@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Catador</title>
+
+    <!-- Link Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="/static/styles/cadastro-catador.css">
+
+    <!-- Material icons google -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons">
+
+    <!-- Link Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+</head>
+<body>
+    <section class="conteudo">
+
+        <!-- cabeçalho -->
+        <header class="cabecalho">
+            
+           <h1 class="cabecalho-titulo">Cadastre o catador</h1>
+
+        </header>
+
+        <!-- formulário -->
+        <form class="formulario" action="/cadastro-catador" method="POST">
+
+            <div class="mb-3">
+                <label for="cpf" class="form-label">CPF</label>
+                <input type="text" class="form-control" id="cpf" name="cpf" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome completo</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="telefone" class="form-label">Telefone (opcional)</label>
+                <input type="tel" class="form-control" id="telefone" name="telefone">
+            </div>
+
+            <div class="mb-3">
+                <label for="data_nascimento" class="form-label">Data de nascimento</label>
+                <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" required>
+            </div>
+
+            <!-- botão de cadastrar -->
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+
+        </form>
+        
+        <!-- rodapé -->
+        <footer class="rodape">
+
+            <span class="rodape-texto">Já tem cadastro?</span>
+            <a href="#">Entre aqui</a>
+
+        </footer>
+
+    </section>
+</body>
+</html>
