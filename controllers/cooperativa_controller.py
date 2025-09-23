@@ -1,3 +1,6 @@
+from data.connection_controller import Connection
+from mysql.connector import Error
+
 class Cooperativas:
 
     def get_by_cnpj (cnpj):
@@ -8,8 +11,31 @@ class Cooperativas:
         se não 'null'
         """
 
-        pass
+        connection_db = Connection.create()
+        cursor = connection_db.cursor()
 
+        try:
 
+            cursor.execute (
 
-        
+                """
+                SELECT * FROM cooperativa
+                WHERE cooperativa.cnpj = %s
+                """,
+
+                (cnpj, )
+
+            )
+
+            return cursor.fetchone()
+
+        except Error as e:
+
+            print(f'Erro - Cooperativas "get_by_cnpj": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+            connection_db.close()        
