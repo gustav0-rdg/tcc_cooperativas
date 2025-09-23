@@ -1,14 +1,9 @@
-from flask import Flask, render_template, redirect
+from flask import Flask
+from routes.pages import pages
 
 app = Flask(__name__)
 
-# Selecionar se é catador ou cooperativa
-@app.route("/")
-def pagina_inicial():
-    return render_template("index.html")
+app.register_blueprint(pages)
 
-@app.route("/cadastro")
-def pagina_cadastro():
-    return render_template("cadastro.html")
 
 app.run(debug=True)
