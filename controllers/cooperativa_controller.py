@@ -41,7 +41,7 @@ class Cooperativa:
             cursor.close()
             connection_db.close()
 
-    def validar (codigo_validacao:str) -> bool:
+    def autenticar (codigo_validacao:str) -> bool:
 
         """
         A função é a etapa final do cadastro, ativa
@@ -132,7 +132,9 @@ class Cooperativa:
         cnpj:str,
 
         email:str,
-        senha:str
+        senha:str,
+
+        validar:bool=True
 
     ) -> bool:
         
@@ -170,9 +172,9 @@ class Cooperativa:
 
             if cursor.rowcount > 0:
 
-                # Enviar Email
+                if not validar:
 
-                pass
+                    return True
 
             else:
 
