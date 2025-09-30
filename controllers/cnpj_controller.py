@@ -1,3 +1,5 @@
+import requests
+
 class CNPJ:
 
     @staticmethod
@@ -57,3 +59,16 @@ class CNPJ:
         # ele é matematicamente válido
 
         return cnpj[-2:] == digito_verificador_1 + digito_verificador_2
+    
+    def consulta_cnpj (cnpj:str) -> dict:
+
+        url = 'https://open.cnpja.com/office/' + cnpj
+
+        response = requests.get(url)
+        response_json = response.json()
+
+        if hasattr(response_json, 'code') and (response_json['code'] == 404 or response_json['code'] == 400):
+
+            return False
+
+        return response_json
