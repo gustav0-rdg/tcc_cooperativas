@@ -2,10 +2,6 @@ body{
     background-color: var(--verde-secundario) !important;
 }
 
-.container{
-   
-}
-
 .card{
     max-width: 360px !important;
     background-color: var(--verde-principal) !important;
@@ -14,9 +10,6 @@ body{
 
 .card h1{
     font-weight: 700;
-}
-#form{
-    
 }
 
 #form input:focus{
@@ -32,6 +25,4 @@ body{
 
 #form a{
     color: var(--verde-medio-secundario) !important;
-
-
 }
