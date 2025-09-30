@@ -1,8 +1,4 @@
 
-    body {
-      background-color: #71B91E
-    }
-
     .form-container {
       max-width: 600px;
       margin: 40px auto;
@@ -10,7 +6,7 @@
       background-color: #9BCA58;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      border: 2px solid #198754; /* verde bootstrap */
+      border: 2px solid #198754; 
     }
 
     h1 {
