@@ -97,7 +97,7 @@ class Cooperativas:
         Registra a cooperativa no Banco de Dados
         """
 
-        if not CNPJ.validar_cnpj(cnpj):
+        if not CNPJ.validar(cnpj):
 
             raise ValueError ('')
 
@@ -106,7 +106,7 @@ class Cooperativas:
 
         try:
 
-            data_cooperativa = CNPJ.consulta_cnpj(cnpj)
+            data_cooperativa = CNPJ.consultar(cnpj)
 
             if not data_cooperativa:
 
