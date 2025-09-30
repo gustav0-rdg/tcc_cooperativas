@@ -89,10 +89,6 @@
 
 }
 
-.rodape a{
-    color: var(--verde-medio-secundario) !important;
-
-}
 .required{
     color: red;
 }
