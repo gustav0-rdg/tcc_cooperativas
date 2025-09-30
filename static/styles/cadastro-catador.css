@@ -82,6 +82,10 @@
 
 }
 
+.required{
+    color: red;
+}
+
 @media screen and (min-width: 1024px){
     .form-button{
         width: 50%;

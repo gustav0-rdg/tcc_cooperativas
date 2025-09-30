@@ -19,43 +19,45 @@
     <!-- Fonts Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <!-- Link Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
+    <!-- link javascript -->
+    <script src="../static/js/cadastrarCatador.js" defer></script>
 </head>
 <body>
     <section class="conteudo">
 
-        <!-- cabeçalho -->
-        <header class="cabecalho">
-            
-           <h1 class="cabecalho-titulo">Cadastre o catador</h1>
-
-        </header>
-
         <!-- formulário -->
         <form class="formulario" action="/cadastro-catador" method="POST">
+            
+            <header class="cabecalho">
+                    
+            <h1 class="cabecalho-titulo">Cadastre o catador</h1>
+        
+            </header>
 
             <div class="mb-3">
-                <label for="cpf" class="form-label">CPF</label>
-                <input type="number" class="form-input" id="cpf" name="cpf" required placeholder="Ex: 000.000.000-00" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" maxlength="14">
+                <label for="cpf" class="form-label">CPF <span class="required">*</span></label>
+                <input type="text" class="form-input" id="cpf" name="cpf" required placeholder="Ex: 000.000.000-00" maxlength="14">
             </div>
 
             <div class="mb-3">
-                <label for="nome" class="form-label">Nome completo</label>
+                <label for="nome" class="form-label">Nome completo <span class="required">*</span></label>
                 <input type="text" class="form-input" id="nome" name="nome" required placeholder="Ex: Vitor Moreira Masalskas">
             </div>
 
             <div class="mb-3">
                 <label for="telefone" class="form-label">Telefone (opcional)</label>
-                <input type="tel" class="form-input" id="telefone" name="telefone" placeholder="Ex: (16) 99999-9999">
+                <input type="tel" class="form-input" id="telefone" name="telefone" placeholder="Ex: (16) 99999-9999" maxlength="15">
             </div>
 
             <div class="mb-3">
-                <label for="data_nascimento" class="form-label">Data de nascimento</label>
+                <label for="data_nascimento" class="form-label">Data de nascimento <span class="required">*</span></label>
                 <input type="date" class="form-input" id="data_nascimento" name="data_nascimento" required>
             </div>
 
@@ -67,9 +69,8 @@
         <!-- rodapé -->
         <footer class="rodape">
 
-            <span class="rodape-texto">Já tem cadastro?</span>
-            <a href="#">Entre aqui</a>
-
+            <span class="rodape-texto">Já tem cadastro? <a href="#">Entre aqui</a></span>
+            
         </footer>
 
     </section>
