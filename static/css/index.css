@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+*{
+    font-family: inter;
+}
+
+.pagina__container{
+    background-color: var(--verde-secundario);
+    height: 100vh;
+}
+
+.card__container{
+    background-color: var(--verde-principal);
+    border: none;
+}
+.card__container>h3{
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--verde-medio-secundario);
+}
+
+.botao__container{
+    background-color: var(--verde-medio-secundario);
+    color: var(--branco);
+}
+.botao__container:hover{
+    background-color: var(--verde-claro-secundario);
+}
+.botao__container:hover .botao__icone{
+    color: var(--preto);
+}
+
+
+.botao__icone{
+    color: var(--verde-claro-secundario);
+}
+
