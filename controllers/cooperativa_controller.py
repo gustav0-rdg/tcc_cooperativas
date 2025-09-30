@@ -1,5 +1,6 @@
 from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
+from controllers.email_controller import Email
 from mysql.connector import Error
 
 class Cooperativa:
@@ -175,6 +176,15 @@ class Cooperativa:
                 if not validar:
 
                     return True
+
+                Email.enviar (
+
+                    data_cooperativa['emails']['address'],
+
+                    'Autenticação do cadastro em Recoopera',
+                    ''
+
+                )
 
             else:
 
