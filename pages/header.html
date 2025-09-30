@@ -1,0 +1,52 @@
+<header class="header">
+    
+    <section class="header__informacoes">
+        <section class="logo">
+            <img src="../img/logo.png" class="logo__img" alt="">
+        </section>
+        <section class="header__informacoes-cooperativa">
+            <h3>Nome da cooperativa.</h3>
+            <small>Endereço da cooperativa.</small>
+        </section>
+        
+    </section>
+    <section class="header__acoes">
+        <i class="fa-solid fa-house" style="color: var(--verde-claro-principal);"></i>
+        <i class="fa-solid fa-right-from-bracket" style="color: var(--verde-claro-principal);"></i>
+    </section>
+</header>
+
+<style>
+    .logo{
+        width:70px;
+        height: 70px;
+        & .logo__img{
+            width: 70px;
+            height: 70px;
+            border-radius: 100%;
+        }
+    }
+    .header{
+        width: 100vw;
+        height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--verde-claro-principal);
+        background-color: var(--verde-secundario);
+    }
+    .header__informacoes{
+        margin-left: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+    .header__acoes{
+        display: flex;
+        & i{
+            font-size: 32px;
+            margin-right: 20px;
+        }
+    }
+</style>
