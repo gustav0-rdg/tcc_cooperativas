@@ -16,6 +16,12 @@
     <!-- Material icons google -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons">
 
+    <!-- Fonts Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
     <!-- Link Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
@@ -35,17 +41,17 @@
 
             <div class="mb-3">
                 <label for="cpf" class="form-label">CPF</label>
-                <input type="text" class="form-input" id="cpf" name="cpf" required>
+                <input type="text" class="form-input" id="cpf" name="cpf" required placeholder="Ex: 000.000.000-00">
             </div>
 
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome completo</label>
-                <input type="text" class="form-input" id="nome" name="nome" required>
+                <input type="text" class="form-input" id="nome" name="nome" required placeholder="Ex: Ronaldo el pepe">
             </div>
 
             <div class="mb-3">
                 <label for="telefone" class="form-label">Telefone (opcional)</label>
-                <input type="tel" class="form-input" id="telefone" name="telefone">
+                <input type="tel" class="form-input" id="telefone" name="telefone" placeholder="Ex: (16) 99999-9999">
             </div>
 
             <div class="mb-3">
@@ -54,7 +60,7 @@
             </div>
 
             <!-- botão de cadastrar -->
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <button type="submit" class="btn btn-primary btn-lg align-self-center form-button">Cadastrar</button>
 
         </form>
         
