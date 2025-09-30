@@ -17,7 +17,7 @@ def pagina_login():
 
 @pages.route("/login-catador", methods=["GET"])
 def pagina_login_catador():
-    return render_template("")
+    return render_template("login-catador.html")
 
 @pages.route("/cadastro-catador", methods=["GET"])
 def pagina_cadastro_catador():
