@@ -27,9 +27,11 @@
     align-items: center;
 
     color: #000;
+}
 
-    font-size: 24px;
-    font-weight: bold;
+.cabecalho-titulo{
+    font-size: 32px;
+    font-weight: bolder;
 }
 
 .formulario{
@@ -57,12 +59,14 @@
     margin-bottom: 15px;
 
     border: 1px solid #000;
-    border-radius: 4px;
+    border-radius: 10px;
 }
 
 .form-button{
     font-weight: bold;
     font-size: 24px;
+
+    border-radius: 20px;
 }
 
 .rodape{
@@ -81,5 +85,10 @@
 @media screen and (min-width: 1024px){
     .form-button{
         width: 50%;
+    }
+
+    .cabecalho-titulo{
+        font-size: 48px;
+        font-weight: bolder;
     }
 }
