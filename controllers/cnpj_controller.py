@@ -3,7 +3,7 @@ import requests
 class CNPJ:
 
     @staticmethod
-    def validar_cnpj (cnpj:str) -> bool:
+    def validar (cnpj:str) -> bool:
 
         """
         Valida matematicamente se o CNPJ fornecido é válido, 
@@ -60,7 +60,8 @@ class CNPJ:
 
         return cnpj[-2:] == digito_verificador_1 + digito_verificador_2
     
-    def consulta_cnpj (cnpj:str) -> dict:
+    @staticmethod
+    def consultar (cnpj:str) -> dict:
 
         url = 'https://open.cnpja.com/office/' + cnpj
 
