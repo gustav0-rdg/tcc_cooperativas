@@ -4,24 +4,35 @@
     font-family: inter;
 }
 
+/* Fundo da Pagina */
 .pagina__container{
     background-color: var(--verde-secundario);
     height: 100vh;
 }
 
+/* Cartão */
 .card__container{
     background-color: var(--verde-principal);
     border: none;
+    border-radius: 10px;
+    max-width: 400px; 
+    width: 100%; 
+    height: 80%;
 }
 .card__container>h3{
     font-size: 36px;
     font-weight: 700;
-    color: var(--verde-medio-secundario);
+    color: var(--verde-escuro-secundario);
+    
 }
 
+/* Botões */
 .botao__container{
     background-color: var(--verde-medio-secundario);
     color: var(--branco);
+    border-radius: 15px;
+   
+    
 }
 .botao__container:hover{
     background-color: var(--verde-claro-secundario);
@@ -30,8 +41,7 @@
     color: var(--preto);
 }
 
-
+/* Icones */
 .botao__icone{
     color: var(--verde-claro-secundario);
 }
-
