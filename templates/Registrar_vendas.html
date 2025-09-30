@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br ">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar_vendas</title>
+    <link rel="stylesheet" href="/static/css/estilo.css">
+    
+</head>
+
+<body>
+    <h1>Registrar Vendas</h1>
+    <form method="POST" action="/registrar_venda">
+        <!-- Catador -->
+
+        <label for="produto"> Catador responsavel</label>
+        <input type="text" id="produto" name="produto" required><br><br>
+
+        <!-- compradores -->
+        <select name="compradores" id="comprador">
+            <option value="comprador1">Comprador 1</option>
+            <option value="comprador2">Comprador 2</option>
+            <option value="comprador3">Comprador 3</option>
+            <option value="comprador4">Comprador 4</option>
+
+        </select>
+
+        <!-- campo data  -->
+        <label for="data">Data de venda:</label>
+        <input type="date" id="data" name="data" required><br><br>
+        <!-- categoria  -->
+        <label for="categoria">Categoria do produto:</label>
+        <select name="" id="">
+            <option value="plastico">Plastico</option>
+            <option value="papel">Papel</option>
+            <option value="outros">Papelão</option>
+            <option value="outros">Outros</option>
+
+
+        </select>
+
+        <!-- Quantidade -->
+        <label for="quantidade">Quantidade (kg):</label>
+        <input type="number" id="quantidade" name="quantidade" step="0.01" required><br><br>
+
+
+        <!-- Preço  -->
+        <label for="preco">Preço por kg (R$):</label>
+        <input type="number" id="preco" name="preco" step="0.01" required><br><br>
+
+
+
+
+
+
+        <input type="submit" value="Registrar Venda">
+
+    </form>
+
+</body>
+
+</html>
