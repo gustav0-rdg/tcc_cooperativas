@@ -32,7 +32,7 @@ class Cooperativa:
 
         except Error as e:
 
-            print(f'Erro - Cooperativas "get_by_cnpj": {e}')
+            print(f'Erro - Cooperativa "get_by_cnpj": {e}')
 
             return False
 
@@ -78,7 +78,7 @@ class Cooperativa:
 
         except Error as e:
 
-            print(f'Erro - Cooperativas "ativar": {e}')
+            print(f'Erro - Cooperativa "validar": {e}')
 
             return False
 
@@ -116,7 +116,7 @@ class Cooperativa:
 
         except Error as e:
 
-            print(f'Erro - Cooperativas "delete": {e}')
+            print(f'Erro - Cooperativa "delete": {e}')
 
             return False
 
@@ -180,7 +180,7 @@ class Cooperativa:
 
         except Error as e:
 
-            print(f'Erro - Cooperativas "create": {e}')
+            print(f'Erro - Cooperativa "create": {e}')
 
             return False
 
