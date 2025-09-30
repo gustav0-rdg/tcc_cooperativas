@@ -22,18 +22,18 @@
       <form method="POST" action="/registrar_venda" class="needs-validation" novalidate>
         <!-- Catador -->
         <div class="mb-3">
-          <label for="produto" class="form-label">Catador responsável</label>
-          <input type="text" class="form-control" id="produto" name="produto" required>
+            <label for="catador" class="form-label">Catador</label>
+            <select name="catadores" id="catador" class="form-select">
+              <!-- banco de dados -->
+            </select>
+      
         </div>
 
         <!-- Compradores -->
         <div class="mb-3">
           <label for="comprador" class="form-label">Comprador</label>
           <select name="compradores" id="comprador" class="form-select">
-            <option value="comprador1">Comprador 1</option>
-            <option value="comprador2">Comprador 2</option>
-            <option value="comprador3">Comprador 3</option>
-            <option value="comprador4">Comprador 4</option>
+          <!-- banco de dados -->
           </select>
         </div>
 
