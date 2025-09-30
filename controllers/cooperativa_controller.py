@@ -41,8 +41,7 @@ class Cooperativa:
             cursor.close()
             connection_db.close()
 
-    # melhorar nome do metodo
-    def ativar (cnpj:str) -> bool:
+    def validar (codigo_validacao:str) -> bool:
 
         """
         A função é a etapa final do cadastro, ativa
@@ -60,10 +59,16 @@ class Cooperativa:
                 """
                 UPDATE cooperativa
                 SET cooperativa.estado = 'Confirmado'
-                WHERE cooperativa.cnpj = %s;
+                INNER JOIN validacoes ON validacoes.codigo = %s
+                WHERE cooperativa.cnpj = validacoes.cnpj_cooperativa;
+
+                DELETE FROM validacoes
+                WHERE validacoes.codigo = %s;
                 """,
 
-                (cnpj, )
+                (codigo_validacao, ),
+
+                multi=True
 
             )
 
@@ -86,7 +91,7 @@ class Cooperativa:
 
         """
         Exclui permanentemente a cooperativa
-        com o CNPJ fornecido do banco de dados
+        com o CNPJ fornecido do banco de dados.
         """
 
         connection_db = Connection.create()
