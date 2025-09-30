@@ -2,7 +2,7 @@ from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
 from mysql.connector import Error
 
-class Cooperativas:
+class Cooperativa:
 
     def get_by_cnpj (cnpj:str) -> bool:
 
@@ -74,6 +74,44 @@ class Cooperativas:
         except Error as e:
 
             print(f'Erro - Cooperativas "ativar": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+            connection_db.close()
+
+    def delete (cnpj:str) -> bool:
+
+        """
+        Exclui permanentemente a cooperativa
+        com o CNPJ fornecido do banco de dados
+        """
+
+        connection_db = Connection.create()
+        cursor = connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                DELETE FROM cooperativa
+                WHERE cooperativa.cnpj = %s;
+                """,
+
+                (cnpj, )
+
+            )
+
+            connection_db.commit()
+
+            return cursor.rowcount > 0
+
+        except Error as e:
+
+            print(f'Erro - Cooperativas "delete": {e}')
 
             return False
 
