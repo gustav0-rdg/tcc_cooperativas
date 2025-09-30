@@ -1,6 +1,6 @@
 from data.connection_controller import Connection
+from controllers.cnpj_controller import CNPJ
 from mysql.connector import Error
-import requests
 
 class Cooperativas:
 
@@ -41,6 +41,47 @@ class Cooperativas:
             cursor.close()
             connection_db.close()
 
+    # melhorar nome do metodo
+    def ativar (cnpj:str) -> bool:
+
+        """
+        A função é a etapa final do cadastro, ativa
+        a conta após o registro da cooperativa e sua
+        confirmação via email
+        """
+
+        connection_db = Connection.create()
+        cursor = connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                UPDATE cooperativa
+                SET cooperativa.estado = 'Confirmado'
+                WHERE cooperativa.cnpj = %s;
+                """,
+
+                (cnpj, )
+
+            )
+
+            connection_db.commit()
+
+            return cursor.rowcount > 0
+
+        except Error as e:
+
+            print(f'Erro - Cooperativas "ativar": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+            connection_db.close()
+
     def create (
             
         __self__,
@@ -56,7 +97,7 @@ class Cooperativas:
         Registra a cooperativa no Banco de Dados
         """
 
-        if not __self__.validar_cnpj(cnpj):
+        if not CNPJ.validar_cnpj(cnpj):
 
             raise ValueError ('')
 
@@ -65,7 +106,7 @@ class Cooperativas:
 
         try:
 
-            data_cooperativa = __self__.consulta_cnpj(cnpj)
+            data_cooperativa = CNPJ.consulta_cnpj(cnpj)
 
             if not data_cooperativa:
 
