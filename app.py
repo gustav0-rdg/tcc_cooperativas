@@ -1,14 +1,12 @@
-from flask import Flask, render_template, redirect
+from flask import Flask
+from routes.pages import pages
+# from routes.auth.auth_routes import auth
+# from routes.api_post import api_post
 
 app = Flask(__name__)
 
-# Selecionar se é catador ou cooperativa
-@app.route("/")
-def pagina_inicial():
-    return render_template("index.html")
-
-@app.route("/cadastro")
-def pagina_cadastro():
-    return render_template("cadastro.html")
+app.register_blueprint(pages)
+# app.register_blueprint(auth)
+# app.register_blueprint(api_post)
 
 app.run(debug=True)
