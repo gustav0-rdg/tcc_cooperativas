@@ -45,7 +45,7 @@ class Email:
             email['To'] = destinatario
             email['Subject'] = assunto
 
-            mensagem_html = MIMEText(formatacao_html, 'html')
+            mensagem_html = MIMEText(formatacao_html, 'html', 'utf-8')
             email.attach(mensagem_html)
 
             servidor.login(Email.remetente, Email.senha)
