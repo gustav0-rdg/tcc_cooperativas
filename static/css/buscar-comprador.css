@@ -1,0 +1,137 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-family: "Inter", sans-serif;
+}
+
+body{
+    background-color: var(--verde-claro-principal);
+}
+
+.content{
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 10px;
+
+    background-color: var(--verde-principal);
+}
+
+
+.search-buyers__title {
+    font-size: 1.75rem; 
+    font-weight: 700;   
+
+    color: #212529;
+
+    justify-self: center;
+}
+
+.search-buyers__subtitle {
+    font-size: 0.95rem;
+
+    margin-bottom: 1.5rem;
+
+    justify-self: center;
+}
+
+
+.search-buyers__search-bar {
+    position: relative; 
+}
+
+.search-buyers__input {
+    height: 50px;
+    padding-left: 1rem;
+
+    padding-right: 2.5rem; 
+    border-radius: 0.5rem;
+}
+
+.search-buyers__icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d; 
+    pointer-events: none; 
+}
+
+
+.material-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 300px;
+    border-radius: 0.75rem; 
+    border: 2px solid black;
+    
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden; 
+    text-decoration: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+
+.material-card:hover {
+    transform: scale(1.08); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+.material-card__label {
+    background-color: white;
+    color: #212529;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px; 
+    font-size: 24px;
+    z-index: 2; 
+    user-select: none; 
+}
+
+.material-card--plastico{
+    background-image: url(https://eplast.com.br/wp-content/uploads/2024/02/plastico_pet-1.jpg.webp);
+}
+
+.material-card--papel{
+    background-image: url(https://blog.contabilista.com.br/uploads/1534186392.png);
+}
+
+.material-card--metal{
+    background-image: url(https://sircat.com/wp-content/uploads/2024/07/Todo-lo-que-debes-saber-sobre-la-recuperacion-de-metales.jpg);
+}
+
+.material-card--madeira{
+    background-image: url(https://construindocasas.com.br/wp-content/uploads/2021/04/Madeira-min-1024x576.jpg);
+}
+
+.material-card--pilha{
+    background-image: url(https://static.manualdaquimica.com/conteudo/images/as-pilhas-sao-dispositivos-muito-utilizados-no-dia-dia-58ada547e2409.jpg);
+}
+
+.material-card--borracha{
+    background-image: url(https://meiosustentavel.com.br/wp-content/uploads/2020/06/reciclagem-de-borracha1.png);
+}
+
+.material-card--papelao{
+    background-image: url(https://www.cbsaparasdepapel.com.br/imagens/informacoes/reciclagem-papel-sp-01.jpg);
+}
+
+.material-card--vidro{
+    background-image: url(https://ciclovivo.com.br/wp-content/uploads/2021/04/vidro-reciclagem-pixabay.jpg);
+}
+
+@media screen and (min-width: 1024px) {
+        
+}
