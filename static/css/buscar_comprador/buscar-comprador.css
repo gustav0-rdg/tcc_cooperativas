@@ -26,7 +26,7 @@ body{
 
 
 .search-buyers__title {
-    font-size: 1.75rem; 
+    font-size: 3rem; 
     font-weight: 700;   
 
     color: #212529;
@@ -35,7 +35,7 @@ body{
 }
 
 .search-buyers__subtitle {
-    font-size: 0.95rem;
+    font-size: 1.5rem;
 
     margin-bottom: 1.5rem;
 
@@ -48,8 +48,10 @@ body{
 }
 
 .search-buyers__input {
-    height: 50px;
+    height: 3rem;
     padding-left: 1rem;
+
+    font-size: 1.5rem;
 
     padding-right: 2.5rem; 
     border-radius: 0.5rem;
@@ -60,7 +62,7 @@ body{
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #6c757d; 
+    color: black; 
     pointer-events: none; 
 }
 
