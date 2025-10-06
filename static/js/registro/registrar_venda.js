@@ -1,18 +1,18 @@
 const material = [
-    { nome: 'Papel' },
-    { nome: 'Metal' }
+    { nome: 'Papel', valor: '0,60' },
+    { nome: 'Metal', valor: '0,65' }
 ];
 
 const vendedores = [
     {
         nome: 'Samuel',
-        cpf: '479.151.534-94',
+        cnpj: '479.151.534-94',
         ultima_venda: '23/05/2021',
         nota: 5
     },
     {
         nome: 'Ivo',
-        cpf: '489.142.564-21',
+        cnpj: '489.142.564-21',
         ultima_venda: '04/12/2023'
     }
 ];
@@ -50,6 +50,7 @@ function exibirVendedores() {
         div.setAttribute('data-value', `${vendedor.nome}`);
         div.innerHTML = `
             <h1>${vendedor.nome}</h1>
+            <small>CNPJ: ${vendedor.cnpj}</small>
         `;
         opcoesSection.appendChild(div);
 
@@ -71,6 +72,7 @@ function exibirMateriais() {
         div.setAttribute('data-value', `${item.nome}`);
         div.innerHTML = `
             <h1>${item.nome}</h1>
+            <small>R$${item.valor}/Kg</small>
         `;
         opcoesSection.appendChild(div);
 
@@ -85,21 +87,24 @@ function exibirMateriais() {
 }
 function exibirValoresDeVenda() {
     opcoesSection.innerHTML = `
-        <div>
+        <div class="informacoes__vendedor">
             <h1>${vendaAtual.material.nome}</h1>
-            <small>${vendaAtual.vendedor.nome}</small>
+            <small>Para: ${vendaAtual.vendedor.nome}</small>
         </div>
-        <div>
-            <h3>Quantos Kgs?</h3>
-            <input type="number" class="preco__kg" />
+        
+        <div class="container__valores"> 
+            <div class="valores__kg">
+                <h3>Quantos Kgs?</h3>
+                <input type="number" class="preco__kg" />
+            </div>
+            <div class="valores__preco">
+                <h3>Preço por kg</h3>
+                <input type="number" class="peso__total" />
+            </div>
         </div>
-        <div>
-            <h3>Preço por kg</h3>
-            <input type="number" class="peso__total" />
-        </div>
-        <button class="confirmar__venda">Confirmar Venda</button>
+        
+        <button class="confirmar__venda">Continuar para a avaliação</button>
     `;
-
     // Adiciona o listener após os elementos estarem no DOM
     const botaoConfirmar = document.querySelector('.confirmar__venda');
 
@@ -121,25 +126,34 @@ function exibirValoresDeVenda() {
     });
 }
 
-function exibirAvaliacao(){
+function exibirAvaliacao() {
     opcoesSection.innerHTML = '';
     opcoesSection.innerHTML = `
     <div class="resumo">
         <h1>Resumo da venda</h1>
-        <div>
-            <p>${vendaAtual.material.nome}</p>
-            <small>${vendaAtual.quantidade}Kg</small>
+        <div class="resumo__venda">
+            <div>
+                <p>${vendaAtual.material.nome}</p>
+                <small>${vendaAtual.quantidade} Kg</small>
+            </div>
+            <div>
+                <p>R$${vendaAtual.total}</p>
+                <small>R$${vendaAtual.preco_por_kg}/Kg</small>
+            </div>
         </div>
-        <div>
-            <p>${vendaAtual.total}</p>
-            <small>${vendaAtual.preco_por_kg}</small>
-        </div>
+        <hr>
         <p> ${vendaAtual.vendedor.nome} </p>
-        <small>${vendaAtual.vendedor.cpf}</small>
+        <small>${vendaAtual.vendedor.cnpj}</small>
     </div>
     <div class="avaliacao">
         <h3>Como você avalia esse comprador?</h3>
-        <input type="number" max=5 class="avaliacao__nota"/>
+        <div class="estrelas">
+            <i class="fa-regular fa-star estrela" data-index="1"></i>
+            <i class="fa-regular fa-star estrela" data-index="2"></i>
+            <i class="fa-regular fa-star estrela" data-index="3"></i>
+            <i class="fa-regular fa-star estrela" data-index="4"></i>
+            <i class="fa-regular fa-star estrela" data-index="5"></i>
+        </div>
     </div>
     <div class="comentario">
         <h3>Comentario rápido</h3>
@@ -156,28 +170,55 @@ function exibirAvaliacao(){
         <button>Pular avaliação</button>
     </div>
     `;
+
+    const estrelas = opcoesSection.querySelectorAll('.estrela');
+    let avaliacaoSelecionada = 0;
+    let notaAtual;
+
+    estrelas.forEach((estrela, index) => {
+        estrela.addEventListener('mouseover', () => {
+            preencherEstrelas(index + 1);
+        });
+
+        estrela.addEventListener('mouseout', () => {
+            preencherEstrelas(avaliacaoSelecionada);
+        });
+
+        estrela.addEventListener('click', () => {
+            avaliacaoSelecionada = index + 1;
+            vendaAtual.nota = avaliacaoSelecionada;
+            preencherEstrelas(avaliacaoSelecionada);
+        });
+    });
+
+    function preencherEstrelas(qtd) {
+        estrelas.forEach((estrela, i) => {
+            if (i < qtd) {
+                estrela.classList.remove('fa-regular');
+                estrela.classList.add('fa-solid');
+            } else {
+                estrela.classList.remove('fa-solid');
+                estrela.classList.add('fa-regular');
+            }
+        });
+    }
+
+
     let comentarioOpcional;
     const opcional = opcoesSection.querySelector('.opcional');
     const valorOpcional = opcional.querySelector('.opcional__comentario');
-    valorOpcional.addEventListener('input', (e)=>{
+    valorOpcional.addEventListener('input', (e) => {
         comentarioOpcional = e.target.value;
     })
 
-    const avaliacaoNota = opcoesSection.querySelector('.avaliacao');
-    const nota = avaliacaoNota.querySelector('.avaliacao__nota');
-    let notaAtual;
 
-    nota.addEventListener('input', (e)=>{
-        notaAtual = e.target.value;
-        console.log(notaAtual)
-    })
 
     const comentariosRapido = opcoesSection.querySelector('.comentario');
     const botoes = comentariosRapido.querySelectorAll('.comentario__btn');
 
     let valorComentario;
     // Adiciona evento de clique para cada botão
-    botoes.forEach(btn => { 
+    botoes.forEach(btn => {
         btn.addEventListener('click', (e) => {
             // Pega o valor do comentário pelo dataset do botão clicado
             valorComentario = e.target.dataset.value;
@@ -189,10 +230,12 @@ function exibirAvaliacao(){
 
     const finalizar = opcoesSection.querySelector('.finalizar');
     const finalizarBtn = finalizar.querySelector('.finalizar__btn');
-    finalizarBtn.addEventListener('click', ()=>{
+    finalizarBtn.addEventListener('click', () => {
         vendaAtual.avaliacao.nota = notaAtual;
         vendaAtual.avaliacao.comentario = valorComentario;
         vendaAtual.avaliacao.analise = comentarioOpcional;
+
+        console.log(vendaAtual);
     })
 }
 
