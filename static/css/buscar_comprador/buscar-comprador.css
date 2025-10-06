@@ -134,6 +134,56 @@ body{
     background-image: url(https://ciclovivo.com.br/wp-content/uploads/2021/04/vidro-reciclagem-pixabay.jpg);
 }
 
+@media screen and (max-width: 768px) {
+    .search-buyers__title{
+        font-size: 24px;
+    }
+    
+    .search-buyers__subtitle{
+        font-size: 16px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .search-buyers__cards{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        column-gap: 10px;
+    } 
+
+    .search-buyers__title{
+        font-size: 24px;
+    }
+    
+    .search-buyers__subtitle{
+        font-size: 16px;
+    }
+}
+
 @media screen and (min-width: 1024px) {
-        
+    .search-buyers__cards{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        column-gap: 10px;    
+    }
+
+    .search-buyers__title{
+        font-size: 32px;
+    }
+
+    .search-buyers__subtitle{
+        font-size: 24px;
+    }
+
+    .search-buyers__input{
+        width: 50%;
+        justify-self: center;
+    }
+
+    .search-buyers__icon{
+        position: absolute;
+        right: 27%;
+    }
 }
