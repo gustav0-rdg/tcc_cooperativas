@@ -177,12 +177,16 @@ class Cooperativa:
 
                     return True
 
+                codigo_verificacao = ''
+
                 Email.enviar (
 
                     data_cooperativa['emails']['address'],
 
                     'Confirme seu e-mail no Recoopera',
                     
+                    #region Estrutura HTML do Email
+
                     # CSS Inline e 'table' são usados por questão
                     # de compatibilidade com a maioria dos clients
                     # de e-mail que não suportam o CSS moderno
@@ -192,55 +196,197 @@ class Cooperativa:
 
                     f"""
                     <html>
-                    <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin:0; padding:20px;">
-                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                    <body
+                        style="
+                        font-family: Arial, sans-serif;
+                        background-color: #7cc046;
+                        background-image: url('https://i.imgur.com/Pv3bCJA.png');
+                        background-size: cover;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        padding: 40px 0;
+                        margin: 0;
+                        word-break: normal;
+                        overflow-wrap: normal;
+                        white-space: normal;
+                        "
+                    >
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                         <tr>
+
+                            <!-- Cabeçalho -->
+
                             <td align="center">
-                            <table style="max-width:600px; width:100%; background:#ffffff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                            <table
+                                style="
+                                max-width: 500px;
+                                width: 100%;
+                                background-color: #98ca60;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                                padding: 30px 25px;
+                                "
+                            >
                                 <tr>
-                                <td align="center" style="padding: 10px 0;">
-                                    <h1 style="color:#2e7d32; margin:0;">Recoopera</h1>
-                                    <p style="color:#666; font-size:14px; margin:5px 0 20px;">
-                                    Rede de cooperativas de catadores de recicláveis
-                                    </p>
+                                <td align="center">
+                                    <table width="100%" cellpadding="0" cellspacing="10">
+                                        <tr>
+
+                                            <!-- Logo -->
+
+                                            <td align="center" valign="middle">
+                                                <img 
+                                                    width="100"
+                                                    src="./image 1.png"
+                                                    alt="Logo de Recoopera"
+                                                />
+                                            </td>
+
+                                            <!-- Nome e Designação -->
+
+                                            <td align="left" valign="middle">
+                                                <h1
+                                                    style="
+                                                        color: #2e5b1b;
+                                                        font-size: 28px;
+                                                        font-weight: 700;
+                                                        margin: 0;
+                                                    "
+                                                >
+                                                    Recoopera
+                                                </h1>
+
+                                                <p
+                                                    style="
+                                                        color: #3e2723;
+                                                        font-size: 14px;
+                                                        font-weight: 500;
+                                                        margin: 0;
+                                                    "
+                                                >
+                                                    Rede de cooperativas de catadores de recicláveis
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                                 </tr>
 
                                 <tr>
-                                <td style="padding: 20px;">
-                                    <h2 style="color:#333; margin-top:0;">Confirme seu e-mail</h2>
-                                    <p style="color:#555; line-height:1.5; font-size:16px;">
-                                    Olá, seja bem-vindo(a) ao <b>Recoopera</b>!  
-                                    Para concluir seu cadastro, precisamos confirmar que este e-mail pertence a você.
-                                    </p>
 
-                                    <div style="text-align:center; margin:30px 0;">
-                                    <a href="https://seusite.com/verificar?token=XYZ123"
-                                        style="background:#2e7d32; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:5px; display:inline-block; font-weight:bold;">
-                                        Confirmar meu e-mail
-                                    </a>
-                                    </div>
+                                    <td style="text-align: left">
 
-                                    <p style="color:#555; font-size:14px; line-height:1.5;">
-                                    Se o botão acima não funcionar, copie e cole o link abaixo em seu navegador:
-                                    <br>
-                                    <a href="https://seusite.com/verificar?token=XYZ123" style="color:#2e7d32; word-break:break-all;">
-                                        https://seusite.com/verificar?token=XYZ123
-                                    </a>
-                                    </p>
+                                        <!-- Título -->
 
-                                    <p style="color:#888; font-size:12px; line-height:1.5; margin-top:30px;">
-                                    Caso você não tenha solicitado este cadastro, pode ignorar este e-mail com segurança.
-                                    </p>
-                                </td>
+                                        <h2
+                                            style="
+                                                color: #2e5b1b;
+                                                font-size: 20px;
+                                                font-weight: 600;
+                                                margin-top: 0;
+                                            "
+                                        >
+                                            Confirme seu e-mail
+                                        </h2>
+
+                                        <!-- Vocativo e Corpo do Texto -->
+
+                                        <p
+                                            style="
+                                                color: #2e2723;
+                                                line-height: 1.6;
+                                                font-size: 15px;
+                                                margin-bottom: 25px;
+                                            "
+                                        >
+                                        Olá, seja bem-vindo(a) ao <b>Recoopera</b>!<br />
+                                        Para concluir seu cadastro, precisamos confirmar que este
+                                        e-mail pertence a você.
+                                        </p>
+
+                                        <!-- Botão Confirmação -->
+
+                                        <div style="text-align: center; margin: 30px 0">
+                                        <a
+                                            href="{codigo_verificacao}"
+                                            style="
+                                            background-color: #4f6d30;
+                                            color: #ffffff;
+                                            text-decoration: none;
+                                            padding: 12px 32px;
+                                            border-radius: 50px;
+                                            font-weight: bold;
+                                            display: inline-block;
+                                            "
+                                        >
+                                            Confirmar meu e-mail
+                                        </a>
+                                        </div>
+
+                                        <!-- Opção Alternativa (Link) -->
+
+                                        <p
+                                        style="
+                                            color: #2e2723;
+                                            font-size: 13px;
+                                            line-height: 1.5;
+                                        "
+                                        >
+                                            Se o botão acima não funcionar, copie e cole o link abaixo no
+                                            seu navegador:
+
+                                            <a
+                                                href="{codigo_verificacao}"
+                                                style="color: #2e7d32; text-decoration: underline"
+                                            >
+                                                {codigo_verificacao}
+                                            </a>
+                                        </p>
+
+                                        <!-- Pós Escrito -->
+
+                                        <p
+                                        style="
+                                            color: #444;
+                                            font-size: 12px;
+                                            line-height: 1.5;
+                                            margin-top: 30px;
+                                            text-align: center;
+                                            padding-bottom: 10px;
+                                        "
+                                        >
+                                        Caso você não tenha solicitado este cadastro, ignore este
+                                        e-mail.
+                                        </p>
+                                    </td>
                                 </tr>
 
+                                <!-- Footer -->
+
                                 <tr>
-                                <td align="center" style="padding: 15px 0; border-top:1px solid #ddd;">
-                                    <p style="color:#999; font-size:12px; margin:0;">
-                                    © 2025 Recoopera – Transformando reciclagem em oportunidade
-                                    </p>
-                                </td>
+
+                                    <!-- Assinatura -->
+
+                                    <td
+                                        align="center"
+                                        style="
+                                        border-top: 2px solid #2e5b1b;
+                                        padding-top: 20px;
+                                        "
+                                    >
+                                    
+                                        <p
+                                            style="
+                                                color: #2e5b1b;
+                                                font-size: 12px;
+                                                font-weight: 500;
+                                                margin: 0;
+                                            "
+                                        >
+                                        © 2025 Recoopera — Transformando reciclagem em oportunidade
+                                        </p>
+
+                                    </td>
                                 </tr>
                             </table>
                             </td>
@@ -249,6 +395,8 @@ class Cooperativa:
                     </body>
                     </html>
                     """
+
+                    #endregion
 
                 )
 
