@@ -5,6 +5,7 @@ from mysql.connector import Error
 
 class Cooperativa:
 
+    @staticmethod
     def get_by_cnpj (cnpj:str) -> bool:
 
         """
@@ -42,6 +43,53 @@ class Cooperativa:
             cursor.close()
             connection_db.close()
 
+    @staticmethod
+    def alterar_status (cnpj:str, novo_status:str) -> bool:
+
+        """
+        Altera o status da cooperativa no sistema
+        entre dois status: ativo e inativo.
+        """
+
+        status_validos = ['ativo', 'inativo']
+
+        if not novo_status in status_validos:
+
+            raise ValueError ('')
+
+        connection_db = Connection.create()
+        cursor = connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                UPDATE cooperativa
+                SET cooperativa.status = %s
+                WHERE cooperativa.cnpj = %s;
+                """,
+
+                (novo_status, cnpj)
+
+            )
+
+            connection_db.commit()
+
+            return cursor.rowcount > 0
+
+        except Error as e:
+
+            print(f'Erro - Cooperativa "alterar_status": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+            connection_db.close()
+
+    @staticmethod
     def autenticar (codigo_validacao:str) -> bool:
 
         """
@@ -88,6 +136,7 @@ class Cooperativa:
             cursor.close()
             connection_db.close()
 
+    @staticmethod
     def delete (cnpj:str) -> bool:
 
         """
@@ -126,6 +175,7 @@ class Cooperativa:
             cursor.close()
             connection_db.close()
 
+    @staticmethod
     def create (
             
         __self__,
