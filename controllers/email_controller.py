@@ -14,7 +14,7 @@ class Email:
     senha = getenv('SENHA_EMAIL')
 
     @staticmethod
-    def enviar (destinatario:str, assunto:str, arquivo_html:str) -> bool:
+    def enviar (destinatario:str, assunto:str, formatacao_html:str) -> bool:
 
         # melhorar descrição
 
@@ -31,10 +31,6 @@ class Email:
 
         try:
 
-            with open(arquivo_html, 'r', encoding='utf-8') as arquivo:
-
-                formatacao_html = arquivo.read()
-
             # O email usa o protocolo MIME (Multipurpose Internet Mail Extensions)
             # pois nele são usados diferentes tipos de conteúdos que precisam
             # ser estruturadas
@@ -45,8 +41,8 @@ class Email:
             email['To'] = destinatario
             email['Subject'] = assunto
 
-            mensagem_html = MIMEText(formatacao_html, 'html', 'utf-8')
-            email.attach(mensagem_html)
+            corpo_html = MIMEText(formatacao_html, 'html', 'utf-8')
+            email.attach(corpo_html)
 
             servidor.login(Email.remetente, Email.senha)
             servidor.sendmail(Email.remetente, destinatario, email.as_string())
