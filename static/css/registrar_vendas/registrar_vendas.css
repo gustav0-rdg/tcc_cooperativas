@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Inter';
 }
 
 header{
@@ -11,6 +14,24 @@ header{
 body{
   background-color: var(--verde-claro-secundario);
 }
+
+.resumo, .opcional, .avaliacao, .comentario, button{
+  box-shadow: 
+        /* 1. Sombra mais próxima: Concentrada e mais escura, com 10% de opacidade */
+        0 1px 3px rgba(81, 109, 43, 0.2), /* Usando 20% do #516D2B */
+        /* 2. Sombra mais distante: Mais espalhada e sutil, com 8% de opacidade */
+        0 4px 10px rgba(113, 147, 65, 0.1); /* Usando 10% do #719341 */
+  transition: 1s;
+    
+}
+
+.resumo:hover, .opcional:hover, .avaliacao:hover, .comentario:hover, .button:hover{
+  box-shadow: 
+    0 2px 5px rgba(81, 109, 43, 0.25), /* Aumenta a concentração */
+    0 8px 15px rgba(113, 147, 65, 0.15); /* Aumenta a elevação */
+    transform: translateY(-2px); /* Eleva ligeiramente o elemento */
+}
+
 .registros{
   display: flex;
   flex-direction: column;
@@ -231,6 +252,7 @@ textarea, input{
   .comentario,
   .opcional,
   .finalizar {
+      box-sizing: border-box;
       width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
       max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
   }

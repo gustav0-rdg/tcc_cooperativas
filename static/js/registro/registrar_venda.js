@@ -186,7 +186,8 @@ function exibirAvaliacao() {
 
         estrela.addEventListener('click', () => {
             avaliacaoSelecionada = index + 1;
-            vendaAtual.nota = avaliacaoSelecionada;
+            console.log(avaliacaoSelecionada);
+            notaAtual = avaliacaoSelecionada;
             preencherEstrelas(avaliacaoSelecionada);
         });
     });
