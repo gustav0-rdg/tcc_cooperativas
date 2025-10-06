@@ -16,10 +16,8 @@ class Email:
     @staticmethod
     def enviar (destinatario:str, assunto:str, formatacao_html:str) -> bool:
 
-        # melhorar descrição
-
         """
-        Enviar email  
+        Enviar email
         """
 
         # Cria conexão com o servidor de email

@@ -141,6 +141,7 @@ class Cooperativa:
         
         """
         Registra a cooperativa no Banco de Dados
+        e envia o email de autenticação
         """
 
         if not CNPJ.validar(cnpj):
@@ -183,7 +184,7 @@ class Cooperativa:
 
                     data_cooperativa['emails']['address'],
 
-                    'Confirme seu e-mail no Recoopera',
+                    'Confirme seu e-mail no ReCoopera',
                     
                     #region Estrutura HTML do Email
 
@@ -238,7 +239,7 @@ class Cooperativa:
                                                 <img 
                                                     width="100"
                                                     src="./image 1.png"
-                                                    alt="Logo de Recoopera"
+                                                    alt="Logo de ReCoopera"
                                                 />
                                             </td>
 
@@ -253,7 +254,7 @@ class Cooperativa:
                                                         margin: 0;
                                                     "
                                                 >
-                                                    Recoopera
+                                                    ReCoopera
                                                 </h1>
 
                                                 <p
@@ -299,7 +300,7 @@ class Cooperativa:
                                                 margin-bottom: 25px;
                                             "
                                         >
-                                        Olá, seja bem-vindo(a) ao <b>Recoopera</b>!<br />
+                                        Olá, seja bem-vindo(a) ao <b>ReCoopera</b>!<br />
                                         Para concluir seu cadastro, precisamos confirmar que este
                                         e-mail pertence a você.
                                         </p>
@@ -383,7 +384,7 @@ class Cooperativa:
                                                 margin: 0;
                                             "
                                         >
-                                        © 2025 Recoopera — Transformando reciclagem em oportunidade
+                                        © 2025 ReCoopera — Transformando reciclagem em oportunidade
                                         </p>
 
                                     </td>
