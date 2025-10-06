@@ -15,14 +15,6 @@ def pagina_cadastro():
 def pagina_login():
     return render_template("login.html")
 
-@pages.route("/login-catador", methods=["GET"])
-def pagina_login_catador():
-    return render_template("login-catador.html")
-
-@pages.route("/cadastro-catador", methods=["GET"])
-def pagina_cadastro_catador():
-    return render_template("cadastro-catador.html")
-
-@pages.route("/pagina-inicial", methods=["GET"])
-def menu_principal():
-    return render_template("tela_inicial.html")
+@pages.route("/login-cooperativa", methods=["GET"])
+def pagina_login_cooperativa():
+    return render_template("login-cooperativa.html")
