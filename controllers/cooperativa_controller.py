@@ -181,8 +181,74 @@ class Cooperativa:
 
                     data_cooperativa['emails']['address'],
 
-                    'Autenticação do cadastro em Recoopera',
-                    ''
+                    'Confirme seu e-mail no Recoopera',
+                    
+                    # CSS Inline e 'table' são usados por questão
+                    # de compatibilidade com a maioria dos clients
+                    # de e-mail que não suportam o CSS moderno
+                    
+                    # (Outlook por exemplo usa o motor do Microsoft Word 
+                    # para renderizar e-mails)
+
+                    f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin:0; padding:20px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td align="center">
+                            <table style="max-width:600px; width:100%; background:#ffffff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                                <tr>
+                                <td align="center" style="padding: 10px 0;">
+                                    <h1 style="color:#2e7d32; margin:0;">Recoopera</h1>
+                                    <p style="color:#666; font-size:14px; margin:5px 0 20px;">
+                                    Rede de cooperativas de catadores de recicláveis
+                                    </p>
+                                </td>
+                                </tr>
+
+                                <tr>
+                                <td style="padding: 20px;">
+                                    <h2 style="color:#333; margin-top:0;">Confirme seu e-mail</h2>
+                                    <p style="color:#555; line-height:1.5; font-size:16px;">
+                                    Olá, seja bem-vindo(a) ao <b>Recoopera</b>!  
+                                    Para concluir seu cadastro, precisamos confirmar que este e-mail pertence a você.
+                                    </p>
+
+                                    <div style="text-align:center; margin:30px 0;">
+                                    <a href="https://seusite.com/verificar?token=XYZ123"
+                                        style="background:#2e7d32; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:5px; display:inline-block; font-weight:bold;">
+                                        Confirmar meu e-mail
+                                    </a>
+                                    </div>
+
+                                    <p style="color:#555; font-size:14px; line-height:1.5;">
+                                    Se o botão acima não funcionar, copie e cole o link abaixo em seu navegador:
+                                    <br>
+                                    <a href="https://seusite.com/verificar?token=XYZ123" style="color:#2e7d32; word-break:break-all;">
+                                        https://seusite.com/verificar?token=XYZ123
+                                    </a>
+                                    </p>
+
+                                    <p style="color:#888; font-size:12px; line-height:1.5; margin-top:30px;">
+                                    Caso você não tenha solicitado este cadastro, pode ignorar este e-mail com segurança.
+                                    </p>
+                                </td>
+                                </tr>
+
+                                <tr>
+                                <td align="center" style="padding: 15px 0; border-top:1px solid #ddd;">
+                                    <p style="color:#999; font-size:12px; margin:0;">
+                                    © 2025 Recoopera – Transformando reciclagem em oportunidade
+                                    </p>
+                                </td>
+                                </tr>
+                            </table>
+                            </td>
+                        </tr>
+                        </table>
+                    </body>
+                    </html>
+                    """
 
                 )
 
