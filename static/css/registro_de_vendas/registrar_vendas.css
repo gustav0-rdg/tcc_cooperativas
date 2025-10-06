@@ -15,6 +15,14 @@ body{
   background-color: var(--verde-claro-secundario);
 }
 
+.registros__etapa .etapa__progresso{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
 .resumo, .opcional, .avaliacao, .comentario, button{
   box-shadow: 
         /* 1. Sombra mais próxima: Concentrada e mais escura, com 10% de opacidade */
@@ -37,11 +45,50 @@ body{
   flex-direction: column;
 }
 
+.registros__etapa{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin:  10px auto;
+  justify-content: center;
+  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: var(--verde-principal);
+}
+
 .registros__opcoes{
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+}
+
+.progress-container{
+  width: 80%;
+  border-radius: 10px;
+  margin: 10px auto;
+  background-color: var(--branco);
+}
+
+.progress-bar{
+  width: 25%;
+  height: 20px;
+  background-color: var(--verde-escuro-secundario);
+  border-radius: 10px;
+}
+
+.progress-bar.cinquenta{
+  width: 50%;
+}
+
+.progress-bar.tres{
+  width: 75%;
+}
+
+.progress-bar.quatro{
+  width: 100%;
 }
 
 .registros__opcoes button{
@@ -61,6 +108,7 @@ body{
 }
 
 .avaliacao{
+  text-align: center;
   width: 80%;
   height: 100px;
 }
@@ -284,10 +332,17 @@ textarea, input{
       max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
   }
 
+  .registros__etapa{
+    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: var(--verde-principal);
+  }
+
   /* 3. Etapa de Seleção (Materiais e Vendedores) */
   .registros__opcoes {
       /* Volta a ser uma linha para aproveitar o espaço horizontal */
-      flex-direction: row; 
       flex-wrap: wrap; /* Permite que os botões quebrem a linha */
       justify-content: center; /* Centraliza os botões */
   }

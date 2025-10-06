@@ -53,7 +53,19 @@ const vendaAtual = {
 
 // Função para mostrar a etapa de vendedores
 function exibirVendedores() {
-    opcoesSection.innerHTML = ''; // Limpar as opções anteriores
+    etapaSection.innerHTML = '';
+    etapaSection.innerHTML = `
+    <div class="etapa__progresso">
+        <h1>Venda de ${vendaAtual.material.nome_comum}</h1>
+        <small>Para quem você vendeu?</small>
+        <div class="progress-container">
+            <div class="progress-bar cinquenta"></div>
+        </div>
+        <span class="progress-label">Passo 2 de 4</span>
+    </div>
+    `
+    opcoesSection.appendChild(vendedoresRecentes)
+
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
@@ -75,6 +87,16 @@ function exibirVendedores() {
 
 // Função para mostrar a etapa de materiais
 function exibirMateriais() {
+    etapaSection.innerHTML = `
+    <h1>Registrar Venda</h1>
+    <small>O que você vendeu?</small>
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+    <span class="progress-label">Passo 1 de 4</span>
+
+    `
+
     opcoesSection.innerHTML = ''; // Limpar as opções anteriores
     material.forEach(item => {
         const div = document.createElement('button');
@@ -96,6 +118,18 @@ function exibirMateriais() {
     });
 }
 function exibirValoresDeVenda() {
+    etapaSection.innerHTML = '';
+    etapaSection.innerHTML = `
+    <div class="etapa__progresso">
+        <h1>${vendaAtual.vendedor.nome_fantasia}</h1>
+        <small>Quanto vendeu e por quanto?</small>
+        <div class="progress-container">
+            <div class="progress-bar tres"></div>
+        </div>
+        <span class="progress-label">Passo 3 de 4</span>
+    </div>
+    `
+
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
             <h1>${vendaAtual.material.nome_comum}</h1>
@@ -137,6 +171,18 @@ function exibirValoresDeVenda() {
 }
 
 function exibirAvaliacao() {
+    etapaSection.innerHTML = '';
+    etapaSection.innerHTML = `
+    <div class="etapa__progresso">
+        <h1>Como foi a venda?</h1>
+        <small>Sua opinião vale muito!</small>
+        <div class="progress-container">
+            <div class="progress-bar quatro"></div>
+        </div>
+        <span class="progress-label">Passo 4 de 4</span>
+    </div>
+    `
+
     opcoesSection.innerHTML = '';
     opcoesSection.innerHTML = `
     <div class="resumo">
