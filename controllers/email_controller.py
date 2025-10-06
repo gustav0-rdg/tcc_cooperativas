@@ -22,7 +22,7 @@ class Email:
 
         # Cria conexão com o servidor de email
         # 'smtp.gmail.com' -> Endereço do servidor da Gmail
-        # 587 -> Porta recomendada para SMTP com conexão segura (.'starttls()')
+        # 587 -> Porta recomendada para SMTP com conexão segura ('.starttls()')
 
         servidor = smtplib.SMTP('smtp.gmail.com', 587)
         servidor.starttls()
