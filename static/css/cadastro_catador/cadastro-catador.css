@@ -9,7 +9,7 @@
 .conteudo{
     width: 100%;
     height: 100vh;
-
+    background-color: var(--verde-secundario) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -31,15 +31,19 @@
 
 .cabecalho-titulo{
     font-size: 32px;
+    color: var(--verde-escuro-secundario);
     font-weight: bolder;
 }
 
 .formulario{
-    width: 50%;
+    max-width: 500px;
+    width: 80%;
 
     padding: 20px;
 
-    background-color: #fff;
+    background-color: var(--verde-principal) !important;
+    color: var(--verde-escuro-secundario) !important;
+
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
     border-radius: 8px;
@@ -65,7 +69,10 @@
 .form-button{
     font-weight: bold;
     font-size: 24px;
-
+    background-color: var(--verde-escuro-principal) !important;
+    text-transform: uppercase;
+    font-weight: 700;
+    border: 0;
     border-radius: 20px;
 }
 
