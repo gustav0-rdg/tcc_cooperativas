@@ -26,3 +26,7 @@ def pagina_cadastro_catador():
 @pages.route("/pagina-inicial", methods=["GET"])
 def menu_principal():
     return render_template("tela_inicial.html")
+
+@pages.route("/registrar-venda", methods=["GET"])
+def registrar_venda():
+    return render_template("registrar_venda.html")
