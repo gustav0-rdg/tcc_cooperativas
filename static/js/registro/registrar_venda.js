@@ -1,19 +1,29 @@
 const material = [
-    { nome: 'Papel', valor: '0,60' },
-    { nome: 'Metal', valor: '0,65' }
+    { nome_comum: 'Papel', valor: '0,60' },
+    { nome_comum: 'Metal', valor: '0,65' }
 ];
 
 const vendedores = [
     {
-        nome: 'Samuel',
+        nome_fantasia: 'Samuel',
         cnpj: '479.151.534-94',
-        ultima_venda: '23/05/2021',
+        data_ultima_venda: '23/05/2021',
         nota: 5
     },
     {
-        nome: 'Ivo',
+        nome_fantasia: 'Ivo',
         cnpj: '489.142.564-21',
-        ultima_venda: '04/12/2023'
+        data_ultima_venda: '04/12/2023'
+    },
+    {
+        nome_fantasia: 'Alex',
+        cnpj: '405.313.132-34', 
+        data_ultima_venda: '07/11/2024'
+    },
+    {
+        nome_fantasia: 'Matheus Fagulhos Nani',
+        cnpj: '404.213.123-94',
+        data_ultima_venda: '08/12/2024'
     }
 ];
 
@@ -47,9 +57,9 @@ function exibirVendedores() {
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
-        div.setAttribute('data-value', `${vendedor.nome}`);
+        div.setAttribute('data-value', `${vendedor.nome_fantasia}`);
         div.innerHTML = `
-            <h1>${vendedor.nome}</h1>
+            <h1>${vendedor.nome_fantasia}</h1>
             <small>CNPJ: ${vendedor.cnpj}</small>
         `;
         opcoesSection.appendChild(div);
@@ -69,9 +79,9 @@ function exibirMateriais() {
     material.forEach(item => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
-        div.setAttribute('data-value', `${item.nome}`);
+        div.setAttribute('data-value', `${item.nome_comum}`);
         div.innerHTML = `
-            <h1>${item.nome}</h1>
+            <h1>${item.nome_comum}</h1>
             <small>R$${item.valor}/Kg</small>
         `;
         opcoesSection.appendChild(div);
@@ -88,8 +98,8 @@ function exibirMateriais() {
 function exibirValoresDeVenda() {
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
-            <h1>${vendaAtual.material.nome}</h1>
-            <small>Para: ${vendaAtual.vendedor.nome}</small>
+            <h1>${vendaAtual.material.nome_comum}</h1>
+            <small>Para: ${vendaAtual.vendedor.nome_fantasia}</small>
         </div>
         
         <div class="container__valores"> 
@@ -133,7 +143,7 @@ function exibirAvaliacao() {
         <h1>Resumo da venda</h1>
         <div class="resumo__venda">
             <div>
-                <p>${vendaAtual.material.nome}</p>
+                <p>${vendaAtual.material.nome_comum}</p>
                 <small>${vendaAtual.quantidade} Kg</small>
             </div>
             <div>
@@ -142,7 +152,7 @@ function exibirAvaliacao() {
             </div>
         </div>
         <hr>
-        <p> ${vendaAtual.vendedor.nome} </p>
+        <p> ${vendaAtual.vendedor.nome_fantasia} </p>
         <small>${vendaAtual.vendedor.cnpj}</small>
     </div>
     <div class="avaliacao">
@@ -236,7 +246,27 @@ function exibirAvaliacao() {
         vendaAtual.avaliacao.comentario = valorComentario;
         vendaAtual.avaliacao.analise = comentarioOpcional;
 
-        console.log(vendaAtual);
+        enviarValores(vendaAtual);
+
+        Swal.fire({
+            icon: "success",
+            title: "Venda registrada!",
+            html: `
+            <div class="relatorio_de_venda">
+                <h3> R$${vendaAtual.total}</h3>
+                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.nome_comum} para ${vendaAtual.vendedor.nome_fantasia}</p>
+            </div>
+            <div class="finalizacao_sw">
+                <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
+                <a href="/registrar-venda">Registrar nova venda</a>
+                <a href="/pagina-inicial">Voltar ao ínicio</a>
+            </div>
+                `,
+            color: "var(--verde-claro-principal)",
+            background: "var(--verde-medio-secundario)",
+            showConfirmButton: false,
+            showCancelButton: false,
+        })
     })
 }
 
@@ -249,3 +279,18 @@ function inicializar() {
 }
 
 inicializar(); // Chama a função inicial para carregar os materiais
+
+const enviarValores = async (dados) =>{
+    fetch('/post/dados-venda', {
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(dados)
+    }).then(response => response.json())
+    .then(data =>{
+        console.log('Sucesso:', data);
+    }).catch((error) =>{
+        console.error('erro:', error)
+    })
+}

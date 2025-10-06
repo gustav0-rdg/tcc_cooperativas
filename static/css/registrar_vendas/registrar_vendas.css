@@ -231,6 +231,33 @@ textarea, input{
 /* ESTILOS PARA TABLETS E DESKTOPS */
 /* Aplicados em telas com largura mínima de 768px (pode ajustar) */
 /* -------------------------------------------------------------------------------------- */
+.relatorio_de_venda{
+  background-color: var(--verde-escuro-secundario);
+  padding: 10px;
+  border-radius: 10px;
+
+}
+
+.finalizacao_sw{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.finalizacao_sw a{
+  width: 80%;
+  height:60px;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--verde-claro-principal);
+  border-radius: 10px;
+}
+
 
 @media screen and (min-width: 768px) {
   /* 1. Centralização e Largura do Container Principal */

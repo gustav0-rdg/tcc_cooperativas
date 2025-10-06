@@ -106,9 +106,15 @@ body {
 
     grid-template-columns: 1fr;
 
-
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 
     /* Estilos base para os botões */
+    & a{
+        text-decoration: none;
+        
+    }
 
     & .acoes__cooperativa-btn {
 
