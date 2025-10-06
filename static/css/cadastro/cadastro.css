@@ -1,0 +1,37 @@
+body{ 
+    background-color: var(--verde-secundario) !important;
+}
+
+.container{
+   
+}
+
+.card{
+    max-width: 360px !important;
+    background-color: var(--verde-principal) !important;
+    color: var(--verde-escuro-secundario) !important;
+}
+
+.card h1{
+    font-weight: 700;
+}
+#form{
+    
+}
+
+#form input:focus{
+    outline: 2px var(--verde-escuro-principal) !important;
+}
+
+#form button{
+    background-color: var(--verde-escuro-principal) !important;
+    border: 0;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+#form a{
+    color: var(--verde-medio-secundario) !important;
+
+
+}
