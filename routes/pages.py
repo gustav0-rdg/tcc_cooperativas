@@ -22,3 +22,7 @@ def pagina_login_catador():
 @pages.route("/cadastro-catador", methods=["GET"])
 def pagina_cadastro_catador():
     return render_template("cadastro-catador.html")
+
+@pages.route("/pagina-inicial", methods=["GET"])
+def menu_principal():
+    return render_template("tela_inicial.html")
