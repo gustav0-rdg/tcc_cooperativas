@@ -2,21 +2,45 @@ import mysql
 
 class Connection:
 
-    def create ():
+    def create (tipo_conexao: str):
 
         try:
 
-            return mysql.connector.connect (
+            # Conecta utilizando uma database local
+            if tipo_conexao == 'local':
 
-                host = '',
-                port = '',
+                return mysql.connector.connect (
 
-                user = '',
-                password = '',
+                    host = 'localhost',
+                    port = '3306',
+
+                    user = 'root',
+                    password = 'root',
+                    
+                    database = 'recoopera' 
+
+                )
+            
+            # Cria uma conexão utilizando um host online
+            elif tipo_conexao == 'online':
+
+                return mysql.connector.connect (
                 
-                database = ''
+                    # Preencher com base no host utilizado
+                    host = '',
+                    port = '',
 
-            )
+                    user = '',
+                    password = '',
+                    
+                    database = ''
+
+                )
+            
+            else:
+                   
+                   raise ValueError("Método para conexão inválido!\nInsira um tipo válido para a conexão (local, online).")
+
 
         # mysql.connector.Error -> Principais erros relacionados ao MySql
 
