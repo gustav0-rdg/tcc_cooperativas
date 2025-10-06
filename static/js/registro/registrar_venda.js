@@ -64,7 +64,6 @@ function exibirVendedores() {
         <span class="progress-label">Passo 2 de 4</span>
     </div>
     `
-    opcoesSection.appendChild(vendedoresRecentes)
 
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
