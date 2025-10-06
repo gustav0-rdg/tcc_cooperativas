@@ -1,0 +1,424 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter';
+}
+
+header{
+  margin-bottom: 20px;
+}
+
+body{
+  background-color: var(--verde-claro-secundario);
+}
+
+.registros__etapa .etapa__progresso{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.resumo, .opcional, .avaliacao, .comentario, button{
+  box-shadow: 
+        /* 1. Sombra mais próxima: Concentrada e mais escura, com 10% de opacidade */
+        0 1px 3px rgba(81, 109, 43, 0.2), /* Usando 20% do #516D2B */
+        /* 2. Sombra mais distante: Mais espalhada e sutil, com 8% de opacidade */
+        0 4px 10px rgba(113, 147, 65, 0.1); /* Usando 10% do #719341 */
+  transition: 1s;
+    
+}
+
+.resumo:hover, .opcional:hover, .avaliacao:hover, .comentario:hover, .button:hover{
+  box-shadow: 
+    0 2px 5px rgba(81, 109, 43, 0.25), /* Aumenta a concentração */
+    0 8px 15px rgba(113, 147, 65, 0.15); /* Aumenta a elevação */
+    transform: translateY(-2px); /* Eleva ligeiramente o elemento */
+}
+
+.registros{
+  display: flex;
+  flex-direction: column;
+}
+
+.registros__etapa{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin:  10px auto;
+  justify-content: center;
+  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: var(--verde-principal);
+}
+
+.registros__opcoes{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-container{
+  width: 80%;
+  border-radius: 10px;
+  margin: 10px auto;
+  background-color: var(--branco);
+}
+
+.progress-bar{
+  width: 25%;
+  height: 20px;
+  background-color: var(--verde-escuro-secundario);
+  border-radius: 10px;
+}
+
+.progress-bar.cinquenta{
+  width: 50%;
+}
+
+.progress-bar.tres{
+  width: 75%;
+}
+
+.progress-bar.quatro{
+  width: 100%;
+}
+
+.registros__opcoes button{
+  display: flex;
+  flex-direction: column;
+  align-items: self-start;
+  justify-content: center;
+
+  padding: 10px;
+  width: 80%;
+
+  color: var(--verde-escuro-secundario);
+  border: 0;
+  background-color: var(--verde-principal);
+  height: 60px;
+  border-radius: 10px;
+}
+
+.avaliacao{
+  text-align: center;
+  width: 80%;
+  height: 100px;
+}
+
+.informacoes__vendedor{
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--verde-principal);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.valores__kg{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30px;
+  width: 80%;
+  height: 200px;
+  background-color: var(--verde-principal);
+}
+
+.valores__preco{
+  border-radius: 30px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  height: 200px;
+  background-color: var(--verde-principal);
+}
+
+.container__valores{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  gap: 10px;
+}
+
+.valores__kg input, .valores__preco input{
+  width: 100px;
+  height: 100px;
+
+  border-radius: 20px;
+  text-align: center;
+  font-size: 32px;
+}
+
+.resumo{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  width: 80%;
+  background-color: var(--verde-principal);
+  gap: 10px;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.resumo__venda{
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  gap: 10%;
+  width: 100%;
+}
+
+hr{
+  border: 2px solid var(--verde-escuro-secundario);
+  width: 90%;
+}
+.resumo__venda div{
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+    align-items: center;
+}
+
+.avaliacao{
+  width: 80%;
+  background-color: var(--verde-principal);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+}
+
+.avaliacao input{
+  height: 50px;
+  width: 80%;
+  border: 0;
+  border-radius: 20px;
+}
+
+.comentario{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 20px;
+  padding: 10px;
+  background-color: var(--verde-principal);
+}
+
+.comentario__btn{
+  width: 90%;
+  border-radius: 10px;
+  color: var(--verde-claro-principal) !important;
+  background-color: var(--verde-medio-secundario) !important;
+  text-align: center;
+}
+
+.opcional{
+  width: 80%;
+  background-color: var(--verde-principal);
+  border-radius: 20px;
+  gap: 10px
+  ;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.opcional textarea{
+  width: 90%;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.finalizar{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  gap: 10px;
+}
+
+.finalizar button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+
+textarea, input{
+  background-color: var(--verde-claro-principal);
+  border: 0;
+}
+
+/* Seu CSS atual (para Mobile) continua aqui, pois é o default */
+
+/* -------------------------------------------------------------------------------------- */
+/* ESTILOS PARA TABLETS E DESKTOPS */
+/* Aplicados em telas com largura mínima de 768px (pode ajustar) */
+/* -------------------------------------------------------------------------------------- */
+.relatorio_de_venda{
+  background-color: var(--verde-escuro-secundario);
+  padding: 10px;
+  border-radius: 10px;
+
+}
+
+.finalizacao_sw{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.finalizacao_sw a{
+  width: 80%;
+  height:60px;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--verde-claro-principal);
+  border-radius: 10px;
+}
+
+
+@media screen and (min-width: 768px) {
+  /* 1. Centralização e Largura do Container Principal */
+  .registros__opcoes {
+      /* Garante que o container principal não ocupe 100% da tela em desktops */
+      max-width: 900px; /* Largura máxima para o conteúdo principal */
+      margin: 0 auto; /* Centraliza o container */
+      /* Mantém o flex-direction: column e align-items: center para centralizar os blocos */
+  }
+
+  /* 2. Largura dos Botões/Blocos */
+  /* Diminui a largura relativa e garante uma largura máxima para não esticar demais */
+  .registros__opcoes button,
+  .informacoes__vendedor,
+  .valores__kg,
+  .valores__preco,
+  .resumo,
+  .avaliacao,
+  .comentario,
+  .opcional,
+  .finalizar {
+      box-sizing: border-box;
+      width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+      max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
+  }
+
+  .registros__etapa{
+    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: var(--verde-principal);
+  }
+
+  /* 3. Etapa de Seleção (Materiais e Vendedores) */
+  .registros__opcoes {
+      /* Volta a ser uma linha para aproveitar o espaço horizontal */
+      flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+      justify-content: center; /* Centraliza os botões */
+  }
+
+  .registros__opcoes button {
+      /* Dá uma largura fixa ou menor para os botões aparecerem lado a lado */
+      width: 250px; /* Largura fixa para que caibam 2 ou 3 por linha */
+      height: 80px; /* Aumenta um pouco a altura para melhor toque/clique */
+      margin: 10px; /* Adiciona margem para separação */
+      align-items: center; /* Centraliza o texto dentro do botão */
+      text-align: center;
+      padding: 20px;
+  }
+
+  .registros__opcoes button h1 {
+      font-size: 1.5em; /* Aumenta um pouco a fonte */
+  }
+  
+  /* Corrige o layout de 'Registros' para manter o alinhamento principal em coluna */
+  .registros {
+      align-items: center; /* Centraliza o <section class="registros__opcoes"> */
+  }
+
+  /* 4. Etapa de Valores (Input de Kg e Preço) */
+  .container__valores {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: center;
+      width: 90%; /* Deve ter a mesma largura dos blocos acima */
+      max-width: 600px; 
+  }
+
+  /* Garante que os containers de input usem metade do espaço disponível no 'container__valores' */
+  .valores__kg, .valores__preco {
+      width: 50%;
+      height: 250px; /* Aumenta um pouco a altura */
+  }
+
+  /* Move o botão 'Continuar' para fora do flex container dos inputs */
+  .confirmar__venda {
+      width: 90%;
+      max-width: 600px; 
+      margin-top: 20px; /* Espaçamento após os campos de input */
+  }
+
+  /* 5. Etapa de Avaliação (Comentários Rápidos) */
+  .comentario {
+      /* Usa grid ou flex para que os botões fiquem lado a lado */
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+      gap: 10px;
+      padding: 20px;
+  }
+
+  .comentario h3 {
+      grid-column: 1 / -1; /* O título ocupa todas as colunas */
+      text-align: center;
+  }
+
+  .comentario__btn {
+      width: 100%; /* Ocupa a largura total da coluna */
+      height: auto; /* Altura automática para o texto caber */
+      padding: 15px;
+  }
+
+  /* 6. Etapa Finalizar */
+  .finalizar {
+      flex-direction: row; /* Coloca os botões lado a lado */
+      justify-content: space-around;
+      padding: 20px 0;
+  }
+
+  .finalizar button {
+      width: 45%; /* Cada botão ocupa quase metade do container */
+      height: 50px;
+      font-size: 1.1em;
+  }
+}

@@ -1,4 +1,4 @@
-from flask import redirect, Blueprint, request
+from flask import redirect, Blueprint, request, jsonify
 
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
@@ -9,3 +9,9 @@ def cadastrar_cooperativa():
     telefone = request.form.get("telefone")
     data_nascimento = request.form.get("data")
     return redirect("/login")
+
+@api_post.route("/dados-venda", methods=["POST"])
+def postar_dados_de_venda():
+    dados_recebidos = request.get_json()
+    print(dados_recebidos)
+    return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
