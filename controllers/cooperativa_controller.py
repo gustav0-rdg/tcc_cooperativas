@@ -6,6 +6,48 @@ from mysql.connector import Error
 class Cooperativa:
 
     @staticmethod
+    def autenticar (email:str, senha:str) -> bool:
+
+        """
+        Verifica a existência de Cooperativa com
+        o email e senha fornecidos e retorna seu
+        código de sessão (Token)
+        """
+
+        connection_db = Connection.create()
+        cursor = connection_db.cursor()
+
+        try:
+
+            # '.callproc(procedure_name, args)' -> Executa a procedure e retorna os valores dos parâmetros - incluindo o valor de retorno OUT que usamos para a verificação
+
+            # 'multi=True' -> Permite múltiplas instruções SQL
+            # Resume: "cursor.execute('CALL procedure_name; SELECT @valueOUT;', multi=TRUE)"
+
+            [_, _, cooperativa_cnpj] = cursor.callproc('', (email, senha, 0))
+
+            if cooperativa_cnpj == 1:
+
+                codigo_sessao = cursor.callproc('', cooperativa_cnpj)
+
+                return codigo_sessao
+
+            else:
+
+                return False
+
+        except Error as e:
+
+            print(f'Erro - Cooperativa "autenticar": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+            connection_db.close()
+
+    @staticmethod
     def get_by_cnpj (cnpj:str) -> bool:
 
         """
@@ -90,7 +132,7 @@ class Cooperativa:
             connection_db.close()
 
     @staticmethod
-    def autenticar (codigo_validacao:str) -> bool:
+    def ativar (codigo_validacao:str) -> bool:
 
         """
         A função é a etapa final do cadastro, ativa
@@ -107,7 +149,7 @@ class Cooperativa:
 
                 """
                 UPDATE cooperativa
-                SET cooperativa.estado = 'Confirmado'
+                SET cooperativa.estado = 'ativo'
                 INNER JOIN validacoes ON validacoes.codigo = %s
                 WHERE cooperativa.cnpj = validacoes.cnpj_cooperativa;
 
@@ -127,7 +169,7 @@ class Cooperativa:
 
         except Error as e:
 
-            print(f'Erro - Cooperativa "validar": {e}')
+            print(f'Erro - Cooperativa "ativar": {e}')
 
             return False
 
