@@ -64,8 +64,8 @@ function exibirVendedores() {
         <span class="progress-label">Passo 2 de 4</span>
     </div>
     `
-    opcoesSection.appendChild(vendedoresRecentes)
-
+    
+    opcoesSection.innerHTML = '';
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";

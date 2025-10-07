@@ -107,6 +107,14 @@ body{
   border-radius: 10px;
 }
 
+
+.confirmar__venda {
+  display: flex;
+  align-items: center !important;
+  font-weight: bolder;
+  margin-bottom: 10px !important;
+}
+
 .avaliacao{
   text-align: center;
   width: 80%;
@@ -343,6 +351,7 @@ textarea, input{
   /* 3. Etapa de Seleção (Materiais e Vendedores) */
   .registros__opcoes {
       /* Volta a ser uma linha para aproveitar o espaço horizontal */
+      flex-direction: row;
       flex-wrap: wrap; /* Permite que os botões quebrem a linha */
       justify-content: center; /* Centraliza os botões */
   }
@@ -387,6 +396,9 @@ textarea, input{
       width: 90%;
       max-width: 600px; 
       margin-top: 20px; /* Espaçamento após os campos de input */
+      display: flex;
+      justify-content: center;
+      font-weight: bolder;
   }
 
   /* 5. Etapa de Avaliação (Comentários Rápidos) */
