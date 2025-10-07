@@ -2,9 +2,9 @@ from flask import redirect, Blueprint, request, jsonify
 
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
-@api_post.route("/cooperativa", methods=["POST"])
-def cadastrar_cooperativa():
-    cnpj = request.form.get("cnpj")
+@api_post.routes("/catador", methods=["POST"])
+def cadastrar_catador():
+    cpf = request.form.get("cpf")
     nome = request.form.get("nome")
     telefone = request.form.get("telefone")
     data_nascimento = request.form.get("data")
