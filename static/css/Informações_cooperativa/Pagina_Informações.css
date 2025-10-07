@@ -1,0 +1,157 @@
+body {
+    background-color: #6AB633;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* ----- Cabeçalho ----- */
+  .perfil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: white;
+    padding: 15px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .perfil img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #ddd;
+  }
+  
+  .perfil-info h5 {
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  .perfil-info p {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  /* ----- Abas ----- */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background-color: #A0D978;
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .tabs button {
+    border: none;
+    background-color: #eee;
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+  
+  .tabs button:hover {
+    background-color: var(--verde-claro-principal) ;
+  }
+  
+  .tabs button.active {
+    background-color: #719341    ;
+    color: white;
+  }
+  
+  /* ----- Blocos de informação ----- */
+  .container h5 {
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+  
+  .info-card {
+    background-color: #A0D978 ;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .info-card p {
+    margin-bottom: 5px;
+    color: #000;
+  }
+  
+  .icone {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+  
+  /* ----- Contato ----- */
+  .info-card.text-center {
+    text-align: center;
+  }
+  
+  .b
+  
+  .rounded {
+    border-radius: 10px !important;
+  }
+  
+  .gap-2 span {
+    font-size: 1rem;
+    color: #000;
+  }
+  
+  /* Ícones do canto superior direito */
+  .ms-auto i {
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  
+  
+  .ms-auto i:hover {
+    color: gray;
+  }
+
+
+    /* Botão Editar */
+
+
+  .btn-editar {
+    background-color: var(--verde-escuro-principal);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .btn-editar:hover {
+    background-color: var(--verde-claro-secundario);
+  }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+        
+        .perfil {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    
+        .tabs {
+            flex-direction: column;
+            gap: 5px;
+        }
+    
+        .info-card {
+            padding: 10px;
+        }
+        }
+
+
+/* Fim do arquivo Pagina_Informa%C3%A7%C3%B5es.css */
+  
+
+    
+
+ 
+

@@ -1,5 +1,5 @@
-const btn = document.querySelector('#form');
-const values = document.querySelector('#cnpj');
+const btn = document.querySelector('#buscaCnpj');
+const values = document.querySelector('#buscaCnpjInput');
 
 const adequacoesCnpj = {
     id: 2143,
@@ -30,49 +30,8 @@ const validarCnpj = async (cnpj) =>{
     
 }
 
-btn.addEventListener('submit', async (e) =>{
-    
-    e.preventDefault();
+btn.addEventListener('click', async () =>{
     const valueDecoded = values.value.replace(/[-_/.]/g, '');
     const dados = await validarCnpj(valueDecoded);
-    if (dados){
-        Swal.fire({
-            background: "#9BCA58",
-            html: `
-                <h2>Cooperativa válida</h2>
-            `,
-            icon: "success",
-            showCancelButton: true,
-            confirmButtonText: 'Fazer login',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                popup: 'my-popup',
-                title: 'my-title',
-                content: 'my-content',
-                confirmButton: 'my-btn',
-                cancelButton: 'my-btn-cancel'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Se o botão "Fazer login" for clicado, redireciona para a URL
-                // Define o action do formulário aqui, após o SweetAlert
-                // Isso vai garantir que o atributo action seja configurado antes do envio
-                btn.setAttribute("action", "/post/cooperativa");
-
-                // Envia o formulário após configurar o action
-                // (você pode remover o `window.location.href` e usar `submit()` se precisar de envio real)
-                btn.submit();
-            } else if (result.isDismissed) {
-                // Se o botão "Cancelar" for clicado, pode fazer outra ação
-                console.log('Ação cancelada');
-            }
-        });
-
-    } else{
-        Swal.fire({
-            background: "#9BCA58",
-            title: "Dados inválidos",
-            icon: "error"
-        });
-    }
+    console.log("Dados encontrados: ", dados);
 })

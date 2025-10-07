@@ -20,11 +20,11 @@ body::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('../imgs/textura-fundo.jpg');
+    background-image: url('../imgs/img-fundo-cadastro.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.1;
+    opacity: 0.2;
     z-index: -1;
 
 }
