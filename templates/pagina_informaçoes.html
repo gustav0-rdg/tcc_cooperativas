@@ -1,32 +1,34 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informações</title>
-    <link rel="stylesheet" href="../static/css/Informações_cooperativa/Pagina_Informações.css">
 
-    <link rel="stylesheet" href="../static/css/root-de-cores.css">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informações</title>
+  <link rel="stylesheet" href="../static/css/Informações_cooperativa/Pagina_Informações.css">
+
+  <link rel="stylesheet" href="../static/css/root-de-cores.css">
 
   <!-- Ícones Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 </head>
+
 <body>
 
 
-<!-- Cabeçalho -->
- 
- {% include 'includes/header.html' %} 
+  <!-- Cabeçalho -->
+
+  {% include 'includes/header.html' %}
 
 
   <!-- Abas -->
   <div class="tabs">
-  
-  <button onclick="window.location" class="active">Informações</button>
-  <button onclick="window.location.href='vendas.html'">Vendas</button>
-</div>
+
+    <button onclick="window.location" class="active">Informações</button>
+    <button onclick="window.location.href='vendas.html'">Vendas</button>
+  </div>
 
   <!-- Conteúdo principal -->
   <div class="container mt-3">
@@ -57,12 +59,13 @@
         <span>(16) 99999-9999</span>
       </div>
     </div>
+
+
     <div>
-      <button class="btn-editar">Editar</button>
+      <a href="editar.html" class="btn-editar">Editar</a>
     </div>
 
 
-    
 
 
 
@@ -70,11 +73,18 @@
 
   </div>
 
+  
+
+  <!-- Rodapé -->
+
+  {% include 'includes/footer.html' %}
 
 
 
 
 
-    
+
+
 </body>
+
 </html>
