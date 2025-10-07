@@ -434,3 +434,22 @@ textarea, input{
       font-size: 1.1em;
   }
 }
+
+#buscarComprador{
+  width: 90%;
+  height: 50px;
+  padding: 20px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 24px;
+
+}
+
+.opcoes-btn__novo-comprador{
+  display: flex;
+  justify-content: center;
+  align-items: center !important;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bolder;
+}

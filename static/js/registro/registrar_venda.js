@@ -70,6 +70,7 @@ function exibirVendedores() {
     opcoesSection.innerHTML = '';
     const novoComprador = document.createElement('button');
     novoComprador.className = "registros__opcoes-btn";
+    novoComprador.classList.add("opcoes-btn__novo-comprador")
     novoComprador.textContent = "Registrar comprador";
     novoComprador.addEventListener('click', async ()=>{
         Swal.fire({
@@ -80,6 +81,7 @@ function exibirVendedores() {
             showCancelButton: true,
             confirmButtonText: 'Buscar',
             cancelButtonText: 'Cancelar',
+            background: "var(--verde-principal)",
             preConfirm: () => {
                 const valor = document.getElementById('buscarComprador').value;
                 if (!valor){
