@@ -1,26 +1,23 @@
-body{ 
-    background-color: var(--verde-secundario) !important;
-}
-
-.container{
-   
-}
-
 .card{
     max-width: 360px !important;
-    background-color: var(--verde-principal) !important;
-    color: var(--verde-escuro-secundario) !important;
+    background-color: var(--verde-principal);
+    border: none !important;
 }
 
 .card h1{
     font-weight: 700;
-}
-#form{
-    
+    color: var(--verde-escuro-secundario);
+   
 }
 
-#form input:focus{
-    outline: 2px var(--verde-escuro-principal) !important;
+label {
+    color: var(--verde-escuro-principal);
+    font-weight: 700;
+}
+
+input::placeholder{
+    color: var(--verde-claro-secundario) !important;
+    
 }
 
 #form button{
@@ -28,10 +25,19 @@ body{
     border: 0;
     text-transform: uppercase;
     font-weight: 700;
+    font-size: 24px;
+    height: 50px;
+}
+
+#form button:hover{
+    background-color: var(--verde-escuro-secundario) !important;
 }
 
 #form a{
-    color: var(--verde-medio-secundario) !important;
+    color: var(--verde-escuro-secundario);
+    text-decoration: underline;
+}
 
-
+p {
+    color: var(--verde-escuro-principal);
 }

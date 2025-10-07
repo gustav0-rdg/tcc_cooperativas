@@ -27,6 +27,12 @@ def pagina_cadastro_catador():
 def menu_principal():
     return render_template("tela_inicial.html")
 
+<<<<<<< HEAD
 @pages.route("/buscar-comprador", methods=['GET'])
 def pagina_buscar_comprador():
     return render_template("buscar-comprador.html")
+=======
+@pages.route("/registrar-venda", methods=["GET"])
+def registrar_venda():
+    return render_template("registrar_venda.html")
+>>>>>>> ed16542fefff414a5f6ba2fe378636b362fb9b18
