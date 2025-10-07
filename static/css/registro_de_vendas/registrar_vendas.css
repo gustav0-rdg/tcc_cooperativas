@@ -314,6 +314,10 @@ textarea, input{
   border-radius: 10px;
 }
 
+.registros_{
+  display: flex;
+  flex-direction: column;
+}
 
 @media screen and (min-width: 768px) {
   /* 1. Centralização e Largura do Container Principal */
@@ -433,6 +437,27 @@ textarea, input{
       height: 50px;
       font-size: 1.1em;
   }
+  .opcoes-btn__novo-comprador{
+    box-sizing: border-box;
+    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+    max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bolder;
+
+    padding: 10px;
+    width: 80%;
+
+    color: var(--verde-escuro-secundario);
+    border: 0;
+    background-color: var(--verde-principal);
+    height: 60px;
+    border-radius: 10px;
+  }
 }
 
 #buscarComprador{
@@ -446,10 +471,49 @@ textarea, input{
 }
 
 .opcoes-btn__novo-comprador{
+  width: 80% !important;
   display: flex;
   justify-content: center;
   align-items: center !important;
   text-align: center;
   font-size: 1.3rem;
   font-weight: bolder;
+}
+
+.opcoes-btn__novo-comprador{
+  box-sizing: border-box;
+  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+  max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bolder;
+
+  padding: 10px;
+  width: 80%;
+
+  color: var(--verde-escuro-secundario);
+  border: 0;
+  background-color: var(--verde-principal);
+  height: 60px;
+  border-radius: 10px;
+}
+
+.registros__comprador{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+i{
+  font-size: 24px;
+}
+
+.ativo{
+  background-color: var(--verde-claro-principal) !important;
+  color: var(--verde-escuro-secundario) !important; 
 }

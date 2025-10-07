@@ -45,6 +45,7 @@ const comentarios = [
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
+const compradorSection = document.querySelector('.registros__comprador');
 
 const vendaAtual = {
     vendedor: {},
@@ -68,10 +69,12 @@ function exibirVendedores() {
     `
     
     opcoesSection.innerHTML = '';
+    
     const novoComprador = document.createElement('button');
     novoComprador.className = "registros__opcoes-btn";
     novoComprador.classList.add("opcoes-btn__novo-comprador")
     novoComprador.textContent = "Registrar comprador";
+
     novoComprador.addEventListener('click', async ()=>{
         Swal.fire({
             title: 'Buscar novo comprador.',
@@ -96,7 +99,7 @@ function exibirVendedores() {
             }
         })
     })
-    opcoesSection.appendChild(novoComprador);
+    compradorSection.appendChild(novoComprador);
 
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
@@ -161,6 +164,7 @@ function exibirValoresDeVenda() {
         <span class="progress-label">Passo 3 de 4</span>
     </div>
     `
+    compradorSection.innerHTML = '';
 
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
@@ -285,9 +289,11 @@ function exibirAvaliacao() {
             if (i < qtd) {
                 estrela.classList.remove('fa-regular');
                 estrela.classList.add('fa-solid');
+                estrela.style.color = "yellow"
             } else {
                 estrela.classList.remove('fa-solid');
                 estrela.classList.add('fa-regular');
+                estrela.style.color = "black"
             }
         });
     }
@@ -312,7 +318,9 @@ function exibirAvaliacao() {
             // Pega o valor do comentário pelo dataset do botão clicado
             valorComentario = e.target.dataset.value;
             console.log('Comentário clicado:', valorComentario);
-
+            botoes.forEach(b => b.classList.remove('ativo'));
+            // adiciona no clicado
+            botao.classList.add('ativo');
             // Aqui você pode salvar o comentário no objeto da venda, por exemplo:
         });
     })
