@@ -1,3 +1,5 @@
+import obterVendedores from "./obterVendedor.js";
+import { registrarNovoVendedor } from "./registrar_vendedores.js";
 const material = [
     { nome_comum: 'Papel', valor: '0,60' },
     { nome_comum: 'Metal', valor: '0,65' }
@@ -66,6 +68,34 @@ function exibirVendedores() {
     `
     
     opcoesSection.innerHTML = '';
+    const novoComprador = document.createElement('button');
+    novoComprador.className = "registros__opcoes-btn";
+    novoComprador.textContent = "Registrar comprador";
+    novoComprador.addEventListener('click', async ()=>{
+        Swal.fire({
+            title: 'Buscar novo comprador.',
+            html: `
+                <input type="text" id="buscarComprador" />
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Buscar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const valor = document.getElementById('buscarComprador').value;
+                if (!valor){
+                    Swal.showValidationMessage('Digite algo para buscar!')
+                }
+                return valor
+            }
+        }).then(async (result) =>{
+            if (result.isConfirmed){
+                const dados = await obterVendedores(result.value);
+                const novoVendedor = registrarNovoVendedor(dados)
+            }
+        })
+    })
+    opcoesSection.appendChild(novoComprador);
+
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
