@@ -1,195 +1,186 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-
     font-family: "Inter", sans-serif;
 }
 
-body{
+body {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+
     background-color: var(--verde-claro-principal);
+
+    overflow-x: hidden;
 }
 
-.content{
+.conteudo {
+
+    margin-top: 1rem;
+
+    padding-bottom: 1rem;
+
     width: 90%;
     height: 90%;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
     border-radius: 10px;
 
-    background-color: var(--verde-principal);
+    background-color: var(--verde-secundario);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-
-.search-buyers__title {
-    font-size: 3rem; 
-    font-weight: 700;   
-
-    color: #212529;
-
-    justify-self: center;
+.buscar-compradores__titulo {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--preto);
+    text-align: center;
 }
 
-.search-buyers__subtitle {
-    font-size: 1.5rem;
-
+.buscar-compradores__subtitulo {
+    font-size: 1.2rem;
     margin-bottom: 1.5rem;
+    text-align: center;
+}
 
+.buscar-compradores__barra-de-busca {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
     justify-self: center;
 }
 
-
-.search-buyers__search-bar {
-    position: relative; 
-}
-
-.search-buyers__input {
+.buscar-compradores__entrada {
     height: 3rem;
     padding-left: 1rem;
-
-    font-size: 1.5rem;
-
-    padding-right: 2.5rem; 
+    font-size: 1.2rem;
+    padding-right: 2.5rem;
     border-radius: 0.5rem;
 }
 
-.search-buyers__icon {
+.buscar-compradores__icone {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: black; 
-    pointer-events: none; 
+    color: var(--preto);
+    pointer-events: none;
 }
 
 
-.material-card {
+.buscar-compradores__cartoes {
+    display: grid;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.cartao-material {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    aspect-ratio: 1 / 1;
     width: 100%;
-    height: 300px;
-    border-radius: 0.75rem; 
-    border: 2px solid black;
-    
+
     background-size: cover;
     background-position: center;
-    position: relative;
-    overflow: hidden; 
+    background-repeat: no-repeat;
+
     text-decoration: none;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-
-.material-card:hover {
-    transform: scale(1.08); 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+.cartao-material:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
-
-.material-card__label {
-    background-color: white;
+.cartao-material__rotulo {
+    background-color: var(--branco);
     color: #212529;
-    font-weight: 500;
+
+    font-weight: 600;
+
     padding: 0.5rem 1.5rem;
-    border-radius: 50px; 
-    font-size: 24px;
-    z-index: 2; 
-    user-select: none; 
+    border-radius: 50px;
+    font-size: 1.1rem;
+
+    z-index: 2;
+    user-select: none;
 }
 
-.material-card--plastico{
+.buscar-compradores__ver-mais{
+    background-color: var(--verde-escuro-principal);
+    color: var(--branco);
+}
+
+.buscar-compradores__ver-mais:hover{
+    background-color: var(--verde-claro-principal);
+    color: var(--preto);
+}
+
+/* imagens dos cards */
+
+.cartao-material--plastico {
     background-image: url(https://eplast.com.br/wp-content/uploads/2024/02/plastico_pet-1.jpg.webp);
 }
 
-.material-card--papel{
+.cartao-material--papel {
     background-image: url(https://blog.contabilista.com.br/uploads/1534186392.png);
 }
 
-.material-card--metal{
+.cartao-material--metal {
     background-image: url(https://sircat.com/wp-content/uploads/2024/07/Todo-lo-que-debes-saber-sobre-la-recuperacion-de-metales.jpg);
 }
 
-.material-card--madeira{
+.cartao-material--madeira {
     background-image: url(https://construindocasas.com.br/wp-content/uploads/2021/04/Madeira-min-1024x576.jpg);
 }
 
-.material-card--pilha{
+.cartao-material--pilha {
     background-image: url(https://static.manualdaquimica.com/conteudo/images/as-pilhas-sao-dispositivos-muito-utilizados-no-dia-dia-58ada547e2409.jpg);
 }
 
-.material-card--borracha{
+.cartao-material--borracha {
     background-image: url(https://meiosustentavel.com.br/wp-content/uploads/2020/06/reciclagem-de-borracha1.png);
 }
 
-.material-card--papelao{
+.cartao-material--papelao {
     background-image: url(https://www.cbsaparasdepapel.com.br/imagens/informacoes/reciclagem-papel-sp-01.jpg);
 }
 
-.material-card--vidro{
+.cartao-material--vidro {
     background-image: url(https://ciclovivo.com.br/wp-content/uploads/2021/04/vidro-reciclagem-pixabay.jpg);
 }
 
-@media screen and (max-width: 768px) {
-    .search-buyers__title{
-        font-size: 24px;
-    }
-    
-    .search-buyers__subtitle{
-        font-size: 16px;
+/* Responsividade */
+
+@media (max-width: 599px) {
+    .buscar-compradores__cartoes {
+        grid-template-columns: 1fr;
     }
 }
 
-@media screen and (min-width: 768px) {
-    .search-buyers__cards{
-        display: grid;
+@media (min-width: 600px) and (max-width: 1023px) {
+    .buscar-compradores__cartoes {
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        column-gap: 10px;
-    } 
-
-    .search-buyers__title{
-        font-size: 24px;
-    }
-    
-    .search-buyers__subtitle{
-        font-size: 16px;
     }
 }
 
-@media screen and (min-width: 1024px) {
-    .search-buyers__cards{
-        display: grid;
+
+@media (min-width: 1024px) {
+    .buscar-compradores__cartoes {
         grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        column-gap: 10px;    
-    }
-
-    .search-buyers__title{
-        font-size: 32px;
-    }
-
-    .search-buyers__subtitle{
-        font-size: 24px;
-    }
-
-    .search-buyers__input{
-        width: 50%;
-        justify-self: center;
-    }
-
-    .search-buyers__icon{
-        position: absolute;
-        right: 27%;
     }
 }
