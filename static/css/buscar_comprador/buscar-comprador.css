@@ -170,6 +170,10 @@ body {
     .buscar-compradores__cartoes {
         grid-template-columns: 1fr;
     }
+
+    .buscar-compradores__titulo{
+        font-size: 32px;
+    }
 }
 
 @media (min-width: 600px) and (max-width: 1023px) {
