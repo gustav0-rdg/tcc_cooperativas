@@ -108,7 +108,7 @@ body {
 
 .cartao-material__rotulo {
     background-color: var(--branco);
-    color: #212529;
+    color: var(--preto);
 
     font-weight: 600;
 
