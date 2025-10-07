@@ -1,17 +1,13 @@
 :root {
     /* Cores Principais */
-    --verde-claro-principal: #E6FFC1;
-    --verde-principal: #9BCA58;
-    --verde-medio-principal: #719341;
-    --verde-escuro-principal: #516D2B;
-
-    /* Cores Secundarias */
-    --verde-claro-secundario: #C2E798;
-    --verde-secundario: #71B91E;
-    --verde-medio-secundario: #4D7E16;
-    --verde-escuro-secundario: #2D4A0C;
+    --verde-claro: #F6FBF2;
+    --verde-claro-medio: #A0D978;
+    --verde-principal: #6AB633;
+    --verde-escuro-medio: #3C671D;
+    --verde-escuro: #1C360A;
 
     /* Cores Bases */
     --branco: #ffffff;
     --preto: #000000;
+    --vermelho: rgb(255, 83, 83);
 }
