@@ -107,6 +107,14 @@ body{
   border-radius: 10px;
 }
 
+
+.confirmar__venda {
+  display: flex;
+  align-items: center !important;
+  font-weight: bolder;
+  margin-bottom: 10px !important;
+}
+
 .avaliacao{
   text-align: center;
   width: 80%;
@@ -306,6 +314,10 @@ textarea, input{
   border-radius: 10px;
 }
 
+.registros_{
+  display: flex;
+  flex-direction: column;
+}
 
 @media screen and (min-width: 768px) {
   /* 1. Centralização e Largura do Container Principal */
@@ -343,6 +355,7 @@ textarea, input{
   /* 3. Etapa de Seleção (Materiais e Vendedores) */
   .registros__opcoes {
       /* Volta a ser uma linha para aproveitar o espaço horizontal */
+      flex-direction: row;
       flex-wrap: wrap; /* Permite que os botões quebrem a linha */
       justify-content: center; /* Centraliza os botões */
   }
@@ -387,6 +400,9 @@ textarea, input{
       width: 90%;
       max-width: 600px; 
       margin-top: 20px; /* Espaçamento após os campos de input */
+      display: flex;
+      justify-content: center;
+      font-weight: bolder;
   }
 
   /* 5. Etapa de Avaliação (Comentários Rápidos) */
@@ -421,4 +437,83 @@ textarea, input{
       height: 50px;
       font-size: 1.1em;
   }
+  .opcoes-btn__novo-comprador{
+    box-sizing: border-box;
+    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+    max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bolder;
+
+    padding: 10px;
+    width: 80%;
+
+    color: var(--verde-escuro-secundario);
+    border: 0;
+    background-color: var(--verde-principal);
+    height: 60px;
+    border-radius: 10px;
+  }
+}
+
+#buscarComprador{
+  width: 90%;
+  height: 50px;
+  padding: 20px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 24px;
+
+}
+
+.opcoes-btn__novo-comprador{
+  width: 80% !important;
+  display: flex;
+  justify-content: center;
+  align-items: center !important;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bolder;
+}
+
+.opcoes-btn__novo-comprador{
+  box-sizing: border-box;
+  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+  max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bolder;
+
+  padding: 10px;
+  width: 80%;
+
+  color: var(--verde-escuro-secundario);
+  border: 0;
+  background-color: var(--verde-principal);
+  height: 60px;
+  border-radius: 10px;
+}
+
+.registros__comprador{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+i{
+  font-size: 24px;
+}
+
+.ativo{
+  background-color: var(--verde-claro-principal) !important;
+  color: var(--verde-escuro-secundario) !important; 
 }

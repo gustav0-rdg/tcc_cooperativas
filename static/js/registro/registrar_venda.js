@@ -1,3 +1,5 @@
+import obterVendedores from "./obterVendedor.js";
+import { registrarNovoVendedor } from "./registrar_vendedores.js";
 const material = [
     { nome_comum: 'Papel', valor: '0,60' },
     { nome_comum: 'Metal', valor: '0,65' }
@@ -43,6 +45,7 @@ const comentarios = [
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
+const compradorSection = document.querySelector('.registros__comprador');
 
 const vendaAtual = {
     vendedor: {},
@@ -64,6 +67,39 @@ function exibirVendedores() {
         <span class="progress-label">Passo 2 de 4</span>
     </div>
     `
+    
+    opcoesSection.innerHTML = '';
+    
+    const novoComprador = document.createElement('button');
+    novoComprador.className = "registros__opcoes-btn";
+    novoComprador.classList.add("opcoes-btn__novo-comprador")
+    novoComprador.textContent = "Registrar comprador";
+
+    novoComprador.addEventListener('click', async ()=>{
+        Swal.fire({
+            title: 'Buscar novo comprador.',
+            html: `
+                <input type="text" id="buscarComprador" />
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Buscar',
+            cancelButtonText: 'Cancelar',
+            background: "var(--verde-principal)",
+            preConfirm: () => {
+                const valor = document.getElementById('buscarComprador').value;
+                if (!valor){
+                    Swal.showValidationMessage('Digite algo para buscar!')
+                }
+                return valor
+            }
+        }).then(async (result) =>{
+            if (result.isConfirmed){
+                const dados = await obterVendedores(result.value);
+                const novoVendedor = registrarNovoVendedor(dados)
+            }
+        })
+    })
+    compradorSection.appendChild(novoComprador);
 
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
@@ -128,6 +164,7 @@ function exibirValoresDeVenda() {
         <span class="progress-label">Passo 3 de 4</span>
     </div>
     `
+    compradorSection.innerHTML = '';
 
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
@@ -252,9 +289,11 @@ function exibirAvaliacao() {
             if (i < qtd) {
                 estrela.classList.remove('fa-regular');
                 estrela.classList.add('fa-solid');
+                estrela.style.color = "yellow"
             } else {
                 estrela.classList.remove('fa-solid');
                 estrela.classList.add('fa-regular');
+                estrela.style.color = "black"
             }
         });
     }
@@ -279,7 +318,9 @@ function exibirAvaliacao() {
             // Pega o valor do comentário pelo dataset do botão clicado
             valorComentario = e.target.dataset.value;
             console.log('Comentário clicado:', valorComentario);
-
+            botoes.forEach(b => b.classList.remove('ativo'));
+            // adiciona no clicado
+            botao.classList.add('ativo');
             // Aqui você pode salvar o comentário no objeto da venda, por exemplo:
         });
     })
