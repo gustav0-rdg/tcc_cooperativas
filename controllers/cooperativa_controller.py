@@ -2,11 +2,37 @@ from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
 from controllers.email_controller import Email
 from mysql.connector import Error
+from mysql.connector.cursor import MySQLCursor
+from mysql.connector.connection import MySQLConnection
 
 class Cooperativa:
 
-    @staticmethod
-    def autenticar (email:str, senha:str) -> bool:
+    def __init__(self, connection_db:MySQLConnection, cursor:MySQLCursor):
+        
+        # Desse modo, podemos otimizar recursos pois
+        # diferentes controladores podem compartilhar
+        # a mesma conexão com o banco de dados, não criando
+        # individualmente para cada função
+
+        if connection_db == None and cursor == None:
+
+            self.connection_db = Connection.create()
+            self.cursor = self.connection_db.cursor(dictionary=True)
+
+        else:
+
+            if not isinstance(cursor, MySQLCursor):
+
+                raise TypeError ('Cooperativa - "cursor" deve ser do tipo MySQLCursor')
+        
+            if not isinstance(connection_db, MySQLConnection):
+
+                raise TypeError ('Cooperativa - "database" deve ser do tipo MySQLConnection')
+
+            self.connection_db = connection_db
+            self.cursor = cursor
+
+    def autenticar (self, email:str, senha:str) -> bool:
 
         """
         Verifica a existência de Cooperativa com
@@ -14,8 +40,9 @@ class Cooperativa:
         código de sessão (Token)
         """
 
-        connection_db = Connection.create()
-        cursor = connection_db.cursor()
+        if not isinstance(email, str) or not isinstance(senha, str):
+
+            raise TypeError ('Cooperativa: "email" e "senha" devem ser do tipo String')
 
         try:
 
@@ -24,11 +51,11 @@ class Cooperativa:
             # 'multi=True' -> Permite múltiplas instruções SQL
             # Resume: "cursor.execute('CALL procedure_name; SELECT @valueOUT;', multi=TRUE)"
 
-            [_, _, cooperativa_cnpj] = cursor.callproc('', (email, senha, 0))
+            [_, _, cooperativa_cnpj] = self.cursor.callproc('', (email, senha, 0))
 
             if cooperativa_cnpj == 1:
 
-                codigo_sessao = cursor.callproc('', cooperativa_cnpj)
+                codigo_sessao = self.cursor.callproc('', cooperativa_cnpj)
 
                 return codigo_sessao
 
@@ -44,11 +71,10 @@ class Cooperativa:
 
         finally:
 
-            cursor.close()
-            connection_db.close()
+            self.cursor.close()
+            self.connection_db.close()
 
-    @staticmethod
-    def get_by_cnpj (cnpj:str) -> bool:
+    def get_by_cnpj (self, cnpj:str) -> bool:
 
         """
         Consulta o CNPJ e retorna a cooperativa
@@ -56,12 +82,13 @@ class Cooperativa:
         se não 'null'
         """
 
-        connection_db = Connection.create()
-        cursor = connection_db.cursor(dictionary=True)
+        if not isinstance(cnpj, str):
+
+            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
 
         try:
 
-            cursor.execute (
+            self.cursor.execute (
 
                 """
                 SELECT * FROM cooperativa
@@ -72,7 +99,7 @@ class Cooperativa:
 
             )
 
-            return cursor.fetchone()
+            return self.cursor.fetchone()
 
         except Error as e:
 
@@ -82,29 +109,29 @@ class Cooperativa:
 
         finally:
 
-            cursor.close()
-            connection_db.close()
+            self.cursor.close()
+            self.connection_db.close()
 
-    @staticmethod
-    def alterar_status (cnpj:str, novo_status:str) -> bool:
+    def alterar_status (self, cnpj:str, novo_status:str) -> bool:
 
         """
         Altera o status da cooperativa no sistema
         entre dois status: ativo e inativo.
         """
 
+        if not isinstance(cnpj, str) or not isinstance(novo_status, str):
+
+            raise TypeError ('Cooperativa - "cnpj" e "novo_status" devem ser do tipo String')
+
         status_validos = ['ativo', 'inativo']
 
         if not novo_status in status_validos:
 
-            raise ValueError ('')
-
-        connection_db = Connection.create()
-        cursor = connection_db.cursor()
+            raise ValueError (f'Cooperativa - "novo_status" deve ser um destes valores: {status_validos}')
 
         try:
 
-            cursor.execute (
+            self.cursor.execute (
 
                 """
                 UPDATE cooperativa
@@ -116,9 +143,9 @@ class Cooperativa:
 
             )
 
-            connection_db.commit()
+            self.connection_db.commit()
 
-            return cursor.rowcount > 0
+            return self.cursor.rowcount > 0
 
         except Error as e:
 
@@ -128,11 +155,10 @@ class Cooperativa:
 
         finally:
 
-            cursor.close()
-            connection_db.close()
+            self.cursor.close()
+            self.connection_db.close()
 
-    @staticmethod
-    def ativar (codigo_validacao:str) -> bool:
+    def ativar (self, codigo_validacao:str) -> bool:
 
         """
         A função é a etapa final do cadastro, ativa
@@ -140,12 +166,13 @@ class Cooperativa:
         confirmação via email
         """
 
-        connection_db = Connection.create()
-        cursor = connection_db.cursor()
+        if not isinstance(codigo_validacao, str):
+
+            raise TypeError ('Cooperativa - "codigo_validacao" deve ser do tipo String')
 
         try:
 
-            cursor.execute (
+            self.cursor.execute (
 
                 """
                 UPDATE cooperativa
@@ -163,9 +190,9 @@ class Cooperativa:
 
             )
 
-            connection_db.commit()
+            self.connection_db.commit()
 
-            return cursor.rowcount > 0
+            return self.cursor.rowcount > 0
 
         except Error as e:
 
@@ -175,23 +202,23 @@ class Cooperativa:
 
         finally:
 
-            cursor.close()
-            connection_db.close()
+            self.cursor.close()
+            self.connection_db.close()
 
-    @staticmethod
-    def delete (cnpj:str) -> bool:
+    def delete (self, cnpj:str) -> bool:
 
         """
         Exclui permanentemente a cooperativa
         com o CNPJ fornecido do banco de dados.
         """
 
-        connection_db = Connection.create()
-        cursor = connection_db.cursor()
+        if not isinstance(cnpj, str):
+
+            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
 
         try:
 
-            cursor.execute (
+            self.cursor.execute (
 
                 """
                 DELETE FROM cooperativa
@@ -202,9 +229,9 @@ class Cooperativa:
 
             )
 
-            connection_db.commit()
+            self.connection_db.commit()
 
-            return cursor.rowcount > 0
+            return self.cursor.rowcount > 0
 
         except Error as e:
 
@@ -212,15 +239,9 @@ class Cooperativa:
 
             return False
 
-        finally:
-
-            cursor.close()
-            connection_db.close()
-
-    @staticmethod
     def create (
             
-        __self__,
+        self,
 
         cnpj:str,
 
@@ -236,12 +257,17 @@ class Cooperativa:
         e envia o email de autenticação
         """
 
+        if not isinstance(cnpj, str) or not isinstance(email, str) or not isinstance(senha, str):
+
+            raise TypeError ('Cooperativa "create" - "cnpj", "email" e "senha" devem ser do tipo String')
+
+        if not isinstance(validar, bool):
+
+            raise TypeError ('Cooperativa "create" - "vakidar" deve ser do tipo Booleano')
+
         if not CNPJ.validar(cnpj):
 
-            raise ValueError ('')
-
-        connection_db = Connection.create()
-        cursor = connection_db.cursor()
+            raise ValueError (f'Cooperativa "create" - O "cnpj" fornecido não é válido: {cnpj}')
 
         try:
 
@@ -251,7 +277,7 @@ class Cooperativa:
 
                 return False
 
-            cursor.execute (
+            self.cursor.execute (
 
                 """
                 INSERT INTO cooperativa (cnpj, email, senha, estado)
@@ -262,9 +288,9 @@ class Cooperativa:
 
             )
 
-            connection_db.commit()
+            self.connection_db.commit()
 
-            if cursor.rowcount > 0:
+            if self.cursor.rowcount > 0:
 
                 if not validar:
 
@@ -502,8 +528,3 @@ class Cooperativa:
             print(f'Erro - Cooperativa "create": {e}')
 
             return False
-
-        finally:
-
-            cursor.close()
-            connection_db.close()
