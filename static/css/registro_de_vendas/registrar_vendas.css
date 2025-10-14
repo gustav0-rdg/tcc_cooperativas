@@ -227,6 +227,7 @@ hr{
   justify-content: center;
   align-items: center;
   gap: 10px;
+  width: 80%;
   border-radius: 20px;
   padding: 10px;
   background-color: var(--verde-principal);
@@ -289,6 +290,7 @@ textarea, input{
 /* -------------------------------------------------------------------------------------- */
 .relatorio_de_venda{
   background-color: var(--verde-escuro-secundario);
+  color: var(--verde-claro-secundario);
   padding: 10px;
   border-radius: 10px;
 
@@ -307,10 +309,11 @@ textarea, input{
   width: 80%;
   height:60px;
   text-decoration: none;
+  color: var(--verde-claro-principal);
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--verde-claro-principal);
+  background-color: var(--verde-medio-principal);
   border-radius: 10px;
 }
 
