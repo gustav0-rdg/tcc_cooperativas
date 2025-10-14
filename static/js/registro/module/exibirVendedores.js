@@ -1,4 +1,5 @@
 import { registrarNovoVendedor } from "../registrar_vendedores.js";
+import { validarCNPJ } from "./validarCnpj.js";
 import obterVendedores from "../obterVendedor.js";
 import { exibirValoresDeVenda } from "./exibirValoresDeVenda.js";
 import { vendaAtual } from "../registrar_venda.js";
@@ -71,6 +72,13 @@ export function exibirVendedores() {
             }
         }).then(async (result) =>{
             if (result.isConfirmed){
+                const isCnpj = validarCNPJ(result.value);
+                if (!isCnpj){
+                    return Swal.fire({
+                        title: "Insira um CNPJ Válido",
+                        icon: "Error"
+                    })
+                }
                 const dados = await obterVendedores(result.value);
                 const novoVendedor = registrarNovoVendedor(dados)
             }
