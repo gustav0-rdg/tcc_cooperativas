@@ -1,4 +1,5 @@
 import { registrarNovoVendedor } from "../registrar_vendedores.js";
+import obterVendedores from "../obterVendedor.js";
 import { exibirValoresDeVenda } from "./exibirValoresDeVenda.js";
 import { vendaAtual } from "../registrar_venda.js";
 const etapaSection = document.querySelector('.registros__etapa');
