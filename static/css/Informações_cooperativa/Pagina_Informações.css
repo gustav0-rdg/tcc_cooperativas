@@ -1,157 +1,111 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    background-color: #6AB633;
+    background-color: var(--verde-claro);
     font-family: Arial, sans-serif;
-  }
-  
-  /* ----- Cabeçalho ----- */
-  .perfil {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: white;
-    padding: 15px;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  .perfil img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: #ddd;
-  }
-  
-  .perfil-info h5 {
-    margin: 0;
-    font-weight: 700;
-  }
-  
-  .perfil-info p {
-    font-size: 0.9rem;
-    color: #555;
-  }
-  
-  /* ----- Abas ----- */
-  .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    background-color: #A0D978;
-    border-bottom: 1px solid #ccc;
-    padding: 10px;
-  }
-  
-  .tabs button {
-    border: none;
-    background-color: #eee;
-    border-radius: 20px;
-    padding: 6px 15px;
-    font-weight: 500;
-    transition: 0.3s;
-  }
-  
-  .tabs button:hover {
-    background-color: var(--verde-claro-principal) ;
-  }
-  
-  .tabs button.active {
-    background-color: #719341    ;
-    color: white;
-  }
-  
-  /* ----- Blocos de informação ----- */
-  .container h5 {
-    font-weight: 600;
-    margin-top: 15px;
-    margin-bottom: 10px;
-  }
-  
-  .info-card {
-    background-color: #A0D978 ;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .info-card p {
-    margin-bottom: 5px;
-    color: #000;
-  }
-  
-  .icone {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-  }
-  
-  /* ----- Contato ----- */
-  .info-card.text-center {
-    text-align: center;
-  }
-  
-  .b
-  
-  .rounded {
-    border-radius: 10px !important;
-  }
-  
-  .gap-2 span {
-    font-size: 1rem;
-    color: #000;
-  }
-  
-  /* Ícones do canto superior direito */
-  .ms-auto i {
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  
-  
-  .ms-auto i:hover {
-    color: gray;
-  }
-
-
-    /* Botão Editar */
-
-
-  .btn-editar {
-    background-color: var(--verde-escuro-principal);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  
-  .btn-editar:hover {
-    background-color: var(--verde-claro-secundario);
-  }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
-        
-        .perfil {
-            flex-direction: column;
-            align-items: flex-start;
-        }
+    width: 100vw;
+    height: 100vh;
     
-        .tabs {
-            flex-direction: column;
-            gap: 5px;
-        }
-    
-        .info-card {
-            padding: 10px;
-        }
-        }
+  }
 
+.corpo {
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
 
-/* Fim do arquivo Pagina_Informa%C3%A7%C3%B5es.css */
-  
+.centralizacao {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    
+.cards-infos {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: row;
+  background-color: var(--verde-principal);
+  border-radius: 10px;
+  height: 50%;
+  width: 50%;
+  padding: 50px;
+}
 
- 
+.botoes {
+  background-color: var(--verde-claro-medio);
+  height: 40px;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 
+.btn-funcoes {
+  background-color: var(--verde-escuro-medio);
+  color: var(--verde-claro);
+  border: none;
+  height: 30px;
+  width: 150px;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.card-sobre {
+  background-color: var(--verde-claro-medio);
+  border-radius: 5px;
+  height: 80%;
+  width: 40%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+h5 {
+  font-weight: 600;
+  font-size: 32px;
+}
+
+.sobre-conteudo {
+  font-size: 24px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.card-contato {
+  background-color: var(--verde-claro-medio);
+  border-radius: 5px;
+  height: 80%;
+  width: 40%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.contato-conteudo {
+  font-size: 24px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.cidade {
+  font-weight: 600;
+}
