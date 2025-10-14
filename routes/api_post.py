@@ -2,7 +2,7 @@ from flask import redirect, Blueprint, request, jsonify
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
-@api_post.routes("/catador", methods=["POST"])
+@api_post.route("/catador", methods=["POST"])
 def cadastrar_catador():
     cpf = request.form.get("cpf")
     nome = request.form.get("nome")
