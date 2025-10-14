@@ -5,10 +5,6 @@ const material = [
     { nome_comum: 'Metal', valor: '0,65' }
 ];
 
-
-
-
-
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
