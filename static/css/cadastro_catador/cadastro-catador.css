@@ -1,102 +1,44 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-
-    font-family: "Inter", sans-serif;
+.card{
+    max-width: 360px !important;
+    background-color: var(--verde-claro-medio);
+    border: none !important;
 }
 
-.conteudo{
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}   
-
-.cabecalho{
-    width: 100%;
-    height: 15vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    color: #000;
+.card h1{
+    font-weight: 700;
+    color: var(--verde-escuro);
+   
 }
 
-.cabecalho-titulo{
-    font-size: 32px;
-    color: var(--verde-escuro-secundario);
-    font-weight: bolder;
+label {
+    color: var(--verde-escuro-medio);
+    font-weight: 700;
 }
 
-.formulario{
-    max-width: 500px;
-    width: 80%;
-
-    padding: 20px;
-
-    background-color: var(--verde-principal) !important;
-    color: var(--verde-escuro-secundario) !important;
-
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
+input::placeholder{
+    color: var(--verde-claro-medio) !important;
+    
 }
 
-.form-label{
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-.form-input{
-    width: 100%;
-
-    padding: 10px;
-    margin-bottom: 15px;
-
-    border: 1px solid #000;
-    border-radius: 10px;
-}
-
-.form-button{
-    font-weight: bold;
-    font-size: 24px;
-    background-color: var(--verde-escuro-principal) !important;
+#form button{
+    background-color: var(--verde-escuro-medio) !important;
+    border: 0;
     text-transform: uppercase;
     font-weight: 700;
-    border: 0;
-    border-radius: 20px;
+    font-size: 24px;
+    height: 50px;
+    margin-top: 15px;
 }
 
-.rodape{
-    width: 100%;
-    height: 5vh;
-
-    display: flex;
-
-    padding: 10px;
-
-    align-items: start;
-    justify-content: center;
-
+#form button:hover{
+    background-color: var(--verde-escuro) !important;
 }
 
-.required{
-    color: red;
+#form a{
+    color: var(--verde-escuro);
+    text-decoration: underline;
 }
 
-@media screen and (min-width: 1024px){
-    .form-button{
-        width: 50%;
-    }
-
-    .cabecalho-titulo{
-        font-size: 48px;
-        font-weight: bolder;
-    }
+p {
+    color: var(--verde-escuro-medio);
 }
