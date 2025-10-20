@@ -1,4 +1,4 @@
-export default async function obterVendedores (cnpj){
+export default async function buscarVendedores (cnpj){
     const decodedCnpj = cnpj.replace(/[-_/.]/g, '');
     try{
         const response = await fetch(`https://open.cnpja.com/office/${decodedCnpj}`);
