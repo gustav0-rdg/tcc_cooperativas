@@ -3,6 +3,7 @@ from controllers.cnpj_controller import CNPJ
 from controllers.email_controller import Email
 from mysql.connector.connection import MySQLConnection
 from controllers.tokens_controller import Tokens
+from controllers.usuarios_controller import Usuarios
 
 class Cooperativa:
 
@@ -253,23 +254,12 @@ class Cooperativa:
         try:
 
             data_cooperativa = CNPJ.consultar(cnpj)
+            id_novo_usuario = Usuarios(self.connection_db).create(nome, email, senha, tipo)
 
-            if not data_cooperativa:
+            if not data_cooperativa or not id_novo_usuario:
 
                 return False
-
-            cursor.execute (
-
-                """
-                INSERT INTO usuarios (nome, email, senha_hash, tipo)
-                VALUES (%s, %s, %s, %s);
-                """,
-
-                (nome, email, senha, tipo)
-
-            )
-
-            id_novo_usuario = cursor.lastrowid
+            
             cursor.execute (
 
                 """
