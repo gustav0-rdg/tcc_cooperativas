@@ -46,7 +46,7 @@ class Usuarios:
                 WHERE 
                     usuarios.email = %s
                 AND
-                    BYTE usuarios.senha_hash = %s;
+                    usuarios.senha_hash = %s;
                 """,
 
                 (email, senha)
