@@ -1,6 +1,7 @@
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
+from datetime import datetime
 
 class Tokens:
 
@@ -17,7 +18,8 @@ class Tokens:
         self,
 
         id_usuario:int,
-        tipo:str
+        tipo:str,
+        data_expiracao:datetime
 
     ) -> bool:
         
@@ -38,11 +40,11 @@ class Tokens:
             cursor.execute (
 
                 """
-                INSERT INTO tokens_validacao (id_usuario, tipo)
-                VALUES (%s, %s);
+                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao)
+                VALUES (%s, %s, %s);
                 """,
 
-                (id_usuario, tipo)
+                (id_usuario, tipo, data_expiracao)
 
             )
 
