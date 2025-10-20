@@ -12,6 +12,49 @@ api_usuarios = Blueprint(
     
 )
 
+@api_usuarios.route('/cadastrar', methods=['POST'])
+def cadastrar ():
+
+    data = request.get_json()
+
+    if not data or not all(key in data for key in ['nome', 'email', 'senha', 'tipo']):
+
+        return jsonify({ "error": "Dados inválidos, todos os campos são obrigatórios" }), 400
+
+    conn = Connection('local')
+
+    try:
+
+        id_usuario = Usuarios(conn.connection_db).create(
+
+            data['nome'],
+            data['email'],
+            data['senha'],
+            data['tipo']
+
+        )
+        
+        if id_usuario:
+
+            return jsonify({ 
+
+                "message": "Usuário cadastrado com sucesso!",
+                "id_usuario": id_usuario
+
+            }), 201
+    
+        else:
+
+            return jsonify({"error": "Erro ao cadastrar usuário"}), 500
+
+    except Exception as e:
+
+        return jsonify({ "error": f"Erro no servidor: {e}" }), 500
+
+    finally:
+
+        conn.close()
+
 @api_usuarios.route('/login', methods=['POST'])
 def login ():
 
@@ -77,3 +120,8 @@ def alterar_senha ():
     finally:
 
         conn.close()
+
+@api_usuarios.route('/delete', methods=['POST'])
+def delete ():
+
+    pass
