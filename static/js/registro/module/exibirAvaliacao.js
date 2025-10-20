@@ -24,7 +24,7 @@ export function exibirAvaliacao() {
         <h1>Resumo da venda</h1>
         <div class="resumo__venda">
             <div>
-                <p>${vendaAtual.material.nome_comum}</p>
+                <p>${vendaAtual.material}</p>
                 <small>${vendaAtual.quantidade} Kg</small>
             </div>
             <div>
@@ -122,7 +122,7 @@ export function exibirAvaliacao() {
             html: `
             <div class="relatorio_de_venda">
                 <h3> R$${vendaAtual.total}</h3>
-                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.nome_comum} para ${vendaAtual.vendedor.nome_fantasia}</p>
+                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material} para ${vendaAtual.vendedor.razao_social}</p>
             </div>
             <div class="finalizacao_sw">
                 <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
@@ -164,7 +164,6 @@ function mudarTipo(nota){
             tipo = "positivo"
             break
         }
-        console.log(comentarios);
     renderizarComentarios(tipo);
 }
 
@@ -194,9 +193,7 @@ function renderizarComentarios(tipo){
             } else {
                 // Se não existe, adiciona
                 vendaAtual.avaliacao.comentarios_rapidos.push(valorComentario);
-            }       
-            console.log(vendaAtual.avaliacao.comentarios_rapidos);
-            
+            }                   
             // Aqui você pode salvar o comentário no objeto da venda, por exemplo:
         });
     })

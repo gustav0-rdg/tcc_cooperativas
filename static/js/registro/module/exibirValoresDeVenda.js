@@ -20,7 +20,7 @@ export function exibirValoresDeVenda() {
 
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
-            <h1>${vendaAtual.material.nome_comum}</h1>
+            <h1>${vendaAtual.material}</h1>
             <small>Para: ${vendaAtual.vendedor.razao_social}</small>
         </div>
         
