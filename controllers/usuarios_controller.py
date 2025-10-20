@@ -98,7 +98,7 @@ class Usuarios:
                 WHERE usuarios.id_usuario = %s;
                 """,
 
-                (id_usuario, nova_senha)
+                (nova_senha, id_usuario)
 
             )
 
@@ -107,6 +107,48 @@ class Usuarios:
         except Exception as e:
 
             print(f'Erro - Usuarios "trocar_senha": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def create (
+            
+        self,
+
+        nome:str,
+
+        email:str,
+        senha:str,
+
+        tipo:str
+
+    ) -> bool:
+        
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            senha = Usuarios.criptografar(senha)
+            cursor.execute (
+
+                """
+                INSERT INTO usuarios (nome, email, senha_hash, tipo)
+                VALUES (%s, %s, %s, %s);
+                """,
+
+                (nome, email, senha, tipo)
+
+            )
+
+            self.connection_db.commit()
+            return cursor.lastrowid
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "create": {e}')
 
             return False
 
