@@ -1,0 +1,224 @@
+/* --- Estilos Gerais --- */
+
+* {
+
+    /* Define que padding e border estão incluídos na largura e altura total do elemento */
+
+    box-sizing: border-box;
+
+    /* Remove margens e preenchimentos padrão para um início limpo */
+
+    margin: 0;
+
+    padding: 0;
+
+}
+
+
+
+/* Garante que o corpo da página ocupe toda a altura da tela */
+
+body {
+
+    min-height: 100vh;
+
+    height: 100%;
+
+    font-family: Arial, sans-serif;
+    /* Fonte base */
+
+    background-color: var(--verde-claro-principal);
+
+
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+
+/* --- Estilos da Seção Principal de Ações (Container dos botões) --- */
+
+.acoes {
+
+    flex-grow: 1;
+
+
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-direction: column;
+
+    padding: 20px;
+
+    /* Centraliza o conteúdo principal, ajustando a largura máxima para leitura/visualização */
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    gap: 20px;
+
+}
+
+
+
+.acoes__cooperativa h1 {
+
+    font-size: 2.5rem;
+
+    margin-bottom: 5px;
+
+}
+
+
+
+.acoes__cooperativa p {
+
+    font-size: 1.2rem;
+
+    margin-bottom: 20px;
+
+}
+
+
+
+/* --- Configuração Grid para os Botões --- */
+
+.acoes__cooperativa {
+
+    display: grid;
+
+    gap: 15px;
+    /* Espaçamento entre os itens do grid (botões) */
+
+    background-color: var(--verde-escuro-principal);
+    padding: 20px;
+    border-radius: 10px;
+
+    /* Configuração padrão (mobile first): 1 coluna por linha */
+
+    grid-template-columns: 1fr;
+
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    /* Estilos base para os botões */
+    & a{
+        text-decoration: none;
+        
+    }
+
+    & .acoes__cooperativa-btn {
+
+        width: 100%;
+
+        min-height: 120px;
+        /* Altura mínima para os botões ficarem grandes */
+
+        padding: 20px;
+
+        background-color: var(--verde-principal);
+        /* Cor de fundo dos botões (cinza claro da imagem) */
+
+        border: none;
+
+        border-radius: 8px;
+
+        font-size: 1.2rem;
+
+        font-weight: bold;
+
+        text-transform: uppercase;
+
+        cursor: pointer;
+
+        transition: background-color 0.3s;
+
+
+
+        /* Opcional: Estilo ao passar o mouse */
+
+        &:hover {
+
+            background-color: var(--verde-medio-principal);
+            color: white;
+
+        }
+
+    }
+
+}
+
+
+
+/* --- Media Query: Telas médias (Ex: Tablet) - 2 botões por linha e 1 em baixo --- */
+
+@media (min-width: 600px) {
+
+    .acoes__cooperativa {
+
+        /* Divide o espaço em 2 colunas de tamanho igual (1fr) */
+
+        grid-template-columns: repeat(2, 1fr);
+
+    }
+
+
+
+    /* Faz o terceiro botão (Registrar venda) ocupar a largura total, ficando na linha de baixo */
+
+    .acoes__cooperativa-btn:nth-child(3) {
+
+        grid-column: 1 / -1;
+        /* Ocupa da primeira linha do grid até a última */
+
+    }
+
+}
+
+
+
+/* --- Media Query: Telas maiores (Ex: Desktop) - 3 botões na mesma linha --- */
+
+@media (min-width: 900px) {
+
+    .acoes__cooperativa {
+
+        /* Divide o espaço em 3 colunas de tamanho igual (1fr) */
+        grid-template-columns: repeat(3, 1fr);
+
+    }
+
+
+
+    /* Remove a regra que fazia o terceiro botão ocupar a linha toda, voltando ao fluxo normal do grid (1 coluna) */
+
+    .acoes__cooperativa-btn:nth-child(3) {
+
+        grid-column: auto;
+
+    }
+
+}
+
+
+
+/* --- Estilos da Seção Compradores Destaque --- */
+
+.acoes__compradores h2 {
+
+    font-size: 2rem;
+
+    margin-top: 40px;
+
+    margin-bottom: 15px;
+
+}

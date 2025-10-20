@@ -52,7 +52,7 @@ class CNPJ:
         # Funciona para listas, tuplas e strings
 
         digito_verificador_1 = calcular_digito(cnpj[:12], pesos[1:])
-        digito_verificador_2 = calcular_digito(cnpj[:12] + digito_verificador_1, pesos)
+        digito_verificador_2 = calcular_digito(cnpj[:12] + str(digito_verificador_1), pesos)
 
         # Se os dois digitos calculados foram iguais
         # aos dois últimos digitos do CNPJ fornecido
