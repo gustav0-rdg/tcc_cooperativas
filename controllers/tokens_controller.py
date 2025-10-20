@@ -40,7 +40,7 @@ class Tokens:
                 """
                 INSERT INTO tokens_validacao (id_usuario, tipo)
                 VALUES (%s, %s);
-                """
+                """,
 
                 (id_usuario, tipo)
 
@@ -82,7 +82,7 @@ class Tokens:
                 INNER JOIN usuarios 
                     ON tokens_validacao.id_usuario = usuarios.id_usuario
                 WHERE BYTE tokens_validacao.token = %s;
-                """
+                """,
 
                 (token, )
 
@@ -116,7 +116,7 @@ class Tokens:
                 UPDATE tokens_validacao
                 SET tokens_validacao.usado = TRUE
                 WHERE tokens_validacao.id_token = %s;
-                """
+                """,
 
                 (id_token, )
 
