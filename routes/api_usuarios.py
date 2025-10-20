@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from controllers.usuarios_controller import Usuarios
 from data.connection_controller import Connection
+from controllers.tokens_controller import Tokens
 
 api_usuarios = Blueprint(
     
@@ -21,7 +22,7 @@ def login ():
 
     if not email or not senha:
 
-        return jsonify({ 'texto': 'Email e Senha são obrigatórios e essenciais' }), 400
+        return jsonify({ 'texto': '"email" e "senha" são parâmetros obrigatórios' }), 400
 
     conn = Connection('local')
     token_sessao = Usuarios(conn.connection_db).autenticar(email, senha)
@@ -34,3 +35,35 @@ def login ():
     else:
 
         return jsonify({ 'texto': 'Email ou Senha inválidos' }), 401
+    
+@api_usuarios.route('/alterar-senha', methods=['POST'])
+def alterar_senha ():
+
+    token = request.headers.get('Authorization')
+    data = request.get_json()
+
+    nova_senha = data.get('nova-senha')
+
+    if not token or not nova_senha:
+
+        return jsonify({ 'texto': '"token" e "nova-senha" são parâmetros obrigatórios' }), 400
+    
+    conn = Connection('local')
+    token_controller = Tokens(conn.connection_db)
+
+    data_token = token_controller.validar(token)
+
+    print(data_token)
+
+    if data_token and data_token['tipo'] == 'recuperacao_senha':
+
+        Usuarios(conn.connection_db).trocar_senha(data_token['id_usuario'], nova_senha)
+        token_controller.set_state(data_token['id_token'])
+
+        conn.close()
+        return jsonify({ 'texto': 'Senha alterada com sucesso' }), 200
+
+    else:
+
+        conn.close()
+        return jsonify({ 'texto': 'Token inválido' }), 401
