@@ -13,7 +13,7 @@ body {
     flex-direction: column;
     align-items: center;
 
-    background-color: var(--verde-claro-principal);
+    background-color: var(--verde-claro-medio);
 
     overflow-x: hidden;
 }
@@ -121,12 +121,12 @@ body {
 }
 
 .buscar-compradores__ver-mais{
-    background-color: var(--verde-escuro-principal);
+    background-color: var(--verde-escuro-medio);
     color: var(--branco);
 }
 
 .buscar-compradores__ver-mais:hover{
-    background-color: var(--verde-claro-principal);
+    background-color: var(--verde-principal);
     color: var(--preto);
 }
 
@@ -191,7 +191,7 @@ body {
 
 .subtipo-card {
     flex: 1 1 30%;
-    background-color: var(--verde-claro-principal);
+    background-color: var(--verde-claro-medio);
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
@@ -200,7 +200,7 @@ body {
     transition: 0.2s;
 }
 .subtipo-card:hover {
-    background-color: var(--verde-escuro-principal);
+    background-color: var(--verde-escuro);
     color: var(--branco);
 }
 
@@ -301,6 +301,7 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
+    color: var(--preto);
 }
 .comprador-info span {
     font-size: 0.9rem;
@@ -335,8 +336,6 @@ body {
     text-decoration: underline;
 }
 
-
-/* --- Seção Comentários (RF0NSE1) --- */
 
 #detalhe-comentarios {
     width: 100%;
