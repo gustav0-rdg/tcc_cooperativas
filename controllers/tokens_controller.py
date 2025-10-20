@@ -119,9 +119,7 @@ class Tokens:
                     tipo,
                     usado
                 FROM tokens_validacao
-                INNER JOIN usuarios 
-                    ON tokens_validacao.id_usuario = usuarios.id_usuario
-                WHERE BYTE tokens_validacao.token = %s;
+                WHERE tokens_validacao.token = %s;
                 """,
 
                 (token, )
