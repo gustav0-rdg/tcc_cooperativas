@@ -25,8 +25,23 @@ def pagina_cadastro_catador():
 
 @pages.route("/pagina-inicial", methods=["GET"])
 def menu_principal():
-    return render_template("tela_inicial.html")
+    return render_template("tela-inicial.html")
 
 @pages.route("/buscar-comprador", methods=['GET'])
 def pagina_buscar_comprador():
     return render_template("buscar-comprador.html")
+
+@pages.route("/registrar-venda")
+def pagina_registrar_venda():
+    return render_template("registrar-venda.html")
+
+@pages.route("/pagina-informacoes")
+def pagina_informacoes():
+    return render_template("pagina_informacoes.html")
+@pages.route("/editar-informacoes")
+def pagina_editar_informacoes():
+    return render_template("editar-informacoes.html")
+
+@pages.route("/recuperar-senha")
+def pagina_recuperar_senha():
+    return render_template("recuperar-senha.html")
