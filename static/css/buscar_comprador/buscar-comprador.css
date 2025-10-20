@@ -362,6 +362,22 @@ body {
     color: var(--preto);
 }
 
+
+.buscar-compradores__cartoes {
+    max-width: 1200px; 
+    margin-top: 2rem;  
+}
+
+#detalhe-comprador .buscar-compradores__barra-de-busca {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#detalhe-comprador .buscar-compradores__titulo {
+    font-size: 2.5rem; 
+    margin-top: 1rem;
+}
+
 /* Responsividade */
 
 @media (max-width: 599px) {
