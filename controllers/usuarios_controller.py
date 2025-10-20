@@ -155,3 +155,79 @@ class Usuarios:
         finally:
 
             cursor.close()
+
+    def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
+
+        """
+        Altera o status do usuario no sistema
+        """
+
+        status_validos = ['ativo', 'inativo']
+
+        if not novo_status in status_validos:
+
+            raise ValueError (f'Usuarios - "novo_status" deve ser um destes valores: {status_validos}')
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            self.cursor.execute (
+
+                """
+                UPDATE usuarios
+                SET usuarios.status = %s
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (novo_status, id_usuario)
+
+            )
+
+            self.connection_db.commit()
+            return cursor.rowcount > 0
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "alterar_status": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def delete (self, id_usuario:int) -> bool:
+
+        """
+        Exclui permanentemente o usuário
+        do banco de dados
+        """
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                DELETE FROM usuarios
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (id_usuario, )
+
+            )
+
+            self.connection_db.commit()
+            return cursor.rowcount > 0
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "delete": {e}')
+
+            return False
+        
+        finally:
+
+            cursor.close()
