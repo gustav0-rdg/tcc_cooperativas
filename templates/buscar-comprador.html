@@ -84,12 +84,6 @@
         <main class="buscar-compradores w-100">
             
             <div id="secao-principal">
-                <h1 class="buscar-compradores__titulo">Buscar compradores</h1>
-                <p class="buscar-compradores__subtitulo text-muted">Procure por material ou digite o nome de um comprador</p>
-                <div class="buscar-compradores__barra-de-busca mb-4">
-                    <input type="text" placeholder="Digite um comprador..." class="form-control buscar-compradores__entrada">
-                    <span class="material-icons buscar-compradores__icone">search</span>
-                </div>
                 
                 <div class="row g-3 flex-column align-items-center w-100 buscar-compradores__cartoes">
                     
@@ -148,16 +142,24 @@
                         </a>
                         <button class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center" data-material="vidro">Ver mais</button>
                     </div>
+
                 </div>
             </div> <section id="detalhe-material" class="hidden">
                 <button id="voltar-para-principal" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
-                <h2 id="material-titulo"></h2>
-                <div id="conteudo-material" class="subtipos-grid">
+                <h2 id="material-titulo"></h2> <div id="conteudo-material" class="subtipos-grid">
                     </div>
             </section>
 
             <section id="detalhe-comprador" class="hidden">
                 <button id="voltar-para-materiais" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
+                
+                <h1 class="buscar-compradores__titulo">Buscar compradores</h1>
+                <p class="buscar-compradores__subtitulo text-muted">Procure pelo nome de um comprador</p>
+                <div class="buscar-compradores__barra-de-busca mb-4">
+                    <input type="text" placeholder="Digite um comprador..." class="form-control buscar-compradores__entrada" id="filtro-compradores">
+                    <span class="material-icons buscar-compradores__icone">search</span>
+                </div>
+
                 <div id="conteudo-comprador">
                     </div>
             </section>
