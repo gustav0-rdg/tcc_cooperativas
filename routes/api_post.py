@@ -18,7 +18,7 @@ def cadastrar_catador():
 def postar_dados_de_venda():
     dados_recebidos = request.get_json()
     conn = Connection('local')
-    processar_venda = Vendas(conn.connection_db).processar_dados_venda(dados_recebidos)
+    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(2, dados_recebidos)
     
     return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
 
