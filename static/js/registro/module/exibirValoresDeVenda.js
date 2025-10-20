@@ -8,7 +8,7 @@ export function exibirValoresDeVenda() {
     etapaSection.innerHTML = '';
     etapaSection.innerHTML = `
     <div class="etapa__progresso">
-        <h1>${vendaAtual.vendedor.nome_fantasia}</h1>
+        <h1>${vendaAtual.vendedor.razao_social}</h1>
         <small>Quanto vendeu e por quanto?</small>
         <div class="progress-container">
             <div class="progress-bar tres"></div>
@@ -21,7 +21,7 @@ export function exibirValoresDeVenda() {
     opcoesSection.innerHTML = `
         <div class="informacoes__vendedor">
             <h1>${vendaAtual.material.nome_comum}</h1>
-            <small>Para: ${vendaAtual.vendedor.nome_fantasia}</small>
+            <small>Para: ${vendaAtual.vendedor.razao_social}</small>
         </div>
         
         <div class="container__valores"> 

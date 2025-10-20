@@ -1,5 +1,4 @@
 export const registrarNovoVendedor = async (dados) =>{
-    console.log(dados);
     if (dados){
         fetch('/post/dados-comprador', {
             method: 'POST',

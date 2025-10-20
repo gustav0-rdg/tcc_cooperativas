@@ -68,7 +68,7 @@ export function exibirAvaliacao() {
             </div>
         </div>
         <hr>
-        <p> ${vendaAtual.vendedor.nome_fantasia} </p>
+        <p> ${vendaAtual.vendedor.razao_social} </p>
         <small>${vendaAtual.vendedor.cnpj}</small>
     </div>
     <div class="avaliacao">
