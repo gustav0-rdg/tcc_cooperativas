@@ -37,6 +37,23 @@ class Tokens:
 
         try:
 
+            # Apaga os tokens anteriores pois esta
+            # credencial deve ser única
+
+            cursor.execute (
+
+                """
+                DELETE FROM tokens_validacao
+                WHERE 
+                    tokens_validacao.id_usuario = %s
+                AND
+                    tokens_validacao.tipo = %s;
+                """,
+
+                (id_usuario, tipo)
+
+            )
+
             cursor.execute (
 
                 """
@@ -62,7 +79,7 @@ class Tokens:
             )
 
             token = cursor.fetchone()['token']
-
+            
             self.connection_db.commit()
             if cursor.rowcount > 0 and token:
 
