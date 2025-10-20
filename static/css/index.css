@@ -18,7 +18,7 @@
     max-width: 900px;
     width: 80%;
     height: 80%;
-    border: 2px solid var(--verde-escuro-principal);
+    border: 2px solid var(--branco);
     z-index: 0;
     
 }
@@ -26,20 +26,20 @@
 .card__container>h3 {
     font-size: 48px;
     font-weight: 700;
-    color: var(--verde-escuro-secundario);
+    color: var(--verde-escuro);
 
 }
 
 /* Botões */
 .botao__container {
-    background-color: var(--verde-medio-secundario);
+    background-color: var(--verde-claro-medio);
     color: var(--branco);
     border-radius: 15px;
     height: 65px;
 }
 
 .botao__container:hover {
-    background-color: var(--verde-claro-secundario);
+    background-color: var(--verde-claro);
 }
 
 .botao__container:hover .botao__icone {
@@ -48,7 +48,7 @@
 
 /* Icones */
 .botao__icone {
-    color: var(--verde-claro-secundario);
+    color: var(--verde-escuro-medio);
 }
 
 

@@ -6,7 +6,7 @@
 
 
 body {
-    background-color: var(--verde-secundario);
+    background-color: var(--verde-escuro);
     min-height: 100vh;
     height: auto;
     position: relative;
