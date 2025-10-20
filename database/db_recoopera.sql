@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS `recoopera`;
 
 USE `recoopera`;
 
--- Comandos de configuração para otimizar a criação do banco de dados e garantir a integridade dos dados.
+-- Comandos de configuração para otimizar a criação do banco de dados
 -- São salvos os valores antigos para serem restaurados no final do script.
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0; -- Desabilita a verificação de chaves únicas durante a execução do script. + Aceleração na inserção de dados.
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0; -- Desabilita a verificação de chaves estrangeiras, permitindo criar as tabelas em qualquer ordem sem erros de dependência.
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `id_usuario` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `nome` VARCHAR(200) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
-  `senha_hash` VARCHAR(255) NOT NULL, -- Armazena a senha de forma segura (hash), nunca em texto plano.
+  `senha_hash` VARCHAR(255) NOT NULL,
   `tipo` ENUM('gestor', 'cooperativa') NOT NULL DEFAULT 'cooperativa', 
   `status` ENUM('ativo', 'inativo', 'bloqueado', 'pendente') NOT NULL DEFAULT 'pendente',
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `tokens_validacao` (
   `tipo` ENUM('cadastro', 'recuperacao_senha') NOT NULL,
   `usado` BOOLEAN NOT NULL DEFAULT FALSE, 
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `data_expiracao` DATETIME NOT NULL, -- Garante que o token tenha uma validade, aumentando a segurança.
+  `data_expiracao` DATETIME NOT NULL,
   UNIQUE INDEX `uidx_token` (`token`),
   INDEX `idx_usuario_tipo` (`id_usuario`, `tipo`),
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `cooperativas` (
   `latitude` DECIMAL(10,8) NULL,
   `longitude` DECIMAL(11,8) NULL,
   `aprovado` BOOLEAN NOT NULL DEFAULT FALSE,
-  `ultima_atualizacao` DATETIME NULL, -- Campo crucial para a regra de negócio de suspensão por inatividade. Atualizado por um trigger.
+  `ultima_atualizacao` DATETIME NULL,
   `data_cadastro` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE INDEX `uidx_cnpj` (`cnpj`),
   UNIQUE INDEX `uidx_id_usuario` (`id_usuario`),
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `documentos_cooperativa` (
   CONSTRAINT `fk_documentos_gestor`
     FOREIGN KEY (`id_gestor_avaliador`)
     REFERENCES `usuarios` (`id_usuario`)
-    ON DELETE SET NULL ON UPDATE CASCADE   -- Se o gestor for deletado, o registro do documento não é perdido, apenas quem o avaliou.
+    ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `compradores` (
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `compradores` (
   `longitude` DECIMAL(11,8) NULL,
   `telefone` VARCHAR(20) NULL, 
   `email` VARCHAR(255) NULL,   
-  `score_confianca` DECIMAL(4,2) NOT NULL DEFAULT 5.00, -- A reputação do comprador, calculada pela função `calcular_score_confianca`.
+  `score_confianca` DECIMAL(4,2) NOT NULL DEFAULT 5.00,
   `numero_avaliacoes` INT UNSIGNED NOT NULL DEFAULT 0,  
   `deletado_em` DATETIME NULL, -- Soft delete, marcado como deletado ao invés de realmente deletar, para não perder os registros
   `data_cadastro` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `compradores` (
   INDEX `idx_ativo` (`deletado_em`)
 );
 
--- Nova tabela para armazenar as exigências de cada comprador, atendendo a um requisito do projeto.
+-- tabela para armazenar as exigências de cada comprador, atendendo a um requisito do projeto. (sem uso ainda)
 CREATE TABLE IF NOT EXISTS `exigencias_compradores` (
   `id_exigencia` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_comprador` BIGINT UNSIGNED NOT NULL,
@@ -134,7 +134,6 @@ CREATE TABLE IF NOT EXISTS `exigencias_compradores` (
     REFERENCES `compradores` (`id_comprador`)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 
 -- ============================================================================
 -- Tabelas para catalogar os tipos de materiais recicláveis.
@@ -174,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `vendas` (
   `id_cooperativa` BIGINT UNSIGNED NOT NULL,
   `id_comprador` BIGINT UNSIGNED NOT NULL,
   `data_venda` DATETIME NOT NULL,
-  `valor_total` DECIMAL(14,2) NOT NULL DEFAULT 0.00, -- Valor total é calculado e atualizado automaticamente pelos triggers.
+  `valor_total` DECIMAL(14,2) NOT NULL DEFAULT 0.00,
   INDEX `idx_cooperativa` (`id_cooperativa`),
   INDEX `idx_comprador` (`id_comprador`),
   INDEX `idx_data_venda` (`data_venda` DESC),
@@ -221,13 +220,13 @@ CREATE TABLE IF NOT EXISTS `feedback_tags` (
 
 CREATE TABLE IF NOT EXISTS `avaliacoes_compradores` (
   `id_avaliacao` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `id_venda` BIGINT UNSIGNED NOT NULL, -- Cada avaliação está ligada a uma única venda.
+  `id_venda` BIGINT UNSIGNED NOT NULL,
   `pontualidade_pagamento` TINYINT UNSIGNED NOT NULL CHECK (pontualidade_pagamento BETWEEN 1 AND 5),
   `logistica_entrega` TINYINT UNSIGNED NOT NULL CHECK (logistica_entrega BETWEEN 1 AND 5),
   `qualidade_negociacao` TINYINT UNSIGNED NOT NULL CHECK (qualidade_negociacao BETWEEN 1 AND 5),
   `comentario_livre` TEXT NULL,
   `data_avaliacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE INDEX `uidx_id_venda` (`id_venda`), -- Garante que uma venda só pode ser avaliada uma vez.
+  UNIQUE INDEX `uidx_id_venda` (`id_venda`),
   CONSTRAINT `fk_avaliacoes_vendas`
     FOREIGN KEY (`id_venda`)
     REFERENCES `vendas` (`id_venda`)
@@ -339,6 +338,38 @@ INSERT INTO `feedback_tags` (`texto`, `tipo`) VALUES
 
 DELIMITER $$
 
+-- TRG_HASH_SENHA_INSERT
+-- Dispara antes de um INSERT na tabela 'usuarios'.
+-- Converte a senha
+CREATE TRIGGER `trg_hash_senha_insert`
+BEFORE INSERT ON `usuarios`
+FOR EACH ROW
+BEGIN
+    SET NEW.senha_hash = SHA2(NEW.senha_hash, 256);
+END$$
+
+
+-- ============================================================================
+-- TRG_HASH_SENHA_UPDATE
+-- Dispara antes de um UPDATE na tabela 'usuarios'.
+-- Verifica se o campo 'senha_hash' está sendo modificado.
+CREATE TRIGGER `trg_hash_senha_update`
+BEFORE UPDATE ON `usuarios`
+FOR EACH ROW
+BEGIN
+    -- Compara o valor NOVO com o valor ANTIGO (já "hasheado").
+    -- Se forem diferentes, significa que uma nova senha foi enviada.
+    IF NEW.senha_hash != OLD.senha_hash THEN
+        -- Aplica o hash SHA2-256 na nova senha.
+        SET NEW.senha_hash = SHA2(NEW.senha_hash, 256);
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
 
 CREATE FUNCTION `calcular_score_confianca`(p_id_comprador BIGINT UNSIGNED)
 RETURNS DECIMAL(4,2)
@@ -389,8 +420,8 @@ BEGIN
         SELECT
             ((ac.pontualidade_pagamento * v_peso_pontualidade) +
              (ac.logistica_entrega * v_peso_logistica) +
-             (ac.qualidade_negociacao * v_peso_negociacao)) * 2 AS nota_ponderada, -- Multiplica por 2 para converter a escala 1-5 para 2-10.
-            EXP(-DATEDIFF(NOW(), v.data_venda) / v_decaimento_dias) AS peso_temporal -- Fórmula de decaimento exponencial.
+             (ac.qualidade_negociacao * v_peso_negociacao)) * 2 AS nota_ponderada,
+            EXP(-DATEDIFF(NOW(), v.data_venda) / v_decaimento_dias) AS peso_temporal
         FROM avaliacoes_compradores ac
         JOIN vendas v ON ac.id_venda = v.id_venda
         WHERE v.id_comprador = p_id_comprador
@@ -525,10 +556,10 @@ BEGIN
     FROM vendas_itens vi
     JOIN vendas v ON vi.id_venda = v.id_venda
     JOIN compradores c ON v.id_comprador = c.id_comprador
-    WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 90 DAY) -- Considera apenas vendas dos últimos 90 dias.
+    WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 90 DAY)
       AND c.deletado_em IS NULL
     GROUP BY vi.id_material_catalogo, c.estado
-    HAVING COUNT(*) >= 3; -- Só calcula estatísticas para regiões com um mínimo de 3 transações, para relevância.
+    HAVING COUNT(*) >= 3;
 END$$
 
 
