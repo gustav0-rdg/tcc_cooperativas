@@ -25,7 +25,7 @@ class Tokens:
 
             raise TypeError ('Tokens Controller - "id_usuario" deve ser do tipo Int e "tipo" deve ser do tipo String')
 
-        tipos_validos = ['']
+        tipos_validos = ['cadastro', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
 
