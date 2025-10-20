@@ -37,10 +37,23 @@ def pagina_registrar_venda():
 
 @pages.route("/pagina-informacoes")
 def pagina_informacoes():
-    return render_template("pagina_informacoes.html")
+    return render_template("pagina-informacoes.html")
+
 @pages.route("/editar-informacoes")
 def pagina_editar_informacoes():
     return render_template("editar-informacoes.html")
+
+@pages.route("/pagina-inicial/gestor")
+def pagina_inicial_gestor():
+    return render_template("pagina-inicial-gestor.html")
+
+@pages.route("/visualizar-cooperativas")
+def pagina_cooperativas_gestor():
+    return render_template("pagina-cooperativas-gestor.html")
+
+@pages.route("/gerenciar-cadastros")
+def pagina_gerenciar_cadastros_gestor():
+    return render_template("pagina-gerenciar-cadastros.html")
 
 @pages.route("/recuperar-senha")
 def pagina_recuperar_senha():

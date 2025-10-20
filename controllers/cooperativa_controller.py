@@ -15,6 +15,60 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
+    def autenticar (self, email:str, senha:str) -> bool:
+
+        """
+        Verifica a existência de Cooperativa com
+        o email e senha fornecidos e retorna seu
+        código de sessão (Token)
+        """
+
+        if not isinstance(email, str) or not isinstance(senha, str):
+
+            raise TypeError ('Cooperativa: "email" e "senha" devem ser do tipo String')
+
+        cursor = self.connection_db.cursor(dictionary=True)
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT id_usuario FROM usuarios WHERE 
+                    usuarios.email = %s 
+                    AND usuarios.senha_hash = SHA2(%s, 256)
+                    AND status = 'ativo';
+                """,
+
+                (email, senha)
+
+            )
+
+            data_user = cursor.fetchone()
+
+            if data_user:
+
+                return Tokens(self.connection_db).create(
+
+                    data_user['id_usuario'],
+                    ''
+
+                )
+
+            else:
+
+                return False                
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "autenticar": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
     def get_by_cnpj (self, cnpj:str) -> bool:
 
         """
