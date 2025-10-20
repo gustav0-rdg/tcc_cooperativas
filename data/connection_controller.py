@@ -41,7 +41,7 @@ class Connection:
 
         try:
 
-            self.connection_db = mysql.connector.connect(info_conexoes[tipo_conexao])
+            self.connection_db = mysql.connector.connect(**info_conexoes[tipo_conexao])
 
         # mysql.connector.Error -> Principais erros relacionados ao MySql
 
