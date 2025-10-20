@@ -54,3 +54,7 @@ def pagina_cooperativas_gestor():
 @pages.route("/gerenciar-cadastros")
 def pagina_gerenciar_cadastros_gestor():
     return render_template("pagina-gerenciar-cadastros.html")
+
+@pages.route("/recuperar-senha")
+def pagina_recuperar_senha():
+    return render_template("recuperar-senha.html")

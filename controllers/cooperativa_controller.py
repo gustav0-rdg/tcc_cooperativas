@@ -33,13 +33,10 @@ class Cooperativa:
             cursor.execute (
 
                 """
-                SELECT
-                    id_usuario
-                FROM usuarios
-                WHERE 
-                    usuarios.email = %s
-                AND
-                    BYTE usuarios.senha_hash = %s;
+                SELECT id_usuario FROM usuarios WHERE 
+                    usuarios.email = %s 
+                    AND usuarios.senha_hash = SHA2(%s, 256)
+                    AND status = 'ativo';
                 """,
 
                 (email, senha)

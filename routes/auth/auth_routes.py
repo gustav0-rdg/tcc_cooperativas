@@ -1,5 +1,8 @@
 
-# from flask import Blueprint, request
+from flask import Blueprint, request, render_template
+from controllers.cooperativa_controller import Cooperativa
+from controllers.cnpj_controller import CNPJ
+
 
 # auth = Blueprint('auth', __name__, url_prefix="/auth")
 
