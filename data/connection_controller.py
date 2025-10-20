@@ -31,7 +31,7 @@ info_conexoes = {
 
 class Connection:
 
-    connection_db:MySQLConnection=None,
+    connection_db:MySQLConnection = None
 
     def __init__ (self, tipo_conexao:str):
 
@@ -41,7 +41,7 @@ class Connection:
 
         try:
 
-            self.connection_db = mysql.connector.connect(info_conexoes[tipo_conexao])
+            self.connection_db = mysql.connector.connect(**info_conexoes[tipo_conexao])
 
         # mysql.connector.Error -> Principais erros relacionados ao MySql
 
