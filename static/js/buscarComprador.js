@@ -7,19 +7,19 @@ const materiaisData = {
             subtipos: [
                 { 
                     nome: 'PET', 
-                    img: '../static/imgs/subtipos/pet.png', // <-- Caminho local
+                    img: '../static/imgs/subtipos/pet.png', 
                     codigo: '01', 
                     codigoImg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Symbol_Resin_Code_01_PET.svg/200px-Symbol_Resin_Code_01_PET.svg.png' 
                 },
                 { 
                     nome: 'PEAD', 
-                    img: '../static/imgs/subtipos/pead.png', // <-- Caminho local
+                    img: '../static/imgs/subtipos/pead.png', 
                     codigo: '02', 
                     codigoImg: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnH2VmFODOdx2uO6FYguSzvsEM61Aqvnxmbw&s' 
                 },
                 {       
                     nome: 'PVC', 
-                    img: '../static/imgs/subtipos/pvc.png', // <-- Caminho local
+                    img: '../static/imgs/subtipos/pvc.png', 
                     codigo: '03', 
                     codigoImg: 'https://www.issosignifica.com/plastico-3-pvc-w400.jpg' 
                 },
@@ -109,7 +109,7 @@ const materiaisData = {
                 infos: 'Apenas papelão seco e amarrado.'
             }
         ]
-        // Aqui vai a lista de mais compradores
+
     };
 
     const comentariosData = {
@@ -154,11 +154,11 @@ const materiaisData = {
             return;
         }
         
-        // 1. Limpa o conteúdo anterior e define o título
+        // Limpa o conteúdo anterior e define o título
         containerSubtipos.innerHTML = '';
         containerTituloMaterial.textContent = data.titulo;
 
-        // 2. Cria o HTML para cada subtipo
+        // Cria o HTML para cada subtipo
         data.subtipos.forEach(subtipo => {
             const cardHTML = `
                 <div class="subtipo-card" data-subtipo="${subtipo.nome}">
@@ -171,10 +171,10 @@ const materiaisData = {
             containerSubtipos.innerHTML += cardHTML;
         });
 
-        // 3. Adiciona os 'ouvintes' de clique nos novos cards criados
+        // Adiciona os 'ouvintes' de clique nos novos cards criados
         adicionarListenersSubtipos();
 
-        // 4. Troca as telas
+        // Troca as telas
         secaoPrincipal.classList.add('hidden');
         secaoDetalheMaterial.classList.remove('hidden');
     }
@@ -315,8 +315,7 @@ const materiaisData = {
         });
     }
 
-
-    // --- 5. BOTÕES DE VOLTAR ---
+    // Botão de voltar
 
     btnVoltarPrincipal.addEventListener('click', () => {
         secaoDetalheMaterial.classList.add('hidden');
