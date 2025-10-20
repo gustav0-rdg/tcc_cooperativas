@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import MySQLConnection
-from mysql.connector.cursor import MySQLCursor
+from mysql.connector.cursor import MySQLCursor, MySQLCursorDict
 
 info_conexoes = {
 
@@ -44,7 +44,7 @@ class Connection:
         try:
 
             self.connection_db = mysql.connector.connect(info_conexoes[tipo_conexao])
-            self.cursor = self.connection_db.cursor(dict=is_dict)
+            self.cursor = self.connection_db.cursor(dictionary=is_dict)
 
         # mysql.connector.Error -> Principais erros relacionados ao MySql
 
@@ -68,9 +68,9 @@ class Connection:
             return False
         
     @staticmethod
-    def validar (connection_db:MySQLConnection, cursor:MySQLCursor):
+    def validar (connection_db:MySQLConnection, cursor:MySQLCursor) -> bool:
 
-        if isinstance(cursor, MySQLCursor) and isinstance(connection_db, MySQLConnection):
+        if isinstance(cursor, (MySQLCursor, MySQLCursorDict)) and isinstance(connection_db, MySQLConnection):
 
             return True
         
