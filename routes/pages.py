@@ -38,3 +38,6 @@ def pagina_registrar_venda():
 @pages.route("/pagina-informacoes")
 def pagina_informacoes():
     return render_template("pagina_informacoes.html")
+@pages.route("/editar-informacoes")
+def pagina_editar_informacoes():
+    return render_template("editar_informacoes.html")
