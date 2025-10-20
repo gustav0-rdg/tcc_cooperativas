@@ -1,44 +1,9 @@
 import { vendaAtual } from "../registrar_venda.js";
-
+import { getFeedbacks } from "../../api/getFeedbacks.js";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
-const comentarios = [
-    // Bom
-    { comentario: "Tudo certo, cliente pagou na hora e retirou rápido.", tipo: "Bom" },
-    { comentario: "Venda rápida, pagamento via Pix e entrega tranquila.", tipo: "Bom" },
-    { comentario: "Cliente de confiança, tudo conforme combinado.", tipo: "Bom" },
-    { comentario: "Pagou adiantado e buscou no mesmo dia.", tipo: "Bom" },
-    { comentario: "Negociação fácil, entrega no prazo e sem complicações.", tipo: "Bom" },
-    { comentario: "Transação limpa, sem atrasos nem dúvidas.", tipo: "Bom" },
-    { comentario: "Cliente eficiente, tudo ocorreu bem.", tipo: "Bom" },
-    { comentario: "Ótima experiência, logística e pagamento em dia.", tipo: "Bom" },
-    { comentario: "Retirada feita pontualmente, pagamento certinho.", tipo: "Bom" },
-    { comentario: "Cliente educado e objetivo, ótimo negócio.", tipo: "Bom" },
 
-    // Neutro
-    { comentario: "Entrega saiu com atraso leve, mas sem grandes problemas.", tipo: "Neutro" },
-    { comentario: "Cliente demorou para responder, mas finalizou a compra.", tipo: "Neutro" },
-    { comentario: "Alguns ajustes durante a venda, mas tudo certo no final.", tipo: "Neutro" },
-    { comentario: "Pagamento feito no último dia, dentro do prazo.", tipo: "Neutro" },
-    { comentario: "Venda foi ok, sem destaques positivos ou negativos.", tipo: "Neutro" },
-    { comentario: "Cliente novo, ainda conhecendo o processo.", tipo: "Neutro" },
-    { comentario: "Logística um pouco confusa, mas resolvida.", tipo: "Neutro" },
-    { comentario: "Faltou um pouco de comunicação, mas foi concluído.", tipo: "Neutro" },
-    { comentario: "Tudo certo, mas houve dúvidas no início.", tipo: "Neutro" },
-    { comentario: "Negociação comum, sem intercorrências.", tipo: "Neutro" },
-
-    // Ruim
-    { comentario: "Cliente atrasou o pagamento por vários dias.", tipo: "Ruim" },
-    { comentario: "Entrega teve que ser refeita por erro do cliente.", tipo: "Ruim" },
-    { comentario: "Muita demora na negociação e respostas vagas.", tipo: "Ruim" },
-    { comentario: "Pagou só depois de muita insistência.", tipo: "Ruim" },
-    { comentario: "Combina uma coisa, depois muda tudo.", tipo: "Ruim" },
-    { comentario: "Cliente difícil de lidar, gerou retrabalho.", tipo: "Ruim" },
-    { comentario: "Não cumpriu prazo e não avisou.", tipo: "Ruim" },
-    { comentario: "Venda estressante e mal resolvida.", tipo: "Ruim" },
-    { comentario: "Sumiu após entrega, demorou a pagar.", tipo: "Ruim" },
-    { comentario: "Nunca mais vendo para esse cliente.", tipo: "Ruim" }
-];
+const comentarios = await getFeedbacks();
 
 export function exibirAvaliacao() {
     etapaSection.innerHTML = '';
@@ -59,7 +24,7 @@ export function exibirAvaliacao() {
         <h1>Resumo da venda</h1>
         <div class="resumo__venda">
             <div>
-                <p>${vendaAtual.material.nome_comum}</p>
+                <p>${vendaAtual.material}</p>
                 <small>${vendaAtual.quantidade} Kg</small>
             </div>
             <div>
@@ -157,7 +122,7 @@ export function exibirAvaliacao() {
             html: `
             <div class="relatorio_de_venda">
                 <h3> R$${vendaAtual.total}</h3>
-                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.nome_comum} para ${vendaAtual.vendedor.nome_fantasia}</p>
+                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material} para ${vendaAtual.vendedor.razao_social}</p>
             </div>
             <div class="finalizacao_sw">
                 <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
@@ -193,15 +158,12 @@ function mudarTipo(nota){
 
     switch (true){
         case nota <= 2:
-           tipo = "Ruim" 
+           tipo = "negativo" 
             break
-        case nota == 3:
-            tipo = "Neutro"
+        case nota >= 3:
+            tipo = "positivo"
             break
-        case nota > 3:
-            tipo = "Bom"
-            break
-        };
+        }
     renderizarComentarios(tipo);
 }
 
@@ -209,7 +171,7 @@ function renderizarComentarios(tipo){
     const comentariosHtml = opcoesSection.querySelector('.comentario');
     comentariosHtml.innerHTML = '';
     comentariosHtml.innerHTML = comentarios.filter(c => c.tipo === tipo).map
-    (c => `<button class="comentario__btn" data-value="${c.comentario}">${c.comentario}</button>
+    (c => `<button class="comentario__btn" data-value="${c.texto}">${c.texto}</button>
             `).join('');
 
     const comentariosRapido = opcoesSection.querySelector('.comentario');
@@ -231,9 +193,7 @@ function renderizarComentarios(tipo){
             } else {
                 // Se não existe, adiciona
                 vendaAtual.avaliacao.comentarios_rapidos.push(valorComentario);
-            }       
-            console.log(vendaAtual.avaliacao.comentarios_rapidos);
-            
+            }                   
             // Aqui você pode salvar o comentário no objeto da venda, por exemplo:
         });
     })

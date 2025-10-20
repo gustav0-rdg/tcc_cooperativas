@@ -1,24 +1,47 @@
+body {
+    background-color: var(--verde-principal) !important;
+}
+
 .card{
     max-width: 360px !important;
-    background-color: var(--verde-principal) !important;
+    background-color: var(--verde-claro-medio) !important;
     color: var(--verde-escuro-secundario) !important;
 }
 
 .card h1{
     font-weight: 700;
+    color: var(--verde-escuro);
+}
+
+#form label{
+    color: var(--verde-escuro-medio);
+    font-weight: 600;
 }
 
 #form input:focus{
-    outline: 2px var(--verde-escuro-principal) !important;
+    outline: 2px var(--verde-escuro-medio) !important;
 }
 
 #form button{
-    background-color: var(--verde-escuro-principal) !important;
+    background-color: var(--verde-escuro-medio) !important;
     border: 0;
     text-transform: uppercase;
     font-weight: 700;
+    font-size: 20px;
+}
+
+#form p{
+    color: var(--verde-escuro);
 }
 
 #form a{
-    color: var(--verde-medio-secundario) !important;
+    color: var(--verde-escuro-medio) !important;
+    margin-bottom: 10px;
+}
+
+@media (min-width: 768px) {
+    .card{
+        width: 100% !important;
+        height: 40% !important;
+    }
 }

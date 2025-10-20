@@ -10,6 +10,7 @@ class Compradores:
         try:
             validar_cnpj = CNPJ.validar(cnpj)
             data = CNPJ.consultar(cnpj)
+            print(data)
             cnpj = data.get('taxId')
             razao_social = data.get('company', {}).get('name')
 
@@ -24,15 +25,16 @@ class Compradores:
             cidade = endereco_info.get('city')
             estado = endereco_info.get('state')
 
-            # Para telefone e email, pegamos o primeiro item da lista (se existir)
-            telefone_info = data.get('phones', [{}])[0]
-            telefone = f"({telefone_info.get('area')}) {telefone_info.get('number')}" if telefone_info else None
+            phones_list = data.get('phones', [])
+            # Verifica se existe um número de telefone no JSON
+            telefone_info = phones_list[0] if phones_list else {}
+            telefone = f"({telefone_info.get('area')}) {telefone_info.get('number')}" if telefone_info.get('area') else None
 
-            email_info = data.get('emails', [{}])[0]
+            emails_list = data.get('emails', [])
+            # Verifica se existe um email
+            email_info = emails_list[0] if emails_list else {}
             email = email_info.get('address') if email_info else None
-
-            print(cnpj, razao_social, endereco, cidade, estado, telefone, email)
-            
+                        
             cursor.execute("""
                     INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
             """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
@@ -40,7 +42,6 @@ class Compradores:
 
         except Exception as e:
             print(e)
-
         finally:
             conn.close()
 
@@ -54,9 +55,9 @@ class Compradores:
         """, ())
             dados = cursor.fetchall()
 
-            return dados or []
+            return dados
         except Exception as e:
-            print(e)
+            return []
         finally: 
             conn.close()
 
