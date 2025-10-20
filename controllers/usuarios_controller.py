@@ -2,6 +2,7 @@ from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 from controllers.tokens_controller import Tokens
 import hashlib
+from datetime import datetime, timedelta
 
 class Usuarios:
 
@@ -60,7 +61,10 @@ class Usuarios:
                 return Tokens(self.connection_db).create(
 
                     data_user['id_usuario'],
-                    'sessao'
+                    'sessao',
+
+                    # Data de expiração em 30 dias
+                    datetime.now() + timedelta(days=30)
 
                 )
 
