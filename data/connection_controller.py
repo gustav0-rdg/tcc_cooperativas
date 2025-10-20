@@ -31,7 +31,7 @@ info_conexoes = {
 
 class Connection:
 
-    connection_db:MySQLConnection=None,
+    connection_db:MySQLConnection = None
 
     def __init__ (self, tipo_conexao:str):
 
