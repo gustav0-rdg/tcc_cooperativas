@@ -41,3 +41,7 @@ def pagina_informacoes():
 @pages.route("/editar-informacoes")
 def pagina_editar_informacoes():
     return render_template("editar-informacoes.html")
+
+@pages.route("/recuperar-senha")
+def pagina_recuperar_senha():
+    return render_template("recuperar-senha.html")
