@@ -9,28 +9,12 @@ class Cooperativa:
 
     def __init__(self, connection_db:MySQLConnection, cursor:MySQLCursor):
         
-        # Desse modo, podemos otimizar recursos pois
-        # diferentes controladores podem compartilhar
-        # a mesma conexão com o banco de dados, não criando
-        # individualmente para cada função
+        if not Connection.validar(connection_db, cursor):
 
-        if connection_db == None and cursor == None:
-
-            self.connection_db = Connection.create()
-            self.cursor = self.connection_db.cursor(dictionary=True)
-
-        else:
-
-            if not isinstance(cursor, MySQLCursor):
-
-                raise TypeError ('Cooperativa - "cursor" deve ser do tipo MySQLCursor')
+            raise ValueError (f'Erro - Cooperativa: Valores inválidos para os parâmetros "connection_db" e "cursor": {connection_db} e {cursor}')
         
-            if not isinstance(connection_db, MySQLConnection):
-
-                raise TypeError ('Cooperativa - "database" deve ser do tipo MySQLConnection')
-
-            self.connection_db = connection_db
-            self.cursor = cursor
+        self.connection_db = connection_db
+        self.cursor = cursor
 
     def autenticar (self, email:str, senha:str) -> bool:
 
