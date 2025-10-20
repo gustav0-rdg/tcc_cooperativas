@@ -130,7 +130,7 @@ export function exibirAvaliacao() {
                 <a href="/pagina-inicial">Voltar ao ínicio</a>
             </div>
                 `,
-            color: "var(--verde-escuro-principal)",
+            color: "var(--verde-escuro)",
             background: "var(--branco)",
             showConfirmButton: false,
             showCancelButton: false,
