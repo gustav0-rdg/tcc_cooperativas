@@ -1,6 +1,7 @@
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
+from datetime import datetime
 
 class Tokens:
 
@@ -17,7 +18,8 @@ class Tokens:
         self,
 
         id_usuario:int,
-        tipo:str
+        tipo:str,
+        data_expiracao:datetime
 
     ) -> bool:
         
@@ -25,7 +27,7 @@ class Tokens:
 
             raise TypeError ('Tokens Controller - "id_usuario" deve ser do tipo Int e "tipo" deve ser do tipo String')
 
-        tipos_validos = ['']
+        tipos_validos = ['cadastro', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
 
@@ -38,11 +40,11 @@ class Tokens:
             cursor.execute (
 
                 """
-                INSERT INTO tokens_validacao (id_usuario, tipo)
-                VALUES (%s, %s);
-                """
+                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao)
+                VALUES (%s, %s, %s);
+                """,
 
-                (id_usuario, tipo)
+                (id_usuario, tipo, data_expiracao)
 
             )
 
@@ -82,7 +84,7 @@ class Tokens:
                 INNER JOIN usuarios 
                     ON tokens_validacao.id_usuario = usuarios.id_usuario
                 WHERE BYTE tokens_validacao.token = %s;
-                """
+                """,
 
                 (token, )
 
@@ -116,7 +118,7 @@ class Tokens:
                 UPDATE tokens_validacao
                 SET tokens_validacao.usado = TRUE
                 WHERE tokens_validacao.id_token = %s;
-                """
+                """,
 
                 (id_token, )
 
