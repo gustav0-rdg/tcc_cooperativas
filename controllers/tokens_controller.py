@@ -1,20 +1,16 @@
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
+from data.connection_controller import Connection
 
 class Tokens:
 
-    def __init__(self, database:MySQLConnection, cursor:MySQLCursor):
+    def __init__(self, connection_db:MySQLConnection):
         
-        if not isinstance(cursor, MySQLCursor):
+        if not Connection.validar(connection_db):
 
-            raise TypeError ('Tokens Controller - "cursor" deve ser do tipo MySQLCursor')
-        
-        if not isinstance(database, MySQLConnection):
+            raise ValueError (f'Erro - Tokens: Valores inválidos para os parâmetros "connection_db": {connection_db}')
 
-            raise TypeError ('Tokens Controller - "database" deve ser do tipo MySQLConnection')
-
-        self.database = database
-        self.cursor = cursor
+        self.connection_db = connection_db
 
     def create (
             
@@ -35,20 +31,31 @@ class Tokens:
 
             raise ValueError (f'Tokens Controller - "tipo" deve ser um desses valores: {tipos_validos}')
         
-        self.cursor.execute (
+        cursor = self.connection_db.cursor()
 
-            """
-            INSERT INTO tokens_validacao (id_token, tipo)
-            VALUES (%s, %s);
-            """
+        try:
 
-            (id_usuario, tipo)
+            cursor.execute (
 
-        )
+                """
+                INSERT INTO tokens_validacao (id_token, tipo)
+                VALUES (%s, %s);
+                """
 
-        self.database.commit()
+                (id_usuario, tipo)
 
-        return self.cursor.rowcount > 0       
+            )
+
+            self.database.commit()
+            return cursor.rowcount > 0
+
+        except:
+
+            return False
+
+        finally:
+
+            cursor.close() 
 
     def validar (self, token:str) -> bool:
 
@@ -56,24 +63,36 @@ class Tokens:
 
             raise ValueError ('Tokens Controller - "token" deve ser do tipo String com 36 caractéres')
 
-        self.cursor.execute (
+        cursor = self.connection_db.cursor()
 
-            """
-            SELECT
-                id_token,
-                token,
-                tipo,
-                usado
-            FROM tokens_validacao
-            INNER JOIN usuarios ON tokens_validacao.id_usuario = usuarios.id_usuario
-            WHERE BYTE tokens_validacao.token = %s;
-            """
+        try:
 
-            (token, )
+            cursor.execute (
 
-        )
+                """
+                SELECT
+                    id_token,
+                    token,
+                    tipo,
+                    usado
+                FROM tokens_validacao
+                INNER JOIN usuarios ON tokens_validacao.id_usuario = usuarios.id_usuario
+                WHERE BYTE tokens_validacao.token = %s;
+                """
 
-        return self.cursor.fetchone()
+                (token, )
+
+            )
+
+            return cursor.fetchone()
+        
+        except:
+
+            return False
+        
+        finally:
+
+            cursor.close()
     
     def set_state (self, id_token:int) -> bool:
 
@@ -81,18 +100,29 @@ class Tokens:
 
             raise TypeError ('Tokens Controller - "id_token" deve ser do tipo Int')
 
-        self.cursor.execute (
+        cursor = self.connection_db.cursor()
 
-            """
-            UPDATE tokens_validacao
-            SET tokens_validacao.usado = TRUE
-            WHERE tokens_validacao.id_token = %s;
-            """
+        try:
 
-            (id_token, )
+            cursor.execute (
 
-        )
+                """
+                UPDATE tokens_validacao
+                SET tokens_validacao.usado = TRUE
+                WHERE tokens_validacao.id_token = %s;
+                """
 
-        self.database.commit()
+                (id_token, )
 
-        return self.cursor.rowcount > 0
+            )
+
+            self.database.commit()
+            return cursor.rowcount > 0
+    
+        except:
+
+            return False
+        
+        finally:
+
+            cursor.close()
