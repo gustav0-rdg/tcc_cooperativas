@@ -24,17 +24,22 @@ def login ():
 
         return jsonify({ 'texto': '"email" e "senha" são parâmetros obrigatórios' }), 400
 
-    conn = Connection('local')
-    token_sessao = Usuarios(conn.connection_db).autenticar(email, senha)
-    conn.close()
-    
-    if token_sessao:
+    try:
 
-        return jsonify({ 'token': token_sessao }), 200
-    
-    else:
+        conn = Connection('local')
+        token_sessao = Usuarios(conn.connection_db).autenticar(email, senha)
+        
+        if token_sessao:
 
-        return jsonify({ 'texto': 'Email ou Senha inválidos' }), 401
+            return jsonify({ 'token': token_sessao }), 200
+        
+        else:
+
+            return jsonify({ 'texto': 'Email ou Senha inválidos' }), 401
+        
+    finally:
+
+        conn.close()
     
 @api_usuarios.route('/alterar-senha', methods=['POST'])
 def alterar_senha ():
@@ -49,21 +54,26 @@ def alterar_senha ():
         return jsonify({ 'texto': '"token" e "nova-senha" são parâmetros obrigatórios' }), 400
     
     conn = Connection('local')
-    token_controller = Tokens(conn.connection_db)
 
-    data_token = token_controller.validar(token)
+    try:
 
-    print(data_token)
+        token_controller = Tokens(conn.connection_db)
+        data_token = token_controller.validar(token)
 
-    if data_token and data_token['tipo'] == 'recuperacao_senha':
+        if data_token and data_token['tipo'] == 'recuperacao_senha':
 
-        Usuarios(conn.connection_db).trocar_senha(data_token['id_usuario'], nova_senha)
-        token_controller.set_state(data_token['id_token'])
+            if Usuarios(conn.connection_db).trocar_senha(data_token['id_usuario'], nova_senha) and token_controller.set_state(data_token['id_token']):
+
+                return jsonify({ 'texto': 'Senha alterada com sucesso' }), 200
+            
+            else:
+
+                return jsonify({ 'texto': 'Algo deu errado, tente novamente' }), 500
+
+        else:
+
+            return jsonify({ 'texto': 'Token inválido' }), 401
+
+    finally:
 
         conn.close()
-        return jsonify({ 'texto': 'Senha alterada com sucesso' }), 200
-
-    else:
-
-        conn.close()
-        return jsonify({ 'texto': 'Token inválido' }), 401
