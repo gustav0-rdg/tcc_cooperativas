@@ -30,11 +30,3 @@ def menu_principal():
 @pages.route("/buscar-comprador", methods=['GET'])
 def pagina_buscar_comprador():
     return render_template("buscar-comprador.html")
-
-@pages.route("/registrar-venda", methods=["GET"])
-def registrar_venda():
-    return render_template("registrar_venda.html")
-
-@pages.route("/pagina-informacoes", methods=["GET"])
-def pagina_informacoes():
-    return render_template("pagina_informacoes.html")
