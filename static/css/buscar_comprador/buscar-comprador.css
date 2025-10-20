@@ -13,7 +13,7 @@ body {
     flex-direction: column;
     align-items: center;
 
-    background-color: var(--verde-claro-principal);
+    background-color: var(--verde-claro-medio);
 
     overflow-x: hidden;
 }
@@ -121,47 +121,245 @@ body {
 }
 
 .buscar-compradores__ver-mais{
-    background-color: var(--verde-escuro-principal);
+    background-color: var(--verde-escuro-medio);
     color: var(--branco);
 }
 
 .buscar-compradores__ver-mais:hover{
-    background-color: var(--verde-claro-principal);
+    background-color: var(--verde-principal);
     color: var(--preto);
 }
 
 /* imagens dos cards */
 
 .cartao-material--plastico {
-    background-image: url(https://eplast.com.br/wp-content/uploads/2024/02/plastico_pet-1.jpg.webp);
+    background-image: url(../../imgs/material-tipos/plastico.jpg);
 }
 
 .cartao-material--papel {
-    background-image: url(https://blog.contabilista.com.br/uploads/1534186392.png);
+    background-image: url(../../imgs/material-tipos/papel.jpg);
 }
 
 .cartao-material--metal {
-    background-image: url(https://sircat.com/wp-content/uploads/2024/07/Todo-lo-que-debes-saber-sobre-la-recuperacion-de-metales.jpg);
+    background-image: url(../../imgs/material-tipos/metal.jpg);
 }
 
 .cartao-material--madeira {
-    background-image: url(https://construindocasas.com.br/wp-content/uploads/2021/04/Madeira-min-1024x576.jpg);
+    background-image: url(../../imgs/material-tipos/madeira.jpg);
 }
 
 .cartao-material--pilha {
-    background-image: url(https://static.manualdaquimica.com/conteudo/images/as-pilhas-sao-dispositivos-muito-utilizados-no-dia-dia-58ada547e2409.jpg);
+    background-image: url(../../imgs/material-tipos/pilha.jpg);
 }
 
 .cartao-material--borracha {
-    background-image: url(https://meiosustentavel.com.br/wp-content/uploads/2020/06/reciclagem-de-borracha1.png);
+    background-image: url(../../imgs/material-tipos/borracha.jpg);
 }
 
 .cartao-material--papelao {
-    background-image: url(https://www.cbsaparasdepapel.com.br/imagens/informacoes/reciclagem-papel-sp-01.jpg);
+    background-image: url(../../imgs/material-tipos/papelao.jpg);
 }
 
 .cartao-material--vidro {
-    background-image: url(https://ciclovivo.com.br/wp-content/uploads/2021/04/vidro-reciclagem-pixabay.jpg);
+    background-image: url(../../imgs/material-tipos/vidro.jpg);
+}
+
+.hidden {
+    display: none !important;
+}
+
+#detalhe-material {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--preto);
+    background: var(--branco);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+#detalhe-material h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.subtipos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.subtipo-card {
+    flex: 1 1 30%;
+    background-color: var(--verde-claro-medio);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.subtipo-card:hover {
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+}
+
+.comentarios {
+    margin-top: 2rem;
+}
+.comentario {
+    background: var(--verde-secundario);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+    
+.btn-voltar {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--preto);
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+.subtipos-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.subtipo-card {
+    display: flex;
+    align-items: center;
+    background-color: var(--branco);
+    border: 1px solid var(--verde-claro-medio); 
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    gap: 1rem;
+    flex: 1 1 100%;
+    text-align: left;
+    font-weight: 700;
+}
+
+.subtipo-card:hover {
+    background-color: var(--verde-claro); 
+    transform: scale(1.01);
+    color: var(--preto);
+}
+
+.subtipo-card img {
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+}
+
+.subtipo-card__simbolo {
+    margin-left: auto;
+    height: 40px;
+    width: 40px;
+    object-fit: contain;
+}
+
+
+#detalhe-comprador {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--preto);
+}
+
+.comprador-card, .historico-card {
+    background-color: var(--verde-claro); 
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.comprador-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.comprador-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--branco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #AAA; 
+}
+
+.comprador-info h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--preto);
+}
+.comprador-info span {
+    font-size: 0.9rem;
+    color: var(--preto); 
+}
+
+.comprador-preco {
+    margin-left: auto;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.comprador-card p {
+    font-size: 0.9rem;
+    color: var(--preto);
+    line-height: 1.4;
+}
+
+.historico-card h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.btn-comentarios {
+    font-weight: 700;
+    color: var(--verde-escuro-medio);
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-comentarios:hover {
+    text-decoration: underline;
+}
+
+
+#detalhe-comentarios {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--preto);
+}
+
+#detalhe-comentarios h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.comentario-card {
+    background-color: var(--verde-claro);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+.comentario-card p {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: var(--preto);
 }
 
 /* Responsividade */
