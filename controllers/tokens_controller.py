@@ -33,7 +33,7 @@ class Tokens:
 
             raise ValueError (f'Tokens Controller - "tipo" deve ser um desses valores: {tipos_validos}')
         
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -48,8 +48,29 @@ class Tokens:
 
             )
 
+            cursor.execute (
+
+                """
+                SELECT
+                    tokens_validacao.token
+                FROM tokens_validacao
+                WHERE tokens_validacao.id_token = %s;
+                """,
+
+                (cursor.lastrowid, )
+
+            )
+
+            token = cursor.fetchone()['token']
+
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            if cursor.rowcount > 0 and token:
+
+                return token
+
+            else:
+
+                return False
 
         except Exception as e:
 
