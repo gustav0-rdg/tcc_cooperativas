@@ -15,22 +15,42 @@ api_usuarios = Blueprint(
 @api_usuarios.route('/cadastrar', methods=['POST'])
 def cadastrar ():
 
-    data = request.get_json()
+    token = request.headers.get('Authorization')
+    data_cadastro = request.get_json()
 
-    if not data or not all(key in data for key in ['nome', 'email', 'senha', 'tipo']):
+    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha', 'tipo']):
 
-        return jsonify({ "error": "Dados inválidos, todos os campos são obrigatórios" }), 400
+        return jsonify({ 'error': 'Dados inválidos, todos os campos são obrigatórios' }), 400
 
     conn = Connection('local')
 
     try:
 
-        id_usuario = Usuarios(conn.connection_db).create(
+        usuarios_controller = Usuarios(conn.connection_db)
 
-            data['nome'],
-            data['email'],
-            data['senha'],
-            data['tipo']
+        #region Cadastro de pessoas com permissões especiais
+
+        if data_cadastro['tipo'] != 'cooperativa':
+
+            if not token:
+
+                return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
+            
+            data_token = Tokens(conn.connection_db).validar(token)
+            usuario = usuarios_controller.get_by_id(data_token['id_usuario'])
+
+            if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
+
+                return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+            
+        #endregion
+
+        id_usuario = usuarios_controller.create(
+
+            data_cadastro['nome'],
+            data_cadastro['email'],
+            data_cadastro['senha'],
+            data_cadastro['tipo']
 
         )
         
@@ -38,18 +58,18 @@ def cadastrar ():
 
             return jsonify({ 
 
-                "message": "Usuário cadastrado com sucesso!",
-                "id_usuario": id_usuario
+                'texto': 'Usuário cadastrado com sucesso!',
+                'id_usuario': id_usuario
 
             }), 201
     
         else:
 
-            return jsonify({"error": "Erro ao cadastrar usuário"}), 500
+            return jsonify({ 'error': 'Erro ao cadastrar usuário'}), 500
 
     except Exception as e:
 
-        return jsonify({ "error": f"Erro no servidor: {e}" }), 500
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
 
     finally:
 
