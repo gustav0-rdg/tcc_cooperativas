@@ -38,7 +38,7 @@ class Tokens:
             cursor.execute (
 
                 """
-                INSERT INTO tokens_validacao (id_token, tipo)
+                INSERT INTO tokens_validacao (id_usuario, tipo)
                 VALUES (%s, %s);
                 """
 
@@ -46,10 +46,12 @@ class Tokens:
 
             )
 
-            self.database.commit()
+            self.connection_db.commit()
             return cursor.rowcount > 0
 
-        except:
+        except Exception as e:
+
+            print(f'Erro - Tokens "create": {e}')
 
             return False
 
@@ -63,7 +65,7 @@ class Tokens:
 
             raise ValueError ('Tokens Controller - "token" deve ser do tipo String com 36 caractéres')
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -72,11 +74,13 @@ class Tokens:
                 """
                 SELECT
                     id_token,
+                    id_usuario,
                     token,
                     tipo,
                     usado
                 FROM tokens_validacao
-                INNER JOIN usuarios ON tokens_validacao.id_usuario = usuarios.id_usuario
+                INNER JOIN usuarios 
+                    ON tokens_validacao.id_usuario = usuarios.id_usuario
                 WHERE BYTE tokens_validacao.token = %s;
                 """
 
@@ -86,7 +90,9 @@ class Tokens:
 
             return cursor.fetchone()
         
-        except:
+        except Exception as e:
+
+            print(f'Erro - Tokens "validar": {e}')
 
             return False
         
@@ -116,10 +122,12 @@ class Tokens:
 
             )
 
-            self.database.commit()
+            self.connection_db.commit()
             return cursor.rowcount > 0
     
-        except:
+        except Exception as e:
+
+            print(f'Erro - Tokens "set_state": {e}')
 
             return False
         
