@@ -1,18 +1,23 @@
 import mysql.connector
+from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
 
 class Feedbacks:
-    @staticmethod
-    def get_all():
+    def __init__(self, connection_db:MySQLConnection):
+        if not Connection.validar(connection_db):
+            raise ValueError(f'Erro - Tokens: valores inválidos para os parametros "connection_db"')
+        self.connection_db = connection_db
+
+    def get_all(self):
         """
         Busca todas as tags de feedback do banco de dados.
         É um método estático porque não depende de uma instância da classe.
         """
         conn = None
         cursor = None
+        cursor = self.connection_db.cursor(dictionary=True)
+
         try:
-            conn = Connection.create('local')
-            cursor = conn.cursor(dictionary=True)
             
             query = "SELECT id_feedback_tag, texto, tipo FROM feedback_tags"
             cursor.execute(query)

@@ -1,12 +1,17 @@
 import mysql.connector
 from data.connection_controller import Connection
+from mysql.connector.connection import MySQLConnection
 from controllers.cnpj_controller import CNPJ
 
 class Compradores:
-    
-    def create(cnpj):
-        conn = Connection.create('local')
-        cursor = conn.cursor()
+    def __init__(self, connection_db:MySQLConnection):
+        if not Connection.validar(connection_db):
+            raise ValueError(f'Erro - Tokens: valores inválidos para os parametros "connection_db"')
+        self.connection_db = connection_db
+
+    def create(self, cnpj):
+        cursor = self.connection_db.cursor(dictionary=True)
+
         try:
             validar_cnpj = CNPJ.validar(cnpj)
             data = CNPJ.consultar(cnpj)
@@ -38,16 +43,15 @@ class Compradores:
             cursor.execute("""
                     INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
             """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
-            conn.commit()
+            self.connection_db.commit()
 
         except Exception as e:
             print(e)
         finally:
-            conn.close()
+            cursor.close()
 
-    def get_all():
-        conn = Connection.create('local')
-        cursor = conn.cursor(dictionary=True)
+    def get_all(self):
+        cursor = self.connection_db.cursor(dictionary=True)
         try:
             cursor.execute("""
             SELECT razao_social, cnpj, email, telefone, endereco, cidade, estado, score_confianca
@@ -59,6 +63,6 @@ class Compradores:
         except Exception as e:
             return []
         finally: 
-            conn.close()
+            cursor.close()
 
     
