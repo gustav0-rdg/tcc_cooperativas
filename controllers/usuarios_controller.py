@@ -98,7 +98,7 @@ class Usuarios:
                 WHERE usuarios.id_usuario = %s;
                 """,
 
-                (id_usuario, nova_senha)
+                (nova_senha, id_usuario)
 
             )
 
