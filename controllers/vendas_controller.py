@@ -26,7 +26,7 @@ class Vendas:
         cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
         
         # O uso de 'with' garante que o cursor será fechado automaticamente
-        with self.db_connection.cursor() as cursor:
+        with self.connection_db.cursor() as cursor:
             # Query SQL para buscar o ID.
             query = "SELECT id_comprador FROM compradores WHERE cnpj = %s AND deletado_em IS NULL"
             cursor.execute(query, (cnpj_limpo,))
@@ -52,15 +52,15 @@ class Vendas:
         Raises:
             MaterialNaoEncontradoError: Se nenhum material ativo for encontrado com o nome fornecido.
         """
-        with self.db_connection.cursor() as cursor:
+        with self.connection_db.cursor() as cursor:
             # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
-            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_material = %s AND ativo = TRUE"
+            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_padrao = %s"
             cursor.execute(query, (nome_material,))
             result = cursor.fetchone()
 
         if result:
             id_material = result[0]
-            print(f"✅ Material encontrado: '{nome_material}' corresponde ao ID {id_material}.")
+            print(f"Material encontrado: '{nome_material}' corresponde ao ID {id_material}.")
             return id_material
         else:
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
@@ -80,9 +80,9 @@ class Vendas:
             print("ℹ️ Nenhuma tag de feedback rápido fornecida.")
             return []
 
-        with self.db_connection.cursor() as cursor:
+        with self.connection_db.cursor() as cursor:
             placeholders = ', '.join(['%s'] * len(lista_tags))
-            query = f"SELECT id_feedback_tag, texto_tag FROM feedback_tags WHERE texto_tag IN ({placeholders}) AND ativo = TRUE"
+            query = f"SELECT id_feedback_tag, texto FROM feedback_tags WHERE texto IN ({placeholders})"
             
             cursor.execute(query, tuple(lista_tags))
             results = cursor.fetchall() 
@@ -98,7 +98,7 @@ class Vendas:
         print(f"Tags de Feedback encontradas: {lista_tags} correspondem aos IDs {ids_encontrados}.")
         return ids_encontrados
     
-    def buscar_ids(self, dados_frontend: dict):
+    def _buscar_ids(self, dados_frontend: dict):
         """
         Método principal que orquestra o processamento dos dados da venda.
         Por enquanto, ele apenas executa o passo 1.
@@ -128,10 +128,10 @@ class Vendas:
             dados_frontend (dict): O dicionário de dados vindo do front-end.
         """
         # Buscar e validar todos os IDs antes de iniciar a transação.
-        ids = self._buscar_todos_ids(dados_frontend)
+        ids = self._buscar_ids(dados_frontend)
 
         # Inicia o cursor que será usado em toda a transação.
-        cursor = self.db_connection.cursor()
+        cursor = self.connection_db.cursor()
 
         try:          
             # INSERIR NA TABELA `vendas`
@@ -142,7 +142,7 @@ class Vendas:
             venda_data = (
                 id_cooperativa,
                 ids['id_comprador'],
-                datetime.now(), # Ou a data vinda do front-end
+                datetime.datetime.now(), # Ou a data vinda do front-end
                 dados_frontend['total']
             )
             cursor.execute(query_venda, venda_data)
@@ -192,16 +192,15 @@ class Vendas:
                 print("Tags de feedback selecionadas inseridas com sucesso.")
 
             # Se todas as operações foram bem-sucedidas, confirma a transação.
-            self.db_connection.commit()
+            self.connection_db.commit()
             print("\n SUCESSO! Transação concluída e dados salvos no banco.")
             return True
 
         except Exception as err:
             # Se qualquer erro ocorrer, desfaz todas as operações.
             print(f"\n ERRO DE BANCO DE DADOS! A transação será revertida. Erro: {err}")
-            self.db_connection.rollback()
+            self.connection_db.rollback()
             return False
         finally:
             # Garante que o cursor seja fechado, independentemente de sucesso ou falha.
             cursor.close()
-            print("--- Fim da transação ---")
