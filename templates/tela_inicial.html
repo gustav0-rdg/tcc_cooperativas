@@ -10,33 +10,29 @@
     <link rel="stylesheet" href="/static/css/root-de-cores.css">
 </head>
 <body>
+    {% include 'includes/header.html' %}
+    <div class="corpo">
+        <main class="acoes">
+            <h1>Bem-vindo!</h1>
+            <p>Como podemos te ajudar?</p>
+            <section class="acoes__cooperativa">
+                
+                <button class="acoes__cooperativa-btn">
+                    <a href="/buscar-comprador">buscar-comprador</a>
+                 </button>
+                <!-- Botão que leva a  tela de cooperativa  -->
+                 <button class="acoes__cooperativa-btn">
+                     <a href="/tela-cooperativa">tela-cooperativa</a>
+                 </button>
+                  <!-- Botão que leva a pagina registrar venda  -->
+                 <button class="acoes__cooperativa-btn">
+                     <a href="/registrar-venda">registrar-venda</a>
+                 </button>
 
-    {% include 'includes/header.html' %} 
-    <main class="acoes">
-        <h1>Bem-vindo!</h1>
-        <p>Como podemos te ajudar?</p>
-        <section class="acoes__cooperativa">
-            <!-- Botão que leva a pagina procurar compradores  -->
-            <button class="acoes__cooperativa-btn">
-               <a href="/buscar-comprador">buscar-comprador</a>
-            </button>
-           <!-- Botão que leva a  tela de cooperativa  -->
-            <button class="acoes__cooperativa-btn">
-                <a href="/tela-cooperativa">tela-cooperativa</a>
-            </button>
-             <!-- Botão que leva a pagina registrar venda  -->
-            <button class="acoes__cooperativa-btn">
-                <a href="/registrar-venda">registrar-venda</a>
-            </button>
-             
-        </section>
-        <!-- Seção que mostra Comprador com mais  destaque  -->
-        <section class="acoes__compradores">
-            <h2>Compradores destaque</h2>
-        </section>
-    </main>
-    {% include 'includes/footer.html' %} 
-      <!-- LINK das fontes  -->
-    <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous"></script>
+            </section>
+        </main>
+    </div> 
+    
+    {% include 'includes/footer.html' %}
 </body>
 </html>
