@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `nome` VARCHAR(200) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `senha_hash` VARCHAR(255) NOT NULL,
-  `tipo` ENUM('gestor', 'cooperativa') NOT NULL DEFAULT 'cooperativa', 
+  `tipo` ENUM('root','gestor', 'cooperativa') NOT NULL DEFAULT 'cooperativa', 
   `status` ENUM('ativo', 'inativo', 'bloqueado', 'pendente') NOT NULL DEFAULT 'pendente',
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE INDEX `uidx_email` (`email`)
