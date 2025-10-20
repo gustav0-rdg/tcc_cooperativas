@@ -33,7 +33,7 @@ def pagina_buscar_comprador():
 
 @pages.route("/registrar-venda")
 def pagina_registrar_venda():
-    return render_template("registrar_venda.html")
+    return render_template("registrar-venda.html")
 
 @pages.route("/pagina-informacoes")
 def pagina_informacoes():
