@@ -5,7 +5,7 @@ const cpfInput = document.getElementById('cpf');
 const nomeInput = document.getElementById('nome');
 const telefoneInput = document.getElementById('telefone');
 const dataNascimento = document.getElementById('data_nascimento');
-const form = document.querySelector('.formulario');
+const form = document.getElementById('form');
 
 
 // CPF

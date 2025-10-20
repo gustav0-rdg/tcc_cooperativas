@@ -1,4 +1,5 @@
 from flask import redirect, Blueprint, request, jsonify
+from controllers.comprador_controller import Compradores
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
@@ -19,5 +20,6 @@ def postar_dados_de_venda():
 @api_post.route("/dados-comprador", methods=["POST"])
 def postar_dados_comprador():
     dados_recebidos = request.get_json()
-    print(json.dumps(dados_recebidos, indent=4, ensure_ascii=False))
+    dados = json.loads(dados_recebidos)
+    Compradores.create(str(dados))
     return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})

@@ -9,19 +9,43 @@
     
     <link rel="stylesheet" href="../static/css/buscar_comprador/buscar-comprador.css"> 
     <link rel="stylesheet" href="../static/css/root-de-cores.css"> 
+    <!-- Importa o CSS do Bootstrap 5 (framework de layout e componentes prontos) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Importa o CSS personalizado da página -->
+    <link rel="stylesheet" href="../static/css/buscar_comprador/buscar-comprador.css">
+
+    <!-- Importa variáveis de cores globais -->
+    <link rel="stylesheet" href="../static/css/root-de-cores.css">
+
+
+    <!-- Importa os ícones da biblioteca Material Icons (Google) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Pré-conexões para otimizar o carregamento das fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Importa a fonte “Inter” usada no layout -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
     
     <script src="../static/js/buscarComprador.js" defer></script> 
+
+    <!-- Script do Bootstrap para ativar componentes interativos (como modal, dropdown etc.) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"
+        defer></script>
 </head>
 <body>
+    <!-- Inclui o cabeçalho do site através de um template (Jinja) -->
     {% include 'includes/header.html' %}
-    <section class="conteudo">
 
+    <!-- Seção principal do conteúdo -->
+    <section class="conteudo">
+        <!-- Área principal de busca de compradores -->
         <main class="buscar-compradores w-100">
             
             <div id="secao-principal">
@@ -89,6 +113,92 @@
                         </a>
                         <button class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center" data-material="vidro">Ver mais</button>
                     </div>
+
+            <h1 class="buscar-compradores__titulo">Buscar compradores</h1>
+
+            <p class="buscar-compradores__subtitulo text-muted">Procure por material ou digite o nome de um comprador
+            </p>
+            <!-- Barra de busca -->
+            <div class="buscar-compradores__barra-de-busca mb-4">
+                <input type="text" placeholder="Digite um comprador..."
+                    class="form-control buscar-compradores__entrada">
+                <span class="material-icons buscar-compradores__icone">search</span>
+            </div>
+
+            <!-- Barra de busca -->
+            <div class="row g-3 flex-column align-items-center w-100 buscar-compradores__cartoes">
+                <!-- Material Plastico  -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--plastico">
+                        <span class="cartao-material__rotulo">Plástico</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Papel  -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--papel">
+                        <span class="cartao-material__rotulo">Papel</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Metal  -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--metal">
+                        <spa n class="cartao-material__rotulo">Metal</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Madeira  -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--madeira">
+                        <span class="cartao-material__rotulo">Madeira</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Pilha  -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--pilha">
+                        <span class="cartao-material__rotulo">Pilha</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Borracha -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--borracha">
+                        <span class="cartao-material__rotulo">Borracha</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+                <!-- Material Papelão -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--papelao">
+                        <span class="cartao-material__rotulo">Papelão</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
+                </div>
+
+                <!-- Material Vidro -->
+                <div class="col-12 col-md-6 col-lg-4 w-100 d-flex buscar-comprador__conteiner flex-column">
+                    <a href="#" class="cartao-material cartao-material--vidro">
+                        <span class="cartao-material__rotulo">Vidro</span>
+                    </a>
+                    <button
+                        class="btn btn-lg buscar-compradores__ver-mais d-flex justify-content-center mt-2 rounded-5 w-70 align-self-center">Ver
+                        mais</button>
                 </div>
             </div> <section id="detalhe-material" class="hidden">
                 <button id="voltar-para-principal" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
@@ -110,7 +220,11 @@
                     </div>
             </section>
             
+
+            </div>
+
         </main>
     </section>
 </body>
+
 </html>

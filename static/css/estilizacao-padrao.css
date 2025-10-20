@@ -6,7 +6,7 @@
 
 
 body {
-    background-color: var(--verde-secundario);
+    background-color: var(--verde-principal);
     min-height: 100vh;
     height: auto;
     position: relative;
@@ -20,11 +20,11 @@ body::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('../imgs/img-fundo-cadastro.jpg');
+    background-image: url('../imgs/img-textura.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.2;
+    opacity: 0.1;
     z-index: -1;
 
 }

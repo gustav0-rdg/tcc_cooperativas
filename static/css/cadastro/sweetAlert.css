@@ -1,24 +1,24 @@
 /* Personalizando o botão de confirmação */
 .my-btn {
-    background-color: #4CAF50;
-    color: white;
+    background-color: var(--verde-principal);
+    color: var(--branco);
     border-radius: 50px;
     padding: 10px 20px;
 }
 
 .my-btn:hover {
-    background-color: #45a049;
+    background-color: var(--verde-principal);
 }
 
 /* Personalizando o botão de cancelar */
 .my-btn-cancel {
-    background-color: #f44336;
-    color: white;
+    background-color: var(--vermelho);
+    color: var(--branco);
     border-radius: 5px;
     padding: 10px 20px;
     border-radius: 50px;
 }
 
 .my-btn-cancel:hover {
-    background-color: #e53935;
+    background-color: var(--vermelho);
 }
