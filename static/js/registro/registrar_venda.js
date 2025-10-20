@@ -1,9 +1,7 @@
 import { exibirAvaliacao } from "./module/exibirAvaliacao.js";
 import { exibirVendedores } from "./module/exibirVendedores.js";
-const material = [
-    { nome_comum: 'Papel', valor: '0,60' },
-    { nome_comum: 'Metal', valor: '0,65' }
-];
+import { getMateriais } from "../api/getMateriais.js";
+const material = await getMateriais();
 
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
@@ -35,16 +33,16 @@ function exibirMateriais() {
     material.forEach(item => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
-        div.setAttribute('data-value', `${item.nome_comum}`);
+        div.setAttribute('data-value', `${item.nome_padrao}`);
         div.innerHTML = `
-            <h1>${item.nome_comum}</h1>
-            <small>R$${item.valor}/Kg</small>
+            <h1>${item.nome_padrao}</h1>
+            <small>${item.categoria}</small>
         `;
         opcoesSection.appendChild(div);
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material = item; // Atualiza o material no objeto vendaAtual
+            vendaAtual.material = item.nome_padrao; // Atualiza o material no objeto vendaAtual
             etapaAtual = "vendedores"; // Muda para a etapa de vendedores
             exibirVendedores(); // Exibe os vendedores
             console.log(vendaAtual); // Apenas para visualização
