@@ -42,3 +42,13 @@ def get_materiais():
         # Em caso de erro, loga no console e retorna um erro 500
         print(f"Erro ao buscar materiais: {e}")
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
+    
+@api_get.route("/comprador/<material>", methods=["GET"])
+def get_by_material(material):
+    try:
+        conn = Connection('local')
+        compradores = Compradores(conn.connection_db).get_by_materials(material)
+        return jsonify(compradores), 200
+    except Exception as e:
+        print(f"Erro ao buscar ompradores por material")
+        return jsonify({"erro":"Ocorreu um erro"}), 500
