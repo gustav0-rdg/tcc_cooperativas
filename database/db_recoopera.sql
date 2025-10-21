@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `recoopera`;
 CREATE DATABASE IF NOT EXISTS `recoopera`;
 
 USE `recoopera`;
@@ -8,7 +9,7 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
 -- ============================================================================
--- Tabelas responsáveis por gerenciar quem pode acessar o sistema.
+-- Tabelas de Autenticação e Usuários
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `usuarios` (
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `nome` VARCHAR(200) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `senha_hash` VARCHAR(255) NOT NULL,
-  `tipo` ENUM('root','gestor', 'cooperativa') NOT NULL DEFAULT 'cooperativa', 
+  `tipo` ENUM('root','gestor', 'cooperativa', 'catador') NOT NULL DEFAULT 'cooperativa',
   `status` ENUM('ativo', 'inativo', 'bloqueado', 'pendente') NOT NULL DEFAULT 'pendente',
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE INDEX `uidx_email` (`email`)
@@ -25,9 +26,9 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 CREATE TABLE IF NOT EXISTS `tokens_validacao` (
   `id_token` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_usuario` BIGINT UNSIGNED NOT NULL,
-  `token` CHAR(64) NOT NULL, 
+  `token` CHAR(64) NOT NULL,
   `tipo` ENUM('cadastro', 'recuperacao_senha') NOT NULL,
-  `usado` BOOLEAN NOT NULL DEFAULT FALSE, 
+  `usado` BOOLEAN NOT NULL DEFAULT FALSE,
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data_expiracao` DATETIME NOT NULL,
   UNIQUE INDEX `uidx_token` (`token`),
@@ -38,9 +39,8 @@ CREATE TABLE IF NOT EXISTS `tokens_validacao` (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 -- ============================================================================
--- Tabelas que representam as entidades principais do negócio.
+-- Tabelas de Entidades Principais (Cooperativas, Catadores, Compradores)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `cooperativas` (
@@ -66,11 +66,36 @@ CREATE TABLE IF NOT EXISTS `cooperativas` (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `catadores` (
+  `id_catador` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` BIGINT UNSIGNED NOT NULL,
+  `id_cooperativa` BIGINT UNSIGNED NOT NULL,
+  `cpf` CHAR(11) NOT NULL,
+  `telefone` VARCHAR(20) NULL,
+  `endereco` TEXT NULL,
+  `cidade` VARCHAR(100) NULL,
+  `estado` CHAR(2) NULL,
+  `data_vinculo` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `data_desvinculo` DATETIME NULL,
+  `ativo` BOOLEAN NOT NULL DEFAULT TRUE,
+  UNIQUE INDEX `uidx_cpf` (`cpf`),
+  UNIQUE INDEX `uidx_id_usuario` (`id_usuario`),
+  INDEX `idx_cooperativa` (`id_cooperativa`),
+  INDEX `idx_ativo` (`ativo`),
+  CONSTRAINT `fk_catadores_usuarios`
+    FOREIGN KEY (`id_usuario`)
+    REFERENCES `usuarios` (`id_usuario`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_catadores_cooperativas`
+    FOREIGN KEY (`id_cooperativa`)
+    REFERENCES `cooperativas` (`id_cooperativa`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS `documentos_cooperativa` (
   `id_documento` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_cooperativa` BIGINT UNSIGNED NOT NULL,
   `arquivo_url` VARCHAR(500) NOT NULL,
-  `tipo_documento` ENUM('contrato_social', 'cartao_cnpj', 'alvara', 'outro') NOT NULL,
   `status` ENUM('pendente', 'aceito', 'negado') NOT NULL DEFAULT 'pendente',
   `data_envio` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data_avaliacao` DATETIME NULL,
@@ -96,14 +121,14 @@ CREATE TABLE IF NOT EXISTS `compradores` (
   `estado` CHAR(2) NULL,
   `latitude` DECIMAL(10,8) NULL,
   `longitude` DECIMAL(11,8) NULL,
-  `telefone` VARCHAR(20) NULL, 
-  `email` VARCHAR(255) NULL,   
-  `score_confianca` DECIMAL(4,2) NOT NULL DEFAULT 5.00,
-  `numero_avaliacoes` INT UNSIGNED NOT NULL DEFAULT 0,  
+  `telefone` VARCHAR(20) NULL,
+  `email` VARCHAR(255) NULL,
+  `score_confianca` DECIMAL(4,2) NOT NULL DEFAULT 2.50,
+  `numero_avaliacoes` INT UNSIGNED NOT NULL DEFAULT 0,
   `deletado_em` DATETIME NULL,
   `data_cadastro` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE INDEX `uidx_cnpj` (`cnpj`),
-  INDEX `idx_score_confianca` (`score_confianca` DESC), 
+  INDEX `idx_score_confianca` (`score_confianca` DESC),
   INDEX `idx_cidade_estado` (`cidade`, `estado`),
   INDEX `idx_ativo` (`deletado_em`)
 );
@@ -126,34 +151,55 @@ CREATE TABLE IF NOT EXISTS `exigencias_compradores` (
 );
 
 -- ============================================================================
--- Tabelas para catalogar os tipos de materiais recicláveis.
+-- Estrutura Hierárquica de Materiais
 -- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `materiais_base` (
+  `id_material_base` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `nome` VARCHAR(100) NOT NULL,
+  `descricao` TEXT NULL,
+  `cor_hex` CHAR(7) NULL,
+  `ordem_exibicao` SMALLINT UNSIGNED DEFAULT 100,
+  -- ativo removido
+  UNIQUE INDEX `uidx_nome_base` (`nome`)
+);
 
 CREATE TABLE IF NOT EXISTS `materiais_catalogo` (
   `id_material_catalogo` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `nome_padrao` VARCHAR(255) NOT NULL,
+  `id_material_base` INT UNSIGNED NOT NULL,
+  `nome_especifico` VARCHAR(255) NOT NULL,
   `descricao` TEXT NULL,
-  `categoria` ENUM('Plástico', 'Papel/Papelão', 'Metal', 'Vidro', 'Madeira', 'Eletrônicos', 'Outros') NOT NULL,
+  -- unidade_medida removido
   `imagem_url` VARCHAR(500) NULL,
-  UNIQUE INDEX `uidx_nome_padrao` (`nome_padrao`),
-  INDEX `idx_categoria` (`categoria`)
+  -- ativo removido
+  UNIQUE INDEX `uidx_base_nome_especifico` (`id_material_base`, `nome_especifico`),
+  INDEX `idx_nome_especifico` (`nome_especifico`),
+  CONSTRAINT `fk_catalogo_base`
+    FOREIGN KEY (`id_material_base`)
+    REFERENCES `materiais_base` (`id_material_base`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `materiais_apelidos` (
-  `id_apelido` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS `materiais_sinonimos` (
+  `id_sinonimo` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_material_catalogo` INT UNSIGNED NOT NULL,
-  `nome_regional` VARCHAR(255) NOT NULL,
-  UNIQUE INDEX `uidx_nome_regional` (`nome_regional`),
-  INDEX `idx_material_catalogo` (`id_material_catalogo`),
-  CONSTRAINT `fk_apelidos_catalogo`
+  `id_cooperativa` BIGINT UNSIGNED NOT NULL,
+  `nome_sinonimo` VARCHAR(255) NOT NULL,
+  INDEX `idx_material_catalogo_sinonimo` (`id_material_catalogo`),
+  INDEX `idx_cooperativa_sinonimo` (`id_cooperativa`),
+  UNIQUE INDEX `uidx_coop_nome_sinonimo` (`id_cooperativa`, `nome_sinonimo`),
+  CONSTRAINT `fk_sinonimos_catalogo`
     FOREIGN KEY (`id_material_catalogo`)
     REFERENCES `materiais_catalogo` (`id_material_catalogo`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_sinonimos_materiais_cooperativas` -- Nova FK
+    FOREIGN KEY (`id_cooperativa`)
+    REFERENCES `cooperativas` (`id_cooperativa`)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 -- ============================================================================
--- Tabelas que registram as operações de venda entre cooperativas e compradores.
+-- Tabelas de Vendas e Avaliações
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `vendas` (
@@ -179,8 +225,8 @@ CREATE TABLE IF NOT EXISTS `vendas_itens` (
   `id_venda_item` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_venda` BIGINT UNSIGNED NOT NULL,
   `id_material_catalogo` INT UNSIGNED NOT NULL,
-  `quantidade_kg` DECIMAL(12,3) NOT NULL CHECK (quantidade_kg > 0), 
-  `preco_por_kg` DECIMAL(12,4) NOT NULL CHECK (preco_por_kg > 0), 
+  `quantidade_kg` DECIMAL(12,3) NOT NULL CHECK (quantidade_kg > 0),
+  `preco_por_kg` DECIMAL(12,4) NOT NULL CHECK (preco_por_kg > 0),
   INDEX `idx_venda` (`id_venda`),
   INDEX `idx_material` (`id_material_catalogo`),
   CONSTRAINT `fk_itens_vendas`
@@ -192,11 +238,6 @@ CREATE TABLE IF NOT EXISTS `vendas_itens` (
     REFERENCES `materiais_catalogo` (`id_material_catalogo`)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
-
-
--- ============================================================================
--- Tabelas relacionadas ao sistema de reputação dos compradores.
--- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `feedback_tags` (
   `id_feedback_tag` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -234,9 +275,8 @@ CREATE TABLE IF NOT EXISTS `avaliacao_feedback_selecionado` (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 -- ============================================================================
--- Tabelas de apoio, logs e dados pré-processados para performance.
+-- Tabelas de Apoio
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `precos_regionais` (
@@ -247,7 +287,7 @@ CREATE TABLE IF NOT EXISTS `precos_regionais` (
   `preco_minimo` DECIMAL(12,4) NOT NULL,
   `preco_maximo` DECIMAL(12,4) NOT NULL,
   `desvio_padrao` DECIMAL(10,4) NOT NULL,
-  `numero_transacoes` INT UNSIGNED NOT NULL, 
+  `numero_transacoes` INT UNSIGNED NOT NULL,
   `data_atualizacao` DATETIME NOT NULL,
   UNIQUE INDEX `uidx_material_regiao_data` (`id_material_catalogo`, `regiao`, `data_atualizacao`),
   INDEX `idx_regiao_material` (`regiao`, `id_material_catalogo`),
@@ -289,33 +329,34 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   INDEX `idx_timestamp` (`timestamp_acao` DESC)
 );
 
+-- ============================================================================
+-- Dados Iniciais (Seeds)
+-- ============================================================================
 
--- ============================================================================
--- Inserção de dados básicos para o funcionamento do sistema.
--- ============================================================================
+INSERT INTO `materiais_base` (`nome`, `cor_hex`, `ordem_exibicao`, `descricao`) VALUES
+('Papel/Papelão', '#8B4513', 10, 'Todos os tipos de papéis e papelões recicláveis.'),
+('Plástico', '#4169E1', 20, 'Diversos tipos de polímeros plásticos.'),
+('Metal', '#708090', 30, 'Metais ferrosos e não ferrosos.'),
+('Vidro', '#20B2AA', 40, 'Embalagens e cacos de vidro.'),
+('Eletrônicos', '#FF6347', 50, 'Resíduos de Equipamentos Elétricos e Eletrônicos (REEE).'),
+('Madeira', '#D2B48C', 60, 'Resíduos de madeira e paletes.'),
+('Outros', '#A9A9A9', 99, 'Materiais não classificados nas categorias anteriores.');
 
 INSERT INTO `config_sistema` (`chave`, `valor`, `descricao`) VALUES
 ('peso_pontualidade', '0.5', 'Peso da nota de pontualidade no pagamento'),
 ('peso_logistica', '0.3', 'Peso da nota de logística e entrega'),
 ('peso_negociacao', '0.2', 'Peso da nota de qualidade da negociação e comunicação'),
-('decaimento_anual_score', '365', 'Dias para decaimento do peso da avaliação. Avaliações mais antigas perdem peso.'),
+('decaimento_anual_score', '365', 'Dias para decaimento do peso da avaliação.'),
 ('avaliacao_neutra_novato', '2.5', 'Score inicial (0-5) para compradores sem avaliações'),
 ('validade_token_horas', '24', 'Validade do token de validação em horas'),
 ('dias_inatividade_suspensao', '60', 'Dias sem atualização para suspender acesso da cooperativa'),
-('min_avaliacoes_confianca', '10', 'Número mínimo de avaliações para que o score de um comprador atinja confiança estatística máxima.'),
-('peso_prior_bayesiano', '3', 'Fator de suavização. Equivalente a adicionar X avaliações neutras no cálculo para evitar que novos compradores com uma única nota alta disparem no ranking.');
+('min_avaliacoes_confianca', '10', 'Número mínimo de avaliações para confiança estatística plena.'),
+('peso_prior_bayesiano', '3', 'Fator de suavização bayesiana.');
 
 INSERT INTO `feedback_tags` (`texto`, `tipo`) VALUES
-('Pagou adiantado', 'positivo'),
-('Pagou na hora', 'positivo'),
-('Logística eficiente', 'positivo'),
-('Comunicação clara', 'positivo'),
-('Pouca burocracia', 'positivo'),
-('Atrasou o pagamento', 'negativo'),
-('Difícil de contatar', 'negativo'),
-('Logística complicada', 'negativo'),
-('Muitas exigências', 'negativo');
-
+('Pagou adiantado', 'positivo'), ('Pagou na hora', 'positivo'), ('Logística eficiente', 'positivo'),
+('Comunicação clara', 'positivo'), ('Pouca burocracia', 'positivo'), ('Atrasou o pagamento', 'negativo'),
+('Difícil de contatar', 'negativo'), ('Logística complicada', 'negativo'), ('Muitas exigências', 'negativo');
 
 -- ============================================================================
 -- FUNÇÕES, TRIGGERS, PROCEDURES E EVENTS
@@ -323,38 +364,12 @@ INSERT INTO `feedback_tags` (`texto`, `tipo`) VALUES
 
 DELIMITER $$
 
--- ----------------------------------------------------------------------------
--- Triggers de HASH de Senha e Geração de TOKEN
--- ----------------------------------------------------------------------------
-
-CREATE TRIGGER `trg_hash_senha_insert`
-BEFORE INSERT ON `usuarios`
-FOR EACH ROW
-BEGIN
-    SET NEW.senha_hash = SHA2(NEW.senha_hash, 256);
-END$$
-
-
-CREATE TRIGGER `trg_hash_senha_update`
-BEFORE UPDATE ON `usuarios`
-FOR EACH ROW
-BEGIN
-    IF NEW.senha_hash != OLD.senha_hash THEN
-        SET NEW.senha_hash = SHA2(NEW.senha_hash, 256);
-    END IF;
-END$$
-
-
 CREATE TRIGGER `trg_gerar_token_validacao_insert`
 BEFORE INSERT ON `tokens_validacao`
 FOR EACH ROW
 BEGIN
     SET NEW.token = SHA2(UUID(), 256);
 END$$
-
--- ----------------------------------------------------------------------------
--- Função de Cálculo de Score
--- ----------------------------------------------------------------------------
 
 CREATE FUNCTION `calcular_score_confianca`(p_id_comprador BIGINT UNSIGNED)
 RETURNS DECIMAL(4,2)
@@ -369,7 +384,8 @@ BEGIN
     DECLARE v_peso_logistica DECIMAL(4,2);
     DECLARE v_peso_negociacao DECIMAL(4,2);
     DECLARE v_decaimento_dias DECIMAL(10,2);
-    DECLARE v_aval_neutra DECIMAL(4,2);
+    DECLARE v_aval_neutra_config DECIMAL(4,2);
+    DECLARE v_aval_neutra_calc DECIMAL(4,2);
     DECLARE v_min_aval_confianca INT;
     DECLARE v_peso_prior DECIMAL(10,2);
     DECLARE v_fator_confianca DECIMAL(10,8);
@@ -378,9 +394,11 @@ BEGIN
     SELECT CAST(valor AS DECIMAL(4,2)) INTO v_peso_logistica FROM config_sistema WHERE chave = 'peso_logistica';
     SELECT CAST(valor AS DECIMAL(4,2)) INTO v_peso_negociacao FROM config_sistema WHERE chave = 'peso_negociacao';
     SELECT CAST(valor AS DECIMAL(10,2)) INTO v_decaimento_dias FROM config_sistema WHERE chave = 'decaimento_anual_score';
-    SELECT CAST(valor AS DECIMAL(4,2)) INTO v_aval_neutra FROM config_sistema WHERE chave = 'avaliacao_neutra_novato';
+    SELECT CAST(valor AS DECIMAL(4,2)) INTO v_aval_neutra_config FROM config_sistema WHERE chave = 'avaliacao_neutra_novato';
     SELECT CAST(valor AS SIGNED) INTO v_min_aval_confianca FROM config_sistema WHERE chave = 'min_avaliacoes_confianca';
     SELECT CAST(valor AS DECIMAL(10,2)) INTO v_peso_prior FROM config_sistema WHERE chave = 'peso_prior_bayesiano';
+
+    SET v_aval_neutra_calc = v_aval_neutra_config * 2;
 
     SELECT COUNT(*) INTO v_num_avaliacoes
     FROM avaliacoes_compradores ac
@@ -388,7 +406,7 @@ BEGIN
     WHERE v.id_comprador = p_id_comprador;
 
     IF v_num_avaliacoes = 0 THEN
-        RETURN v_aval_neutra;
+        RETURN v_aval_neutra_config;
     END IF;
 
     SELECT
@@ -410,14 +428,14 @@ BEGIN
     IF v_soma_pesos > 0 THEN
         SET v_score_bruto = v_soma_ponderada / v_soma_pesos;
     ELSE
-        RETURN v_aval_neutra;
+        RETURN v_aval_neutra_config;
     END IF;
 
-    SET v_score_ajustado = (v_score_bruto * v_num_avaliacoes + v_aval_neutra * v_peso_prior) /
-                           (v_num_avaliacoes + v_peso_prior);
+    SET v_score_ajustado = (v_score_bruto * v_num_avaliacoes + v_aval_neutra_calc * v_peso_prior) /
+                          (v_num_avaliacoes + v_peso_prior);
 
     SET v_fator_confianca = LEAST(v_num_avaliacoes / v_min_aval_confianca, 1.0);
-    SET v_score_ajustado = v_aval_neutra + (v_score_ajustado - v_aval_neutra) * v_fator_confianca;
+    SET v_score_ajustado = v_aval_neutra_calc + (v_score_ajustado - v_aval_neutra_calc) * v_fator_confianca;
 
     IF v_score_ajustado > 10.00 THEN SET v_score_ajustado = 10.00; END IF;
     IF v_score_ajustado < 0.00 THEN SET v_score_ajustado = 0.00; END IF;
@@ -425,99 +443,15 @@ BEGIN
     RETURN v_score_ajustado / 2;
 END$$
 
--- ----------------------------------------------------------------------------
--- Triggers de Atualização de Vendas e Score
--- ----------------------------------------------------------------------------
-
-CREATE TRIGGER `trg_atualizar_valor_total_venda_insert`
-AFTER INSERT ON `vendas_itens`
-FOR EACH ROW
-BEGIN
-    UPDATE vendas v
-    SET v.valor_total = (
-        SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0)
-        FROM vendas_itens vi
-        WHERE vi.id_venda = NEW.id_venda
-    )
-    WHERE v.id_venda = NEW.id_venda;
-END$$
-
-CREATE TRIGGER `trg_atualizar_valor_total_venda_update`
-AFTER UPDATE ON `vendas_itens`
-FOR EACH ROW
-BEGIN
-    UPDATE vendas v
-    SET v.valor_total = (
-        SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0)
-        FROM vendas_itens vi
-        WHERE vi.id_venda = NEW.id_venda
-    )
-    WHERE v.id_venda = NEW.id_venda;
-END$$
-
-CREATE TRIGGER `trg_atualizar_valor_total_venda_delete`
-AFTER DELETE ON `vendas_itens`
-FOR EACH ROW
-BEGIN
-    UPDATE vendas v
-    SET v.valor_total = (
-        SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0)
-        FROM vendas_itens vi
-        WHERE vi.id_venda = OLD.id_venda
-    )
-    WHERE v.id_venda = OLD.id_venda;
-END$$
-
-CREATE TRIGGER `trg_recalcular_score_apos_avaliacao`
-AFTER INSERT ON `avaliacoes_compradores`
-FOR EACH ROW
-BEGIN
-    DECLARE v_novo_score DECIMAL(4,2);
-    DECLARE v_id_comprador BIGINT UNSIGNED;
-    DECLARE v_num_avaliacoes INT;
-
-    SELECT id_comprador INTO v_id_comprador
-    FROM vendas
-    WHERE id_venda = NEW.id_venda;
-
-    SET v_novo_score = calcular_score_confianca(v_id_comprador);
-
-    SELECT COUNT(*) INTO v_num_avaliacoes
-    FROM avaliacoes_compradores ac
-    JOIN vendas v ON ac.id_venda = v.id_venda
-    WHERE v.id_comprador = v_id_comprador;
-
-    UPDATE compradores
-    SET score_confianca = v_novo_score,
-        numero_avaliacoes = v_num_avaliacoes
-    WHERE id_comprador = v_id_comprador;
-
-    INSERT INTO historico_score (id_comprador, score_calculado, detalhe_json, data_calculo)
-    VALUES (
-        v_id_comprador,
-        v_novo_score,
-        JSON_OBJECT('trigger', 'nova_avaliacao', 'id_avaliacao', NEW.id_avaliacao),
-        NOW()
-    );
-END$$
-
-CREATE TRIGGER `trg_atualizar_data_cooperativa`
-AFTER INSERT ON `vendas`
-FOR EACH ROW
-BEGIN
-    UPDATE cooperativas
-    SET ultima_atualizacao = NOW()
-    WHERE id_cooperativa = NEW.id_cooperativa;
-END$$
-
--- ----------------------------------------------------------------------------
--- Procedures e Events
--- ----------------------------------------------------------------------------
+CREATE TRIGGER `trg_atualizar_valor_total_venda_insert` AFTER INSERT ON `vendas_itens` FOR EACH ROW BEGIN UPDATE vendas v SET v.valor_total = ( SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0) FROM vendas_itens vi WHERE vi.id_venda = NEW.id_venda ) WHERE v.id_venda = NEW.id_venda; END$$
+CREATE TRIGGER `trg_atualizar_valor_total_venda_update` AFTER UPDATE ON `vendas_itens` FOR EACH ROW BEGIN UPDATE vendas v SET v.valor_total = ( SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0) FROM vendas_itens vi WHERE vi.id_venda = NEW.id_venda ) WHERE v.id_venda = NEW.id_venda; END$$
+CREATE TRIGGER `trg_atualizar_valor_total_venda_delete` AFTER DELETE ON `vendas_itens` FOR EACH ROW BEGIN UPDATE vendas v SET v.valor_total = ( SELECT COALESCE(SUM(vi.quantidade_kg * vi.preco_por_kg), 0) FROM vendas_itens vi WHERE vi.id_venda = OLD.id_venda ) WHERE v.id_venda = OLD.id_venda; END$$
+CREATE TRIGGER `trg_recalcular_score_apos_avaliacao` AFTER INSERT ON `avaliacoes_compradores` FOR EACH ROW BEGIN DECLARE v_novo_score DECIMAL(4,2); DECLARE v_id_comprador BIGINT UNSIGNED; DECLARE v_num_avaliacoes INT; SELECT id_comprador INTO v_id_comprador FROM vendas WHERE id_venda = NEW.id_venda; SET v_novo_score = calcular_score_confianca(v_id_comprador); SELECT COUNT(*) INTO v_num_avaliacoes FROM avaliacoes_compradores ac JOIN vendas v ON ac.id_venda = v.id_venda WHERE v.id_comprador = v_id_comprador; UPDATE compradores SET score_confianca = v_novo_score, numero_avaliacoes = v_num_avaliacoes WHERE id_comprador = v_id_comprador; INSERT INTO historico_score (id_comprador, score_calculado, detalhe_json, data_calculo) VALUES ( v_id_comprador, v_novo_score, JSON_OBJECT('trigger', 'nova_avaliacao', 'id_avaliacao', NEW.id_avaliacao), NOW() ); END$$
+CREATE TRIGGER `trg_atualizar_data_cooperativa` AFTER INSERT ON `vendas` FOR EACH ROW BEGIN UPDATE cooperativas SET ultima_atualizacao = NOW() WHERE id_cooperativa = NEW.id_cooperativa; END$$
 
 CREATE PROCEDURE `materializar_precos_regionais`()
 BEGIN
     TRUNCATE TABLE `precos_regionais`;
-
     INSERT INTO `precos_regionais`
         (id_material_catalogo, regiao, preco_medio, preco_minimo, preco_maximo, desvio_padrao, numero_transacoes, data_atualizacao)
     SELECT
@@ -532,19 +466,39 @@ BEGIN
     FROM vendas_itens vi
     JOIN vendas v ON vi.id_venda = v.id_venda
     JOIN compradores c ON v.id_comprador = c.id_comprador
-    WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-      AND c.deletado_em IS NULL
+    WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 90 DAY) AND c.deletado_em IS NULL
     GROUP BY vi.id_material_catalogo, c.estado
     HAVING COUNT(*) >= 3;
 END$$
 
-
 CREATE EVENT `evt_materializar_precos_regionais`
-ON SCHEDULE EVERY 1 DAY
-STARTS TIMESTAMP(CURRENT_DATE, '03:00:00')
-DO
+ON SCHEDULE EVERY 1 DAY STARTS TIMESTAMP(CURRENT_DATE, '03:00:00')
+DO BEGIN CALL materializar_precos_regionais(); END$$
+
+CREATE PROCEDURE `buscar_material_por_nome`(IN p_nome VARCHAR(255))
 BEGIN
-    CALL materializar_precos_regionais();
+    SELECT
+        mb.nome AS material_base,
+        mc.id_material_catalogo,
+        mc.nome_especifico,
+        'nome_especifico' AS encontrado_em,
+        NULL AS sinonimo_encontrado
+    FROM materiais_catalogo mc
+    JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
+    WHERE mc.nome_especifico LIKE CONCAT('%', p_nome, '%')
+
+    UNION
+
+    SELECT
+        mb.nome AS material_base,
+        mc.id_material_catalogo,
+        mc.nome_especifico,
+        'sinonimo' AS encontrado_em,
+        ms.nome_sinonimo AS sinonimo_encontrado
+    FROM materiais_sinonimos ms
+    JOIN materiais_catalogo mc ON ms.id_material_catalogo = mc.id_material_catalogo
+    JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
+    WHERE ms.nome_sinonimo LIKE CONCAT('%', p_nome, '%');
 END$$
 
 DELIMITER ;
@@ -555,24 +509,14 @@ DELIMITER ;
 
 CREATE OR REPLACE VIEW `v_compradores_publico` AS
 SELECT
-    id_comprador,
-    razao_social,
-    cidade,
-    estado,
-    latitude,
-    longitude,
-    telefone,
-    email,
-    score_confianca,
-    numero_avaliacoes
-FROM compradores
-WHERE deletado_em IS NULL;
-
+    id_comprador, razao_social, cidade, estado, latitude, longitude,
+    telefone, email, score_confianca, numero_avaliacoes
+FROM compradores WHERE deletado_em IS NULL;
 
 CREATE OR REPLACE VIEW `v_precos_mercado_anonimizado` AS
 SELECT
-    mc.nome_padrao AS material,
-    mc.categoria,
+    mb.nome AS material_base,
+    mc.nome_especifico AS material_especifico,
     c.estado,
     AVG(vi.preco_por_kg) AS preco_medio,
     MIN(vi.preco_por_kg) AS preco_minimo,
@@ -585,37 +529,91 @@ FROM vendas_itens vi
 JOIN vendas v ON vi.id_venda = v.id_venda
 JOIN compradores c ON v.id_comprador = c.id_comprador
 JOIN materiais_catalogo mc ON vi.id_material_catalogo = mc.id_material_catalogo
-WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-  AND c.deletado_em IS NULL
-GROUP BY mc.nome_padrao, mc.categoria, c.estado, ano, mes
+JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
+WHERE v.data_venda >= DATE_SUB(NOW(), INTERVAL 12 MONTH) AND c.deletado_em IS NULL
+GROUP BY mb.nome, mc.nome_especifico, c.estado, ano, mes
 HAVING COUNT(*) >= 3;
 
+CREATE OR REPLACE VIEW `v_catadores_cooperativa` AS
+SELECT
+    cat.id_catador, cat.id_usuario, cat.cpf, cat.telefone AS catador_telefone, cat.endereco AS catador_endereco,
+    cat.cidade AS catador_cidade, cat.estado AS catador_estado, cat.data_vinculo, cat.ativo,
+    coop.id_cooperativa, coop.cnpj, coop.razao_social, coop.endereco AS coop_endereco,
+    coop.cidade AS coop_cidade, coop.estado AS coop_estado, coop.ultima_atualizacao
+FROM catadores cat
+JOIN cooperativas coop ON cat.id_cooperativa = coop.id_cooperativa
+WHERE cat.ativo = TRUE;
 
-CREATE ROLE IF NOT EXISTS 'gestor_role', 'cooperativa_role';
+CREATE OR REPLACE VIEW `v_materiais_completo` AS
+SELECT
+    mb.nome AS material_base,
+    mb.cor_hex,
+    mc.id_material_catalogo,
+    mc.nome_especifico,
+    mc.descricao,
+    mc.imagem_url,
+    GROUP_CONCAT(ms.nome_sinonimo SEPARATOR ' | ') AS sinonimos
+FROM materiais_catalogo mc
+JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
+LEFT JOIN materiais_sinonimos ms ON mc.id_material_catalogo = ms.id_material_catalogo
+GROUP BY mc.id_material_catalogo;
 
-GRANT ALL PRIVILEGES ON `recoopera`.* TO 'gestor_role';
+-- ============================================================================
+-- CRIAÇÃO DE ROLES E PERMISSÕES
+-- ============================================================================
+
+CREATE ROLE IF NOT EXISTS 'root_role', 'gestor_role', 'cooperativa_role', 'catador_role';
+
+GRANT ALL PRIVILEGES ON `recoopera`.* TO 'root_role' WITH GRANT OPTION;
+
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, REFERENCES, INDEX, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EXECUTE ON `recoopera`.* TO 'gestor_role';
 
 GRANT SELECT ON `recoopera`.`v_compradores_publico` TO 'cooperativa_role';
 GRANT SELECT ON `recoopera`.`v_precos_mercado_anonimizado` TO 'cooperativa_role';
 GRANT SELECT ON `recoopera`.`config_sistema` TO 'cooperativa_role';
-GRANT SELECT ON `recoopera`.`materiais_catalogo` TO 'cooperativa_role';
-GRANT SELECT ON `recoopera`.`materiais_apelidos` TO 'cooperativa_role';
 GRANT SELECT ON `recoopera`.`feedback_tags` TO 'cooperativa_role';
 GRANT SELECT ON `recoopera`.`precos_regionais` TO 'cooperativa_role';
 GRANT SELECT ON `recoopera`.`exigencias_compradores` TO 'cooperativa_role';
+GRANT SELECT ON `recoopera`.`materiais_base` TO 'cooperativa_role';
+GRANT SELECT ON `recoopera`.`materiais_catalogo` TO 'cooperativa_role';
+GRANT SELECT ON `recoopera`.`materiais_sinonimos` TO 'cooperativa_role';
+GRANT SELECT ON `recoopera`.`v_materiais_completo` TO 'cooperativa_role';
 
 GRANT INSERT ON `recoopera`.`vendas` TO 'cooperativa_role';
 GRANT INSERT ON `recoopera`.`vendas_itens` TO 'cooperativa_role';
 GRANT INSERT ON `recoopera`.`avaliacoes_compradores` TO 'cooperativa_role';
 GRANT INSERT ON `recoopera`.`avaliacao_feedback_selecionado` TO 'cooperativa_role';
-GRANT INSERT, UPDATE, SELECT ON `recoopera`.`materiais_apelidos` TO 'cooperativa_role';
+GRANT INSERT, UPDATE, SELECT ON `recoopera`.`materiais_sinonimos` TO 'cooperativa_role';
 
 GRANT INSERT, UPDATE (endereco, cidade, estado, latitude, longitude, telefone, email) ON `recoopera`.`compradores` TO 'cooperativa_role';
 GRANT SELECT (`id_comprador`, `razao_social`, `cnpj`) ON `recoopera`.`compradores` TO 'cooperativa_role';
 
+GRANT INSERT, SELECT, UPDATE ON `recoopera`.`catadores` TO 'cooperativa_role';
+GRANT INSERT ON `recoopera`.`usuarios` TO 'cooperativa_role';
+
 GRANT EXECUTE ON FUNCTION `recoopera`.`calcular_score_confianca` TO 'cooperativa_role';
+GRANT EXECUTE ON PROCEDURE `recoopera`.`buscar_material_por_nome` TO 'cooperativa_role';
+
+GRANT SELECT ON `recoopera`.`v_compradores_publico` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`v_catadores_cooperativa` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`v_precos_mercado_anonimizado` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`feedback_tags` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`precos_regionais` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`exigencias_compradores` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`materiais_base` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`materiais_catalogo` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`materiais_sinonimos` TO 'catador_role';
+GRANT SELECT ON `recoopera`.`v_materiais_completo` TO 'catador_role';
+
+GRANT SELECT, UPDATE (telefone, endereco, cidade, estado) ON `recoopera`.`catadores` TO 'catador_role';
+GRANT SELECT, UPDATE (nome, senha_hash) ON `recoopera`.`usuarios` TO 'catador_role';
+
+GRANT EXECUTE ON PROCEDURE `recoopera`.`buscar_material_por_nome` TO 'catador_role';
 
 -- Restaura as configurações originais do MySQL
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+INSERT INTO `usuarios` (`nome`, `email`, `senha_hash`, `tipo`, `status`)
+VALUES ('Administrador Root', 'root@recoopera.com', '$2y$10$w5QDRfX.T.PAccEA51b2nOf85.kG3/jV/P0/jE/q.sL.t8G/iYvW6', 'root', 'ativo');
