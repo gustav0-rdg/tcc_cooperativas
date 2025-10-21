@@ -72,15 +72,20 @@ class Usuarios:
     def autenticar (self, email:str, senha:str) -> bool:
 
         """
-        Verifica e autentica o usuário e
-        retorna seu código de sessão (token)
+        Verifica a autenticidade do usuário
+        conferindo a existência do seu email
+        e senha cadastrados no banco de dados
         """
 
         #region Exceções
 
-        if not isinstance(email, str) or not isinstance(senha, str):
+        if not isinstance(email, str):
 
-            raise TypeError ('Usuarios "autenticar" - "email" e "senha" devem ser do tipo String')
+            raise TypeError ('Usuarios "autenticar" - "email" deve ser do tipo String')
+        
+        if not isinstance(senha, str):
+
+            raise TypeError ('Usuarios "autenticar" - "senha" deve ser do tipo String')
             
         #endregion
 
@@ -109,20 +114,10 @@ class Usuarios:
             data_user = cursor.fetchone()
 
             if data_user:
-
-                return Tokens(self.connection_db).create(
-
-                    data_user['id_usuario'],
-                    'sessao',
-
-                    # Data de expiração em 30 dias
-                    datetime.now() + timedelta(days=30)
-
-                )
+                return data_user['id_usuario']
 
             else:
-
-                return False                
+                return None                
 
         except Exception as e:
 
