@@ -177,21 +177,22 @@ def delete (id_usuario:int=None):
             
         #endregion
         
-        delete_usuario = Usuarios(conn.connection_db).delete(id_usuario)
+        match Usuarios(conn.connection_db).delete(id_usuario):
 
-        # 404 - Usuário não encontrado
+            # 404 - Usuário não encontrado
 
-        if delete_usuario == None:
-            return jsonify({ 'error': 'Usuário não encontrado' }), 404
-        
-        # 500 - Erro ao excluir usuário
+            case None:
+                return jsonify({ 'error': 'Usuário não encontrado' }), 404
 
-        if delete_usuario == False:
-            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-        
-        # 200 - Usuário excluído
+            # 200 - Usuário Excluído
 
-        return jsonify({ 'texto': 'Usuário excluído' }), 200
+            case True:
+                return jsonify({ 'texto': 'Usuário excluído' }), 200
+
+            # 500 - Erro ao excluir usuário
+
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
     
     except Exception as e:
 
@@ -236,26 +237,22 @@ def get_info (id_usuario:int=None):
         #endregion
 
         data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
- 
-        # 404 - Usuário não encontrado
+        match data_usuario:
 
-        if data_usuario == None:
+            # 404 - Usuário não encontrado
 
-            return jsonify({ 'error': 'Verifique o parâmetro "id_usuario" e tente novamente' }), 404
-        
-        # 404 - Erro ao consultar as informações do usuário
+            case None:
+                return jsonify({ 'error': 'Usuário não encontrado' }), 404
 
-        if data_usuario == False:
+            # 200 - Informações do usuário consultadas
 
-            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-        
-        # 200 - Informações do usuário consultadas
+            case True:
+                return jsonify({ 'data': data_usuario }), 200
 
-        return jsonify({
+            # 500 - Erro ao consultar as informações usuário
 
-            'data': data_usuario
-        
-        }), 200
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
     
     except Exception as e:
 
