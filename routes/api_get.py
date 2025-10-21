@@ -50,5 +50,5 @@ def get_by_material(material):
         compradores = Compradores(conn.connection_db).get_by_materials(material)
         return jsonify(compradores), 200
     except Exception as e:
-        print(f"Erro ao buscar ompradores por material")
+        print(f"Erro ao buscar ompradores por material: {e}")
         return jsonify({"erro":"Ocorreu um erro"}), 500
