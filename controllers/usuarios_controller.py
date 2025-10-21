@@ -216,6 +216,22 @@ class Usuarios:
 
         try:
 
+            cursor.execute (
+
+                """
+                SELECT id_usuario FROM usuarios
+                WHERE usuarios.email = %s;
+                """,
+
+                (email, )
+
+            )
+
+            # Já há um usuário com o email cadastrado
+            
+            if cursor.fetchone() != None:
+                return None
+
             senha = Usuarios.criptografar(senha)
             cursor.execute (
 
@@ -501,7 +517,7 @@ class Usuarios:
 
         try:
 
-            self.cursor.execute (
+            cursor.execute (
 
                 """
                 UPDATE usuarios
@@ -514,7 +530,7 @@ class Usuarios:
             )
 
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0 or None
 
         except Exception as e:
 
@@ -557,7 +573,7 @@ class Usuarios:
             )
 
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0 or None
 
         except Exception as e:
 
