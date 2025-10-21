@@ -18,15 +18,17 @@ def cadastrar ():
     token = request.headers.get('Authorization')
     data_cadastro = request.get_json()
 
-    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha', 'tipo']):
+    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha']):
 
         return jsonify({ 'error': 'Dados inválidos, todos os campos são obrigatórios' }), 400
+
+    if not 'tipo' in data_cadastro:
+
+        data_cadastro['tipo'] = 'cooperativa'
 
     conn = Connection('local')
 
     try:
-
-        usuarios_controller = Usuarios(conn.connection_db)
 
         #region Cadastro de pessoas com permissões especiais
 
@@ -37,7 +39,7 @@ def cadastrar ():
                 return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
             
             data_token = Tokens(conn.connection_db).validar(token)
-            usuario = usuarios_controller.get_by_id(data_token['id_usuario'])
+            usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
 
             if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
 
@@ -45,7 +47,7 @@ def cadastrar ():
             
         #endregion
 
-        id_usuario = usuarios_controller.create(
+        id_usuario = Usuarios(conn.connection_db).create(
 
             data_cadastro['nome'],
             data_cadastro['email'],
@@ -142,6 +144,184 @@ def alterar_senha ():
         conn.close()
 
 @api_usuarios.route('/delete', methods=['POST'])
-def delete ():
+def delete_personal ():
 
-    pass
+    token = request.headers.get('Authorization')
+
+    if not token:
+
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+    
+    conn = Connection('local')
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        data_usuario = Usuarios(conn.connection_db).delete(data_token['id_usuario'])
+ 
+        if data_usuario == None:
+
+            return jsonify({ 'error': 'Usuário não encontrado' }), 404
+        
+        if data_usuario == False:
+
+            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        
+        return jsonify({ 'texto': 'Usuário excluído' }), 200
+    
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
+
+@api_usuarios.route('/delete/<id_usuario>', methods=['POST'])
+def delete (id_usuario):
+
+    token = request.headers.get('Authorization')
+
+    if not token:
+
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+    
+    conn = Connection('local')
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        if data_token['id_usuario'] != id_usuario:
+
+            if Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] == 'cooperativa':
+                return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+        
+        delete_usuario = Usuarios(conn.connection_db).delete(id_usuario)
+
+        # 404 - Usuário não encontrado
+
+        if delete_usuario == None:
+            return jsonify({ 'error': 'Usuário não encontrado' }), 404
+        
+        # 500 - Erro ao excluir usuário
+
+        if delete_usuario == False:
+            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        
+        # 200 - Usuário excluído
+
+        return jsonify({ 'texto': 'Usuário excluído' }), 200
+    
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
+
+@api_usuarios.route('/get', methods=['POST'])
+def get_info_personal ():
+
+    token = request.headers.get('Authorization')
+
+    if not token:
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+    
+    conn = Connection('local')
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        data_usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+ 
+        # 404 - Usuário não encontrado
+
+        if data_usuario == None:
+            return jsonify({ 'error': 'Verifique o parâmetro "id_usuario" e tente novamente' }), 404
+        
+        # 500 - Erro no servidor
+
+        if data_usuario == False:
+            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        
+        # 200 - Informações do usuário consultadas
+
+        return jsonify({
+
+            'data': data_usuario
+        
+        }), 200
+    
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
+
+@api_usuarios.route('/get/<id_usuario>', methods=['POST'])
+def get_info (id_usuario:int):
+
+    if not id_usuario.isdigit():
+
+        return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+
+    id_usuario = int(id_usuario)
+    token = request.headers.get('Authorization')
+
+    if not token:
+
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+    
+    conn = Connection('local')
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        if data_token['id_usuario'] != id_usuario:
+
+            if Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] == 'cooperativa':
+
+                return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+
+        data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
+ 
+        if data_usuario == None:
+
+            return jsonify({ 'error': 'Verifique o parâmetro "id_usuario" e tente novamente' }), 404
+        
+        if data_usuario == False:
+
+            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        
+        return jsonify({
+
+            'data': data_usuario
+        
+        }), 200
+    
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
