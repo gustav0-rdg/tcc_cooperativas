@@ -20,18 +20,72 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def autenticar (self, email:str, senha:str) -> bool:
+    def get_by_id (self, id_usuario:int) -> dict:
 
         """
-        Verifica e autentica o usuário e
-        retorna seu código de sessão (token)
+        Consulta no banco de dados o
+        usuário com o ID fornecido
         """
 
         #region Exceções
 
-        if not isinstance(email, str) or not isinstance(senha, str):
+        if not isinstance(id_usuario, int):
 
-            raise TypeError ('Usuarios "autenticar" - "email" e "senha" devem ser do tipo String')
+            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser do tipo Int')
+            
+        #endregion
+
+        cursor = self.connection_db.cursor(dictionary=True)
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    usuarios.id_usuario,
+                    usuarios.nome,
+                    usuarios.email,
+                    usuarios.tipo,
+                    usuarios.status,
+                    usuarios.data_criacao
+                FROM usuarios
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (id_usuario, )
+
+            )
+
+            return cursor.fetchone()            
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "get_by_id": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def autenticar (self, email:str, senha:str) -> bool:
+
+        """
+        Verifica a autenticidade do usuário
+        conferindo a existência do seu email
+        e senha cadastrados no banco de dados
+        """
+
+        #region Exceções
+
+        if not isinstance(email, str):
+
+            raise TypeError ('Usuarios "autenticar" - "email" deve ser do tipo String')
+        
+        if not isinstance(senha, str):
+
+            raise TypeError ('Usuarios "autenticar" - "senha" deve ser do tipo String')
             
         #endregion
 
@@ -60,20 +114,10 @@ class Usuarios:
             data_user = cursor.fetchone()
 
             if data_user:
-
-                return Tokens(self.connection_db).create(
-
-                    data_user['id_usuario'],
-                    'sessao',
-
-                    # Data de expiração em 30 dias
-                    datetime.now() + timedelta(days=30)
-
-                )
+                return data_user['id_usuario']
 
             else:
-
-                return False                
+                return None                
 
         except Exception as e:
 
@@ -113,7 +157,6 @@ class Usuarios:
         try:
 
             nova_senha = Usuarios.criptografar(nova_senha)
-
             cursor.execute (
 
                 """
@@ -126,7 +169,7 @@ class Usuarios:
 
             )
 
-            return True               
+            return cursor.rowcount > 0 or None               
 
         except Exception as e:
 
@@ -171,6 +214,22 @@ class Usuarios:
         cursor = self.connection_db.cursor()
 
         try:
+
+            cursor.execute (
+
+                """
+                SELECT id_usuario FROM usuarios
+                WHERE usuarios.email = %s;
+                """,
+
+                (email, )
+
+            )
+
+            # Já há um usuário com o email cadastrado
+
+            if cursor.fetchone() != None:
+                return None
 
             senha = Usuarios.criptografar(senha)
             cursor.execute (
@@ -457,7 +516,7 @@ class Usuarios:
 
         try:
 
-            self.cursor.execute (
+            cursor.execute (
 
                 """
                 UPDATE usuarios
@@ -470,7 +529,7 @@ class Usuarios:
             )
 
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0 or None
 
         except Exception as e:
 
@@ -513,7 +572,7 @@ class Usuarios:
             )
 
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0 or None
 
         except Exception as e:
 
