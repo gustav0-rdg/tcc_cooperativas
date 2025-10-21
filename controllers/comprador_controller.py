@@ -104,8 +104,8 @@ class Compradores:
         # Adiciona o filtro dinamicamente se um material for especificado
         if material:
             # Filtra tanto por nome quanto por categoria para maior flexibilidade
-            base_query += " AND (mc.nome_padrao = %s OR mc.categoria = %s)"
-            params.extend([material, material])
+            base_query += " AND mc.nome_padrao = %s"
+            params.extend(material)
 
         # Adiciona o agrupamento e a ordenação
         final_query = base_query + """

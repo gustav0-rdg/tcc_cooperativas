@@ -132,35 +132,35 @@ body {
 
 /* imagens dos cards */
 
-.cartao-material--plastico {
+.cartao-material--Plástico {
     background-image: url(../../imgs/material-tipos/plastico.jpg);
 }
 
-.cartao-material--papel {
+.cartao-material--Papel {
     background-image: url(../../imgs/material-tipos/papel.jpg);
 }
 
-.cartao-material--metal {
+.cartao-material--Metal {
     background-image: url(../../imgs/material-tipos/metal.jpg);
 }
 
-.cartao-material--madeira {
+.cartao-material--Madeira {
     background-image: url(../../imgs/material-tipos/madeira.jpg);
 }
 
-.cartao-material--pilha {
+.cartao-material--Pilha {
     background-image: url(../../imgs/material-tipos/pilha.jpg);
 }
 
-.cartao-material--borracha {
+.cartao-material--Borracha {
     background-image: url(../../imgs/material-tipos/borracha.jpg);
 }
 
-.cartao-material--papelao {
+.cartao-material--Papelão {
     background-image: url(../../imgs/material-tipos/papelao.jpg);
 }
 
-.cartao-material--vidro {
+.cartao-material--Vidro {
     background-image: url(../../imgs/material-tipos/vidro.jpg);
 }
 
