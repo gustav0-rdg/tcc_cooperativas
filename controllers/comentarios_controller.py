@@ -28,7 +28,7 @@ class Comentarios:
         results = []
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
-                cursor.execute(query_sql, tuple(cnpj))
+                cursor.execute(query_sql, (cnpj,))
                 results = cursor.fetchall()
                 if results.length == 0:
                     return []
