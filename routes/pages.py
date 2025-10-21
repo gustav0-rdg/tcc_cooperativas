@@ -17,7 +17,7 @@ def formulario_cadastro():
 
 @pages.route("/login", methods=["GET"])
 def pagina_login():
-    return render_template("login.html")
+    return render_template("login-cooperativa.html")
 
 @pages.route("/login-catador", methods=["GET"])
 def pagina_login_catador():
