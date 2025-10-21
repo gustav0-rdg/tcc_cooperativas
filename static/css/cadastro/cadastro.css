@@ -1,27 +1,27 @@
 .card{
     max-width: 360px !important;
-    background-color: var(--verde-principal);
+    background-color: var(--verde-claro-medio);
     border: none !important;
 }
 
 .card h1{
     font-weight: 700;
-    color: var(--verde-escuro-secundario);
+    color: var(--verde-escuro);
    
 }
 
 label {
-    color: var(--verde-escuro-principal);
+    color: var(--verde-escuro-medio);
     font-weight: 700;
 }
 
 input::placeholder{
-    color: var(--verde-claro-secundario) !important;
+    color: var(--verde-claro-medio) !important;
     
 }
 
 #form button{
-    background-color: var(--verde-escuro-principal) !important;
+    background-color: var(--verde-escuro-medio) !important;
     border: 0;
     text-transform: uppercase;
     font-weight: 700;
@@ -30,14 +30,14 @@ input::placeholder{
 }
 
 #form button:hover{
-    background-color: var(--verde-escuro-secundario) !important;
+    background-color: var(--verde-escuro) !important;
 }
 
 #form a{
-    color: var(--verde-escuro-secundario);
+    color: var(--verde-escuro);
     text-decoration: underline;
 }
 
 p {
-    color: var(--verde-escuro-principal);
+    color: var(--verde-escuro-medio);
 }

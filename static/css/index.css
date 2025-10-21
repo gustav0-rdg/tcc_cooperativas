@@ -12,13 +12,13 @@
 
 /* Cartão */
 .card__container {
-    background-color: var(--verde-principal);
+    background-color: var(--verde-claro-medio);
     border: none !important;
     border-radius: 10px;
     max-width: 900px;
     width: 80%;
     height: 80%;
-    border: 2px solid var(--verde-escuro-principal);
+    border: 2px solid var(--verde-escuro);
     z-index: 0;
     
 }
@@ -26,29 +26,26 @@
 .card__container>h3 {
     font-size: 48px;
     font-weight: 700;
-    color: var(--verde-escuro-secundario);
+    color: var(--verde-escuro);
 
 }
 
 /* Botões */
 .botao__container {
-    background-color: var(--verde-medio-secundario);
-    color: var(--branco);
+    background-color: var(--verde-escuro-medio);
+    color: var(--verde-claro);
     border-radius: 15px;
     height: 65px;
 }
 
 .botao__container:hover {
-    background-color: var(--verde-claro-secundario);
-}
-
-.botao__container:hover .botao__icone {
-    color: var(--preto);
+    background-color: var(--verde-escuro);
+    color: var(--verde-claro);
 }
 
 /* Icones */
 .botao__icone {
-    color: var(--verde-claro-secundario);
+    color: var(--verde-claro);
 }
 
 

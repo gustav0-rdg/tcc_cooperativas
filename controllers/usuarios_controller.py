@@ -1,34 +1,99 @@
 from data.connection_controller import Connection
-from controllers.cnpj_controller import CNPJ
-from controllers.email_controller import Email
 from mysql.connector.connection import MySQLConnection
 from controllers.tokens_controller import Tokens
+import hashlib
+from datetime import datetime, timedelta
+from controllers.email_controller import Email
 
-class Cooperativa:
+class Usuarios:
 
-    def __init__(self, connection_db:MySQLConnection):
+    def __init__ (self, connection_db:MySQLConnection):
         
         if not Connection.validar(connection_db):
 
-            raise ValueError (f'Erro - Cooperativa: Valores inválidos para os parâmetros "connection_db": {connection_db}')
+            raise ValueError (f'Erro - Usuarios: Valores inválidos para os parâmetros "connection_db": {connection_db}')
         
         self.connection_db = connection_db
 
-    def autenticar (self, email:str, senha:str) -> bool:
+    @staticmethod
+    def criptografar (texto:str) -> str:
+
+        return hashlib.sha256(texto.encode('utf-8')).hexdigest()
+    
+    def get_by_id (self, id_usuario:int) -> dict:
 
         """
-        Verifica a existência de Cooperativa com
-        o email e senha fornecidos e retorna seu
-        código de sessão (Token)
+        Consulta no banco de dados o
+        usuário com o ID fornecido
         """
 
-        if not isinstance(email, str) or not isinstance(senha, str):
+        #region Exceções
 
-            raise TypeError ('Cooperativa: "email" e "senha" devem ser do tipo String')
+        if not isinstance(id_usuario, int):
+
+            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser do tipo Int')
+            
+        #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    usuarios.id_usuario,
+                    usuarios.nome,
+                    usuarios.email,
+                    usuarios.tipo,
+                    usuarios.status,
+                    usuarios.data_criacao
+                FROM usuarios
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (id_usuario, )
+
+            )
+
+            return cursor.fetchone()            
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "get_by_id": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def autenticar (self, email:str, senha:str) -> bool:
+
+        """
+        Verifica a autenticidade do usuário
+        conferindo a existência do seu email
+        e senha cadastrados no banco de dados
+        """
+
+        #region Exceções
+
+        if not isinstance(email, str):
+
+            raise TypeError ('Usuarios "autenticar" - "email" deve ser do tipo String')
+        
+        if not isinstance(senha, str):
+
+            raise TypeError ('Usuarios "autenticar" - "senha" deve ser do tipo String')
+            
+        #endregion
+
+        cursor = self.connection_db.cursor(dictionary=True)
+
+        try:
+
+            senha = Usuarios.criptografar(senha)
 
             cursor.execute (
 
@@ -39,7 +104,7 @@ class Cooperativa:
                 WHERE 
                     usuarios.email = %s
                 AND
-                    BYTE usuarios.senha_hash = %s;
+                    usuarios.senha_hash = %s;
                 """,
 
                 (email, senha)
@@ -49,21 +114,14 @@ class Cooperativa:
             data_user = cursor.fetchone()
 
             if data_user:
-
-                return Tokens(self.connection_db).create(
-
-                    data_user['id_usuario'],
-                    ''
-
-                )
+                return data_user['id_usuario']
 
             else:
-
-                return False                
+                return None                
 
         except Exception as e:
 
-            print(f'Erro - Cooperativa "autenticar": {e}')
+            print(f'Erro - Usuarios "autenticar": {e}')
 
             return False
 
@@ -71,153 +129,55 @@ class Cooperativa:
 
             cursor.close()
 
-    def get_by_cnpj (self, cnpj:str) -> bool:
+    def trocar_senha (self, id_usuario:int, nova_senha:str) -> bool:
 
         """
-        Consulta o CNPJ e retorna a cooperativa
-        com o CNPJ requisitado, caso registrado,
-        se não 'null'
+        Alterar a senha do usuário
+        no banco de dados
         """
 
-        if not isinstance(cnpj, str):
-
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT * FROM cooperativa
-                WHERE cooperativa.cnpj = %s;
-                """,
-
-                (cnpj, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_by_cnpj": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
-
-        """
-        Altera o status da cooperativa no sistema
-        """
-
-        if not isinstance(id_usuario, int) or not isinstance(novo_status, str):
-
-            raise TypeError ('Cooperativa - "id_usuario" e "novo_status" devem ser do tipo String')
-
-        status_validos = ['ativo', 'inativo']
-
-        if not novo_status in status_validos:
-
-            raise ValueError (f'Cooperativa - "novo_status" deve ser um destes valores: {status_validos}')
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            self.cursor.execute (
-
-                """
-                UPDATE usuarios
-                SET usuarios.status = %s
-                WHERE usuarios.id_usuario = %s;
-                """,
-
-                (novo_status, id_usuario)
-
-            )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "alterar_status": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def ativar (self, codigo_validacao:str) -> bool:
-
-        """
-        A função é a etapa final do cadastro, ativa
-        a conta após o registro da cooperativa e sua
-        confirmação via email
-        """
-
-        if not isinstance(codigo_validacao, str):
-
-            raise TypeError ('Cooperativa - "codigo_validacao" deve ser do tipo String')
-
-        try:
-
-            data_token = Tokens(self.connection_db).validar(codigo_validacao)
-
-            if data_token['tipo'] != 'cadastro' or data_token['usado'] == True:
-
-                return False
-        
-            return self.alterar_status(data_token['id_usuario'], 'ativo')
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "ativar": {e}')
-
-            return False
-
-    def delete (self, id_usuario:int) -> bool:
-
-        """
-        Exclui permanentemente a cooperativa
-        com o CNPJ fornecido do banco de dados.
-        """
+        #region Exceções
 
         if not isinstance(id_usuario, int):
 
-            raise TypeError ('Cooperativa - "id_usuario" deve ser do tipo Int')
+            raise TypeError ('Usuarios "trocar_senha" - "id_usuario" deve ser do tipo Int')
+        
+        if not isinstance(id_usuario, int):
+
+            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ser do tipo String')
+        
+        if len(nova_senha) < 8:
+
+            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ter 8 ou mais caractéres')
+            
+        #endregion
 
         cursor = self.connection_db.cursor()
 
         try:
 
+            nova_senha = Usuarios.criptografar(nova_senha)
+
             cursor.execute (
 
                 """
-                DELETE FROM usuarios
+                UPDATE usuarios
+                SET usuarios.senha_hash = %s
                 WHERE usuarios.id_usuario = %s;
                 """,
 
-                (id_usuario, )
+                (nova_senha, id_usuario)
 
             )
 
-            self.connection_db.commit()
-            return cursor.rowcount > 0
+            return True               
 
         except Exception as e:
 
-            print(f'Erro - Cooperativa "delete": {e}')
+            print(f'Erro - Usuarios "trocar_senha": {e}')
 
             return False
-        
+
         finally:
 
             cursor.close()
@@ -227,37 +187,36 @@ class Cooperativa:
         self,
 
         nome:str,
+
         email:str,
         senha:str,
-        tipo:str,
 
-        cnpj:str,
+        tipo:str
 
     ) -> bool:
         
         """
-        Registra a cooperativa no Banco de Dados
-        e envia o email de autenticação
+        Cadastra o usuário (de forma genérica) 
+        no banco de dados
         """
 
-        if not isinstance(cnpj, str) or not isinstance(email, str) or not isinstance(senha, str):
+        #region Exceções
 
-            raise TypeError ('Cooperativa "create" - "cnpj", "email" e "senha" devem ser do tipo String')
+        if not isinstance(nome, str) or not isinstance(email, str) or not isinstance(senha, str) or not isinstance(tipo, str):
 
-        if not CNPJ.validar(cnpj):
+            raise TypeError ('Usuarios "create" - "nome", "email", "senha" e "tipo" devem ser do tipo String')
+            
+        if len(senha) < 8:
 
-            raise ValueError (f'Cooperativa "create" - O "cnpj" fornecido não é válido: {cnpj}')
+            raise ValueError ('Usuarios "create" - "senha" deve ter 8 ou mais caractéres')
+
+        #endregion
 
         cursor = self.connection_db.cursor()
 
         try:
 
-            data_cooperativa = CNPJ.consultar(cnpj)
-
-            if not data_cooperativa:
-
-                return False
-
+            senha = Usuarios.criptografar(senha)
             cursor.execute (
 
                 """
@@ -269,44 +228,15 @@ class Cooperativa:
 
             )
 
-            id_novo_usuario = cursor.lastrowid
-            cursor.execute (
-
-                """
-                INSERT INTO cooperativas (id_usuario, cnpj, razao_social, endereco, cidade, estado, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-                """,
-
-                (
-                    id_novo_usuario, 
-                    cnpj,
-
-                    data_cooperativa['nature']['id'],
-                    f'{data_cooperativa['address']['street']}, {data_cooperativa['address']['number']}',    
-                    data_cooperativa['address']['city'],
-                    data_cooperativa['address']['state'],
-                    '',
-                    ''       
-                )
-
-            )
-
             self.connection_db.commit()
-            if cursor.rowcount > 0:
-
-                codigo_verificacao = Tokens(self.connection_db).create(id_novo_usuario, 'cadastro')
-                return self.enviar_email_confirmacao(codigo_verificacao)
-
-            else:
-
-                return False
+            return cursor.lastrowid
 
         except Exception as e:
 
-            print(f'Erro - Cooperativa "create": {e}')
+            print(f'Erro - Usuarios "create": {e}')
 
             return False
-        
+
         finally:
 
             cursor.close()
@@ -543,3 +473,98 @@ class Cooperativa:
             print(f'Erro - Cooperativa "enviar_email_confirmacao": {e}')
 
             return False
+
+    def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
+
+        """
+        Altera o status do usuario no sistema
+        """
+
+        #region Exceções
+
+        if not isinstance(id_usuario, int):
+
+            raise TypeError ('Usuarios "alterar_status" - "id_usuario" deve ser do tipo Int')
+        
+        if not isinstance(novo_status, str):
+
+            raise TypeError ('Usuarios "alterar_status" - "novo_status" deve ser do tipo String')
+
+        status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
+        if not novo_status in status_validos:
+
+            raise ValueError (f'Usuarios "alterar_status" - "novo_status" deve ser um destes valores: {status_validos}')
+
+        #endregion
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            self.cursor.execute (
+
+                """
+                UPDATE usuarios
+                SET usuarios.status = %s
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (novo_status, id_usuario)
+
+            )
+
+            self.connection_db.commit()
+            return cursor.rowcount > 0
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "alterar_status": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def delete (self, id_usuario:int) -> bool:
+
+        """
+        Exclui permanentemente o usuário
+        do banco de dados
+        """
+
+        #region Exceções
+
+        if not isinstance(id_usuario, int):
+
+            raise TypeError ('Usuarios "delete" - "id_usuario" deve ser do tipo Int')
+            
+        #endregion
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                DELETE FROM usuarios
+                WHERE usuarios.id_usuario = %s;
+                """,
+
+                (id_usuario, )
+
+            )
+
+            self.connection_db.commit()
+            return cursor.rowcount > 0
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "delete": {e}')
+
+            return False
+        
+        finally:
+
+            cursor.close()
