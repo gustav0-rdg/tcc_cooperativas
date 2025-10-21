@@ -402,3 +402,50 @@ body {
         grid-template-columns: repeat(4, 1fr);
     }
 }
+
+/* Adicione esta linha no topo do seu arquivo CSS para importar a fonte */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+.container {
+    display: flex;
+    gap: 15px; /* Mantido, mas pode diminuir se preferir (ex: 10px) */
+    padding: 20px;
+    border-radius: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: auto;
+}
+
+.item {
+    position: relative;
+    border: 2px solid var(--verde-claro);
+    border-radius: 8px;
+    padding: 8px 30px 8px 15px; 
+    
+    background-color: var(--verde-claro-medio);
+    display: flex;
+    align-items: center;
+    font-size: 16px; 
+    
+    font-weight: 700;
+    color: var(--branco);
+}
+
+.badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    
+    background-color: var(--verde-claro);
+    border: 2px solid var(--verde-principal);
+    border-radius: 50%;
+    font-size: 14px;
+    
+    color: var(--verde-escuro-medio);
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

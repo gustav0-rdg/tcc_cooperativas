@@ -1,9 +1,9 @@
 import { getMateriais } from "./api/getMateriais.js";
-import { getCompradoresPorMaterial } from "./api/getCompradores.js";
+import { getCompradoresPorMaterial, getCompradoresavaliacoes } from "./api/getCompradores.js";
 
 
 const buscarCompradoresSec = document.querySelector('.buscar-compradores__cartoes');
-
+const detalheCompradores = document.querySelector('#detalhe-comprador');
 async function renderizarMateriais() {
     const materiais = await getMateriais();
     if (!materiais) return; // Se não houver materiais, não faz nada
@@ -33,6 +33,7 @@ buscarCompradoresSec.addEventListener('click', async (event) => {
         await renderizarCompradores(compradores)
     }
 });
+
 async function renderizarCompradores(compradores) {
     buscarCompradoresSec.innerHTML = '';
     const htmlCompradores = compradores.map((comprador, index) => `
@@ -49,33 +50,36 @@ async function renderizarCompradores(compradores) {
                     <p>Preço pago: R$${comprador.valor_total}</p>
                     <small>${comprador.total_kg_comprado} Kgs</small>
                 </div>
-                <button class="verMais" data-index="${index}">Ver mais</button>
+                <button class="verMais" data-value="${comprador.cnpj}" data-index="${index}">Ver mais</button>
             </div>
         </div>
     `).join('');
 
-    // 3. Insere todo o HTML no DOM de uma só vez (muito mais performático)
-    buscarCompradoresSec.innerHTML = htmlCompradores;
+    detalheCompradores.innerHTML = htmlCompradores;
+    detalheCompradores.classList.remove('hidden')
 
-    // 4. Agora que todos os botões existem, busca todos eles
-    const todosOsBotoes = buscarCompradoresSec.querySelectorAll('.verMais');
+    const todosOsBotoes = detalheCompradores.querySelectorAll('.verMais');
 
-    // 5. Adiciona o evento de clique para cada botão
     todosOsBotoes.forEach(botao => {
-        botao.addEventListener('click', (event) => {
-            // Pega o 'index' que guardamos no atributo 'data-index' do botão
+        botao.addEventListener('click', async (event) => {
             const compradorIndex = event.target.dataset.index;
-            
-            // Usa o index para pegar o objeto correto do array original
+            const compradorCnpj = event.target.dataset.value;
+            const avaliacoes = await getCompradoresavaliacoes(compradorCnpj);
+            console.log(avaliacoes);
             const compradorSelecionado = compradores[compradorIndex];
-
-            // Agora sim, mostra o SweetAlert com os dados corretos
             Swal.fire({
                 title: `${compradorSelecionado.razao_social}`,
+                background: "var(--verde-principal)",
                 html: `
                     <p><strong>Avaliação:</strong> ${compradorSelecionado.avaliacao} ⭐</p>
                     <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
                     <p><strong>Total Comprado:</strong> ${compradorSelecionado.total_kg_comprado} Kgs</p>
+                    <div class="container">
+                    ${
+                        avaliacoes.map(a => `<div class="item">${a.texto} <span class="badge">${a.quantidade}</span></div>`
+                        ).join('')
+                    }
+                    </div>
                     `,
                 icon: 'info'
             });

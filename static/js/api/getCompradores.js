@@ -15,3 +15,14 @@ export async function getCompradoresPorMaterial(nome_material) {
         return [];
     }
 }
+
+export async function getCompradoresavaliacoes(cnpj) {
+    try{
+        const response = await fetch(`/get/feedback-tags/${encodeURIComponent(cnpj)}`);
+        const data = await response.json();
+        return data;
+    } catch (error){
+        console.error("Falha na requisição:", error);
+        return [];
+    }
+}
