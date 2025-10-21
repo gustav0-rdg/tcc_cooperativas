@@ -1,23 +1,28 @@
 * {
-    box-sizing: border-box;
+    box-sizing: border-box; 
     margin: 0;
     padding: 0;
 }
 
+
+
+
 body {
-    height: 100vh;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
     background-color: var(--verde-claro);
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; 
 }
 
 .corpo {
-    width: 100vw;
-    height: 100vh;
+    flex-grow: 1; 
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px 10px; 
 }
 
 .acoes {
@@ -25,82 +30,107 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 20px;
+    padding: 30px; 
+    width: 95%;
+    max-width: 900px; 
+    gap: 30px; 
     background-color: var(--verde-principal);
     border-radius: 10px;
+    min-height: 60vh; 
+    text-align: center; 
 }
 
 .acoes h1 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 3rem); 
     margin-bottom: 5px;
     color: var(--verde-escuro) !important;
 }
 
 .acoes p {
-    font-size: 32px;
+    font-size: clamp(1.5rem, 4vw, 2rem); 
     margin-bottom: 20px;
     color: var(--verde-escuro) !important;
 }
 
 .acoes__cooperativa {
     display: grid;
-    gap: 15px;
+    grid-template-columns: 1fr; 
+    gap: 20px; 
     background-color: var(--verde-escuro-medio);
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
-    grid-template-columns: 1fr;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-
-    & a{
-        text-decoration: none;
-    }
-    & .acoes__cooperativa-btn {
-        width: 100%;
-        min-height: 120px;
-        padding: 20px;
-        background-color: var(--verde-claro-medio);
-        color: var(--verde-escuro);
-        border: none;
-        border-radius: 8px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        &:hover {
-            background-color: var(--verde-escuro);
-            color: var(--verde-claro);
-        }
-    }
+    width: 100%; 
 }
 
+.acoes__cooperativa a {
+    text-decoration: none;
+    color: var(--verde-escuro);
+}
+
+.acoes__cooperativa a:hover {
+    color: var(--verde-claro) !important; 
+}
+
+.acoes__cooperativa-btn {
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    text-align: center;
+    width: 100%; 
+    min-height: 120px;
+    padding: 15px; 
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(1rem, 2.5vw, 1.4rem); 
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.acoes__cooperativa-btn:hover {
+    background-color: var(--verde-escuro);
+    color: var(--verde-claro) !important; 
+}
+
+/* Media Query para Telas Maiores (>= 600px) */
 @media (min-width: 600px) {
     .acoes__cooperativa {
+        /* Layout de duas colunas para telas médias e grandes */
         grid-template-columns: repeat(2, 1fr);
+        /* Garantindo que o grid esteja sempre centralizado */
+        justify-content: center;
+        align-content: center;
     }
 
-    .acoes__cooperativa-btn:nth-child(3) {
-        grid-column: 1 / -1;
+    /* O terceiro botão (registrar-venda) ocupa duas colunas para simetria */
+    .acoes__cooperativa > div:nth-child(3) {
+        grid-column: 1 / -1; 
     }
 }
 
-@media (min-width: 900px) {
+/* Media Query para Telas Menores (Dispositivos Móveis - Máximo 600px) */
+@media (max-width: 600px) {
+    /* Garante que o layout volte para uma coluna em telas menores */
     .acoes__cooperativa {
-        grid-template-columns: repeat(3, 1fr);
+        display: flex; /* Volta para flexbox para melhor controle de botões empilhados */
+        flex-direction: column;
+        gap: 20px; /* Espaçamento entre os botões */
+        padding: 20px 10px;
     }
-
-    .acoes__cooperativa-btn:nth-child(3) {
+    
+    /* Remove a regra de coluna do terceiro botão para telas pequenas */
+    .acoes__cooperativa > div:nth-child(3) {
         grid-column: auto;
     }
 }
 
-.acoes__compradores h2 {
+
+/* Outras Seções (Removida a regra que estava incompleta e desnecessária) */
+/* .acoes__compradores h2 {
     font-size: 2rem;
     margin-top: 40px;
     margin-bottom: 15px;
-}
+} */
