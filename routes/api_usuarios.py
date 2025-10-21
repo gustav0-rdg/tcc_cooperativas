@@ -237,6 +237,9 @@ def get_info (id_usuario:int=None):
         #endregion
 
         data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
+
+        print(type(data_usuario))
+
         match data_usuario:
 
             # 404 - Usuário não encontrado
@@ -246,7 +249,7 @@ def get_info (id_usuario:int=None):
 
             # 200 - Informações do usuário consultadas
 
-            case True:
+            case _ if isinstance(data_usuario, dict):
                 return jsonify({ 'data': data_usuario }), 200
 
             # 500 - Erro ao consultar as informações usuário
