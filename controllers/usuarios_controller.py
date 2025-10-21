@@ -157,7 +157,6 @@ class Usuarios:
         try:
 
             nova_senha = Usuarios.criptografar(nova_senha)
-
             cursor.execute (
 
                 """
@@ -170,7 +169,7 @@ class Usuarios:
 
             )
 
-            return True               
+            return cursor.rowcount > 0 or None               
 
         except Exception as e:
 
@@ -228,7 +227,7 @@ class Usuarios:
             )
 
             # Já há um usuário com o email cadastrado
-            
+
             if cursor.fetchone() != None:
                 return None
 
