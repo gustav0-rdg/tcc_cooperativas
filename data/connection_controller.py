@@ -17,13 +17,13 @@ info_conexoes = {
 
     'online': {
 
-        'host': '',
-        'port': '',
+        'host': 'db-recoopera.mysql.database.azure.com',
+        'port': '3306',
 
-        'user': '',
-        'password': '',
+        'user': 'godofredo',
+        'password': '33351065Aa!',
         
-        'database': '' 
+        'database': 'db-recoopera' 
 
     }
 
