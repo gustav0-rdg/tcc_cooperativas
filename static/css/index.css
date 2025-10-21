@@ -12,7 +12,7 @@
 
 /* Cartão */
 .card__container {
-    background-color: var(--verde-claro-medio);
+    background-color: var(--verde-principal);
     border: none !important;
     border-radius: 10px;
     max-width: 900px;
@@ -32,20 +32,23 @@
 
 /* Botões */
 .botao__container {
-    background-color: var(--verde-escuro-medio);
-    color: var(--verde-claro);
+    background-color: var(--verde-claro-medio);
+    color: var(--branco);
     border-radius: 15px;
     height: 65px;
 }
 
 .botao__container:hover {
-    background-color: var(--verde-escuro);
-    color: var(--verde-claro);
+    background-color: var(--verde-escuro-medio);
+}
+
+.botao__container:hover .botao__icone {
+    color: var(--preto);
 }
 
 /* Icones */
 .botao__icone {
-    color: var(--verde-claro);
+    color: var(--verde-escuro-medio);
 }
 
 

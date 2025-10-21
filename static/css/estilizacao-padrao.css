@@ -6,7 +6,11 @@
 
 
 body {
+<<<<<<< HEAD
+    background-color: var(--verde-escuro);
+=======
     background-color: var(--verde-principal);
+>>>>>>> 29e64399251d9b0a97dea89cce141b1bcfc459ef
     min-height: 100vh;
     height: auto;
     position: relative;

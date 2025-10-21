@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recoopera | Cooperativas</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <link rel="stylesheet" href="../static/css/root-de-cores.css">
+    <link rel="stylesheet" href="../static/css/pag_cooperativa_gestor/pag_cooperativas_gestor.css">
+    
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+</head>
+<body>
+    
+    {% include 'includes/header.html' %}
+    
+    <main class="container-fluid cooperativas-main">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-11 col-xl-10">
+                
+                <section class="page-header mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <a href="{{ url_for('gestor.inicio') }}" class="btn-voltar" title="Voltar">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h1 class="page-title mb-0">Cooperativas Cadastradas</h1>
+                    </div>
+                    <p class="page-subtitle">Gerencie e visualize todas as cooperativas do sistema</p>
+                </section>
+
+                <section class="search-section mb-4">
+                    <form id="searchForm" method="GET" action="{{ url_for('gestor.visualizar_cooperativas') }}">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6 col-lg-5">
+                                <div class="search-box">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" 
+                                           class="form-control search-input" 
+                                           id="searchInput" 
+                                           name="q"
+                                           placeholder="Buscar por nome ou CNPJ...">
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6 col-lg-7">
+                                <div class="filters-box">
+                                    <button class="btn btn-filter dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-filter"></i> Filtros
+                                    </button>
+                                    <ul class="dropdown-menu filter-dropdown">
+                                        <li><h6 class="dropdown-header">Status</h6></li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="todos">
+                                                <i class="fas fa-circle-nodes"></i> Todos
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="aprovado">
+                                                <i class="fas fa-check-circle text-success"></i> Aprovados
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="aguardando">
+                                                <i class="fas fa-clock text-warning"></i> Aguardando
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="bloqueado">
+                                                <i class="fas fa-ban text-danger"></i> Bloqueados
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Atividade</h6></li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="atividade" data-value="todos">
+                                                <i class="fas fa-circle-nodes"></i> Todos
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="atividade" data-value="ativo">
+                                                <i class="fas fa-bolt text-success"></i> Ativos (últimos 2 meses)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="atividade" data-value="inativo">
+                                                <i class="fas fa-moon text-secondary"></i> Inativos
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    
+                                    <div class="active-filters mt-2" id="activeFilters"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <div class="results-counter mb-3">
+                    <span id="resultsCount">
+                        Mostrando {{ cooperativas|length }} de {{ total_cooperativas }} cooperativa{{ 's' if total_cooperativas != 1 else '' }}
+                    </span>
+                </div>
+
+                <section class="cooperativas-list mb-4">
+                    <div class="row g-3 g-md-4" id="cooperativasContainer">
+                        
+                        {% for coop in cooperativas %}
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="coop-card" 
+                                     data-id="{{ coop.id }}"
+                                     data-nome="{{ coop.nome }}"
+                                     data-cnpj="{{ coop.cnpj }}"
+                                     data-status="{{ coop.status }}"
+                                     data-data-cadastro="{{ coop.dataCadastro|formatar_data }}"
+                                     data-ultimo-acesso="{{ coop.ultimoAcesso|formatar_data }}"
+                                     data-ativo="{{ coop.ativo }}"
+                                     data-telefone="{{ coop.telefone }}"
+                                     data-email="{{ coop.email }}"
+                                     data-endereco="{{ coop.endereco }}"
+                                     data-cidade="{{ coop.cidade }}"
+                                     data-estado="{{ coop.estado }}"
+                                     data-total-vendas="{{ coop.totalVendas }}"
+                                     data-materiais-vendidos="{{ coop.materiaisVendidos }}">
+                                    
+                                    <div class="coop-card-header">
+                                        <div>
+                                            <h3 class="coop-name">{{ coop.nome }}</h3>
+                                            <p class="coop-cnpj">{{ coop.cnpj }}</p>
+                                        </div>
+                                        <span class="status-badge status-{{ coop.status }}">
+                                            {{ coop.status|title }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="coop-card-body">
+                                        <div class="coop-info-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ coop.cidade }} - {{ coop.estado }}</span>
+                                        </div>
+                                        <div class="coop-info-item">
+                                            <i class="fas fa-phone"></i>
+                                            <span>{{ coop.telefone }}</span>
+                                        </div>
+                                        <div class="coop-info-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>{{ coop.email }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="coop-card-footer">
+                                        <div class="last-access">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Último acesso: {{ coop.ultimoAcesso|formatar_data }}</span>
+                                            <span class="activity-indicator {{ 'activity-active' if coop.ativo else 'activity-inactive' }}" 
+                                                  title="{{ 'Ativo' if coop.ativo else 'Inativo' }}"></span>
+                                        </div>
+                                        
+                                        {% if coop.status == 'bloqueado' %}
+                                            <button class="btn-block btn-block-success" 
+                                                    data-coop-id="{{ coop.id }}" 
+                                                    data-coop-nome="{{ coop.nome }}"
+                                                    data-acao="desbloquear">
+                                                <i class="fas fa-unlock"></i> Desbloquear
+                                            </button>
+                                        {% else %}
+                                            <button class="btn-block btn-block-danger" 
+                                                    data-coop-id="{{ coop.id }}" 
+                                                    data-coop-nome="{{ coop.nome }}"
+                                                    data-acao="bloquear">
+                                                <i class="fas fa-ban"></i> Bloquear
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% if not cooperativas %}
+                            <div class="col-12">
+                                <div class="alert alert-info text-center" style="background: var(--branco); border: 2px solid var(--verde-claro-medio); border-radius: 12px;">
+                                    <i class="fas fa-info-circle" style="font-size: 2rem; color: var(--verde-principal); margin-bottom: 1rem;"></i>
+                                    <h5 style="color: var(--verde-escuro);">Nenhuma cooperativa encontrada</h5>
+                                    <p style="color: var(--cinza-claro); margin-bottom: 0;">Tente ajustar os filtros de pesquisa</p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </section>
+
+                <div class="text-center mb-5">
+                    <button class="btn btn-load-more" id="loadMoreBtn" 
+                            data-total-exibido="{{ cooperativas|length }}" 
+                            data-total-geral="{{ total_cooperativas }}">
+                        <i class="fas fa-chevron-down"></i> Carregar mais cooperativas
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="cooperativaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Detalhes da Cooperativa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-modal-close" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% include 'includes/footer.html' %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="../static/js/visualizar_cooperativas_gestor/cooperativas.js"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
+from datetime import datetime
 
 class Tokens:
 
@@ -17,7 +18,8 @@ class Tokens:
         self,
 
         id_usuario:int,
-        tipo:str
+        tipo:str,
+        data_expiracao:datetime
 
     ) -> bool:
         
@@ -25,29 +27,67 @@ class Tokens:
 
             raise TypeError ('Tokens Controller - "id_usuario" deve ser do tipo Int e "tipo" deve ser do tipo String')
 
-        tipos_validos = ['']
+        tipos_validos = ['cadastro', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
 
             raise ValueError (f'Tokens Controller - "tipo" deve ser um desses valores: {tipos_validos}')
         
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
+
+            # Apaga os tokens anteriores pois esta
+            # credencial deve ser única
 
             cursor.execute (
 
                 """
-                INSERT INTO tokens_validacao (id_usuario, tipo)
-                VALUES (%s, %s);
-                """
+                DELETE FROM tokens_validacao
+                WHERE 
+                    tokens_validacao.id_usuario = %s
+                AND
+                    tokens_validacao.tipo = %s;
+                """,
 
                 (id_usuario, tipo)
 
             )
 
+            cursor.execute (
+
+                """
+                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao)
+                VALUES (%s, %s, %s);
+                """,
+
+                (id_usuario, tipo, data_expiracao)
+
+            )
+
+            cursor.execute (
+
+                """
+                SELECT
+                    tokens_validacao.token
+                FROM tokens_validacao
+                WHERE tokens_validacao.id_token = %s;
+                """,
+
+                (cursor.lastrowid, )
+
+            )
+
+            token = cursor.fetchone()['token']
+            
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            if cursor.rowcount > 0 and token:
+
+                return token
+
+            else:
+
+                return False
 
         except Exception as e:
 
@@ -79,10 +119,8 @@ class Tokens:
                     tipo,
                     usado
                 FROM tokens_validacao
-                INNER JOIN usuarios 
-                    ON tokens_validacao.id_usuario = usuarios.id_usuario
-                WHERE BYTE tokens_validacao.token = %s;
-                """
+                WHERE tokens_validacao.token = %s;
+                """,
 
                 (token, )
 
@@ -116,7 +154,7 @@ class Tokens:
                 UPDATE tokens_validacao
                 SET tokens_validacao.usado = TRUE
                 WHERE tokens_validacao.id_token = %s;
-                """
+                """,
 
                 (id_token, )
 

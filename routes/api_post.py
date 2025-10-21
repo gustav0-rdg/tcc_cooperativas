@@ -1,5 +1,6 @@
 from flask import redirect, Blueprint, request, jsonify
 from controllers.comprador_controller import Compradores
+from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
@@ -15,7 +16,9 @@ def cadastrar_catador():
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
     dados_recebidos = request.get_json()
-    print(dados_recebidos)
+    conn = Connection('local')
+    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(2, dados_recebidos)
+    
     return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
 
 @api_post.route("/dados-comprador", methods=["POST"])
