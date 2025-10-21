@@ -1,9 +1,7 @@
 from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
-from controllers.email_controller import Email
+from controllers.cpf_controller import CPF
 from mysql.connector.connection import MySQLConnection
-from controllers.tokens_controller import Tokens
-from controllers.usuarios_controller import Usuarios
 
 class Cooperativa:
 
@@ -193,6 +191,10 @@ class Cooperativa:
         if not isinstance(cpf, str):
 
             raise TypeError ('Cooperativa - "cpf" deve ser do tipo String')
+        
+        if not CPF.validar(cpf):
+
+            raise ValueError ('Cooperativa - "cpf" fornecido é inválido')
         
         if not isinstance(telefone, str):
 
