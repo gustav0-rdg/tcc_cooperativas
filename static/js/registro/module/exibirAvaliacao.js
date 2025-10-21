@@ -171,7 +171,7 @@ function renderizarComentarios(tipo){
     const comentariosHtml = opcoesSection.querySelector('.comentario');
     comentariosHtml.innerHTML = '';
     comentariosHtml.innerHTML = comentarios.filter(c => c.tipo === tipo).map
-    (c => `<button class="comentario__btn" data-value="${c.texto}">${c.texto}</button>
+    (c => `<button class="comentario__btn comentario-rapido" data-value="${c.texto}">${c.texto}</button>
             `).join('');
 
     const comentariosRapido = opcoesSection.querySelector('.comentario');

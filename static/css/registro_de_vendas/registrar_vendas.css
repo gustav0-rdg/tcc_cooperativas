@@ -104,7 +104,6 @@ body{
   border-radius: 10px;
 }
 
-
 .confirmar__venda {
   display: flex;
   align-items: center !important;
@@ -319,12 +318,10 @@ hr{
   font-weight: 600;
 }
 
-
 textarea, input{
   background-color: transparent;
   border: 0;
 }
-
 
 .relatorio_de_venda{
   background-color: var(--verde-escuro);
@@ -371,7 +368,8 @@ textarea, input{
   border: 0;
   border-radius: 10px;
   font-size: 24px;
-  background-color: white !important;
+  background-color: var(--branco) !important;
+  outline-color: var(--verde-escuro-medio);
 }
 
 .opcoes-btn__novo-comprador{
@@ -450,7 +448,6 @@ i{
     background-color: var(--verde-principal);
   }
 
- 
   .registros__opcoes {
       flex-direction: row;
       flex-wrap: wrap; 
@@ -458,7 +455,7 @@ i{
   }
 
   .registros__opcoes button {
-      width: 250px; 
+      width: 350px; 
       margin: 10px; 
       align-items: center; 
       text-align: center;
@@ -466,87 +463,82 @@ i{
   }
 
   .registros__opcoes button h1 {
-      font-size: 1.5em; /* Aumenta um pouco a fonte */
+      font-size: 1.5em; 
   }
   
-  /* Corrige o layout de 'Registros' para manter o alinhamento principal em coluna */
   .registros {
-      align-items: center; /* Centraliza o <section class="registros__opcoes"> */
+      align-items: center; 
   }
 
-  /* 4. Etapa de Valores (Input de Kg e Preço) */
+  .comentario-rapido{
+    width: 250px !important;
+  }
+
   .container__valores {
       display: flex;
       flex-direction: row;
       gap: 20px;
       justify-content: center;
-      width: 90%; /* Deve ter a mesma largura dos blocos acima */
+      width: 90%; 
       max-width: 600px; 
   }
 
-  /* Garante que os containers de input usem metade do espaço disponível no 'container__valores' */
   .valores__kg, .valores__preco {
       width: 50%;
-      height: 250px; /* Aumenta um pouco a altura */
+      height: 250px; 
   }
 
-  /* Move o botão 'Continuar' para fora do flex container dos inputs */
   .confirmar__venda {
       width: 90%;
       max-width: 600px; 
-      margin-top: 20px; /* Espaçamento após os campos de input */
+      margin-top: 20px; 
       display: flex;
       justify-content: center;
       font-weight: bolder;
   }
 
-  /* 5. Etapa de Avaliação (Comentários Rápidos) */
   .comentario {
-      /* Usa grid ou flex para que os botões fiquem lado a lado */
       display: grid;
-      grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+      grid-template-columns: 1fr 1fr; 
       gap: 10px;
       padding: 20px;
   }
 
   .comentario h3 {
-      grid-column: 1 / -1; /* O título ocupa todas as colunas */
+      grid-column: 1 / -1; 
       text-align: center;
   }
 
   .comentario__btn {
-      width: 100%; /* Ocupa a largura total da coluna */
-      height: auto; /* Altura automática para o texto caber */
+      width: 100%; 
+      height: auto; 
       padding: 15px;
   }
 
-  /* 6. Etapa Finalizar */
   .finalizar {
-      flex-direction: row; /* Coloca os botões lado a lado */
+      flex-direction: row; 
       justify-content: space-around;
       padding: 20px 0;
   }
 
   .finalizar button {
-      width: 45%; /* Cada botão ocupa quase metade do container */
+      width: 45%; 
       height: 50px;
       font-size: 1.1em;
   }
+
   .opcoes-btn__novo-comprador{
     box-sizing: border-box;
-    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
-    max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
-
+    width: 90%; 
+    max-width: 600px; 
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     font-size: 1.3rem;
     font-weight: bolder;
-
     padding: 10px;
     width: 80%;
-
     border: 0;
     background-color: var(--verde-claro-medio);
     height: 60px;
