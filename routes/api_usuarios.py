@@ -144,50 +144,18 @@ def alterar_senha ():
         conn.close()
 
 @api_usuarios.route('/delete', methods=['POST'])
-def delete_personal ():
-
-    token = request.headers.get('Authorization')
-
-    if not token:
-
-        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-    
-    conn = Connection('local')
-
-    try:
-
-        data_token = Tokens(conn.connection_db).validar(token)
-        if not data_token or data_token['tipo'] != 'sessao':
-
-            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-
-        data_usuario = Usuarios(conn.connection_db).delete(data_token['id_usuario'])
- 
-        if data_usuario == None:
-
-            return jsonify({ 'error': 'Usuário não encontrado' }), 404
-        
-        if data_usuario == False:
-
-            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-        
-        return jsonify({ 'texto': 'Usuário excluído' }), 200
-    
-    except Exception as e:
-
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
-    finally:
-
-        conn.close()
-
 @api_usuarios.route('/delete/<id_usuario>', methods=['POST'])
-def delete (id_usuario):
+def delete (id_usuario:int=None):
+
+    if id_usuario != None:
+
+        if not id_usuario.isdigit():
+            return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+
+        id_usuario = int(id_usuario)
 
     token = request.headers.get('Authorization')
-
     if not token:
-
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
     conn = Connection('local')
@@ -198,11 +166,16 @@ def delete (id_usuario):
 
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        #region Excluindo a conta de terceiros
 
         if data_token['id_usuario'] != id_usuario:
 
             if Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] == 'cooperativa':
+
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+            
+        #endregion
         
         delete_usuario = Usuarios(conn.connection_db).delete(id_usuario)
 
@@ -229,62 +202,18 @@ def delete (id_usuario):
         conn.close()
 
 @api_usuarios.route('/get', methods=['POST'])
-def get_info_personal ():
-
-    token = request.headers.get('Authorization')
-
-    if not token:
-        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-    
-    conn = Connection('local')
-
-    try:
-
-        data_token = Tokens(conn.connection_db).validar(token)
-
-        if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-
-        data_usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
- 
-        # 404 - Usuário não encontrado
-
-        if data_usuario == None:
-            return jsonify({ 'error': 'Verifique o parâmetro "id_usuario" e tente novamente' }), 404
-        
-        # 500 - Erro no servidor
-
-        if data_usuario == False:
-            return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-        
-        # 200 - Informações do usuário consultadas
-
-        return jsonify({
-
-            'data': data_usuario
-        
-        }), 200
-    
-    except Exception as e:
-
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
-    finally:
-
-        conn.close()
-
 @api_usuarios.route('/get/<id_usuario>', methods=['POST'])
-def get_info (id_usuario:int):
+def get_info (id_usuario:int=None):
 
-    if not id_usuario.isdigit():
+    if id_usuario != None:
 
-        return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+        if not id_usuario.isdigit():
+            return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
 
-    id_usuario = int(id_usuario)
+        id_usuario = int(id_usuario)
+
     token = request.headers.get('Authorization')
-
     if not token:
-
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
     conn = Connection('local')
@@ -295,6 +224,8 @@ def get_info (id_usuario:int):
         if not data_token or data_token['tipo'] != 'sessao':
 
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        #region Consultando info de terceiros
 
         if data_token['id_usuario'] != id_usuario:
 
@@ -302,16 +233,24 @@ def get_info (id_usuario:int):
 
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
 
+        #endregion
+
         data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
  
+        # 404 - Usuário não encontrado
+
         if data_usuario == None:
 
             return jsonify({ 'error': 'Verifique o parâmetro "id_usuario" e tente novamente' }), 404
         
+        # 404 - Erro ao consultar as informações do usuário
+
         if data_usuario == False:
 
             return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
         
+        # 200 - Informações do usuário consultadas
+
         return jsonify({
 
             'data': data_usuario
