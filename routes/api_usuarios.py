@@ -17,14 +17,17 @@ api_usuarios = Blueprint(
 def cadastrar ():
 
     token = request.headers.get('Authorization')
+
     data_cadastro = request.get_json()
 
     if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha']):
+        
+        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
 
-        return jsonify({ 'error': 'Dados inválidos, todos os campos são obrigatórios' }), 400
+    if len(data_cadastro['senha']) < 8:
+        return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
 
     if not 'tipo' in data_cadastro:
-
         data_cadastro['tipo'] = 'cooperativa'
 
     conn = Connection('local')
@@ -36,39 +39,44 @@ def cadastrar ():
         if data_cadastro['tipo'] != 'cooperativa':
 
             if not token:
-
                 return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
             
             data_token = Tokens(conn.connection_db).validar(token)
             usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
 
             if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
-
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
             
         #endregion
 
-        id_usuario = Usuarios(conn.connection_db).create(
+        novo_usuario = Usuarios(conn.connection_db).create(
 
             data_cadastro['nome'],
+
             data_cadastro['email'],
             data_cadastro['senha'],
+
             data_cadastro['tipo']
 
         )
-        
-        if id_usuario:
 
-            return jsonify({ 
+        match novo_usuario:
 
-                'texto': 'Usuário cadastrado com sucesso!',
-                'id_usuario': id_usuario
+            # 200 - Usuário criado
 
-            }), 201
-    
-        else:
+            case _ if isinstance(novo_usuario, int):
 
-            return jsonify({ 'error': 'Erro ao cadastrar usuário'}), 500
+                return jsonify({ 
+
+                    'texto': 'Usuário cadastrado',
+                    'id_usuario': novo_usuario
+
+                }), 200
+
+            # 500 - Erro ao criar usuário
+
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
 
     except Exception as e:
 
@@ -277,9 +285,6 @@ def get_info (id_usuario:int=None):
         #endregion
 
         data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
-
-        print(type(data_usuario))
-
         match data_usuario:
 
             # 404 - Usuário não encontrado
