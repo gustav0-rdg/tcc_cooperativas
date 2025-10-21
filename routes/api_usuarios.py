@@ -199,13 +199,6 @@ def alterar_senha ():
 @api_usuarios.route('/delete/<id_usuario>', methods=['POST'])
 def delete (id_usuario:int=None):
 
-    if id_usuario != None:
-
-        if not id_usuario.isdigit():
-            return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
-
-        id_usuario = int(id_usuario)
-
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
@@ -218,6 +211,17 @@ def delete (id_usuario:int=None):
 
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        if id_usuario != None:
+
+            if not id_usuario.isdigit():
+                return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+
+            id_usuario = int(id_usuario)
+
+        else:
+
+            id_usuario = data_token['id_usuario']
 
         #region Excluindo a conta de terceiros
 
@@ -277,7 +281,7 @@ def get_info (id_usuario:int=None):
             id_usuario = int(id_usuario)
 
         else:
-            
+
             id_usuario = data_token['id_usuario']
 
         #region Consultando info de terceiros
