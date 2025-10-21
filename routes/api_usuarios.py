@@ -317,3 +317,87 @@ def get_info (id_usuario:int=None):
     finally:
 
         conn.close()
+
+@api_usuarios.route('/alterar-status', methods=['POST'])
+@api_usuarios.route('/alterar-status/<id_usuario>', methods=['POST'])
+def alterar_status (id_usuario:int=None):
+
+    data = request.get_json()
+
+    novo_status = data.get('novo-status')
+    if not novo_status:
+        return jsonify({ 'error': '"novo-status" é um parâmetro obrigatório' }), 400
+
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+    
+    conn = Connection('local')
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token:
+            return jsonify({ 'error': 'Token inválido' }), 400
+
+        if id_usuario != None:
+
+            if not id_usuario.isdigit():
+                return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+
+            id_usuario = int(id_usuario)
+
+        else:
+
+            id_usuario = data_token['id_usuario']
+
+        match novo_status:
+
+            case 'ativo':
+
+                if not (data_token['tipo'] == 'cadastro' or (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa')):
+
+                    return jsonify({ 'error': 'Você não tem permissão para tal ação' }), 403
+                
+            case 'inativo' | 'bloqueado':
+
+                if not (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa'):
+
+                    return jsonify({ 'error': 'Você não tem permissão para tal ação' }), 403
+
+            case _:
+
+                return jsonify({ 'error': '"novo-status" inválido' }), 400
+
+        #region Alterando o status de terceiros
+
+        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa':
+
+            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+
+        #endregion
+
+        match Usuarios(conn.connection_db).alterar_status(id_usuario, novo_status):
+
+            # 404 - Usuário não encontrado
+
+            case None:
+                return jsonify({ 'error': 'Usuário não encontrado' }), 404
+
+            # 200 - Status do usuário alterado
+
+            case True:
+                return jsonify({ 'texto': 'Status do usuário alterado' }), 200
+
+            # 500 - Erro ao alterar o status
+
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+    
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
