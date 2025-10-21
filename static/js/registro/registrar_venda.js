@@ -9,7 +9,10 @@ const opcoesSection = document.querySelector('.registros__opcoes');
 
 export const vendaAtual = {
     vendedor: {},
-    material: {},
+    material: {
+        principal:'',
+        subtipo:''
+    },
     avaliacao: {
         comentarios_rapidos: [],
     },
@@ -42,8 +45,8 @@ function exibirMateriais() {
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material = item.nome_padrao; // Atualiza o material no objeto vendaAtual
-            etapaAtual = "vendedores"; // Muda para a etapa de vendedores
+            vendaAtual.material.principal = item.nome_padrao; // Atualiza o material no objeto vendaAtual
+            etapaAtual = "subtipos"; // Muda para a etapa de vendedores
             exibirVendedores(); // Exibe os vendedores
             console.log(vendaAtual); // Apenas para visualização
         });
