@@ -11,6 +11,10 @@ def pagina_inicial():
 def pagina_cadastro():
     return render_template("cadastro.html")
 
+@pages.route("/registrar_cooperativa", methods=["POST"])
+def formulario_cadastro():
+    return render_template("cadastro.html")
+
 @pages.route("/login", methods=["GET"])
 def pagina_login():
     return render_template("login.html")
@@ -25,16 +29,36 @@ def pagina_cadastro_catador():
 
 @pages.route("/pagina-inicial", methods=["GET"])
 def menu_principal():
-    return render_template("tela_inicial.html")
+    return render_template("tela-inicial.html")
 
 @pages.route("/buscar-comprador", methods=['GET'])
 def pagina_buscar_comprador():
     return render_template("buscar-comprador.html")
 
-@pages.route("/registrar-venda", methods=["GET"])
-def registrar_venda():
-    return render_template("registrar_venda.html")
+@pages.route("/registrar-venda")
+def pagina_registrar_venda():
+    return render_template("registrar-venda.html")
 
-@pages.route("/pagina-informacoes", methods=["GET"])
+@pages.route("/pagina-informacoes")
 def pagina_informacoes():
-    return render_template("pagina_informacoes.html")
+    return render_template("pagina-informacoes.html")
+
+@pages.route("/editar-informacoes")
+def pagina_editar_informacoes():
+    return render_template("editar-informacoes.html")
+
+@pages.route("/pagina-inicial/gestor")
+def pagina_inicial_gestor():
+    return render_template("pagina-inicial-gestor.html")
+
+@pages.route("/visualizar-cooperativas")
+def pagina_cooperativas_gestor():
+    return render_template("pagina-cooperativas-gestor.html")
+
+@pages.route("/gerenciar-cadastros")
+def pagina_gerenciar_cadastros_gestor():
+    return render_template("pagina-gerenciar-cadastros.html")
+
+@pages.route("/recuperar-senha")
+def pagina_recuperar_senha():
+    return render_template("recuperar-senha.html")

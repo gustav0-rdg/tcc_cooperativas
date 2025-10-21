@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recoopera | Administração</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="../static/css/root-de-cores.css">
+    <link rel="stylesheet" href="../static/css/pagina_inicial_gestor/pag_gestor.css">
+    
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+</head>
+<body>
+    
+    {% include 'includes/header.html' %}
+    
+    <main class="container-fluid gestor-main">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+                
+                <section class="welcome-section text-center mb-5">
+                    <h1 class="welcome-title">Bem-vindo!</h1>
+                    <p class="welcome-subtitle">Quais partes você quer gerenciar?</p>
+                </section>
+
+                <section class="action-buttons mb-5">
+                    <div class="row g-3 {% if usuario_logado.tipo == 'root' %}g-md-3{% else %}g-md-4{% endif %} {% if usuario_logado.tipo == 'root' %}justify-content-center{% endif %}">
+                    <div class="col-12 {% if usuario_logado.tipo == 'root' %}col-md-4{% else %}col-md-6{% endif %}">
+                            <a href="{{ url_for('gestor.visualizar_cooperativas') }}" class="action-card">
+                                <div class="action-card-content">
+                                    <i class="fas fa-users action-icon"></i>
+                                    <span class="action-text">Cooperativas</span>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 {% if usuario_logado.tipo == 'root' %}col-md-4{% else %}col-md-6{% endif %}">
+                            <a href="{{ url_for('gestor.gerenciar_cadastros') }}" class="action-card">
+                                <div class="action-card-content">
+                                    <i class="fas fa-user-cog action-icon"></i>
+                                    <span class="action-text">Gerenciar Cadastros</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        {% if usuario_logado.tipo == 'root' %}
+                        <div class="col-12 col-md-4">
+                            <a href="{{ url_for('gestor.criar_gestor') }}" class="action-card">
+                                <div class="action-card-content">
+                                    <i class="fas fa-user-plus action-icon"></i> 
+                                    <span class="action-text">Criar Usuário Gestor</span>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+    
+    {% include 'includes/footer.html' %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

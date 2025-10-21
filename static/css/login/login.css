@@ -1,47 +1,68 @@
 body {
-    background-color: var(--verde-principal) !important;
+    background-color: var(--verde-escuro) !important; 
 }
 
-.card{
-    max-width: 360px !important;
+
+.card {
+    max-width: 400px; 
+    width: 90%; 
     background-color: var(--verde-claro-medio) !important;
-    color: var(--verde-escuro-secundario) !important;
+    color: var(--verde-escuro-secundario);
+    border-radius: 10px;
 }
 
-.card h1{
+.card h1 {
     font-weight: 700;
     color: var(--verde-escuro);
+    font-size: 1.8rem; 
 }
 
-#form label{
+#form label {
     color: var(--verde-escuro-medio);
     font-weight: 600;
 }
 
-#form input:focus{
-    outline: 2px var(--verde-escuro-medio) !important;
+#form input:focus {
+    border-color: var(--verde-escuro-medio);
+    box-shadow: 0 0 0 0.25rem rgba(var(--verde-escuro-medio), 0.25);
 }
 
-#form button{
+.btn-login {
+    display: block; 
+    text-align: center; 
     background-color: var(--verde-escuro-medio) !important;
+    color: var(--verde-claro) !important; 
     border: 0;
     text-transform: uppercase;
     font-weight: 700;
-    font-size: 20px;
+    font-size: 1.1rem; 
+    padding: 10px 0; 
+    border-radius: 5px;
+    margin-top: 15px; 
+    transition: background-color 0.3s;
 }
 
-#form p{
+.btn-login:hover {
+    background-color: var(--verde-escuro) !important; 
+    color: var(--verde-claro) !important; 
+    text-decoration: none !important; 
+}
+
+#form p {
+    color: var(--verde-escuro) !important;
+    font-size: 0.95rem;
+}
+
+#form a {
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.link_a {
+    color: var(--verde-escuro-medio);
+}
+
+.link_a:hover {
     color: var(--verde-escuro);
-}
-
-#form a{
-    color: var(--verde-escuro-medio) !important;
-    margin-bottom: 10px;
-}
-
-@media (min-width: 768px) {
-    .card{
-        width: 100% !important;
-        height: 40% !important;
-    }
+    text-decoration: underline;
 }

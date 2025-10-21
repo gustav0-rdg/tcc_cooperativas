@@ -1,0 +1,113 @@
+main {
+    overflow-y: hidden;
+}
+
+.gestor-main {
+    background: var(--verde-principal);
+    min-height: calc(100vh - 120px);
+    padding: 3rem 1rem;
+}
+
+.welcome-section {
+    margin-top: 2rem;
+}
+
+.welcome-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--verde-escuro);
+    margin-bottom: 1rem;
+}
+
+.welcome-subtitle {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: var(--verde-escuro-medio);
+    font-weight: 400;
+}
+
+.action-buttons {
+    margin-top: 3rem;
+}
+
+.action-card {
+    display: block;
+    background: var(--verde-claro-medio);
+    border: 3px solid var(--verde-claro-medio);
+    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(106, 182, 51, 0.1);
+    height: 100%;
+    min-height: 180px;
+}
+
+.action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(106, 182, 51, 0.2);
+    border-color: var(--verde-principal);
+    background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
+}
+
+.action-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.action-icon {
+    font-size: 3.5rem;
+    color: var(--verde-principal);
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .action-icon {
+    transform: scale(1.15);
+    color: var(--verde-escuro-medio);
+}
+
+.action-text {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-weight: 600;
+    color: var(--verde-escuro);
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .gestor-main {
+        padding: 2rem 0.75rem;
+    }
+    
+    .welcome-section {
+        margin-top: 1rem;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+    }
+    
+    .action-card {
+        padding: 2rem 1rem;
+        min-height: 150px;
+    }
+    
+    .action-icon {
+        font-size: 2.5rem;
+    }
+    
+}
+
+@media (max-width: 576px) {
+    .welcome-title {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .action-card {
+        min-height: 130px;
+        padding: 1.5rem 1rem;
+    }
+}

@@ -1,6 +1,7 @@
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
+from datetime import datetime
 
 class Tokens:
 
@@ -17,37 +18,84 @@ class Tokens:
         self,
 
         id_usuario:int,
-        tipo:str
+        tipo:str,
+        data_expiracao:datetime
 
     ) -> bool:
         
-        if not isinstance(id_usuario, int) or not isinstance(tipo, str):
+        #region Exceções
 
-            raise TypeError ('Tokens Controller - "id_usuario" deve ser do tipo Int e "tipo" deve ser do tipo String')
+        if not isinstance(id_usuario, int):
 
-        tipos_validos = ['']
+            raise TypeError ('Tokens - "id_usuario" deve ser do tipo Int')
+        
+        if not isinstance(tipo, str):
+
+            raise TypeError ('Tokens - "tipo" deve ser do tipo String')
+
+        tipos_validos = ['cadastro', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
 
-            raise ValueError (f'Tokens Controller - "tipo" deve ser um desses valores: {tipos_validos}')
+            raise ValueError (f'Tokens - O parâmetro "tipo" deve receber um desses valores: {tipos_validos} mas recebeu: "{tipo}"')
+
+        #endregion
         
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
+
+            # Apaga os tokens anteriores pois esta
+            # credencial deve ser única
 
             cursor.execute (
 
                 """
-                INSERT INTO tokens_validacao (id_usuario, tipo)
-                VALUES (%s, %s);
-                """
+                DELETE FROM tokens_validacao
+                WHERE 
+                    tokens_validacao.id_usuario = %s
+                AND
+                    tokens_validacao.tipo = %s;
+                """,
 
                 (id_usuario, tipo)
 
             )
 
+            cursor.execute (
+
+                """
+                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao)
+                VALUES (%s, %s, %s);
+                """,
+
+                (id_usuario, tipo, data_expiracao)
+
+            )
+
+            cursor.execute (
+
+                """
+                SELECT
+                    tokens_validacao.token
+                FROM tokens_validacao
+                WHERE tokens_validacao.id_token = %s;
+                """,
+
+                (cursor.lastrowid, )
+
+            )
+
+            token = cursor.fetchone()['token']
+            
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            if cursor.rowcount > 0 and token:
+
+                return token
+
+            else:
+
+                return False
 
         except Exception as e:
 
@@ -61,9 +109,17 @@ class Tokens:
 
     def validar (self, token:str) -> bool:
 
-        if not isinstance(token, str) or len(token) < 36:
+        #region Exceções
 
-            raise ValueError ('Tokens Controller - "token" deve ser do tipo String com 36 caractéres')
+        if not isinstance(token, str):
+
+            raise TypeError ('Tokens - "token" deve ser do tipo String')
+        
+        if len(token) != 36:
+
+            raise ValueError ('Tokens - "token" deve ter 36 caractéres')
+        
+        #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
 
@@ -79,10 +135,8 @@ class Tokens:
                     tipo,
                     usado
                 FROM tokens_validacao
-                INNER JOIN usuarios 
-                    ON tokens_validacao.id_usuario = usuarios.id_usuario
-                WHERE BYTE tokens_validacao.token = %s;
-                """
+                WHERE tokens_validacao.token = %s;
+                """,
 
                 (token, )
 
@@ -102,9 +156,13 @@ class Tokens:
     
     def set_state (self, id_token:int) -> bool:
 
+        #region Exceções
+
         if not isinstance(id_token, int):
 
-            raise TypeError ('Tokens Controller - "id_token" deve ser do tipo Int')
+            raise TypeError ('Tokens - "id_usuario" deve ser do tipo Int')
+        
+        #endregion
 
         cursor = self.connection_db.cursor()
 
@@ -116,7 +174,7 @@ class Tokens:
                 UPDATE tokens_validacao
                 SET tokens_validacao.usado = TRUE
                 WHERE tokens_validacao.id_token = %s;
-                """
+                """,
 
                 (id_token, )
 

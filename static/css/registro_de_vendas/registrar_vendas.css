@@ -12,7 +12,7 @@ header{
 }
 
 body{
-  background-color: var(--verde-claro-secundario);
+  background-color: var(--verde-claro);
 }
 
 .registros__etapa .etapa__progresso{
@@ -25,19 +25,16 @@ body{
 
 .resumo, .opcional, .avaliacao, .comentario, button{
   box-shadow: 
-        /* 1. Sombra mais próxima: Concentrada e mais escura, com 10% de opacidade */
-        0 1px 3px rgba(81, 109, 43, 0.2), /* Usando 20% do #516D2B */
-        /* 2. Sombra mais distante: Mais espalhada e sutil, com 8% de opacidade */
-        0 4px 10px rgba(113, 147, 65, 0.1); /* Usando 10% do #719341 */
+        0 1px 3px rgba(81, 109, 43, 0.2), 
+        0 4px 10px rgba(113, 147, 65, 0.1); 
   transition: 1s;
-    
 }
 
 .resumo:hover, .opcional:hover, .avaliacao:hover, .comentario:hover, .button:hover{
   box-shadow: 
-    0 2px 5px rgba(81, 109, 43, 0.25), /* Aumenta a concentração */
-    0 8px 15px rgba(113, 147, 65, 0.15); /* Aumenta a elevação */
-    transform: translateY(-2px); /* Eleva ligeiramente o elemento */
+    0 2px 5px rgba(81, 109, 43, 0.25), 
+    0 8px 15px rgba(113, 147, 65, 0.15); 
+    transform: translateY(-2px); 
 }
 
 .registros{
@@ -51,7 +48,7 @@ body{
   align-items: center;
   margin:  10px auto;
   justify-content: center;
-  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
+  width: 80%; 
   max-width: 600px;
   padding: 20px;
   border-radius: 20px;
@@ -62,20 +59,20 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
 }
 
 .progress-container{
   width: 80%;
   border-radius: 10px;
   margin: 10px auto;
-  background-color: var(--branco);
+  background-color: var(--verde-claro);
 }
 
 .progress-bar{
   width: 25%;
   height: 20px;
-  background-color: var(--verde-escuro-secundario);
+  background-color: var(--verde-escuro-medio);
   border-radius: 10px;
 }
 
@@ -100,19 +97,20 @@ body{
   padding: 10px;
   width: 80%;
 
-  color: var(--verde-escuro-secundario);
+  color: var(--verde-claro);
   border: 0;
-  background-color: var(--verde-principal);
+  background-color: var(--verde-escuro-medio);
   height: 60px;
   border-radius: 10px;
 }
-
 
 .confirmar__venda {
   display: flex;
   align-items: center !important;
   font-weight: bolder;
   margin-bottom: 10px !important;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .avaliacao{
@@ -125,9 +123,14 @@ body{
   width: 80%;
   display: flex;
   flex-direction: column;
-  background-color: var(--verde-principal);
+  background-color: var(--verde-escuro-medio);
+  color: var(--verde-claro);
   border-radius: 10px;
   padding: 10px;
+}
+
+.informacoes__vendedor small{
+  color: var(--verde-claro);
 }
 
 .valores__kg{
@@ -137,20 +140,28 @@ body{
   align-items: center;
   border-radius: 30px;
   width: 80%;
-  height: 200px;
-  background-color: var(--verde-principal);
+  height: 150px;
+  background-color: var(--verde-claro-medio);
+}
+
+.valores__kg h3{
+  color: var(--verde-escuro);
 }
 
 .valores__preco{
-  border-radius: 30px;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border-radius: 30px;
   width: 80%;
-  height: 200px;
-  background-color: var(--verde-principal);
+  height: 150px;
+  background-color: var(--verde-claro-medio);
+
+}
+
+.valores__preco h3{
+  color: var(--verde-escuro);
 }
 
 .container__valores{
@@ -159,16 +170,18 @@ body{
   justify-content: center;
   align-items: center;
   width: 90%;
-  gap: 10px;
+  gap: 20px;
 }
 
 .valores__kg input, .valores__preco input{
-  width: 100px;
-  height: 100px;
-
+  width: 80px;
+  height: 80px;
   border-radius: 20px;
   text-align: center;
-  font-size: 32px;
+  font-size: 28px;
+  margin-top: 10px;
+  border: 2px solid var(--verde-escuro-medio);
+  outline: none;
 }
 
 .resumo{
@@ -176,12 +189,16 @@ body{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  
   width: 80%;
-  background-color: var(--verde-principal);
+  background-color: var(--verde-escuro-medio);
   gap: 10px;
   padding: 10px;
   border-radius: 20px;
+}
+
+.resumo h1{
+  color: var(--verde-claro-medio);
+  font-size: 24px;
 }
 
 .resumo__venda{
@@ -190,6 +207,21 @@ body{
   align-items: center;
   gap: 10%;
   width: 100%;
+  color: var(--verde-claro);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.registros__opcoes p{
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--verde-claro);
+}
+
+.registros__opcoes small{
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--verde-claro-medio);
 }
 
 hr{
@@ -206,12 +238,16 @@ hr{
 
 .avaliacao{
   width: 80%;
-  background-color: var(--verde-principal);
+  background-color: var(--verde-claro-medio);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   border-radius: 20px;
+}
+
+.avaliacao h3{
+  color: var(--verde-escuro);
 }
 
 .avaliacao input{
@@ -230,14 +266,16 @@ hr{
   width: 80%;
   border-radius: 20px;
   padding: 10px;
-  background-color: var(--verde-principal);
+  background-color: var(--verde-claro-medio);
 }
 
 .comentario__btn{
   width: 90%;
   border-radius: 10px;
-  color: var(--verde-claro-principal) !important;
-  background-color: var(--verde-medio-secundario) !important;
+  color: var(--verde-claro) !important;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--verde-escuro-medio) !important;
   text-align: center;
 }
 
@@ -245,8 +283,7 @@ hr{
   width: 80%;
   background-color: var(--verde-principal);
   border-radius: 20px;
-  gap: 10px
-  ;
+  gap: 10px;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -258,6 +295,9 @@ hr{
   width: 90%;
   border-radius: 10px;
   padding: 10px;
+  outline: none;
+  border: 2px solid var(--verde-escuro);
+  color: var(--verde-claro);
 }
 
 .finalizar{
@@ -265,35 +305,34 @@ hr{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80%;
+  width: 95%;
   gap: 10px;
+
 }
 
 .finalizar button{
   display: flex;
   justify-content: center;
   align-items: center;
-
+  font-size: 24px;
+  font-weight: 600;
 }
 
-
 textarea, input{
-  background-color: var(--verde-claro-principal);
+  background-color: transparent;
   border: 0;
 }
 
-/* Seu CSS atual (para Mobile) continua aqui, pois é o default */
-
-/* -------------------------------------------------------------------------------------- */
-/* ESTILOS PARA TABLETS E DESKTOPS */
-/* Aplicados em telas com largura mínima de 768px (pode ajustar) */
-/* -------------------------------------------------------------------------------------- */
 .relatorio_de_venda{
-  background-color: var(--verde-escuro-secundario);
-  color: var(--verde-claro-secundario);
+  background-color: var(--verde-escuro);
+  color: var(--verde-claro);
   padding: 10px;
   border-radius: 10px;
 
+}
+
+.relatorio_de_venda h3{
+  color: var(--verde-claro-medio);
 }
 
 .finalizacao_sw{
@@ -309,158 +348,17 @@ textarea, input{
   width: 80%;
   height:60px;
   text-decoration: none;
-  color: var(--verde-claro-principal);
+  color: var(--verde-claro);
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--verde-medio-principal);
+  background-color: var(--verde-escuro-medio);
   border-radius: 10px;
 }
 
 .registros_{
   display: flex;
   flex-direction: column;
-}
-
-@media screen and (min-width: 768px) {
-  /* 1. Centralização e Largura do Container Principal */
-  .registros__opcoes {
-      /* Garante que o container principal não ocupe 100% da tela em desktops */
-      max-width: 900px; /* Largura máxima para o conteúdo principal */
-      margin: 0 auto; /* Centraliza o container */
-      /* Mantém o flex-direction: column e align-items: center para centralizar os blocos */
-  }
-
-  /* 2. Largura dos Botões/Blocos */
-  /* Diminui a largura relativa e garante uma largura máxima para não esticar demais */
-  .registros__opcoes button,
-  .informacoes__vendedor,
-  .valores__kg,
-  .valores__preco,
-  .resumo,
-  .avaliacao,
-  .comentario,
-  .opcional,
-  .finalizar {
-      box-sizing: border-box;
-      width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
-      max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
-  }
-
-  .registros__etapa{
-    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
-    max-width: 600px;
-    padding: 20px;
-    border-radius: 20px;
-    background-color: var(--verde-principal);
-  }
-
-  /* 3. Etapa de Seleção (Materiais e Vendedores) */
-  .registros__opcoes {
-      /* Volta a ser uma linha para aproveitar o espaço horizontal */
-      flex-direction: row;
-      flex-wrap: wrap; /* Permite que os botões quebrem a linha */
-      justify-content: center; /* Centraliza os botões */
-  }
-
-  .registros__opcoes button {
-      /* Dá uma largura fixa ou menor para os botões aparecerem lado a lado */
-      width: 250px; /* Largura fixa para que caibam 2 ou 3 por linha */
-      height: 80px; /* Aumenta um pouco a altura para melhor toque/clique */
-      margin: 10px; /* Adiciona margem para separação */
-      align-items: center; /* Centraliza o texto dentro do botão */
-      text-align: center;
-      padding: 20px;
-  }
-
-  .registros__opcoes button h1 {
-      font-size: 1.5em; /* Aumenta um pouco a fonte */
-  }
-  
-  /* Corrige o layout de 'Registros' para manter o alinhamento principal em coluna */
-  .registros {
-      align-items: center; /* Centraliza o <section class="registros__opcoes"> */
-  }
-
-  /* 4. Etapa de Valores (Input de Kg e Preço) */
-  .container__valores {
-      display: flex;
-      flex-direction: row;
-      gap: 20px;
-      justify-content: center;
-      width: 90%; /* Deve ter a mesma largura dos blocos acima */
-      max-width: 600px; 
-  }
-
-  /* Garante que os containers de input usem metade do espaço disponível no 'container__valores' */
-  .valores__kg, .valores__preco {
-      width: 50%;
-      height: 250px; /* Aumenta um pouco a altura */
-  }
-
-  /* Move o botão 'Continuar' para fora do flex container dos inputs */
-  .confirmar__venda {
-      width: 90%;
-      max-width: 600px; 
-      margin-top: 20px; /* Espaçamento após os campos de input */
-      display: flex;
-      justify-content: center;
-      font-weight: bolder;
-  }
-
-  /* 5. Etapa de Avaliação (Comentários Rápidos) */
-  .comentario {
-      /* Usa grid ou flex para que os botões fiquem lado a lado */
-      display: grid;
-      grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
-      gap: 10px;
-      padding: 20px;
-  }
-
-  .comentario h3 {
-      grid-column: 1 / -1; /* O título ocupa todas as colunas */
-      text-align: center;
-  }
-
-  .comentario__btn {
-      width: 100%; /* Ocupa a largura total da coluna */
-      height: auto; /* Altura automática para o texto caber */
-      padding: 15px;
-  }
-
-  /* 6. Etapa Finalizar */
-  .finalizar {
-      flex-direction: row; /* Coloca os botões lado a lado */
-      justify-content: space-around;
-      padding: 20px 0;
-  }
-
-  .finalizar button {
-      width: 45%; /* Cada botão ocupa quase metade do container */
-      height: 50px;
-      font-size: 1.1em;
-  }
-  .opcoes-btn__novo-comprador{
-    box-sizing: border-box;
-    width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
-    max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: bolder;
-
-    padding: 10px;
-    width: 80%;
-
-    color: var(--verde-escuro-secundario);
-    border: 0;
-    background-color: var(--verde-principal);
-    height: 60px;
-    border-radius: 10px;
-  }
 }
 
 #buscarComprador{
@@ -470,7 +368,8 @@ textarea, input{
   border: 0;
   border-radius: 10px;
   font-size: 24px;
-
+  background-color: var(--branco) !important;
+  outline-color: var(--verde-escuro-medio);
 }
 
 .opcoes-btn__novo-comprador{
@@ -485,20 +384,16 @@ textarea, input{
 
 .opcoes-btn__novo-comprador{
   box-sizing: border-box;
-  width: 90%; /* Aumenta a largura dos blocos em relação ao max-width do container */
-  max-width: 600px; /* Limita a largura máxima dos blocos individuais para não ficarem muito grandes em telas muito largas */
-
+  width: 90%; 
+  max-width: 600px; 
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   font-size: 1.3rem;
   font-weight: bolder;
-
   padding: 10px;
   width: 80%;
-
-  color: var(--verde-escuro-secundario);
   border: 0;
   background-color: var(--verde-principal);
   height: 60px;
@@ -512,11 +407,141 @@ textarea, input{
   margin-bottom: 10px;
 }
 
+.registros__comprador button{
+  color: var(--verde-claro);
+}
+
 i{
   font-size: 24px;
 }
 
 .ativo{
-  background-color: var(--verde-claro-principal) !important;
-  color: var(--verde-escuro-secundario) !important; 
+  background-color: var(--verde-principal) !important;
+  color: var(--verde-claro) !important; 
+}
+
+@media screen and (min-width: 768px) {
+  .registros__opcoes {
+      max-width: 900px; 
+      margin: 0 auto; 
+  }
+
+  .registros__opcoes button,
+  .informacoes__vendedor,
+  .valores__kg,
+  .valores__preco,
+  .resumo,
+  .avaliacao,
+  .comentario,
+  .opcional,
+  .finalizar {
+      box-sizing: border-box;
+      width: 90%; 
+      max-width: 600px; 
+  }
+
+  .registros__etapa{
+    width: 90%; 
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: var(--verde-principal);
+  }
+
+  .registros__opcoes {
+      flex-direction: row;
+      flex-wrap: wrap; 
+      justify-content: center; 
+  }
+
+  .registros__opcoes button {
+      width: 350px; 
+      margin: 10px; 
+      align-items: center; 
+      text-align: center;
+      padding: 20px;
+  }
+
+  .registros__opcoes button h1 {
+      font-size: 1.5em; 
+  }
+  
+  .registros {
+      align-items: center; 
+  }
+
+  .comentario-rapido{
+    width: 250px !important;
+  }
+
+  .container__valores {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: center;
+      width: 90%; 
+      max-width: 600px; 
+  }
+
+  .valores__kg, .valores__preco {
+      width: 50%;
+      height: 250px; 
+  }
+
+  .confirmar__venda {
+      width: 90%;
+      max-width: 600px; 
+      margin-top: 20px; 
+      display: flex;
+      justify-content: center;
+      font-weight: bolder;
+  }
+
+  .comentario {
+      display: grid;
+      grid-template-columns: 1fr 1fr; 
+      gap: 10px;
+      padding: 20px;
+  }
+
+  .comentario h3 {
+      grid-column: 1 / -1; 
+      text-align: center;
+  }
+
+  .comentario__btn {
+      width: 100%; 
+      height: auto; 
+      padding: 15px;
+  }
+
+  .finalizar {
+      flex-direction: row; 
+      justify-content: space-around;
+      padding: 20px 0;
+  }
+
+  .finalizar button {
+      width: 45%; 
+      height: 50px;
+      font-size: 1.1em;
+  }
+
+  .opcoes-btn__novo-comprador{
+    box-sizing: border-box;
+    width: 90%; 
+    max-width: 600px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bolder;
+    padding: 10px;
+    width: 80%;
+    border: 0;
+    background-color: var(--verde-claro-medio);
+    height: 60px;
+    border-radius: 10px;
+  }
 }
