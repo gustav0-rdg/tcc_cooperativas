@@ -2,6 +2,7 @@ from flask import Blueprint, request, redirect, jsonify
 from controllers.comprador_controller import Compradores
 from controllers.materiais_controller import Materiais
 from controllers.feedback_controller import Feedbacks
+from controllers.comentarios_controller import Comentarios
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
@@ -52,3 +53,13 @@ def get_by_material(material):
     except Exception as e:
         print(f"Erro ao buscar ompradores por material: {e}")
         return jsonify({"erro":"Ocorreu um erro"}), 500
+    
+@api_get.route("/feedback-tags/<cnpj>", methods=["GET"])
+def get_feedback_tags_vendedor(cnpj):
+    try:
+        conn = Connection('local')
+        feedbacks_tags = Comentarios(conn.connection_db).get_feedback_tags(cnpj)
+        return jsonify(feedbacks_tags), 200
+    except Exception as e:
+        print (e)
+        return jsonify({"erro":"falha ao buscar dados"})
