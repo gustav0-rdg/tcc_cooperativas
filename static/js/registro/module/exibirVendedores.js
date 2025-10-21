@@ -39,7 +39,8 @@ export async function exibirVendedores() {
             showCancelButton: true,
             confirmButtonText: 'Buscar',
             cancelButtonText: 'Cancelar',
-            background: "var(--verde-principal)",
+            color: "var(--verde-escuro-medio)",
+            background: "var(--verde-claro-medio)",
             preConfirm: () => {
                 const valor = document.getElementById('buscarComprador').value;
                 if (!valor) {
