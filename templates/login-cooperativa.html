@@ -17,42 +17,38 @@
 </head>
 
 <body>
-  <!-- Seção que envolve o conteúdo principal da página -->
+
   <section class="conteudo">
 
-    <!-- Container para Centralizar o formulario -->
     <div class="container d-flex justify-content-center align-items-center vh-100">
-      <!-- Cartão para o formulário com sombra e padding -->
-      <div class="card shadow-lg p-4 col-md-3">
-        <!-- Título da pagina  -->
+      <div class="card shadow-lg p-4" style="max-width: 400px; width: 90%;">
         <h1 class="text-center mb-2">Login</h1>
 
-        <!-- Formulário de login -->
         <form action="/post/login" method="post" id="form">
           <div class="mb-2">
-            <!-- Campo de entrada CNPJ -->
             <label for="cnpj" class="form-label">CNPJ</label>
             <input type="text" id="cnpj" name="cnpj" class="form-control" required>
           </div>
-          <!-- Campo de entrada senha  -->
+          
           <div class="mb-2">
             <label for="senha" class="form-label">Senha</label>
             <input type="password" id="senha" name="senha" class="form-control" required>
-            <a href="/recuperar-senha">Esqueceu a senha?</a>
+            <a href="/recuperar-senha" class="link_a">Esqueceu a senha?</a>
           </div>
-          <!-- Botão para enviar o formulario de login-->
-          <button type="submit" class="btn btn-primary w-100  ">
+          
+          <div>
             <a href="/pagina-inicial" class="btn-login">Login</a>
-          </button>
+          </div>
 
-          <!-- Link para usuários que ainda não tem cadastro -->
           <p class="text-center mt-4">
-            Não tem cadastro? <a href="/cadastro"> clique aqui </a>
+            Não tem cadastro? <a href="/cadastro" class="link_a"> clique aqui </a>
           </p>
         </form>
       </div>
     </div>
+
   </section>
+
 </body>
 
 </html>
