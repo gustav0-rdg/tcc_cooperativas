@@ -30,7 +30,6 @@ info_conexoes = {
 }
 
 class Connection:
-
     connection_db: MySQLConnection = None
 
     def __init__(self, tipo_conexao: str):
@@ -38,9 +37,9 @@ class Connection:
             raise ValueError(f'Erro - Connection: Tipo de conexão inválido: {tipo_conexao}')
 
         try:
-            print(f"Tentando conectar a: {info_conexoes[tipo_conexao]['host']}...")
+            print(f"Tentando conectar a: {info_conexoes[tipo_conexao]['host']}...") # Log
             self.connection_db = mysql.connector.connect(**info_conexoes[tipo_conexao])
-            print("Conexão bem-sucedida!")
+            print("Conexão bem-sucedida!") 
 
         except mysql.connector.Error as e:
             print(f'Erro FATAL - Connection: Erro ao criar conexão: {e}')
