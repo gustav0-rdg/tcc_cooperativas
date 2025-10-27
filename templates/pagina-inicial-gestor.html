@@ -69,10 +69,10 @@
                         <!-- Esse card só aparece se o usuário logado for do tipo "root" -->
                         {% if usuario_logado.tipo == 'root' %}
                         <div class="col-12 col-md-4">
-                            <a href="{{ url_for('gestor.criar_gestor') }}" class="action-card">
+                            <a href="/gerenciar-gestores" class="action-card">
                                 <div class="action-card-content">
                                     <i class="fas fa-user-plus action-icon"></i> 
-                                    <span class="action-text">Criar Usuário Gestor</span>
+                                    <span class="action-text">Gestores</span>
                                 </div>
                             </a>
                         </div>
