@@ -34,6 +34,7 @@ class Connection:
     connection_db:MySQLConnection = None
 
     def __init__ (self, tipo_conexao:str):
+        tipo_conexao = "online"
 
         if not tipo_conexao in info_conexoes:
 
