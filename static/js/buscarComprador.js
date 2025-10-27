@@ -30,6 +30,7 @@ buscarCompradoresSec.addEventListener('click', async (event) => {
         const materialNome = targetElement.dataset.material;
         console.log(`Buscando compradores para: ${materialNome}`);
         const compradores = await getCompradoresPorMaterial(materialNome);
+        console.log(compradores);
         await renderizarCompradores(compradores)
     }
 });
