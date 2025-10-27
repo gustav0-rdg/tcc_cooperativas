@@ -72,7 +72,7 @@ def cadastrar ():
         print("CNPJ validado com sucesso!")
 
         # Banco de dados
-        conn = Connection('local')
+        conn = Connection('online')
         db = conn.connection_db
         usuarios_ctrl = Usuarios(db)
         cooperativa_ctrl = Cooperativa(db)
@@ -181,7 +181,7 @@ def login (tipo_usuario):
 
     conn = None
     try:
-        conn = Connection('local')
+        conn = Connection('online')
         db = conn.connection_db
         usuarios_ctrl = Usuarios(db)
         tokens_ctrl = Tokens(db)
@@ -248,7 +248,7 @@ def login (tipo_usuario):
         if not token_valor:
             return jsonify({'error': 'Token não fornecido'}), 401
 
-        conn = Connection('local')
+        conn = Connection('online')
         db = conn.connection_db
         tokens_ctrl = Tokens(db)
 
