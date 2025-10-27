@@ -103,10 +103,11 @@ class Vendas:
         Método principal que orquestra o processamento dos dados da venda.
         Por enquanto, ele apenas executa o passo 1.
         """
-        try:       
+        try:    
+             
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
-            nome_material = dados_frontend['material']
+            nome_material = dados_frontend['material']['subtipo']
             id_material = self._buscar_id_material(nome_material)
             ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
             return {
@@ -127,6 +128,7 @@ class Vendas:
             id_cooperativa (int): O ID da cooperativa que está realizando a venda.
             dados_frontend (dict): O dicionário de dados vindo do front-end.
         """
+        print('dados frontedn', dados_frontend)  
         # Buscar e validar todos os IDs antes de iniciar a transação.
         ids = self._buscar_ids(dados_frontend)
 

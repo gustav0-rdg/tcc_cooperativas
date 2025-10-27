@@ -2,6 +2,7 @@ from flask import redirect, Blueprint, request, jsonify
 from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
+from controllers.materiais_controller import Materiais
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
@@ -15,6 +16,8 @@ def cadastrar_catador():
 
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
+
+    
     dados_recebidos = request.get_json()
     conn = Connection('local')
     processar_venda = Vendas(conn.connection_db).registrar_nova_venda(2, dados_recebidos)
@@ -31,38 +34,29 @@ def postar_dados_comprador():
 
 # eu que fiz samuel corrija
 
-@api_post.route("cadastrar-sinonimo", methods=["POST"])
+@api_post.route("/cadastrar-sinonimo", methods=["POST"])
 def registrar_sinonimo():
     data = request.get_json()
 
-    categoria = data.get('categoria')
     nome_padrao = data.get('nome_padrao')
     sinonimo = data.get('sinonimo')
-
-    if not all([categoria, nome_padrao, sinonimo]):
-        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+    # GRANDE AVISOOOO
+    # 
+    # 
+    # 
+    # 
+    # 
+    # 
+    # 
+    # 
+    # 
+    # TEM QUE COLOCAR O ID QUANDO FOR USAR USER
+    id_cooperativa = 1
     
 
-    # tem que colocar os dados nossos certinho
-    try:
-        conn = Connection('local')
-        cursor = conn.cursor()
+    if not all([nome_padrao, sinonimo]):
+        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+    
+    conn = Connection('local')
 
-        query = """
-            INSERT INTO sinonimos (categoria, nome_padrao, sinonimo)
-            VALUES (%s, %s, %s)
-        """
-        cursor.execute(query, (categoria, nome_padrao, sinonimo))
-        conn.commit()
-
-        return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
-
-    except mysql.connector.Error as err:
-        print("Erro MySQL:", err)
-        return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+    Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)

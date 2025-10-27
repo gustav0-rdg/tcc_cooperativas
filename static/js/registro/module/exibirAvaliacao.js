@@ -139,6 +139,8 @@ export function exibirAvaliacao() {
 }
 
 const enviarValores = async (dados) =>{
+
+    console.log('dados', JSON.stringify(dados))
     fetch('/post/dados-venda', {
         method: 'POST',
         headers: {

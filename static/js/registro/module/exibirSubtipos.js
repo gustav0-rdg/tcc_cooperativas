@@ -28,14 +28,12 @@ export async function exibirSubtipos() {
     novoSubtipo.classList.add("opcoes-btn__novo-comprador");
     novoSubtipo.textContent = "Outros materiais";
 
-    console.log(material, vendaAtual)
-
     const materiaisCategoriaAtual = material.filter(
         item => item.categoria === vendaAtual.material.categoria
     );
 
-    const botoesSwal = materiaisCategoriaAtual.map(mat => `<button class="registros__opcoes-btn swal__btn-material-existente"value="${mat.nome_padrao}">${mat.nome_padrao}</button>`).join(' ');
-
+    const botoesSwal = materiaisCategoriaAtual.map(mat => `<button class="registros__opcoes-btn swal__btn-material-existente"value="${mat.id_material_catalogo}">${mat.nome_padrao}</button>`).join(' ');
+ 
     novoSubtipo.addEventListener('click', async () => {
         Swal.fire({
             title: 'Algum destes materiais é o mesmo no qual você quer registrar?',
@@ -47,13 +45,18 @@ export async function exibirSubtipos() {
             background: "var(--verde-claro-medio)",
 
             didOpen: () => {
+
                 // adiciona evento de clique aos botões
                 const botoes = Swal.getPopup().querySelectorAll('.registros__opcoes-btn');
                 botoes.forEach(botao => {
+                    console.log('caiu aqui')
+                    // Verifica se o botão é de sinonimo ou novo material
                     if (botao.classList.contains('swal__btn-material-existente')) {
+
+                        // Caso seja sinonimo
                         botao.addEventListener('click', () => {
+                            console.log('caiu aqui 3')
                             let valoresCadastro = {
-                                categoria: vendaAtual.material.categoria,
                                 nome_padrao: botao.value,
                                 sinonimo: '',
                             }
@@ -73,19 +76,18 @@ export async function exibirSubtipos() {
                                     valoresCadastro.sinonimo = valor // adiciona o sinonimo nas informações que serão passadas
                                     return valoresCadastro;
                                 }
-
-                            }).then(async (result) => {
-                                console.log(valoresCadastro, result.isConfirmed)
+                            }).then(async () => {
+                
 
                                 try {
-                                    const resposta = await fetch('/registrar-sinonimo', {
+                                    const resposta = await fetch('/post/cadastrar-sinonimo', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json'
                                         },
                                         body: JSON.stringify(valoresCadastro)
                                     });
-
+                                        console.log('caiu aqui 4')
                                     const data = await resposta.json();
 
                                     if (resposta.ok) {
