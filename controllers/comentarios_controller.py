@@ -23,7 +23,8 @@ class Comentarios:
         INNER JOIN feedback_tags AS f ON afs.id_feedback_tag = f.id_feedback_tag
         WHERE c.cnpj = %s
         GROUP BY f.texto
-        ORDER BY quantidade DESC;
+        ORDER BY quantidade DESC
+        LIMIT 3;
         """
         results = []
         try:

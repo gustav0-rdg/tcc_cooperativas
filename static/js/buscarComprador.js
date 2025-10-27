@@ -77,12 +77,16 @@ async function renderizarCompradores(compradores) {
                     <p><strong>Avaliação:</strong> ${compradorSelecionado.score_confianca} <i class="fa-solid fa-star" style="color: var(--verde-claro)"></i></p>
                     <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
                     <p><strong>Total Comprado:</strong> ${compradorSelecionado.quantidade_kg} Kgs</p>
-                    <div class="comentarios-livres dropdown-btn">
+                    <button class="comentarios-livres dropdown-btn">
                         Ver comentarios
-                    </div> 
-                    <div class="dropdown-content">
+                    </button> 
+                    <div class="dropdown-content hidden">
                     ${
-                        comentarios.map(a => `<div class="comentarios-livre>${a.comentario_livre}</div>`
+                        comentarios.map(a => `
+                            <div class="comentarios-livre">
+                                <div class="comentarios-livre__avatar"></div>
+                                <div class="comentarios-livre__text">${a.comentario_livre}</div>
+                            </div>`
                         ).join('')
                     }
                     </div>
@@ -93,8 +97,14 @@ async function renderizarCompradores(compradores) {
                     }
                     </div>
                     `,
-                width: "350px"
-            }).then();
+                didOpen: () =>{
+                    const comentariosBtn = Swal.getPopup().querySelector(".dropdown-btn");
+                    const comentariosSec = Swal.getPopup().querySelector(".dropdown-content");
+                    comentariosBtn.addEventListener('click', () =>{
+                        comentariosSec.classList.toggle('hidden');
+                    })
+                }
+            });
         });
     });
 }
