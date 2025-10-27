@@ -62,3 +62,7 @@ def pagina_gerenciar_cadastros_gestor():
 @pages.route("/recuperar-senha")
 def pagina_recuperar_senha():
     return render_template("recuperar-senha.html")
+
+@pages.route("/gerenciar-gestores", methods=["GET"])
+def pagina_gerenciar_gestores():
+    return render_template("gerenciar-gestores.html")
