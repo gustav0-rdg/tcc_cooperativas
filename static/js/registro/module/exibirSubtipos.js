@@ -52,8 +52,11 @@ export async function exibirSubtipos() {
                 botoes.forEach(botao => {
                     if (botao.classList.contains('swal__btn-material-existente')) {
                         botao.addEventListener('click', () => {
-                            let valoresCadastro = [vendaAtual.material.categoria, botao.value,] // categoria, nome_padrão, sinonimo -> sinonimo entra mais tarde
-
+                            let valoresCadastro = {
+                                categoria: vendaAtual.material.categoria,
+                                nome_padrao: botao.value,
+                                sinonimo: '',
+                            }
                             Swal.fire({
                                 title: 'Escreva o nome que você usa',
                                 html: `<input type="text" id="novoNomeMaterial" />`,
@@ -67,13 +70,34 @@ export async function exibirSubtipos() {
                                     if (!valor) {
                                         Swal.showValidationMessage('Digite algo para o nome!');
                                     }
-                                    valoresCadastro.push(valor) // adiciona o sinonimo nas informações que serão passadas
+                                    valoresCadastro.sinonimo = valor // adiciona o sinonimo nas informações que serão passadas
                                     return valoresCadastro;
                                 }
 
-                            }).then(async (result) =>{
+                            }).then(async (result) => {
                                 console.log(valoresCadastro, result.isConfirmed)
-                                
+
+                                try {
+                                    const resposta = await fetch('/registrar-sinonimo', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(valoresCadastro)
+                                    });
+
+                                    const data = await resposta.json();
+
+                                    if (resposta.ok) {
+                                        Swal.fire('Sucesso!', data.message, 'success');
+                                    } else {
+                                        Swal.fire('Erro!', data.message, 'error');
+                                    }
+                                } catch (error) {
+                                    console.error(error);
+                                    Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
+                                }
+
                             })
 
 

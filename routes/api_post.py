@@ -28,3 +28,41 @@ def postar_dados_comprador():
     dados = json.loads(dados_recebidos)
     Compradores(conn.connection_db).create(str(dados))
     return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})
+
+# eu que fiz samuel corrija
+
+@api_post.route("cadastrar-sinonimo", methods=["POST"])
+def registrar_sinonimo():
+    data = request.get_json()
+
+    categoria = data.get('categoria')
+    nome_padrao = data.get('nome_padrao')
+    sinonimo = data.get('sinonimo')
+
+    if not all([categoria, nome_padrao, sinonimo]):
+        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+    
+
+    # tem que colocar os dados nossos certinho
+    try:
+        conn = Connection('local')
+        cursor = conn.cursor()
+
+        query = """
+            INSERT INTO sinonimos (categoria, nome_padrao, sinonimo)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(query, (categoria, nome_padrao, sinonimo))
+        conn.commit()
+
+        return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
+
+    except mysql.connector.Error as err:
+        print("Erro MySQL:", err)
+        return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
