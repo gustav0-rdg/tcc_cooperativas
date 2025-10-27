@@ -1,9 +1,7 @@
 from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
-from controllers.email_controller import Email
+from controllers.cpf_controller import CPF
 from mysql.connector.connection import MySQLConnection
-from controllers.tokens_controller import Tokens
-from controllers.usuarios_controller import Usuarios
 
 class Cooperativa:
 
@@ -15,53 +13,50 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
-    def autenticar (self, email:str, senha:str) -> bool:
+    def get_by_id (self, id_cooperativa:int) -> dict:
 
         """
-        Verifica a existência de Cooperativa com
-        o email e senha fornecidos e retorna seu
-        código de sessão (Token)
+        Procura a cooperativa da qual o usuario
+        fornecido é o administrador
         """
 
-        if not isinstance(email, str) or not isinstance(senha, str):
+        #region Exceções
 
-            raise TypeError ('Cooperativa: "email" e "senha" devem ser do tipo String')
+        if not isinstance(id_cooperativa, int):
 
-        cursor = self.connection_db.cursor(dictionary=True)
+            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
+
+        #endregion
+
+        cursor = self.connection_db.cursor()
 
         try:
 
             cursor.execute (
 
                 """
-                SELECT id_usuario FROM usuarios WHERE 
-                    usuarios.email = %s 
-                    AND usuarios.senha_hash = SHA2(%s, 256)
-                    AND status = 'ativo';
+                SELECT
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude,
+                    aprovado
+                FROM cooperativas
+                WHERE cooperativas.id_cooperativa = %s;
                 """,
 
-                (email, senha)
+                (id_cooperativa, )
 
             )
 
-            data_user = cursor.fetchone()
-
-            if data_user:
-
-                return Tokens(self.connection_db).create(
-
-                    data_user['id_usuario'],
-                    ''
-
-                )
-
-            else:
-
-                return False                
+            return cursor.fetchone()
 
         except Exception as e:
 
-            print(f'Erro - Cooperativa "autenticar": {e}')
+            print(f'Erro - Cooperativa "get_by_id": {e}')
 
             return False
 
@@ -69,7 +64,7 @@ class Cooperativa:
 
             cursor.close()
 
-    def get_by_cnpj (self, cnpj:str) -> bool:
+    def get_by_cnpj (self, cnpj:str) -> dict:
 
         """
         Consulta o CNPJ e retorna a cooperativa
@@ -105,6 +100,157 @@ class Cooperativa:
         except Exception as e:
 
             print(f'Erro - Cooperativa "get_by_cnpj": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def get_by_usuario (self, id_usuario:int) -> dict:
+
+        """
+        Procura a cooperativa da qual o usuario
+        fornecido é o administrador
+        """
+
+        #region Exceções
+
+        if not isinstance(id_usuario, int):
+
+            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo Int')
+
+        #endregion
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude,
+                    aprovado
+                FROM cooperativas
+                WHERE cooperativas.id_usuario = %s;
+                """,
+
+                (id_usuario, )
+
+            )
+
+            return cursor.fetchone()
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "get_by_usuario": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+    def vincular_cooperado(
+            
+        self, 
+
+        id_cooperativa:int, 
+        id_usuario_cooperado:int,
+
+        cpf:str,
+        telefone:str,
+        endereco:str,
+        cidade:str,
+        estado:str
+            
+    ) -> bool:
+
+        """
+        Relaciona o usuário fornecido com a
+        cooperativa
+        """
+
+        #region Exceções
+
+        if not isinstance(id_cooperativa, str):
+
+            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
+        
+        if not isinstance(id_usuario_cooperado, int):
+
+            raise TypeError ('Cooperativa - "id_usuario_cooperado" deve ser do tipo Int')
+        
+        if not isinstance(cpf, str):
+
+            raise TypeError ('Cooperativa - "cpf" deve ser do tipo String')
+        
+        if not CPF.validar(cpf):
+
+            raise ValueError ('Cooperativa - "cpf" fornecido é inválido')
+        
+        if not isinstance(telefone, str):
+
+            raise TypeError ('Cooperativa - "telefone" deve ser do tipo String')
+        
+        if not isinstance(endereco, str):
+
+            raise TypeError ('Cooperativa - "endereco" deve ser do tipo String')
+        
+        if not isinstance(cidade, str):
+
+            raise TypeError ('Cooperativa - "cidade" deve ser do tipo String')
+        
+        if not isinstance(estado, str):
+
+            raise TypeError ('Cooperativa - "estado" deve ser do tipo String')
+
+        #endregion
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT cooperados.id_cooperado FROM cooperados
+                WHERE cooperados.cpf = %s;
+                """,
+
+                (cpf, )
+
+            )
+
+            # Cooperado já existente
+            
+            if cursor.fetchone() != None:
+                return None
+
+            cursor.execute (
+
+                """
+                INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, endereco, cidade, estado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """,
+
+                (id_usuario_cooperado, id_cooperativa, cpf, telefone, endereco, cidade, estado)
+
+            )
+
+            self.connection_db.commit()
+            return cursor.lastrowid
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "vincular_cooperado": {e}')
 
             return False
 
@@ -148,7 +294,7 @@ class Cooperativa:
             )
 
             self.connection_db.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0 or None
 
         except Exception as e:
 
@@ -186,10 +332,24 @@ class Cooperativa:
 
         try:
 
+            cursor.execute (
+
+                """
+                SELECT cooperativas.cnpj FROM cooperativas
+                WHERE cooperativas.cnpj = %s;
+                """,
+
+                (cnpj, )
+
+            )
+
+            # Cooperativa já existente
+
+            if cursor.fetchone() != None:
+                return None
+
             data_cooperativa = CNPJ.consultar(cnpj)
-
             if not data_cooperativa:
-
                 return False
             
             cursor.execute (
