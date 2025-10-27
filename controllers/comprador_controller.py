@@ -76,10 +76,10 @@ class Compradores:
                 mc.nome_padrao,
                 c.razao_social,
                 c.cnpj,
-                SUM(vi.quantidade_kg) AS total_kg_comprado,
-                v.valor_total,
-                c.score_confianca as avaliacao,
-                c.numero_avaliacoes
+                SUM(vi.quantidade_kg) AS quantidade_kg,
+                SUM(v.valor_total) AS valor_total,
+                AVG(c.score_confianca) AS score_confianca,
+                SUM(c.numero_avaliacoes) AS numero_avaliacoes
             FROM
                 compradores AS c
             INNER JOIN
