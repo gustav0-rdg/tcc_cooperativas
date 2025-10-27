@@ -33,40 +33,52 @@ class Connection:
     connection_db: MySQLConnection = None
 
     def __init__(self, tipo_conexao: str):
-        if not tipo_conexao in info_conexoes:
-            raise ValueError(f'Erro - Connection: Tipo de conexão inválido: {tipo_conexao}')
+        if tipo_conexao not in info_conexoes:
+            raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
 
+        config = info_conexoes[tipo_conexao].copy() 
+
+        if tipo_conexao == 'online':
+            print("Configurando SSL para conexão online...")
+
+            config['ssl_disabled'] = False
+            config['ssl_verify_cert'] = True
+
+        print(f"Tentando conectar a: {config.get('host')}...") 
         try:
-            print(f"Tentando conectar a: {info_conexoes[tipo_conexao]['host']}...") # Log
-            self.connection_db = mysql.connector.connect(**info_conexoes[tipo_conexao])
-            print("Conexão bem-sucedida!") 
+            # Usa a configuração (com ou sem SSL adicionado)
+            self.connection_db = mysql.connector.connect(**config)
+            print("Conexão bem-sucedida!")
 
         except mysql.connector.Error as e:
-            print(f'Erro FATAL - Connection: Erro ao criar conexão: {e}')
+            print(f'Erro - Connection: Erro ao criar conexão com o Banco de Dados ({tipo_conexao}): {e}')
             self.connection_db = None
-            raise ConnectionError(f"Falha ao conectar à base de dados: {e}") from e
-        
+
     def close (self) -> bool:
+        if self.connection_db and self.connection_db.is_connected():
+            try:
+                self.connection_db.close()
+                print("Conexão fechada.") # Log
+                return True
+            except mysql.connector.Error as e:
+                print(f'Erro - Connection "close": {e}')
+                return False
+        elif self.connection_db is None:
+             print("Aviso - Connection 'close': Tentativa de fechar uma conexão que falhou ao ser criada.")
+             return False 
+        else:
+             print("Aviso - Connection 'close': Conexão já estava fechada.")
+             return True 
 
-        try:
-
-            self.connection_db.close()
-
-            return True
-
-        except mysql.connector.Error as e:
-
-            print(f'Erro - Connection "close": {e}')
-
-            return False
-        
     @staticmethod
     def validar (connection_db:MySQLConnection) -> bool:
 
         if isinstance(connection_db, MySQLConnection) and connection_db.is_connected():
-
             return True
-        
         else:
 
+            if not isinstance(connection_db, MySQLConnection):
+                 print("Connection.validar falhou: Objeto não é MySQLConnection.")
+            elif not connection_db.is_connected():
+                 print("Connection.validar falhou: is_connected() retornou False.")
             return False
