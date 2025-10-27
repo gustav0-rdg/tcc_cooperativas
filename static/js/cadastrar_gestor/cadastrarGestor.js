@@ -52,7 +52,11 @@ function addGestorCard(gestor) {
     const cardsContainer = document.getElementById('gestoresCards');
     const card = document.createElement('div');
 
-    card.className = 'card mb-3';
+    card.className = 'card mb-3 gestor-card';
+    // Armazena o nome em minúsculas para facilitar a busca
+    card.dataset.nome = gestor.nome.toLowerCase(); 
+    // Armazena o email em minúsculas para facilitar a busca
+    card.dataset.email = gestor.email.toLowerCase(); 
     card.innerHTML = `
         <div class="card-body">
             <h5 class="card-title">${gestor.nome}</h5>
@@ -73,12 +77,12 @@ function addGestorCard(gestor) {
     cardsContainer.appendChild(card);
 }
 
-// Visiblidade da senha
+// Função para alternar a visibilidade da senha
 function togglePasswordVisibility(icon, senha) {
     const passwordSpan = icon.previousElementSibling;
     if (passwordSpan.textContent === "******") {
         // Mostra a senha
-        passwordSpan.textContent = senha;
+        passwordSpan.textContent = senha; 
         // Altera o ícone para "ocultar"
         icon.textContent = "visibility_off"; 
     } else {
@@ -109,6 +113,29 @@ function deleteGestorFromLocalStorage(email) {
     gestores = gestores.filter(gestor => gestor.email !== email);
     localStorage.setItem('gestores', JSON.stringify(gestores));
 }
+
+// Pesquisar os gestores
+function searchGestores() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.gestor-card');
+
+    cards.forEach(card => {
+        const nome = card.dataset.nome;
+        const email = card.dataset.email;
+
+        // Verifica se o nome ou email contém o texto pesquisado
+        if (nome.includes(searchInput) || email.includes(searchInput)) {
+            // Mostra o card
+            card.style.display = 'block'; 
+        } else {
+            // Esconde o card
+            card.style.display = 'none'; 
+        }
+    });
+}
+
+// Adiciona o evento de pesquisa ao campo de entrada
+document.getElementById('searchInput').addEventListener('input', searchGestores);
 
 // Carrega os gestores que estavam salvos no Local Storage ao iniciar a página
 document.addEventListener('DOMContentLoaded', loadGestoresFromLocalStorage);
