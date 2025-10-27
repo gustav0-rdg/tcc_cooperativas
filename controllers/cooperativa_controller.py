@@ -2,6 +2,7 @@ from data.connection_controller import Connection
 from controllers.cnpj_controller import CNPJ
 from controllers.cpf_controller import CPF
 from mysql.connector.connection import MySQLConnection
+from controllers.usuarios_controller import Usuarios
 
 class Cooperativa:
 
@@ -87,8 +88,17 @@ class Cooperativa:
             cursor.execute (
 
                 """
-                SELECT * FROM cooperativa
-                WHERE cooperativa.cnpj = %s;
+                SELECT
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude,
+                    aprovado
+                FROM cooperativas
+                WHERE cooperativas.cnpj = %s;
                 """,
 
                 (cnpj, )
@@ -163,7 +173,10 @@ class Cooperativa:
         self, 
 
         id_cooperativa:int, 
-        id_usuario_cooperado:int,
+        
+        nome:str,
+        email:str,
+        senha:str,
 
         cpf:str,
         telefone:str,
@@ -184,9 +197,17 @@ class Cooperativa:
 
             raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
-        if not isinstance(id_usuario_cooperado, int):
+        if not isinstance(nome, str):
 
-            raise TypeError ('Cooperativa - "id_usuario_cooperado" deve ser do tipo Int')
+            raise TypeError ('Cooperativa - "nome" deve ser do tipo String')
+        
+        if not isinstance(email, str):
+
+            raise TypeError ('Cooperativa - "email" deve ser do tipo String')
+        
+        if not isinstance(senha, str):
+
+            raise TypeError ('Cooperativa - "senha" deve ser do tipo String')
         
         if not isinstance(cpf, str):
 
@@ -218,35 +239,65 @@ class Cooperativa:
 
         try:
 
-            cursor.execute (
+            def vincular (id_cooperado):
 
-                """
-                SELECT cooperados.id_cooperado FROM cooperados
-                WHERE cooperados.cpf = %s;
-                """,
+                cursor.execute (
 
-                (cpf, )
+                    """
+                    INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, endereco, cidade, estado)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                    """,
+
+                    (id_cooperado, id_cooperativa, cpf, telefone, endereco, cidade, estado)
+
+                )
+
+                self.connection_db.commit()
+                return cursor.lastrowid
+
+            cooperado = Usuarios(self.connection_db).create(
+
+                nome,
+                email,
+                senha
 
             )
 
-            # Cooperado já existente
+            match cooperado:
+
+                case None:
+
+                    cursor.execute (
+
+                        """
+                        SELECT
+                            usuarios.id_usuario,
+                            usuarios.tipo
+                        FROM usuarios
+                        INNER JOIN
+                            cooperados ON cooperados.id_usuario = usuarios.id_usuario
+                        WHERE usuarios.email = %s;
+                        """,
+
+                        (email, )
+
+                    )
+
+                    data_usuario = cursor.fetchone()
+
+                    if data_usuario != None:
+                        return None
+                
+                    if data_usuario['tipo'] == 'cooperado':
+                        return vincular(data_usuario['id_usuario'])
+
+                    return None
+
+                case _ if isinstance(cooperado, int):
+                    return vincular(cooperado)
             
-            if cursor.fetchone() != None:
-                return None
-
-            cursor.execute (
-
-                """
-                INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, endereco, cidade, estado)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """,
-
-                (id_usuario_cooperado, id_cooperativa, cpf, telefone, endereco, cidade, estado)
-
-            )
-
-            self.connection_db.commit()
-            return cursor.lastrowid
+                case False | _:
+                    return False
 
         except Exception as e:
 
