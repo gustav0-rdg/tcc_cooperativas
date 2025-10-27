@@ -30,22 +30,32 @@
     <!-- Link Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
-    <!-- link javascript -->
+    <!-- Link JavaScript -->
     <script src="../static/js/cadastrar_gestor/cadastrarGestor.js" defer></script>
 </head>
 <body>
+    <!-- Cabeçalho -->
     {% include 'includes/header.html' %}
-    <div class="container mt-5">
-        <h1 class="text-center">Gestores</h1>
-        <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <main class="container mt-5">
+        <!-- Título da página -->
+        <header>
+            <h1 class="text-center"><strong>Gestores</strong></h1>
+        </header>
+
+        <!-- Barra de pesquisa e botão de adicionar gestor -->
+        <section class="d-flex justify-content-center gap-5 align-items-center mb-4">
             <input type="text" id="searchInput" class="form-control w-50" placeholder="Pesquisar gestores">
             <button class="btn btn-primary" onclick="addGestor()">+</button>
-        </div>
-        <div id="gestoresCards">
-            <!-- Cards dos gestores -->
-        </div>
-    </div>
+        </section>
 
+        <!-- Container para os cards dos gestores -->
+        <section id="gestoresCards">
+            <!-- Cards dos gestores -->
+        </section>
+    </main>
+
+    <!-- Modal de confirmação de exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
