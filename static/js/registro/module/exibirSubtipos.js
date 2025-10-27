@@ -26,34 +26,95 @@ export async function exibirSubtipos() {
     const novoSubtipo = document.createElement('button');
     novoSubtipo.className = "registros__opcoes-btn";
     novoSubtipo.classList.add("opcoes-btn__novo-comprador");
-    novoSubtipo.textContent = "Registrar comprador";
+    novoSubtipo.textContent = "Outros materiais";
 
-    novoSubtipo.addEventListener('click', async () =>{
+    console.log(material, vendaAtual)
+
+    const materiaisCategoriaAtual = material.filter(
+        item => item.categoria === vendaAtual.material.categoria
+    );
+
+    const botoesSwal = materiaisCategoriaAtual.map(mat => `<button class="registros__opcoes-btn swal__btn-material-existente"value="${mat.nome_padrao}">${mat.nome_padrao}</button>`).join(' ');
+
+    novoSubtipo.addEventListener('click', async () => {
         Swal.fire({
-            title:'Algum destes materiais'
+            title: 'Algum destes materiais é o mesmo no qual você quer registrar?',
+            html: botoesSwal + '<button class="registros__opcoes-btn swal__btn-material-novo">Criar novo material</button>',
+            showCancelButton: true,
+            showConfirmButton: false,
+            cancelButtonText: 'Cancelar',
+            color: "var(--verde-escuro-medio)",
+            background: "var(--verde-claro-medio)",
+
+            didOpen: () => {
+                // adiciona evento de clique aos botões
+                const botoes = Swal.getPopup().querySelectorAll('.registros__opcoes-btn');
+                botoes.forEach(botao => {
+                    if (botao.classList.contains('swal__btn-material-existente')) {
+                        botao.addEventListener('click', () => {
+                            let valoresCadastro = [vendaAtual.material.categoria, botao.value,] // categoria, nome_padrão, sinonimo -> sinonimo entra mais tarde
+
+                            Swal.fire({
+                                title: 'Escreva o nome que você usa',
+                                html: `<input type="text" id="novoNomeMaterial" />`,
+                                showCancelButton: true,
+                                confirmButtonText: 'Registrar como sinônimo',
+                                cancelButtonText: 'Cancelar',
+                                color: "var(--verde-escuro-medio)",
+                                background: "var(--verde-claro-medio)",
+                                preConfirm: () => {
+                                    const valor = document.getElementById('novoNomeMaterial').value;
+                                    if (!valor) {
+                                        Swal.showValidationMessage('Digite algo para o nome!');
+                                    }
+                                    valoresCadastro.push(valor) // adiciona o sinonimo nas informações que serão passadas
+                                    return valoresCadastro;
+                                }
+
+                            }).then(async (result) =>{
+                                console.log(valoresCadastro, result.isConfirmed)
+                                
+                            })
+
+
+
+                            // Fazer um if de caso de td certo no cadastro
+                            Swal.fire({
+                                title: 'tudo certo'
+                            })
+                        })
+                    }
+                    else {
+
+                    };
+                });
+            }
         })
     })
 
+    compradorSection.appendChild(novoSubtipo)
 
-        material.forEach(item => {
-            const div = document.createElement('button');
-            div.className = "registros__opcoes-btn";
-            div.setAttribute('data-value', `${item.nome_padrao}`);
-            div.innerHTML = `
+
+    materiaisCategoriaAtual.forEach(item => {
+        const div = document.createElement('button');
+        div.className = "registros__opcoes-btn";
+        div.setAttribute('data-value', `${item.nome_padrao}`);
+        div.innerHTML = `
                 <h1>${item.nome_padrao}</h1>
                 <small>${item.categoria}</small>
             `;
-            opcoesSection.appendChild(div);
-    
-            // Adicionando o evento de clique para o material
-            div.addEventListener('click', () => {
-                vendaAtual.material.subtipo = item.nome_padrao; // Atualiza o material no objeto vendaAtual
-        
-                // TROCAR ESTE PARA EXIBIR SUBTIPOS
-                // exibirVendedores(); // Exibe os vendedores
-                exibirVendedores();
-                console.log(vendaAtual); // Apenas para visualização
-            });
+        opcoesSection.appendChild(div);
+
+        // Adicionando o evento de clique para o material
+        div.addEventListener('click', () => {
+            vendaAtual.material.subtipo = item.nome_padrao; // Atualiza o material no objeto vendaAtual
+
+            // TROCAR ESTE PARA EXIBIR SUBTIPOS
+            // exibirVendedores(); // Exibe os vendedores
+            exibirVendedores();
+            console.log(vendaAtual); // Apenas para visualização
         });
+    });
+
 
 }
