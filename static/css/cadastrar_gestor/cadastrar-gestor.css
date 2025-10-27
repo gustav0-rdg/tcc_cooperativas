@@ -58,13 +58,13 @@ button.btn-primary:hover {
 
 .card h5 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.50rem;
     color: var(--verde-escuro);
 }
 
 .card p {
     margin: 5px 0;
-    font-size: 0.9rem;
+    font-size: 1.15rem;
     color: var(--verde-escuro-medio);
 }
 

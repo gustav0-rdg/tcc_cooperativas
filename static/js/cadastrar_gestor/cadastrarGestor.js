@@ -7,7 +7,18 @@ function addGestor() {
             <input type="email" id="email" class="swal2-input" placeholder="Email">
             <input type="password" id="senha" class="swal2-input" placeholder="Senha">
         `,
+
+        customClass: {
+            cancelButton: 'order-1 right-gap',
+            confirmButton: 'order-2',
+        },
+
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+
         confirmButtonText: 'Cadastrar',
+        confirmButtonColor: '#6AB633',
+        
         focusConfirm: false,
         preConfirm: () => {
             const nome = document.getElementById('nome').value;
