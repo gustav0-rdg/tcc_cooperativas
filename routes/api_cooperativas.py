@@ -47,7 +47,7 @@ def alterar_aprovacao (id_cooperativa:int):
             # 404 - Cooperativa não encontrada
 
             case None:
-                return jsonify({ 'error': 'Usuário não encontrado' }), 404
+                return jsonify({ 'error': 'Cooperativa não encontrado' }), 404
 
             # 200 - Aprovação alterada
 
