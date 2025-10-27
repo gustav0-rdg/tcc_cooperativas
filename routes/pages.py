@@ -62,3 +62,7 @@ def pagina_gerenciar_cadastros_gestor():
 @pages.route("/recuperar-senha")
 def pagina_recuperar_senha():
     return render_template("recuperar-senha.html")
+
+@pages.route("/Termos-de-Uso")
+def pagina_termos_de_uso():
+    return render_template("pagina-termo.html")
