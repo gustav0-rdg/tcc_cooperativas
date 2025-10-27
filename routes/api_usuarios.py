@@ -287,7 +287,7 @@ def alterar_senha ():
     if len(nova_senha) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
     
-    conn = Connection('local')
+    conn = Connection('online')
 
     try:
 
@@ -331,7 +331,7 @@ def delete (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('local')
+    conn = Connection('online')
 
     try:
 
@@ -392,7 +392,7 @@ def get_info (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('local')
+    conn = Connection('online')
 
     try:
 
@@ -460,7 +460,7 @@ def alterar_status (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('local')
+    conn = Connection('online')
 
     try:
 
