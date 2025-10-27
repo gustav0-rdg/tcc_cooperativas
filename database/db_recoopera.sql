@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `recoopera`;
 CREATE DATABASE IF NOT EXISTS `recoopera`;
 
 USE `recoopera`;
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `id_usuario` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `nome` VARCHAR(200) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
+  `cpf` VARCHAR(11),
   `senha_hash` VARCHAR(255) NOT NULL,
   `tipo` ENUM('root','gestor', 'cooperativa', 'cooperado') NOT NULL DEFAULT 'cooperativa',
   `status` ENUM('ativo', 'inativo', 'bloqueado', 'pendente') NOT NULL DEFAULT 'pendente',
@@ -26,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `tokens_validacao` (
   `id_token` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_usuario` BIGINT UNSIGNED NOT NULL,
   `token` CHAR(64) NOT NULL,
-  `tipo` ENUM('cadastro', 'recuperacao_senha') NOT NULL,
+  `tipo` ENUM('cadastro', 'recuperacao_senha', 'sessao') NOT NULL, -- Adicionado 'sessao'
   `usado` BOOLEAN NOT NULL DEFAULT FALSE,
   `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data_expiracao` DATETIME NOT NULL,
@@ -545,7 +547,7 @@ SELECT
   mc.nome_especifico,
   mc.descricao,
   mc.imagem_url,
-  GROUP_CONCAT(ms.nome_sinonimo SEPARATOR ' | ') AS sinonimos
+  GROUP_CONCAT(DISTINCT ms.nome_sinonimo SEPARATOR ' | ') AS sinonimos -- CORRIGIDO COM DISTINCT
 FROM materiais_catalogo mc
 JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
 LEFT JOIN materiais_sinonimos ms ON mc.id_material_catalogo = ms.id_material_catalogo
@@ -602,6 +604,20 @@ GRANT SELECT, UPDATE (telefone, endereco, cidade, estado) ON `recoopera`.`cooper
 GRANT SELECT, UPDATE (nome, senha_hash) ON `recoopera`.`usuarios` TO 'cooperado_role';
 
 GRANT EXECUTE ON PROCEDURE `recoopera`.`buscar_material_por_nome` TO 'cooperado_role';
+
+-- ============================================================================
+-- ÍNDICES ADICIONAIS PARA PERFORMANCE
+-- ============================================================================
+
+CREATE INDEX idx_email_status ON usuarios(email, status);
+CREATE INDEX idx_venda_data_comprador ON vendas(id_comprador, data_venda DESC);
+
+-- ============================================================================
+-- UTILIZADOR ROOT INICIAL (NECESSÁRIO PARA CRIAR GESTORES)
+-- ============================================================================
+INSERT INTO `usuarios` (`nome`, `email`, `senha_hash`, `tipo`, `status`)
+VALUES
+('Administrador Root', 'root@recoopera.com', '639e4eeb4030a3cce2f9874f7d99e724aabe569c52874b01208d642fbe068227', 'root', 'ativo');
 
 -- Restaura as configurações originais do MySQL
 SET SQL_MODE=@OLD_SQL_MODE;
