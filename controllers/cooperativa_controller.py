@@ -259,7 +259,8 @@ class Cooperativa:
 
                 nome,
                 email,
-                senha
+                senha,
+                tipo='cooperado'
 
             )
 
