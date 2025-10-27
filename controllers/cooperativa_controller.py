@@ -76,17 +76,17 @@ class Cooperativa:
         endereco: str | None,
         cidade: str | None,
         estado: str | None,
-        latitude: str | None = None, 
+        latitude: str | None = None,
         longitude: str | None = None
-    ) -> int | None: # Retorna o ID da cooperativa criada ou None, em caso de erro
-        
+    ) -> int | None:
+
         cursor = self.connection_db.cursor()
-        cnpj_limpo = ''.join(filter(str.isdigit, cnpj)) # limpa o cnpj colocando os digitos na string vazia ''
+        cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
 
         if len(cnpj_limpo) != 14:
             print(f'Erro - Cooperativa "create": CNPJ formatado incorretamente: {cnpj}')
             return None
-        
+
         try:
             cursor.execute(
                 """
@@ -98,21 +98,13 @@ class Cooperativa:
                     cidade,
                     estado,
                     latitude,
-                    longitude, 
-                    aprovado,
-                    status_cooperativa
-                    )
+                    longitude,
+                    aprovado
+                )
                 VALUES (
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    FALSE,
-                    'pendente'
+                    %s, %s, %s, %s, %s, %s,
+                    %s, %s,
+                    FALSE
                 )
                 """, (
                     id_usuario,
@@ -126,12 +118,12 @@ class Cooperativa:
                 )
             )
 
-            return cursor.lastrowid()
-        
+            return cursor.lastrowid
+
         except Exception as e:
             print(f'Erro - Cooperativa "create" ao inserir na DB: {e}')
             return None
-        
+
         finally:
             if cursor:
                 cursor.close()

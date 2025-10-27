@@ -53,7 +53,7 @@ def cadastrar ():
             return jsonify({'error': 'O CNPJ informado não pertence a uma Cooperativa (Natureza Jurídica incorreta).'}), 400
         
         # Verificação de CNAE
-        cnae_principal_id = dados_cnpj.get('company', {}).get('cnae', {}).get('id')
+        cnae_principal_id = dados_cnpj.get('mainActivity', {}).get('id')
         cnaes_secundarios_ids = [act.get('id') for act in dados_cnpj.get('sideActivities', [])]
 
         cnae_valido = False
