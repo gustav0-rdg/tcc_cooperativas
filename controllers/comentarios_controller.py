@@ -35,3 +35,28 @@ class Comentarios:
         except Exception as e:
             print(e)
         return results
+    
+    def get_comentarios(self, cnpj):
+        query = """
+        SELECT 
+            ac.comentario_livre,
+            co.razao_social as comprador_nome,
+            co.cnpj as comprador_cnpj,
+            coop.razao_social as coop_nome,
+            coop.cnpj as coop_cnpj
+        FROM avaliacoes_compradores ac
+        INNER JOIN vendas v ON ac.id_venda = v.id_venda
+        INNER JOIN compradores co ON v.id_comprador = co.id_comprador
+        INNER JOIN cooperativas coop ON v.id_cooperativa = coop.id_cooperativa
+        WHERE co.cnpj = %s;
+        """
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                cursor.execute(query, (cnpj, ))
+                results = cursor.fetchall()
+                
+        except Exception as e:
+            print(e)
+        
+        finally:
+            return results
