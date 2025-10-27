@@ -93,7 +93,7 @@ class Compradores:
             GROUP BY
                 mc.categoria, mc.nome_padrao, c.id_comprador, c.razao_social, c.cnpj
             ORDER BY
-                total_kg_comprado DESC;
+                quantidade_kg DESC;
         """
         # Usar 'with' garante que o cursor será fechado mesmo se ocorrer um erro
         try:
