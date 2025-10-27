@@ -65,11 +65,12 @@ class Connection:
         
     @staticmethod
     def validar (connection_db:MySQLConnection) -> bool:
-
-        if isinstance(connection_db, MySQLConnection) and connection_db.is_connected():
-
-            return True
-        
-        else:
-
+        try:
+            # Garante que o objeto não é None e tem o método is_connected()
+            return (
+                connection_db is not None and
+                hasattr(connection_db, "is_connected") and
+                connection_db.is_connected()
+            )
+        except Exception:
             return False
