@@ -16,7 +16,7 @@ export async function exibirVendedores() {
     // --- Essa parte inicial continua a mesma ---
     etapaSection.innerHTML = `
     <div class="etapa__progresso">
-        <h1>Venda de ${vendaAtual.material}</h1>
+        <h1>Venda de ${vendaAtual.material.subtipo}</h1>
         <small>Para quem você vendeu?</small>
         <div class="progress-container">
             <div class="progress-bar cinquenta"></div>

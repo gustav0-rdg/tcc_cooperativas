@@ -1,7 +1,8 @@
 import { exibirAvaliacao } from "./module/exibirAvaliacao.js";
+import { exibirSubtipos } from "./module/exibirSubtipos.js";
 import { exibirVendedores } from "./module/exibirVendedores.js";
 import { getMateriais } from "../api/getMateriais.js";
-const material = await getMateriais();
+export const material = await getMateriais();
 
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
@@ -10,7 +11,7 @@ const opcoesSection = document.querySelector('.registros__opcoes');
 export const vendaAtual = {
     vendedor: {},
     material: {
-        principal:'',
+        categoria:'',
         subtipo:''
     },
     avaliacao: {
@@ -38,16 +39,17 @@ function exibirMateriais() {
         div.className = "registros__opcoes-btn";
         div.setAttribute('data-value', `${item.nome_padrao}`);
         div.innerHTML = `
-            <h1>${item.nome_padrao}</h1>
-            <small>${item.categoria}</small>
+            <h1>${item.categoria}</h1>
         `;
         opcoesSection.appendChild(div);
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material.principal = item.nome_padrao; // Atualiza o material no objeto vendaAtual
+            vendaAtual.material.categoria = item.categoria; // Atualiza o material no objeto vendaAtual
             etapaAtual = "subtipos"; // Muda para a etapa de vendedores
-            exibirVendedores(); // Exibe os vendedores
+            // TROCAR ESTE PARA EXIBIR SUBTIPOS
+            // exibirVendedores(); // Exibe os vendedores
+            exibirSubtipos();
             console.log(vendaAtual); // Apenas para visualização
         });
     });
