@@ -157,62 +157,119 @@ def cadastrar ():
             conn.close()
             print("Conexão fechada")
 
-@api_usuarios.route('/login', methods=['POST'])
-def login ():
+@api_usuarios.route('/login/<tipo_usuario>', methods=['POST'])
+def login (tipo_usuario):
+
+    """
+    Rota unificada para login. Aceita 'cooperativa', 'cooperado', 'gestor', 'root'.
+    Espera JSON com 'identificador' (email ou cpf) e 'senha'.
+    """
 
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Requisição sem corpo JSON'}), 400
 
-    email = data.get('email')
-    if not email:
-        return jsonify({ 'texto': '"email" é parâmetro obrigatório' }), 400
-        
+    identificador = data.get('identificador')
     senha = data.get('senha')
-    if not senha:
-        return jsonify({ 'texto': '"senha" é parâmetro obrigatório' }), 400
-    
-    conn = Connection('local')
+    tipos_validos = ['cooperativa', 'cooperado', 'gestor', 'root']
 
+    # Validações básicas
+    if tipo_usuario not in tipos_validos:
+         return jsonify({'error': f'Tipo de usuário inválido: {tipo_usuario}'}), 400
+    if not identificador or not senha:
+        return jsonify({'error': 'Identificador (email/CPF) e senha são obrigatórios'}), 400
+
+    conn = None
     try:
+        conn = Connection('local')
+        db = conn.connection_db
+        usuarios_ctrl = Usuarios(db)
+        tokens_ctrl = Tokens(db)
 
-        autenticar_usuario = Usuarios(conn.connection_db).autenticar(email, senha)
-        match autenticar_usuario:
+        id_usuario_autenticado = usuarios_ctrl.autenticar(identificador, senha)
 
-            # 404 - Usuário não encontrado (Email ou Senha incorretos)
+        if id_usuario_autenticado is None: # Usuário não encontrado ou senha incorreta
+            print(f"Falha na autenticação para: {identificador}")
+            return jsonify({'error': 'Identificador ou senha inválidos'}), 401
+        elif id_usuario_autenticado is False: # Erro no banco durante autenticação
+             print(f"Erro no banco ao autenticar: {identificador}")
+             return jsonify({'error': 'Erro ao verificar credenciais'}), 500
 
-            case None:
-                return jsonify({ 'error': 'Email ou senha incorretos' }), 404
+        usuario_info = usuarios_ctrl.get_by_id(id_usuario_autenticado)
+        if not usuario_info:
+            print(f"Erro: Usuário autenticado ({id_usuario_autenticado}) não encontrado ao buscar dados.")
+            return jsonify({'error': 'Erro interno ao buscar dados do usuário'}), 500
 
-            # 200 - Usuário autêntico
+        if usuario_info['tipo'] != tipo_usuario:
+            print(f"Falha no login: Tipo incorreto. Esperado: {tipo_usuario}, Recebido: {usuario_info['tipo']}")
+            return jsonify({'error': f'Login não permitido para este tipo de conta ({tipo_usuario}).'}), 403
 
-            case _ if isinstance(autenticar_usuario, int):
+        if usuario_info['status'] != 'ativo':
+             print(f"Falha no login: Status não ativo ({usuario_info['status']}) para usuário {id_usuario_autenticado}")
+             mensagem_erro = f"Sua conta está {usuario_info['status']}. Entre em contato com o suporte."
+             if usuario_info['status'] == 'pendente':
+                  mensagem_erro = "Sua conta ainda está pendente de aprovação."
+             return jsonify({'error': mensagem_erro}), 403
 
-                return jsonify({ 
-                    
-                    'token': Tokens(conn.connection_db).create(
+        # Gerar Token de Sessão
+        data_expiracao = datetime.now() + timedelta(days=30) # Token válido por 30 dias
+        token = tokens_ctrl.create(id_usuario_autenticado, 'sessao', data_expiracao)
 
-                        autenticar_usuario,
-                        'sessao',
+        if not token:
+             print(f"Erro ao gerar token de sessão para usuário {id_usuario_autenticado}")
+             return jsonify({'error': 'Erro ao iniciar sessão'}), 500
 
-                        # Data de expiração em 30 dias
-                        datetime.now() + timedelta(days=30)
+        print(f"Login bem-sucedido para {identificador} (Usuário ID: {id_usuario_autenticado}, Tipo: {tipo_usuario}). Token gerado.")
 
-                    )
-
-                }), 200
-
-            # 500 - Erro ao verificar a autenticidade do usuário
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        # Retornar Token
+        return jsonify({'token': token}), 200
 
     except Exception as e:
+        print(f"Erro GERAL na rota /login/{tipo_usuario}: {e}")
 
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+        if conn and conn.connection_db and conn.connection_db.is_connected() and conn.connection_db.in_transaction:
+            try: conn.connection_db.rollback()
+            except Exception as rb_err: print(f"Erro durante rollback no login: {rb_err}")
+        return jsonify({'error': 'Ocorreu um erro interno no servidor durante o login.'}), 500
 
     finally:
-
-        conn.close()
+        if conn:
+            conn.close()
+            print("Conexão fechada (login).")
     
+# @api_usuarios.route('/logout', methods=['POST'])
+# @require_login # Decorador que valida o token e injeta dados do usuário
+# def logout(usuario_logado): # Recebe dados do usuário do decorador
+    conn = None
+    try:
+        token_header = request.headers.get('Authorization')
+        token_valor = token_header.split(" ")[1] if token_header and " " in token_header else None
+
+        if not token_valor:
+            return jsonify({'error': 'Token não fornecido'}), 401
+
+        conn = Connection('local')
+        db = conn.connection_db
+        tokens_ctrl = Tokens(db)
+
+
+        sucesso = tokens_ctrl.invalidar_token(token_valor)
+
+        if sucesso:
+            print(f"Logout bem-sucedido para usuário {usuario_logado['id_usuario']}")
+            return jsonify({'message': 'Logout realizado com sucesso'}), 200
+        else:
+            print(f"Erro ao invalidar token durante logout para usuário {usuario_logado['id_usuario']}")
+            return jsonify({'error': 'Erro ao finalizar sessão'}), 500
+
+    except Exception as e:
+        print(f"Erro GERAL na rota /logout: {e}")
+        return jsonify({'error': 'Erro interno no servidor durante logout'}), 500
+    finally:
+        if conn:
+            conn.close()
+            print("Conexão fechada (logout).")
+
 @api_usuarios.route('/alterar-senha', methods=['POST'])
 def alterar_senha ():
 
