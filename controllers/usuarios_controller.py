@@ -1,9 +1,9 @@
 from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 from controllers.tokens_controller import Tokens
+from controllers.email_controller import Email
 import hashlib
 from datetime import datetime, timedelta
-from controllers.email_controller import Email
 
 class Usuarios:
 
@@ -20,56 +20,43 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id (self, id_usuario:int) -> dict:
-
+    def get_by_id (self, id_usuario:int) -> dict | None: # Retorna dict ou None
         """
+
         Consulta no banco de dados o
+
         usuário com o ID fornecido
+
         """
-
-        #region Exceções
-
         if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser do tipo Int')
-            
-        #endregion
+            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser int')
 
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
             cursor.execute (
-
                 """
                 SELECT
-                    usuarios.id_usuario,
-                    usuarios.nome,
-                    usuarios.email,
-                    usuarios.tipo,
-                    usuarios.status,
-                    usuarios.data_criacao
+                    usuarios.id_usuario, usuarios.nome, usuarios.email,
+                    usuarios.tipo, usuarios.status, usuarios.data_criacao
                 FROM usuarios
                 WHERE usuarios.id_usuario = %s;
-                """,
-
-                (id_usuario, )
-
+                """, (id_usuario, )
             )
+            resultado = cursor.fetchone()
 
-            return cursor.fetchone()            
-
+            self.connection_db.commit()
+            return resultado
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "get_by_id": {e}')
-
-            return False
-
+            self.connection_db.rollback() # Garante rollback em caso de erro
+            return None # Retorna None em caso de erro
+        
         finally:
-
             cursor.close()
 
-    def autenticar (self, email:str, senha:str) -> bool:
+    def autenticar (self, email:str, senha:str) -> int | None | bool:
 
         """
         Verifica a autenticidade do usuário
@@ -79,54 +66,32 @@ class Usuarios:
 
         #region Exceções
 
-        if not isinstance(email, str):
-
-            raise TypeError ('Usuarios "autenticar" - "email" deve ser do tipo String')
-        
-        if not isinstance(senha, str):
-
-            raise TypeError ('Usuarios "autenticar" - "senha" deve ser do tipo String')
-            
-        #endregion
+        if not isinstance(email, str) or not isinstance(senha, str):
+             raise TypeError ('Usuarios "autenticar" - email e senha devem ser strings')
 
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
-
-            senha = Usuarios.criptografar(senha)
-
+            senha_hash = Usuarios.criptografar(senha)
             cursor.execute (
-
                 """
-                SELECT
-                    id_usuario
-                FROM usuarios
-                WHERE 
-                    usuarios.email = %s
-                AND
-                    usuarios.senha_hash = %s;
-                """,
-
-                (email, senha)
-
+                SELECT id_usuario FROM usuarios
+                WHERE usuarios.email = %s AND usuarios.senha_hash = %s;
+                """, (email, senha_hash) 
             )
-
             data_user = cursor.fetchone()
+            self.connection_db.commit()
 
             if data_user:
-                return data_user['id_usuario']
-
+                return data_user['id_usuario'] # Retorna o ID se autenticado
             else:
-                return None                
-
+                return None # Retorna None se não encontrado
+            
         except Exception as e:
-
             print(f'Erro - Usuarios "autenticar": {e}')
-
-            return False
-
+            self.connection_db.rollback()
+            return False # Retorna False em caso de erro de execução
+        
         finally:
-
             cursor.close()
 
     def trocar_senha (self, id_usuario:int, nova_senha:str) -> bool:
@@ -139,46 +104,31 @@ class Usuarios:
         #region Exceções
 
         if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "trocar_senha" - "id_usuario" deve ser do tipo Int')
-        
-        if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ser do tipo String')
-        
+            raise TypeError ('Usuarios "trocar_senha" - id_usuario deve ser int')
+        if not isinstance(nova_senha, str):
+            raise TypeError ('Usuarios "trocar_senha" - nova_senha deve ser string')
         if len(nova_senha) < 8:
-
-            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ter 8 ou mais caractéres')
-            
+            raise ValueError ('Usuarios "trocar_senha" - nova_senha deve ter >= 8 caracteres')
         #endregion
 
         cursor = self.connection_db.cursor()
 
         try:
-
-            nova_senha = Usuarios.criptografar(nova_senha)
+            nova_senha_hash = Usuarios.criptografar(nova_senha)
             cursor.execute (
-
                 """
-                UPDATE usuarios
-                SET usuarios.senha_hash = %s
-                WHERE usuarios.id_usuario = %s;
-                """,
-
-                (nova_senha, id_usuario)
-
+                UPDATE usuarios SET senha_hash = %s WHERE id_usuario = %s;
+                """, (nova_senha_hash, id_usuario) 
             )
-
-            return cursor.rowcount > 0 or None               
-
+            self.connection_db.commit() 
+            return cursor.rowcount > 0 # Retorna True se alterou, False se não encontrou
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "trocar_senha": {e}')
-
+            self.connection_db.rollback() # Rollback em caso de erro
             return False
-
+        
         finally:
-
             cursor.close()
 
     def create (
@@ -192,7 +142,7 @@ class Usuarios:
 
         tipo:str
 
-    ) -> bool:
+    ) -> int | None:
         
         """
         Cadastra o usuário (de forma genérica) 

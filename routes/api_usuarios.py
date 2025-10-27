@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from controllers.usuarios_controller import Usuarios
+from controllers.cooperativa_controller import Cooperativa
+from controllers.cnpj_controller import CNPJ
 from data.connection_controller import Connection
 from controllers.tokens_controller import Tokens
 from datetime import datetime, timedelta
@@ -13,78 +15,147 @@ api_usuarios = Blueprint(
     
 )
 
+# CNAEs permitidos
+CNAES_PERMITIDOS = [3811400, 3831901, 3831999, 3832700, 3812200]
+NATUREZA_JURIDICA_COOPERATIVA = 2143 # Código para Cooperativa
+
 @api_usuarios.route('/cadastrar', methods=['POST'])
 def cadastrar ():
-
-    token = request.headers.get('Authorization')
-
-    data_cadastro = request.get_json()
-
-    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha']):
-        
-        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
-
-    if len(data_cadastro['senha']) < 8:
-        return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
-
-    if not 'tipo' in data_cadastro:
-        data_cadastro['tipo'] = 'cooperativa'
-
-    conn = Connection('local')
+    conn = None
 
     try:
+        data_cadastro = request.get_json()
+        campos_obrigatorios = ['nome', 'email', 'senha', 'cnpj']
 
-        #region Cadastro de pessoas com permissões especiais
+        # Validação dos dados
+        if not data_cadastro or not all(key in data_cadastro for key in campos_obrigatorios):
+            return jsonify({'error': f'Dados de cadastros inválidos. Campos obrigatórios: {", ".join(campos_obrigatorios)}'}),400
 
-        if data_cadastro['tipo'] != 'cooperativa':
+        if len(data_cadastro['senha']) < 8:
+            return jsonify({'error': 'A senha deve ter no mínimo 8 caracteres'}), 400
+        
+        cnpj_limpo = ''.join(filter(str.isdigit, data_cadastro['cnpj']))
+        if len(cnpj_limpo) != 14:
+            ({'error': 'CNPJ inválido. Deve conter 14 dígitos'}), 400
 
-            if not token:
-                return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
-            
-            data_token = Tokens(conn.connection_db).validar(token)
-            usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        # Validação de negócio
+        print(f"Consultando CNPJ: {cnpj_limpo}")
+        dados_cnpj = CNPJ.consultar(cnpj_limpo)
 
-            if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
-                return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-            
-        #endregion
+        if not dados_cnpj:
+            print("Erro: API CNPJ não retornou dados")
+            return jsonify({'error': 'Não foi possível validar o CNPJ. Tente novamente mais tarde.'}), 503 # Código de serviço indisponível
+        
+        # Verificação de natureza
+        natureza_id = dados_cnpj.get('company', {}).get('nature', {}).get('id')
+        if natureza_id != NATUREZA_JURIDICA_COOPERATIVA:
+            print(f"Natureza jurídica inválida: {natureza_id}")
+            return jsonify({'error': 'O CNPJ informado não pertence a uma Cooperativa (Natureza Jurídica incorreta).'}), 400
+        
+        # Verificação de CNAE
+        cnae_principal_id = dados_cnpj.get('company', {}).get('cnae', {}).get('id')
+        cnaes_secundarios_ids = [act.get('id') for act in dados_cnpj.get('sideActivities', [])]
 
-        novo_usuario = Usuarios(conn.connection_db).create(
+        cnae_valido = False
+        if cnae_principal_id in CNAES_PERMITIDOS:
+            cnae_valido = True
+        else:
+            for cnae_sec_id in cnaes_secundarios_ids:
+                if cnae_sec_id in CNAES_PERMITIDOS:
+                    cnae_valido = True
+                    break
 
-            data_cadastro['nome'],
+        if not cnae_valido:
+            print(f"CNAE inválido. Principal: {cnae_principal_id}, Secundários: {cnaes_secundarios_ids}")
+            return jsonify({'error': 'O CNPJ informado não possui CNAE compatível com cooperativas de reciclagem.'}), 400
 
-            data_cadastro['email'],
-            data_cadastro['senha'],
+        print("CNPJ validado com sucesso!")
 
-            data_cadastro['tipo']
+        # Banco de dados
+        conn = Connection('local')
+        db = conn.connection_db
+        usuarios_ctrl = Usuarios(db)
+        cooperativa_ctrl = Cooperativa(db)
 
+        id_usuario_criado = None
+        id_cooperativa_criada = None
+
+        db.start_transaction()
+        print("Transação iniciada")
+
+        id_usuario_criado = usuarios_ctrl.create(
+            nome=data_cadastro['nome'],
+            email=data_cadastro['email'],
+            senha=data_cadastro['senha'],
+            tipo='cooperativa' # Status já é dado como 'pendente' default
+        )
+        
+        if not id_usuario_criado:
+            # Verifica a natureza do erro
+            cursor_check = db.cursor()
+            cursor_check.execute("SELECT id_usuario FROM usuarios WHERE email = %s", (data_cadastro['email'],))
+            if cursor_check.fetchone():
+                cursor_check.close()
+                db.rollback()
+                print("Rollback: Email duplicado.")
+                return jsonify({'error': 'Este email já está cadastrado.'}), 409 # Conflict
+            else:
+                cursor_check.close()
+                db.rollback()
+                print("Rollback: Erro desconhecido ao criar usuário.")
+                raise Exception("Falha ao criar usuário por motivo desconhecido") # Cai no except geral
+
+        print(f"Usuário criado: {id_usuario_criado}")
+
+        addr = dados_cnpj.get('address', {})
+        endereco_completo = f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}"
+
+        id_cooperativa_criada = cooperativa_ctrl.create(
+            id_usuario=id_usuario_criado,
+            cnpj=cnpj_limpo,
+            razao_social=dados_cnpj.get('company', {}).get('name', 'Razão Social não encontrada'),
+            endereco=endereco_completo.strip(" ,-"),
+            cidade=addr.get('city'),
+            estado=addr.get('state')
+            # Latitude e longitude (não essencial por agora)
         )
 
-        match novo_usuario:
+        if not id_cooperativa_criada:
+            db.rollback()
+            print("Rollback: Erro ao criar cooperativa (verificar logs do controller).")
+             # Poderia ser CNPJ duplicado ou outro erro
+            cursor_check = db.cursor()
+            cursor_check.execute("SELECT id_cooperativa FROM cooperativas WHERE cnpj = %s", (cnpj_limpo,))
+            if cursor_check.fetchone():
+                 cursor_check.close()
+                 return jsonify({'error': 'Este CNPJ já está cadastrado.'}), 409
+            else:
+                 cursor_check.close()
+                 raise Exception("Falha ao criar cooperativa por motivo desconhecido") # Cai no except geral
 
-            # 200 - Usuário criado
+        print(f"Cooperativa criada: {id_cooperativa_criada}")
 
-            case _ if isinstance(novo_usuario, int):
-
-                return jsonify({ 
-
-                    'texto': 'Usuário cadastrado',
-                    'id_usuario': novo_usuario
-
-                }), 200
-
-            # 500 - Erro ao criar usuário
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-
+        db.commit()
+        print("Commit realizado.")
+        return jsonify({'message': 'Cadastro realizado com sucesso! Sua conta está pendente e está aguardando aprovação.'}), 201
+    
     except Exception as e:
+        print(f"Erro GERAL na rota /cadastrar: {e}")
+        if conn and conn.connection_db.is_connected():
+            try:
+                # Tenta fazer rollback
+                if conn.connection_db.in_transaction():
+                    print("Realizando rollback devido a erro...")
+                    conn.connection_db.rollback()
+            except Exception as rollback_err:
+                print(f"Erro durante o rollback: {rollback_err}")
 
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
+        return jsonify({'error': 'Ocorreu um erro interno no servidor durante o cadastro.'}), 500
+    
     finally:
-
-        conn.close()
+        if conn:
+            conn.close()
+            print("Conexão fechada")
 
 @api_usuarios.route('/login', methods=['POST'])
 def login ():

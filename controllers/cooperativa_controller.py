@@ -1,5 +1,4 @@
 from data.connection_controller import Connection
-from controllers.cnpj_controller import CNPJ
 from controllers.email_controller import Email
 from mysql.connector.connection import MySQLConnection
 from controllers.tokens_controller import Tokens
@@ -69,6 +68,74 @@ class Cooperativa:
 
             cursor.close()
 
+    def create (
+        self,
+        id_usuario: int,
+        cnpj: str,
+        razao_social: str,
+        endereco: str | None,
+        cidade: str | None,
+        estado: str | None,
+        latitude: str | None = None, 
+        longitude: str | None = None
+    ) -> int | None: # Retorna o ID da cooperativa criada ou None, em caso de erro
+        
+        cursor = self.connection_db.cursor()
+        cnpj_limpo = ''.join(filter(str.isdigit, cnpj)) # limpa o cnpj colocando os digitos na string vazia ''
+
+        if len(cnpj_limpo) != 14:
+            print(f'Erro - Cooperativa "create": CNPJ formatado incorretamente: {cnpj}')
+            return None
+        
+        try:
+            cursor.execute(
+                """
+                INSERT INTO cooperativas (
+                    id_usuario,
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude, 
+                    aprovado,
+                    status_cooperativa
+                    )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    FALSE,
+                    'pendente'
+                )
+                """, (
+                    id_usuario,
+                    cnpj_limpo,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude
+                )
+            )
+
+            return cursor.lastrowid()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "create" ao inserir na DB: {e}')
+            return None
+        
+        finally:
+            if cursor:
+                cursor.close()
+    
     def get_by_cnpj (self, cnpj:str) -> bool:
 
         """
@@ -156,72 +223,6 @@ class Cooperativa:
 
             return False
 
-        finally:
-
-            cursor.close()
-
-    def create (
-            
-        self,
-
-        cnpj:str,
-        id_usuario:str
-
-    ) -> bool:
-        
-        """
-        Registra a cooperativa no Banco de Dados
-        e relaciona-a com o usuário
-        """
-
-        #region Exceções
-
-        if not CNPJ.validar(cnpj):
-
-            raise ValueError (f'Cooperativa "create" - O "cnpj" fornecido não é válido: {cnpj}')
-        
-        #endregion
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            data_cooperativa = CNPJ.consultar(cnpj)
-
-            if not data_cooperativa:
-
-                return False
-            
-            cursor.execute (
-
-                """
-                INSERT INTO cooperativas (id_usuario, cnpj, razao_social, endereco, cidade, estado, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-                """,
-
-                (
-                    id_usuario, 
-                    cnpj,
-
-                    data_cooperativa['nature']['id'],
-                    f'{data_cooperativa['address']['street']}, {data_cooperativa['address']['number']}',    
-                    data_cooperativa['address']['city'],
-                    data_cooperativa['address']['state'],
-                    '',
-                    ''       
-                )
-
-            )
-
-            self.connection_db.commit()
-            return cursor.lastrowid
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "create": {e}')
-
-            return False
-        
         finally:
 
             cursor.close()
