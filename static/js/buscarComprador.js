@@ -77,6 +77,15 @@ async function renderizarCompradores(compradores) {
                     <p><strong>Avaliação:</strong> ${compradorSelecionado.score_confianca} <i class="fa-solid fa-star" style="color: var(--verde-claro)"></i></p>
                     <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
                     <p><strong>Total Comprado:</strong> ${compradorSelecionado.quantidade_kg} Kgs</p>
+                    <div class="comentarios-livres dropdown-btn">
+                        Ver comentarios
+                    </div> 
+                    <div class="dropdown-content">
+                    ${
+                        comentarios.map(a => `<div class="comentarios-livre>${a.comentario_livre}</div>`
+                        ).join('')
+                    }
+                    </div>
                     <div class="container">
                     ${
                         avaliacoes.map(a => `<div class="item">${a.texto} <span class="badge">${a.quantidade}</span></div>`
@@ -85,7 +94,7 @@ async function renderizarCompradores(compradores) {
                     </div>
                     `,
                 width: "350px"
-            });
+            }).then();
         });
     });
 }
