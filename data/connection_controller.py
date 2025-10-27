@@ -31,24 +31,22 @@ info_conexoes = {
 
 class Connection:
 
-    connection_db:MySQLConnection = None
+    connection_db: MySQLConnection = None
 
-    def __init__ (self, tipo_conexao:str):
-
+    def __init__(self, tipo_conexao: str):
         if not tipo_conexao in info_conexoes:
-
-            raise ValueError (f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
+            raise ValueError(f'Erro - Connection: Tipo de conexão inválido: {tipo_conexao}')
 
         try:
-
+            print(f"Tentando conectar a: {info_conexoes[tipo_conexao]['host']}...")
             self.connection_db = mysql.connector.connect(**info_conexoes[tipo_conexao])
-
-        # mysql.connector.Error -> Principais erros relacionados ao MySql
+            print("Conexão bem-sucedida!")
 
         except mysql.connector.Error as e:
-
-            print(f'Erro - Connection: Erro ao criar conexão com o Banco de Dados: {e}')
-
+            print(f'Erro FATAL - Connection: Erro ao criar conexão: {e}')
+            self.connection_db = None
+            raise ConnectionError(f"Falha ao conectar à base de dados: {e}") from e
+        
     def close (self) -> bool:
 
         try:
