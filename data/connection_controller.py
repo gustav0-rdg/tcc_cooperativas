@@ -23,7 +23,7 @@ info_conexoes = {
         'user': 'godofredo',
         'password': '33351065Aa!',
         
-        'database': 'db-recoopera' 
+        'database': 'recoopera' 
 
     }
 
