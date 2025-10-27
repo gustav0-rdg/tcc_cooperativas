@@ -7,19 +7,20 @@ function addGestor() {
             <input type="email" id="email" class="swal2-input" placeholder="Email">
             <input type="password" id="senha" class="swal2-input" placeholder="Senha">
         `,
-
+        
         customClass: {
             cancelButton: 'order-1 right-gap',
             confirmButton: 'order-2',
         },
-
+        
         showCancelButton: true,
         cancelButtonText: 'Cancelar',
-
+        
         confirmButtonText: 'Cadastrar',
         confirmButtonColor: '#6AB633',
         
         focusConfirm: false,
+
         preConfirm: () => {
             const nome = document.getElementById('nome').value;
             const email = document.getElementById('email').value;
@@ -82,6 +83,7 @@ function addGestorCard(gestor) {
                 </span>
             </p>
             <button class="btn btn-danger btn-sm" onclick="confirmDelete(this, '${gestor.email}')">Excluir</button>
+            <button class="btn btn-secondary btn-sm" onclick="editGestor('${gestor.email}')">Editar</button>
         </div>
     `;
 
@@ -95,13 +97,58 @@ function togglePasswordVisibility(icon, senha) {
         // Mostra a senha
         passwordSpan.textContent = senha; 
         // Altera o ícone para "ocultar"
-        icon.textContent = "visibility_off"; 
+        icon.textContent = "visibility_off";
     } else {
         // Oculta a senha
         passwordSpan.textContent = "******"; 
         // Altera o ícone para "mostrar"
         icon.textContent = "visibility"; 
     }
+}
+
+// Editar o gestor
+function editGestor(email) {
+    const gestores = JSON.parse(localStorage.getItem('gestores')) || [];
+    const gestor = gestores.find(g => g.email === email);
+
+    if (!gestor) {
+        Swal.fire('Erro', 'Gestor não encontrado', 'error');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Editar Gestor',
+        html: `
+            <input type="text" id="editNome" class="swal2-input" placeholder="Nome" value="${gestor.nome}">
+            <input type="email" id="editEmail" class="swal2-input" placeholder="Email" value="${gestor.email}">
+            <input type="password" id="editSenha" class="swal2-input" placeholder="Senha" value="${gestor.senha}">
+        `,
+        confirmButtonText: 'Salvar',
+        confirmButtonColor: '#6AB633',
+        focusConfirm: false,
+        preConfirm: () => {
+            const nome = document.getElementById('editNome').value;
+            const newEmail = document.getElementById('editEmail').value;
+            const senha = document.getElementById('editSenha').value;
+
+            if (!nome || !newEmail || !senha) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos');
+                return false;
+            }
+
+            // Atualiza os dados do gestor
+            gestor.nome = nome;
+            gestor.email = newEmail;
+            gestor.senha = senha;
+
+            // Atualiza o Local Storage
+            localStorage.setItem('gestores', JSON.stringify(gestores));
+
+            // Atualiza os cards na tela
+            document.getElementById('gestoresCards').innerHTML = '';
+            loadGestoresFromLocalStorage();
+        }
+    });
 }
 
 // Confirma a exclusão de um gestor
@@ -134,13 +181,10 @@ function searchGestores() {
         const nome = card.dataset.nome;
         const email = card.dataset.email;
 
-        // Verifica se o nome ou email contém o texto pesquisado
         if (nome.includes(searchInput) || email.includes(searchInput)) {
-            // Mostra o card
-            card.style.display = 'block'; 
+            card.style.display = 'block';
         } else {
-            // Esconde o card
-            card.style.display = 'none'; 
+            card.style.display = 'none';
         }
     });
 }
