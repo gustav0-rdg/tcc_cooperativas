@@ -1,6 +1,6 @@
 import { getMateriais } from "./api/getMateriais.js";
-import { getCompradoresPorMaterial, getCompradoresavaliacoes } from "./api/getCompradores.js";
-
+import { getCompradoresPorMaterial } from "./api/getCompradores.js";
+import { getFeedbackTags, getComentarios } from "./api/getAvaliacoes.js";
 
 const buscarCompradoresSec = document.querySelector('.buscar-compradores__cartoes');
 const detalheCompradores = document.querySelector('#detalhe-comprador');
@@ -45,14 +45,15 @@ async function renderizarCompradores(compradores) {
                 </div>
                 <div class="comprador-info">
                     <h3>${comprador.razao_social}</h3>
-                    <span>Avaliação: ${comprador.avaliacao} ⭐</span>
+                    <span>Avaliação: ${comprador.score_confianca} <i class="fa-solid fa-star" style="color: var(--verde-escuro)"></i></span>
                 </div>
                 <div class="comprador-preco">
                     <p>Preço pago: R$${comprador.valor_total}</p>
-                    <small>${comprador.total_kg_comprado} Kgs</small>
+                    <small>${comprador.quantidade_kg} Kgs</small>
                 </div>
-                <button class="verMais" data-value="${comprador.cnpj}" data-index="${index}">Ver mais</button>
             </div>
+            <button class="verMais" data-value="${comprador.cnpj}" data-index="${index}">Ver mais</button>
+
         </div>
     `).join('');
 
@@ -65,16 +66,17 @@ async function renderizarCompradores(compradores) {
         botao.addEventListener('click', async (event) => {
             const compradorIndex = event.target.dataset.index;
             const compradorCnpj = event.target.dataset.value;
-            const avaliacoes = await getCompradoresavaliacoes(compradorCnpj);
-            console.log(avaliacoes);
+            const avaliacoes = await getFeedbackTags(compradorCnpj);
+            const comentarios = await getComentarios(compradorCnpj);
             const compradorSelecionado = compradores[compradorIndex];
+            console.log(compradorSelecionado);
             Swal.fire({
                 title: `${compradorSelecionado.razao_social}`,
                 background: "var(--verde-principal)",
                 html: `
-                    <p><strong>Avaliação:</strong> ${compradorSelecionado.avaliacao} ⭐</p>
+                    <p><strong>Avaliação:</strong> ${compradorSelecionado.score_confianca} <i class="fa-solid fa-star" style="color: var(--verde-claro)"></i></p>
                     <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
-                    <p><strong>Total Comprado:</strong> ${compradorSelecionado.total_kg_comprado} Kgs</p>
+                    <p><strong>Total Comprado:</strong> ${compradorSelecionado.quantidade_kg} Kgs</p>
                     <div class="container">
                     ${
                         avaliacoes.map(a => `<div class="item">${a.texto} <span class="badge">${a.quantidade}</span></div>`
@@ -82,7 +84,7 @@ async function renderizarCompradores(compradores) {
                     }
                     </div>
                     `,
-                icon: 'info'
+                width: "350px"
             });
         });
     });
