@@ -49,57 +49,36 @@ def vincular_cooperado ():
         
         data_cooperativa = Cooperativa(conn.connection_db).get_by_usuario(data_adm_cooperativa['id_usuario'])
 
-        id_usuario_cooperado = Usuarios(conn.connection_db).create(
+        id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
+
+            data_cooperativa['id_cooperativa'],
 
             data_cooperado['nome'],
             data_cooperado['email'],
             data_cooperado['senha'],
-            tipo='cooperado'
+            
+            data_cooperado['cpf'],
+            data_cooperado['telefone'],
+            data_cooperado['endereco'],
+            data_cooperado['cidade'],
+            data_cooperado['estado']
 
         )
 
-        match id_usuario_cooperado:
+        match id_cooperado:
 
             # 409 - Email já cadastrado
 
             case None:
                 return jsonify({ 'error': 'Email já cadastrado' }), 409
 
-            # 200 - Usuário cooperado cadastrado
+            # 200 - Usuário cooperado vinculado
 
-            case _ if isinstance(id_usuario_cooperado, int):
+            case _ if isinstance(id_cooperado, int):
                 
-                id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
+                return jsonify({ 'texto': 'Cooperado vinculado' }), 200
 
-                    data_cooperativa['id_cooperativa'],
-                    id_usuario_cooperado,
-
-                    data_cooperado['cpf'],
-                    data_cooperado['telefone'],
-                    data_cooperado['endereco'],
-                    data_cooperado['cidade'],
-                    data_cooperado['estado']
-
-                )
-
-                match id_cooperado:
-                    
-                    # 409 - Cooperado já existente
-
-                    case None:
-                        return jsonify({ 'error': 'Cooperado já cadastrado' }), 409
-
-                    # 200 - Cooperado vinculado
-
-                    case _ if isinstance(id_cooperado, int):
-                        return jsonify({ 'texto': 'Cooperado vinculado' }), 200
-                    
-                    # 500 - Erro ao vincular cooperado
-
-                    case False | _:
-                        return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-
-            # 500 - Erro ao cadastrar usuário cooperado
+            # 500 - Erro ao vincular usuário cooperado
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
