@@ -11,9 +11,13 @@ def pagina_inicial():
 def pagina_cadastro():
     return render_template("cadastro.html")
 
+@pages.route("/registrar_cooperativa", methods=["POST"])
+def formulario_cadastro():
+    return render_template("cadastro.html")
+
 @pages.route("/login", methods=["GET"])
 def pagina_login():
-    return render_template("login.html")
+    return render_template("login-cooperativa.html")
 
 @pages.route("/login-catador", methods=["GET"])
 def pagina_login_catador():

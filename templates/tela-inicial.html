@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="/static/css/root-de-cores.css">
     <!-- Link para o favicon -->
     <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <!-- Link font awesome -->
+    <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
     {% include 'includes/header.html' %}
@@ -22,17 +24,17 @@
             <p>Como podemos te ajudar?</p>
             <section class="acoes__cooperativa">
                 
-                <button class="acoes__cooperativa-btn">
-                    <a href="/buscar-comprador">buscar-comprador</a>
-                 </button>
+                <div>
+                    <a href="/buscar-comprador" class="acoes__cooperativa-btn">buscar comprador</a>
+                </div>
                 <!-- Botão que leva a  tela de cooperativa  -->
-                 <button class="acoes__cooperativa-btn">
-                     <a href="/pagina-informacoes">pagina-informacoes</a>
-                 </button>
+                 <div>
+                     <a href="/pagina-informacoes" class="acoes__cooperativa-btn">pagina informacoes</a>
+                 </div>
                   <!-- Botão que leva a pagina registrar venda  -->
-                 <button class="acoes__cooperativa-btn">
-                     <a href="/registrar-venda">registrar-venda</a>
-                 </button>
+                 <div>
+                     <a href="/registrar-venda" class="acoes__cooperativa-btn">registrar venda</a>
+                 </div>
 
             </section>
         </main>

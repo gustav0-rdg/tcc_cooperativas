@@ -11,4 +11,5 @@ app.register_blueprint(api_post)
 app.register_blueprint(api_get)
 app.register_blueprint(api_usuarios)
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
