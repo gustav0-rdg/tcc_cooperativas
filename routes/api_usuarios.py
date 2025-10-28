@@ -19,17 +19,18 @@ def cadastrar ():
     token = request.headers.get('Authorization')
 
     data_cadastro = request.get_json()
+    campos_obrigatorios =  ['nome', 'email', 'senha', 'tipo']
 
-    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha']):
-        
+    # 400 - Campos obrigatórios incompletos
+
+    if not data_cadastro or not all(key in data_cadastro for key in campos_obrigatorios):
         return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
+
+    # 400 - Senha com menos de 8 caractéres
 
     if len(data_cadastro['senha']) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
-
-    if not 'tipo' in data_cadastro:
-        data_cadastro['tipo'] = 'cooperativa'
-
+    
     conn = Connection('local')
 
     try:
