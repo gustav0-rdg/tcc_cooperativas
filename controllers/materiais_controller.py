@@ -47,12 +47,13 @@ class Materiais:
             
 
             query = """
-            INSERT INTO materiais_sinonimos (id_material_catalogo, sinonimo, id_cooperativa)
+            INSERT INTO materiais_apelidos (id_material_catalogo, nome_regional, id_apelido)
             VALUES (%s, %s, %s)
             """
-            cursor.execute(query, (nome_padrao, sinonimo))
-
+            cursor.execute(query, (nome_padrao, sinonimo, id_cooperativa))
+            self.connection_db.commit()
             return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
+
 
         except mysql.connector.Error as error:
             print("Erro MySQL:", error)

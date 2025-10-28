@@ -49,16 +49,16 @@ export async function exibirSubtipos() {
                 // adiciona evento de clique aos botões
                 const botoes = Swal.getPopup().querySelectorAll('.registros__opcoes-btn');
                 botoes.forEach(botao => {
-                    console.log('caiu aqui')
                     // Verifica se o botão é de sinonimo ou novo material
                     if (botao.classList.contains('swal__btn-material-existente')) {
-
                         // Caso seja sinonimo
                         botao.addEventListener('click', () => {
                             console.log('caiu aqui 3')
+
+                            // informações que serão passadas para o banco de dados
                             let valoresCadastro = {
                                 nome_padrao: botao.value,
-                                sinonimo: '',
+                                sinonimo: 'Poooo',
                             }
                             Swal.fire({
                                 title: 'Escreva o nome que você usa',
@@ -77,9 +77,9 @@ export async function exibirSubtipos() {
                                     return valoresCadastro;
                                 }
                             }).then(async () => {
-                
-
                                 try {
+                                    console.log(JSON.stringify(valoresCadastro))
+
                                     const resposta = await fetch('/post/cadastrar-sinonimo', {
                                         method: 'POST',
                                         headers: {
@@ -87,16 +87,14 @@ export async function exibirSubtipos() {
                                         },
                                         body: JSON.stringify(valoresCadastro)
                                     });
-                                        console.log('caiu aqui 4')
                                     const data = await resposta.json();
-
                                     if (resposta.ok) {
                                         Swal.fire('Sucesso!', data.message, 'success');
                                     } else {
                                         Swal.fire('Erro!', data.message, 'error');
                                     }
                                 } catch (error) {
-                                    console.error(error);
+                                    console.error(error); 
                                     Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
                                 }
 
@@ -134,9 +132,6 @@ export async function exibirSubtipos() {
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
             vendaAtual.material.subtipo = item.nome_padrao; // Atualiza o material no objeto vendaAtual
-
-            // TROCAR ESTE PARA EXIBIR SUBTIPOS
-            // exibirVendedores(); // Exibe os vendedores
             exibirVendedores();
             console.log(vendaAtual); // Apenas para visualização
         });
