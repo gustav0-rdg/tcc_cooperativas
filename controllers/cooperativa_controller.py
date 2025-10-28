@@ -65,6 +65,47 @@ class Cooperativa:
 
             cursor.close()
 
+    def get_all (self) -> list:
+
+        """
+        Consulta todas as cooperativas
+        cadastradas no sistema
+        """
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    id_cooperativa,
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude,
+                    aprovado
+                FROM cooperativas
+                """
+
+            )
+
+            return cursor.fetchall()
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "get_all": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
     def get_by_cnpj (self, cnpj:str) -> dict:
 
         """
