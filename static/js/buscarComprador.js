@@ -44,11 +44,16 @@ async function renderizarSubtipos(subtipos, id_material) {
     `).join('');
     buscarSubtipos.innerHTML = `
     <div class="subtipos">
-        <button class="">Voltar</button>
+        <button class="btn-voltar">Voltar</button>
         ${htmlSubtipos}
     </div>
     `;
     buscarSubtipos.classList.remove('hidden');
+    const btnVoltar = buscarSubtipos.querySelector('.btn-voltar');
+    btnVoltar.addEventListener('click', async () =>{
+        await renderizarMateriais();
+        buscarSubtipos.classList.add('hidden')
+    })
     const btn = buscarSubtipos.querySelectorAll('.subtipo-card');
     btn.forEach(e =>{
         e.addEventListener('click', async (event) =>{
