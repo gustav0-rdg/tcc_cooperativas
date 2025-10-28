@@ -72,13 +72,7 @@ class Connection:
 
     @staticmethod
     def validar (connection_db:MySQLConnection) -> bool:
-
         if isinstance(connection_db, MySQLConnection) and connection_db.is_connected():
             return True
         else:
-
-            if not isinstance(connection_db, MySQLConnection):
-                 print("Connection.validar falhou: Objeto não é MySQLConnection.")
-            elif not connection_db.is_connected():
-                 print("Connection.validar falhou: is_connected() retornou False.")
             return False

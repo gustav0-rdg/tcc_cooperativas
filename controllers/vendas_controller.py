@@ -54,7 +54,7 @@ class Vendas:
         """
         with self.connection_db.cursor() as cursor:
             # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
-            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_padrao = %s"
+            query = "SELECT id_material_base FROM materiais_base WHERE nome = %s"
             cursor.execute(query, (nome_material,))
             result = cursor.fetchone()
 
