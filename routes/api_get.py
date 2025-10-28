@@ -49,6 +49,23 @@ def get_materiais():
     finally:
         if conn:
             conn.close()
+
+@api_get.route("/subtipos/<material_id>", methods=["GET"])
+def get_subtipos_materiais(material_id):
+    """
+    Rota para obter a lista completa de materiais do catálogo.
+    """
+    try:
+        conn = Connection('local')
+        materiais = Materiais(conn.connection_db).get_subtipos(material_id)
+        conn.close()
+        return jsonify(materiais), 200
+    except Exception as e:
+        print(f"Erro ao buscar materiais: {e}")
+        return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
+    finally:
+        if conn:
+            conn.close()
     
 @api_get.route("/comprador/<material>", methods=["GET"])
 def get_by_material(material):

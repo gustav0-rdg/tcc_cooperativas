@@ -37,3 +37,38 @@ class Materiais:
 
         finally:
             cursor.close()
+
+    def get_subtipos(self, id_material_base):
+        """
+        Busca todos os materiais cadastrados no catálogo do banco de dados.
+
+        Utiliza a classe 'Connection' para estabelecer a conexão.
+
+        Retorna:
+            list: Uma lista de dicionários, onde cada dicionário representa um subtipo de um determinado material.
+                Retorna uma lista vazia em caso de erro ou se nenhum material for encontrado.
+        """
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                query = """
+                SELECT 
+                    mc.id_material_base,
+                    mc.id_material_catalogo, 
+                    mc.nome_especifico, 
+                    mc.descricao
+                FROM materiais_catalogo AS mc
+                WHERE 
+                    mc.id_material_base = %s
+                GROUP BY 
+                    -- Agrupa os resultados por material
+                    mc.id_material_catalogo, 
+                    mc.nome_especifico, 
+                    mc.descricao;
+                """
+                cursor.execute(query, (id_material_base,))
+                results = cursor.fetchall()
+                return results
+        except Exception as e:
+            print(e)
+            return []
+    
