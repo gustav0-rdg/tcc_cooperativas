@@ -166,7 +166,7 @@ function preencherModalDetalhes(cardElement) {
 }
 
 function toggleBloqueioCooperativa(buttonElement) {
-    const coopId = buttonElement.dataset.coopId;
+    const userId = buttonElement.dataset.userId;
     const coopNome = buttonElement.dataset.coopNome;
     const acao = buttonElement.dataset.acao;
 
@@ -189,14 +189,19 @@ function toggleBloqueioCooperativa(buttonElement) {
         cancelButtonText: 'Cancelar',
         reverseButtons: true
     }).then((result) => {
+
         if (result.isConfirmed) {
             
-            const url = `/gestores/cooperativas/${coopId}/${acao}`;
+            const url = `/api/usuarios/alterar-status/${userId}`;
 
             fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('session_token')
+                },
+                body: {
+                    'novo-status': (acao === 'bloquear' ? 'bloqueado' : 'ativo')
                 }
             })
             .then(response => response.json())
