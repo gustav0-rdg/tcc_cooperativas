@@ -1,8 +1,10 @@
 import { getMateriais } from "./api/getMateriais.js";
+import { getSubtipos } from "./api/getSubTipos.js"
 import { getCompradoresPorMaterial } from "./api/getCompradores.js";
 import { getFeedbackTags, getComentarios } from "./api/getAvaliacoes.js";
 
 const buscarCompradoresSec = document.querySelector('.buscar-compradores__cartoes');
+const buscarSubtipos = document.querySelector('#detalhe-material');
 const detalheCompradores = document.querySelector('#detalhe-comprador');
 async function renderizarMateriais() {
     const materiais = await getMateriais();
@@ -24,16 +26,35 @@ async function renderizarMateriais() {
 
 buscarCompradoresSec.addEventListener('click', async (event) => {
     event.preventDefault();
-    const targetElement = event.target.closest('[data-material]');
-
-    if (targetElement) {
-        const materialNome = targetElement.dataset.material;
-        console.log(`Buscando compradores para: ${materialNome}`);
-        const compradores = await getCompradoresPorMaterial(materialNome);
-        console.log(compradores);
-        await renderizarCompradores(compradores)
+    const targetMateriais = event.target.closest('[data-material]');
+    if (targetMateriais) {
+        const materialNome = targetMateriais.dataset.material;
+        const subtipos = await getSubtipos(materialNome);
+        console.log(subtipos);  
+        await renderizarSubtipos(subtipos, materialNome)
     }
 });
+
+async function renderizarSubtipos(subtipos, id_material) {
+    buscarCompradoresSec.innerHTML = '';
+    const htmlSubtipos = subtipos.map((subtipo, index) => `
+        <button class="comprador-card" data-subtipo="${subtipo.id_material_catalogo}">
+            <h1>${subtipo.nome_especifico}</h2>
+        </button>
+    `).join('');
+    buscarSubtipos.innerHTML = htmlSubtipos;
+    buscarSubtipos.classList.remove('hidden');
+    const btn = buscarSubtipos.querySelectorAll('.comprador-card');
+    btn.forEach(e =>{
+        e.addEventListener('click', async (event) =>{
+            const id_subtipo = event.target.dataset.subtipo;
+            console.log(id_material);
+            const compradores = await getCompradoresPorMaterial(id_material)
+            await renderizarCompradores(compradores);
+            buscarSubtipos.classList.add('hidden');
+        })
+    })
+}
 
 async function renderizarCompradores(compradores) {
     buscarCompradoresSec.innerHTML = '';
