@@ -181,7 +181,6 @@ def cadastrar ():
 
         if conn:
             conn.close()
-    
 @api_cooperativas.route('/alterar-aprovacao/<id_cooperativa>', methods=['POST'])
 def alterar_aprovacao (id_cooperativa:int):
 

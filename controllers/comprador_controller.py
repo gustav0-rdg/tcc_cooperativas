@@ -66,27 +66,20 @@ class Compradores:
             cursor.close()
 
     
-    def get_by_materials(self, material=None):
+    def get_by_materials(self, material):
         """
-        Busca e agrupa compradores com base no material ou categoria de material que compraram.
-
-        :param material: (Opcional) String com o nome do material ou a categoria.
-                         Se não for fornecido, a função retorna dados para todos os materiais.
-        :return: Lista de dicionários, onde cada dicionário representa um comprador e o material.
-                 Retorna uma lista vazia se não houver resultados ou em caso de erro.
+        Busca e agrupa compradores com base no material que compraram.
         """
-        if not self.conn or not self.conn.is_connected():
-            print("Erro: Não há conexão ativa com o banco de dados.")
-            return []
-
-        # A query base é a mesma que desenvolvemos.
-        base_query = """
+        query = """
             SELECT
                 mc.categoria,
                 mc.nome_padrao,
                 c.razao_social,
                 c.cnpj,
-                SUM(vi.quantidade_kg) AS total_kg_comprado
+                SUM(vi.quantidade_kg) AS quantidade_kg,
+                SUM(v.valor_total) AS valor_total,
+                AVG(c.score_confianca) AS score_confianca,
+                SUM(c.numero_avaliacoes) AS numero_avaliacoes
             FROM
                 compradores AS c
             INNER JOIN
@@ -96,40 +89,27 @@ class Compradores:
             INNER JOIN
                 materiais_catalogo AS mc ON vi.id_material_catalogo = mc.id_material_catalogo
             WHERE
-                c.deletado_em IS NULL
-        """
-        
-        params = []
-        
-        # Adiciona o filtro dinamicamente se um material for especificado
-        if material:
-            # Filtra tanto por nome quanto por categoria para maior flexibilidade
-            base_query += " AND (mc.nome_padrao = %s OR mc.categoria = %s)"
-            params.extend([material, material])
-
-        # Adiciona o agrupamento e a ordenação
-        final_query = base_query + """
+                c.deletado_em IS NULL AND mc.id_material_catalogo = %s
             GROUP BY
-                mc.categoria, mc.nome_padrao, c.id_comprador
+                mc.categoria, mc.nome_padrao, c.id_comprador, c.razao_social, c.cnpj
             ORDER BY
-                mc.categoria ASC, mc.nome_padrao ASC, total_kg_comprado DESC;
+                quantidade_kg DESC;
         """
-
-        results = []
-        cursor = self.conn.cursor(dictionary=True) # dictionary=True retorna resultados como dicts
-
+        # Usar 'with' garante que o cursor será fechado mesmo se ocorrer um erro
         try:
-            print(f"\nExecutando busca para: '{material if material else 'Todos os materiais'}'...")
-            
-            # Executa a query de forma segura usando parâmetros
-            cursor.execute(final_query, tuple(params))
-            results = cursor.fetchall()
-            
-            print(f"Encontrados {len(results)} resultados.")
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                print(f"\nExecutando busca para: '{material if material else 'Todos os materiais'}'...")
+                
+                # Executa a query de forma segura
+                cursor.execute(query, tuple(material))
+                results = cursor.fetchall()
+                
+                print(f"Encontrados {len(results)} resultados.")
 
         except mysql.connector.Error as err:
             print(f"Erro ao executar a consulta: {err}")
-        finally:
-            cursor.close()
+            # É uma boa prática relançar a exceção ou retornar algo que indique o erro
+            # para a camada superior (a rota Flask).
+            return {"erro": str(err)} # Exemplo
             
         return results
