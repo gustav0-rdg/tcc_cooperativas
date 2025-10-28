@@ -5,8 +5,8 @@ from data.connection_controller import Connection
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
-@api_post.route("/cooperado", methods=["POST"])
-def cadastrar_cooperado():
+@api_post.route("/catador", methods=["POST"])
+def cadastrar_catador():
     cpf = request.form.get("cpf")
     nome = request.form.get("nome")
     telefone = request.form.get("telefone")
