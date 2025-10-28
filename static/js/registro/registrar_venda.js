@@ -4,6 +4,7 @@ import { exibirVendedores } from "./module/exibirVendedores.js";
 import { getMateriais } from "../api/getMateriais.js";
 export const material = await getMateriais();
 
+console.log('oieee', material)
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');

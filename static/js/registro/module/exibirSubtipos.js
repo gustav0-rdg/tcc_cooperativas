@@ -71,19 +71,8 @@ export async function exibirSubtipos() {
                                 nome_padrao: botao.value,
                                 sinonimo: valor,
                             }
-                            Swal.fire({
-                                title: 'Escreva o nome que você usa',
-                                html: `<input type="text" id="novoNomeMaterial" />`,
-                                showCancelButton: true,
-                                confirmButtonText: 'Registrar como sinônimo',
-                                cancelButtonText: 'Cancelar',
-                                color: "var(--verde-escuro-medio)",
-                                background: "var(--verde-claro-medio)",
-                                preConfirm: () => {
-                                    // adiciona o sinonimo nas informações que serão passadas
-                                    return valoresCadastro;
-                                }
-                            }).then(async () => {
+                            
+                            async () => {
                                 try {
                                     console.log(JSON.stringify(valoresCadastro))
 
@@ -105,7 +94,7 @@ export async function exibirSubtipos() {
                                     Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
                                 }
 
-                            })
+                            }
 
 
 
@@ -116,6 +105,7 @@ export async function exibirSubtipos() {
                         })
                     }
                     else {
+
 
                     };
                 });
