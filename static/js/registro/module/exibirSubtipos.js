@@ -32,12 +32,12 @@ export async function exibirSubtipos() {
         item => item.categoria === vendaAtual.material.categoria
     );
 
-    const botoesSwal = materiaisCategoriaAtual.map(mat => `<button class="registros__opcoes-btn swal__btn-material-existente"value="${mat.id_material_catalogo}">${mat.nome_padrao}</button>`).join(' ');
- 
+    const botoesSwal = materiaisCategoriaAtual.map(mat => `<input type="radio" class="registros__opcoes-btn swal__btn-material-existente"value="${mat.id_material_catalogo}">`).join(' ');
+
     novoSubtipo.addEventListener('click', async () => {
         Swal.fire({
             title: 'Algum destes materiais é o mesmo no qual você quer registrar?',
-            html: botoesSwal + '<button class="registros__opcoes-btn swal__btn-material-novo">Criar novo material</button>',
+            html: '<input type="text" placeholder="escreva aqui o nome usado em sua regiao" id="novoNomeMaterial">' + botoesSwal + '<button class="registros__opcoes-btn swal__btn-material-novo">Criar novo material</button>',
             showCancelButton: true,
             showConfirmButton: false,
             cancelButtonText: 'Cancelar',
@@ -49,16 +49,27 @@ export async function exibirSubtipos() {
                 // adiciona evento de clique aos botões
                 const botoes = Swal.getPopup().querySelectorAll('.registros__opcoes-btn');
                 botoes.forEach(botao => {
+
                     // Verifica se o botão é de sinonimo ou novo material
                     if (botao.classList.contains('swal__btn-material-existente')) {
+
                         // Caso seja sinonimo
                         botao.addEventListener('click', () => {
                             console.log('caiu aqui 3')
 
+
+                            const valor = document.getElementById('novoNomeMaterial').value;
+                            if (!valor) {
+                                Swal.showValidationMessage('Digite algo para o nome!');
+                            }
+                            valoresCadastro.sinonimo = valor
+
+
+
                             // informações que serão passadas para o banco de dados
                             let valoresCadastro = {
                                 nome_padrao: botao.value,
-                                sinonimo: 'Poooo',
+                                sinonimo: valor,
                             }
                             Swal.fire({
                                 title: 'Escreva o nome que você usa',
@@ -69,11 +80,7 @@ export async function exibirSubtipos() {
                                 color: "var(--verde-escuro-medio)",
                                 background: "var(--verde-claro-medio)",
                                 preConfirm: () => {
-                                    const valor = document.getElementById('novoNomeMaterial').value;
-                                    if (!valor) {
-                                        Swal.showValidationMessage('Digite algo para o nome!');
-                                    }
-                                    valoresCadastro.sinonimo = valor // adiciona o sinonimo nas informações que serão passadas
+                                    // adiciona o sinonimo nas informações que serão passadas
                                     return valoresCadastro;
                                 }
                             }).then(async () => {
@@ -94,7 +101,7 @@ export async function exibirSubtipos() {
                                         Swal.fire('Erro!', data.message, 'error');
                                     }
                                 } catch (error) {
-                                    console.error(error); 
+                                    console.error(error);
                                     Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
                                 }
 
