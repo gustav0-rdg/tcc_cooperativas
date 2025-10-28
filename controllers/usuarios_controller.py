@@ -177,45 +177,94 @@ class Usuarios:
         finally:
             cursor.close()
 
-    def create (self, nome:str, email:str, senha:str, tipo:str) -> int | None:
+    def create (self, nome:str, senha:str, tipo:str, email:str = None, cpf:str = None, status:str = 'pendente') -> Tuple[int | None, str]:
         
         """
-        Cadastra o usuário (de forma genérica) 
-        no banco de dados
+        Cadastra o registro BASE do usuário na tabela 'usuarios'.
+        - Para 'cooperado' sem email, o CPF é obrigatório.
+        - Para outros tipos, o Email é obrigatório.
+        - Retorna o id_usuario criado ou None em caso de falha.
         """
 
-        #region Exceções
+        #region Validações essenciais
+        if not nome or not senha or not tipo:
+            print('Erro create: Nome, senha e tipo são obrigatórios');
+            return None
+        
+        if cpf:
+            cpf = ''.join(filter(str.isdigit, cpf))
 
-        if not isinstance(nome, str) or not isinstance(email, str) or not isinstance(senha, str) or not isinstance(tipo, str):
-            raise TypeError ('Usuarios "create" - nome, email, senha e tipo devem ser strings')
+            if len(cpf) != 11:
+                print(f'Erro create: CPF inválido fornecido: {cpf}')
+                return None
+        
+        # Validação do identificador obrigatório por Tipo
+        if tipo == 'cooperado':
+            if not cpf:
+                msg = f'Erro create: CPF é obrigatório para tipo {tipo}'
+                return(None, msg)
+        elif not email:
+
+            msg = f'Erro create: Email é obrigatório para o tipo {tipo}'
+            print(msg)
+
+            return (None, msg)
+        
         if len(senha) < 8:
-            raise ValueError ('Usuarios "create" - senha deve ter >= 8 caracteres')
+            msg = 'Erro create: Senha deve ter >= 8 caracteres'
+            print(msg)
+            return (None, msg) 
         
+        status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
+        if status not in status_validos:
+             msg = f'Erro create: Status inválido: {status}'
+             print(msg)
+             return (None, msg)
         #endregion
 
         cursor = self.connection_db.cursor()
+
         try:
-
             senha_hash = Usuarios.criptografar(senha)
-            cursor.execute (
-                """
-                INSERT INTO usuarios (nome, email, senha_hash, tipo)
-                VALUES (%s, %s, %s, %s);
-                """, (nome, email, senha_hash, tipo)
-            )
 
-            return cursor.lastrowid # Retorna o ID do usuário criado
+            query = """
+                INSERT INTO usuarios (nome, email, cpf, senha_hash, tipo, status)
+                VALUES (%s, %s, %s, %s, %s, %s);
+            """
 
+            params = (nome, email, cpf, senha_hash, tipo, status)
+            cursor.execute(query, params)
+            self.connection_db.commit()
+
+            id_criado = cursor.lastrowid
+            msg = f'Usuário base criado com ID: {id_criado} (Tipo: {tipo})'
+            print(msg)
+            return(id_criado, msg)
+        
         except mysql.connector.IntegrityError as e:
-            print(f'Erro de Integridade - Usuarios "create": {e}')
-            return None
+
+            # Erro de duplicação
+            error_msg = str(e).lower()
+            campo_duplicado = 'desconhecido'
+
+            if 'email' in error_msg: campo_duplicado = 'Email'
+            elif 'cpf' in error_msg: campo_duplicado = 'CPF'
+
+            msg = f'Erro de integridade - Usuários "create": {campo_duplicado} já existe'
+            print(msg)
+
+            self.connection_db.rollback()
+            return(None, msg)
         
         except Exception as e:
-            print(f'Erro - Usuarios "create": {e}')
-            return None
+            msg = f'Erro inesperado - Usuários "create": {e}'
+            print(msg)
+            
+            self.connection_db.rollback()
+            return(None, msg)
         
         finally:
-            cursor.close()
+            if cursor: cursor.close()
 
     def enviar_email_confirmacao (self, destinatario:str, codigo_verificacao:str) -> bool:
 

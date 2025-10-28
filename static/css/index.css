@@ -44,6 +44,7 @@
 
 .botao__icone {
     color: var(--verde-claro);
+    font-size: 32px !important;
 }
 
 @media (min-width: 768px) {

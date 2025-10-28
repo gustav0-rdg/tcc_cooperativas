@@ -14,78 +14,96 @@ api_usuarios = Blueprint(
 )
 
 @api_usuarios.route('/cadastrar', methods=['POST'])
-def cadastrar ():
+def cadastrar():
 
-    token = request.headers.get('Authorization')
-
-    data_cadastro = request.get_json()
-    campos_obrigatorios =  ['nome', 'email', 'senha', 'tipo']
-
-    # 400 - Campos obrigatórios incompletos
-
-    if not data_cadastro or not all(key in data_cadastro for key in campos_obrigatorios):
-        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
-
-    # 400 - Senha com menos de 8 caractéres
-
-    if len(data_cadastro['senha']) < 8:
-        return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
-    
-    conn = Connection('local')
-
+    conn = None
     try:
+        data_cadastro = request.get_json()
+        
+        # Campos base obrigatórios
+        nome = data_cadastro.get('nome')
+        senha = data_cadastro.get('senha')
+        tipo_novo_usuario = data_cadastro.get('tipo')
+        
+        email = data_cadastro.get('email') 
+        cpf = data_cadastro.get('cpf') # Para cooperados
 
-        #region Cadastro de pessoas com permissões especiais
-
-        if data_cadastro['tipo'] != 'cooperativa':
-
-            if not token:
-                return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
-            
-            data_token = Tokens(conn.connection_db).validar(token)
-            usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
-
-            if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
-                return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-            
+        #region Validações básicas
+        if not nome or not senha or not tipo_novo_usuario:
+            return jsonify({'error': 'Nome, senha e tipo são obrigatórios'}), 400
+        if len(senha) < 8:
+            return jsonify({'error': 'A senha deve ter no mínimo 8 caracteres'}), 400
         #endregion
 
-        novo_usuario = Usuarios(conn.connection_db).create(
+        conn = Connection('local')
+        if not conn.connection_db or not conn.connection_db.is_connected():
+             raise ConnectionError("Falha ao conectar ao banco de dados")
 
-            data_cadastro['nome'],
+        status_inicial = 'pendente'
 
-            data_cadastro['email'],
-            data_cadastro['senha'],
+        if tipo_novo_usuario != 'cooperativa':
+            token_header = request.headers.get('Authorization')
+            if not token_header or not token_header.startswith("Bearer "):
+                 conn.close(); return jsonify({'error': 'Token de autorização ausente ou mal formatado'}), 401
+            token = token_header.split(" ")[1]
+            
+            tokens_ctrl = Tokens(conn.connection_db)
+            data_token = tokens_ctrl.validar(token)
+            if not data_token: conn.close(); return jsonify({'error': 'Token inválido'}), 401
+            
+            id_usuario_logado = data_token['id_usuario']
+            token_valido_agora = tokens_ctrl.get_ultimo_token_por_usuario(id_usuario_logado, 'sessao')
+            if not token_valido_agora or token_valido_agora != token: conn.close(); return jsonify({'error': 'Token expirado ou inválido'}), 401
 
-            data_cadastro['tipo']
+            usuarios_ctrl_check = Usuarios(conn.connection_db)
+            usuario_logado = usuarios_ctrl_check.get_by_id(id_usuario_logado)
+            if not usuario_logado: conn.close(); return jsonify({'error': 'Usuário requisitante não encontrado'}), 404
+            
+            if usuario_logado['tipo'] != 'root':
+                conn.close(); return jsonify({'error': 'Apenas o usuário Root pode criar este tipo de conta'}), 403
+            
+            if tipo_novo_usuario == 'root':
+                 conn.close(); return jsonify({'error': 'Não é permitido criar outro usuário Root'}), 403
 
+            if tipo_novo_usuario == 'gestor' or tipo_novo_usuario == 'cooperado':
+                status_inicial = 'ativo'
+            
+            # Validação de dados específicos do tipo
+            if tipo_novo_usuario == 'gestor' and not email:
+                 conn.close(); return jsonify({'error': 'Email é obrigatório para criar um gestor'}), 400
+            if tipo_novo_usuario == 'cooperado' and not cpf:
+                 conn.close(); return jsonify({'error': 'CPF é obrigatório para criar um cooperado'}), 400
+                 
+        else:
+             if not email:
+                  conn.close(); return jsonify({'error': 'Email é obrigatório para cadastro de cooperativa'}), 400
+
+        usuarios_ctrl_create = Usuarios(conn.connection_db)
+        
+        id_criado, msg_status = usuarios_ctrl_create.create(
+            nome=nome,
+            senha=senha,
+            tipo=tipo_novo_usuario,
+            email=email, 
+            cpf=cpf,     
+            status=status_inicial 
         )
-
-        match novo_usuario:
-
-            # 200 - Usuário criado
-
-            case _ if isinstance(novo_usuario, int):
-
-                return jsonify({ 
-
-                    'texto': 'Usuário cadastrado',
-                    'id_usuario': novo_usuario
-
-                }), 200
-
-            # 500 - Erro ao criar usuário
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-
-    except Exception as e:
-
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
-    finally:
-
+        
         conn.close()
+
+        if id_criado is not None:
+            return jsonify({'id_usuario': id_criado, 'message': f'Usuário {tipo_novo_usuario} base criado com sucesso!'}), 201
+        else:
+            return jsonify({'error': msg_status or f'Erro ao criar {tipo_novo_usuario}.'}), 409 # Ou 500
+
+    except ConnectionError as ce:
+         print(f"Erro de Conexão na rota /cadastrar: {ce}")
+         return jsonify({'error': 'Falha na conexão com o banco de dados'}), 500
+         
+    except Exception as e:
+        if conn and conn.connection_db and conn.connection_db.is_connected(): conn.close()
+        print(f"Erro GERAL Inesperado na rota /cadastrar: {e}")
+        return jsonify({'error': 'Erro interno inesperado no servidor'}), 50
 
 @api_usuarios.route('/login', methods=['POST'])
 def login_generico():
@@ -390,6 +408,8 @@ def alterar_status (id_usuario:int=None):
 
         conn.close()
         
+
+
 @api_usuarios.route('/me', methods=['GET'])
 def get_meu_usuario():
 
