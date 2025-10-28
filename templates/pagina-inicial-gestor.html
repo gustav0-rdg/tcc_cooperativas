@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <!-- Define o tipo de documento e o idioma da página -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Título que aparece na aba do navegador -->
     <title>Recoopera | Administração</title>
     
+    <!-- Importa o framework CSS Bootstrap (versão 5.3.2) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Importa os ícones da biblioteca Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Importa o arquivo de cores padrão do projeto -->
     <link rel="stylesheet" href="../static/css/root-de-cores.css">
+    
+    <!-- Importa o CSS específico da página inicial do gestor -->
     <link rel="stylesheet" href="../static/css/pagina_inicial_gestor/pag_gestor.css">
     
+    <!-- Ícone que aparece na aba do navegador -->
     <link rel="icon" href="../static/img/favicon.png" type="image/png">
 </head>
 <body>
     
+    <!-- Inclui o cabeçalho (header) de outro arquivo HTML -->
     {% include 'includes/header.html' %}
     
+    <!-- Área principal da página -->
     <main class="container-fluid gestor-main">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-8">
                 
+                <!-- Seção de boas-vindas -->
                 <section class="welcome-section text-center mb-5">
                     <h1 class="welcome-title">Bem-vindo!</h1>
                     <p class="welcome-subtitle">Quais partes você quer gerenciar?</p>
                 </section>
 
+                <!-- Seção com os botões de ações -->
                 <section class="action-buttons mb-5">
+                    
+                    <!-- A classe do grid muda conforme o tipo do usuário logado -->
                     <div class="row g-3 {% if usuario_logado.tipo == 'root' %}g-md-3{% else %}g-md-4{% endif %} {% if usuario_logado.tipo == 'root' %}justify-content-center{% endif %}">
-                    <div class="col-12 {% if usuario_logado.tipo == 'root' %}col-md-4{% else %}col-md-6{% endif %}">
+                        
+                        <!-- Card para acessar a área de cooperativas -->
+                        <div class="col-12 {% if usuario_logado.tipo == 'root' %}col-md-4{% else %}col-md-6{% endif %}">
                             <a href="{{ url_for('gestor.visualizar_cooperativas') }}" class="action-card">
                                 <div class="action-card-content">
+                                    <!-- Ícone e texto do card -->
                                     <i class="fas fa-users action-icon"></i>
                                     <span class="action-text">Cooperativas</span>
                                 </div>
                             </a>
                         </div>
                         
+                        <!-- Card para gerenciar cadastros -->
                         <div class="col-12 {% if usuario_logado.tipo == 'root' %}col-md-4{% else %}col-md-6{% endif %}">
                             <a href="{{ url_for('gestor.gerenciar_cadastros') }}" class="action-card">
                                 <div class="action-card-content">
@@ -46,12 +66,13 @@
                             </a>
                         </div>
 
+                        <!-- Esse card só aparece se o usuário logado for do tipo "root" -->
                         {% if usuario_logado.tipo == 'root' %}
                         <div class="col-12 col-md-4">
-                            <a href="{{ url_for('gestor.criar_gestor') }}" class="action-card">
+                            <a href="/gerenciar-gestores" class="action-card">
                                 <div class="action-card-content">
                                     <i class="fas fa-user-plus action-icon"></i> 
-                                    <span class="action-text">Criar Usuário Gestor</span>
+                                    <span class="action-text">Gestores</span>
                                 </div>
                             </a>
                         </div>
@@ -63,8 +84,10 @@
         </div>
     </main>
     
+    <!-- Inclui o rodapé (footer) de outro arquivo HTML -->
     {% include 'includes/footer.html' %}
     
+    <!-- Importa o script JavaScript do Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
