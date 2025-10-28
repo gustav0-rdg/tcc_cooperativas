@@ -65,6 +65,47 @@ class Cooperativa:
 
             cursor.close()
 
+    def get_all (self) -> list:
+
+        """
+        Consulta todas as cooperativas
+        cadastradas no sistema
+        """
+
+        cursor = self.connection_db.cursor()
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    id_cooperativa,
+                    cnpj,
+                    razao_social,
+                    endereco,
+                    cidade,
+                    estado,
+                    latitude,
+                    longitude,
+                    aprovado
+                FROM cooperativas
+                """
+
+            )
+
+            return cursor.fetchall()
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "get_all": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
     def get_by_cnpj (self, cnpj:str) -> dict:
 
         """
@@ -259,7 +300,8 @@ class Cooperativa:
 
                 nome,
                 email,
-                senha
+                senha,
+                tipo='cooperado'
 
             )
 
@@ -309,7 +351,7 @@ class Cooperativa:
 
             cursor.close()
 
-    def alterar_aprovacao (self, cnpj:str, aprovado:bool) -> bool:
+    def alterar_aprovacao (self, id_cooperativa:int, aprovado:bool) -> bool:
         
         """
         Altera o estado de aprovação da
@@ -318,9 +360,9 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(cnpj, str):
+        if not isinstance(id_cooperativa, int):
 
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
+            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
         if not isinstance(aprovado, bool):
 
@@ -337,10 +379,10 @@ class Cooperativa:
                 """
                 UPDATE cooperativas
                 SET cooperativas.aprovado = %s
-                WHERE cooperativas.cnpj = %s;
+                WHERE cooperativas.id_cooperativa = %s;
                 """,
 
-                (aprovado, cnpj)
+                (aprovado, id_cooperativa)
 
             )
 
