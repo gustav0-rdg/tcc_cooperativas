@@ -389,3 +389,54 @@ def alterar_status (id_usuario:int=None):
     finally:
 
         conn.close()
+        
+@api_usuarios.route('/me', methods=['GET'])
+def get_meu_usuario():
+
+    conn = None
+    try:
+
+        token_header = request.headers.get('Authorization')
+        
+        if not token_header:
+            return jsonify({'error': 'Token não fornecido'}), 401
+        
+        try:
+            token = token_header.split(" ")[1]
+        except IndexError:
+            return jsonify({'error': 'Token mal formatado'}), 401
+
+        conn = Connection('local')
+        db = conn.connection_db
+        tokens_ctrl = Tokens(db)
+
+        data_token = tokens_ctrl.validar(token)
+
+        if not data_token:
+            return jsonify({'error': 'Token inválido'}), 401
+        
+        id_usuario = data_token['id_usuario']
+        token_valido_agora = tokens_ctrl.get_ultimo_token_por_usuario(id_usuario, 'sessao')
+
+        if not token_valido_agora or token_valido_agora != token:
+             return jsonify({'error': 'Token expirado ou inválido'}), 401
+
+        usuarios_ctrl = Usuarios(db)
+        usuario_info = usuarios_ctrl.get_by_id(id_usuario)
+
+        conn.close()
+
+        if not usuario_info:
+            return jsonify({'error': 'Usuário não encontrado'}), 404
+
+        return jsonify({
+            'id_usuario': usuario_info['id_usuario'],
+            'nome': usuario_info['nome'],
+            'email': usuario_info['email'],
+            'tipo': usuario_info['tipo']
+        }), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro GERAL na rota /me: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
