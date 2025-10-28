@@ -15,7 +15,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `id_usuario` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `nome` VARCHAR(200) NOT NULL,
-  `email` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255),
   `cpf` VARCHAR(11),
   `senha_hash` VARCHAR(255) NOT NULL,
   `tipo` ENUM('root','gestor', 'cooperativa', 'cooperado') NOT NULL DEFAULT 'cooperativa',
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
 );
 
 -- ============================================================================
--- Dados Iniciais (Seeds)
+-- Dados Iniciais
 -- ============================================================================
 
 INSERT INTO `materiais_base` (`nome`, `descricao`) VALUES

@@ -4,6 +4,8 @@ import mysql.connector
 from controllers.tokens_controller import Tokens
 from controllers.email_controller import Email
 import hashlib
+from datetime import datetime, timedelta
+from typing import Tuple
 
 class Usuarios:
 
@@ -20,7 +22,7 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id (self, id_usuario:int) -> dict | None: # Retorna dict ou None
+    def get_by_id (self, id_usuario:int) -> dict | None:
         """
 
         Consulta no banco de dados o
@@ -60,42 +62,82 @@ class Usuarios:
         finally:
             cursor.close()
 
-    def autenticar (self, email:str, senha:str) -> int | None | bool:
+    def autenticar(self, identificador: str, senha: str) -> Tuple[str | None, str]:
 
         """
-        Verifica a autenticidade do usuário
-        conferindo a existência do seu email
-        e senha cadastrados no banco de dados
+        Autentica um usuário de forma genérica usando e-mail, CNPJ ou CPF.
+        Verifica a senha e as regras de negócio (status, aprovação, etc.).
+        
+        Retorna:
+            (str | None): O token de sessão, ou None se a autenticação falhar.
+            (str): Uma mensagem de status (ex: "LOGIN_SUCESSO", "SENHA_INVALIDA").
         """
-
-        #region Exceções
-
-        if not isinstance(email, str) or not isinstance(senha, str):
-             raise TypeError ('Usuarios "autenticar" - email e senha devem ser strings')
-
-        #endregion
-
+        
         cursor = self.connection_db.cursor(dictionary=True)
+        senha_hash = Usuarios.criptografar(senha)
+        
+        query = """
+            SELECT 
+                u.id_usuario, u.senha_hash, u.tipo, u.status,
+                c.aprovado AS cooperativa_aprovada,
+                co.ativo AS cooperado_ativo
+            FROM usuarios AS u
+            LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario
+            LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario
+            WHERE 
+                u.email = %s OR   -- Para Gestor/Root
+                c.cnpj = %s OR    -- Para Cooperativa
+                u.cpf = %s        -- Para Cooperado
+            LIMIT 1;
+        """
+        
         try:
-            senha_hash = Usuarios.criptografar(senha)
-            cursor.execute (
-                """
-                SELECT id_usuario FROM usuarios
-                WHERE usuarios.email = %s AND usuarios.senha_hash = %s;
-                """, (email, senha_hash) 
-            )
-            data_user = cursor.fetchone()
-            self.connection_db.commit()
+            params = (identificador, identificador, identificador)
+            cursor.execute(query, params)
+            usuario_data = cursor.fetchone()
 
-            if data_user:
-                return data_user['id_usuario'] # Retorna o ID se autenticado
-            else:
-                return None # Retorna None se não encontrado
+            # Verificações de Falha
+            if not usuario_data:
+                return (None, "IDENTIFICADOR_NAO_ENCONTRADO")
+
+            if usuario_data['senha_hash'] != senha_hash:
+                return (None, "SENHA_INVALIDA")
+
+            if usuario_data['status'] != 'ativo':
+                return (None, f"USUARIO_{usuario_data['status'].upper()}")
+
+            tipo_usuario = usuario_data['tipo']
+            if tipo_usuario == 'cooperativa' and not usuario_data['cooperativa_aprovada']:
+                return (None, "COOPERATIVA_NAO_APROVADA")
+            if tipo_usuario == 'cooperado' and not usuario_data['cooperado_ativo']:
+                return (None, "COOPERADO_INATIVO")
+
+            # Sucesso
+            id_usuario = usuario_data['id_usuario']
             
+            token_controller = Tokens(self.connection_db)
+            
+            data_expiracao = datetime.now() + timedelta(days=30) 
+
+            token_criado_sucesso = token_controller.create(
+                id_usuario=id_usuario, 
+                tipo='sessao', 
+                data_expiracao=data_expiracao
+            )
+            
+            if token_criado_sucesso:
+
+                token = token_controller.get_last_token_by_user(id_usuario, 'sessao')
+                if token:
+                    return (token, "LOGIN_SUCESSO")
+                else:
+                    return (None, "ERRO_GERAR_TOKEN")
+            else:
+                return (None, "ERRO_CRIAR_TOKEN")
+        
         except Exception as e:
-            print(f'Erro - Usuarios "autenticar": {e}')
-            self.connection_db.rollback()
-            return False # Retorna False em caso de erro de execução
+            print(f"Erro - Usuarios 'autenticar' genérico: {e}")
+            return (None, "ERRO_INTERNO")
         
         finally:
             cursor.close()
@@ -135,18 +177,7 @@ class Usuarios:
         finally:
             cursor.close()
 
-    def create (
-            
-        self,
-
-        nome:str,
-
-        email:str,
-        senha:str,
-
-        tipo:str
-
-    ) -> int | None:
+    def create (self, nome:str, email:str, senha:str, tipo:str) -> int | None:
         
         """
         Cadastra o usuário (de forma genérica) 
@@ -487,3 +518,4 @@ class Usuarios:
         
         finally:
             cursor.close()
+    
