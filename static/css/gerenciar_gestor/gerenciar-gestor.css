@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--verde-claro);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--branco);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--verde-escuro);
+    margin-bottom: 20px;
+}
+
+#searchInput {
+    border-radius: 20px;
+    padding: 10px 15px;
+    border: 1px solid var(--verde-escuro-medio);
+    background-color: var(--branco);
+    color: var(--verde-escuro);
+}
+
+button.btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--verde-principal);
+    border: none;
+    color: var(--branco);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-primary:hover {
+    background-color: var(--verde-escuro-medio);
+}
+
+.card {
+    background-color: var(--branco);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card h5 {
+    margin: 0;
+    font-size: 1.50rem;
+    color: var(--verde-escuro);
+}
+
+.card p {
+    margin: 5px 0;
+    font-size: 1.15rem;
+    color: var(--verde-escuro-medio);
+}
+
+.card .btn-danger {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: var(--vermelho);
+    border: none;
+    color: var(--branco);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.card .btn-danger:hover {
+    background-color: var(--verde-escuro);
+}

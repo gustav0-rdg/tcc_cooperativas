@@ -19,17 +19,18 @@ def cadastrar ():
     token = request.headers.get('Authorization')
 
     data_cadastro = request.get_json()
+    campos_obrigatorios =  ['nome', 'email', 'senha', 'tipo']
 
-    if not data_cadastro or not all(key in data_cadastro for key in ['nome', 'email', 'senha']):
-        
+    # 400 - Campos obrigatórios incompletos
+
+    if not data_cadastro or not all(key in data_cadastro for key in campos_obrigatorios):
         return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
+
+    # 400 - Senha com menos de 8 caractéres
 
     if len(data_cadastro['senha']) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
-
-    if not 'tipo' in data_cadastro:
-        data_cadastro['tipo'] = 'cooperativa'
-
+    
     conn = Connection('local')
 
     try:
@@ -87,61 +88,48 @@ def cadastrar ():
         conn.close()
 
 @api_usuarios.route('/login', methods=['POST'])
-def login ():
+def login_generico():
 
-    data = request.get_json()
-
-    email = data.get('email')
-    if not email:
-        return jsonify({ 'texto': '"email" é parâmetro obrigatório' }), 400
-        
-    senha = data.get('senha')
-    if not senha:
-        return jsonify({ 'texto': '"senha" é parâmetro obrigatório' }), 400
-    
-    conn = Connection('local')
+    conn = None
 
     try:
+        data = request.get_json()
+        identificador = data.get('identificador')
+        senha = data.get('senha')
 
-        autenticar_usuario = Usuarios(conn.connection_db).autenticar(email, senha)
-        match autenticar_usuario:
+        if not identificador or not senha:
+            return jsonify({'error': 'Identificador e senha são obrigatórios'}), 400
+        
+        conn = Connection('local')
+        usuario_controller = Usuarios(conn.connection_db)
+        
+        token, status_msg = usuario_controller.autenticar(identificador, senha)
+        
+        conn.close() 
 
-            # 404 - Usuário não encontrado (Email ou Senha incorretos)
+        if status_msg == "LOGIN_SUCESSO" and token:
+            # Envia o token para o JavaScript
+            return jsonify({'token': token}), 200
+        else:
+            # Falha na autenticação, traduz a mensagem
+            erros = {
+                "IDENTIFICADOR_NAO_ENCONTRADO": "Usuário não encontrado.",
+                "SENHA_INVALIDA": "Senha inválida.",
+                "USUARIO_PENDENTE": "Cadastro pendente de aprovação.",
+                "USUARIO_INATIVO": "Este usuário está inativo.",
+                "USUARIO_BLOQUEADO": "Este usuário foi bloqueado.",
+                "COOPERATIVA_NAO_APROVADA": "Cadastro da cooperativa ainda não foi aprovado.",
+                "COOPERADO_INATIVO": "Este cooperado está inativo.",
+            }
 
-            case None:
-                return jsonify({ 'error': 'Email ou senha incorretos' }), 404
-
-            # 200 - Usuário autêntico
-
-            case _ if isinstance(autenticar_usuario, int):
-
-                return jsonify({ 
-                    
-                    'token': Tokens(conn.connection_db).create(
-
-                        autenticar_usuario,
-                        'sessao',
-
-                        # Data de expiração em 30 dias
-                        datetime.now() + timedelta(days=30)
-
-                    )
-
-                }), 200
-
-            # 500 - Erro ao verificar a autenticidade do usuário
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+            mensagem_erro = erros.get(status_msg, "Credenciais inválidas ou usuário não autorizado")
+            return jsonify({'error': mensagem_erro}), 401
 
     except Exception as e:
+        if conn: conn.close()
+        print(f"Erro na rota /login: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
 
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
-    finally:
-
-        conn.close()
-    
 @api_usuarios.route('/alterar-senha', methods=['POST'])
 def alterar_senha ():
 

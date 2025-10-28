@@ -1,9 +1,11 @@
 from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
+import mysql.connector
 from controllers.tokens_controller import Tokens
+from controllers.email_controller import Email
 import hashlib
 from datetime import datetime, timedelta
-from controllers.email_controller import Email
+from typing import Tuple
 
 class Usuarios:
 
@@ -20,100 +22,124 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id (self, id_usuario:int) -> dict:
-
+    def get_by_id (self, id_usuario:int) -> dict | None:
         """
+
         Consulta no banco de dados o
+
         usuário com o ID fornecido
+
         """
 
         #region Exceções
-
         if not isinstance(id_usuario, int):
+            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser int')
 
-            raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser do tipo Int')
-            
         #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
             cursor.execute (
-
                 """
                 SELECT
-                    usuarios.id_usuario,
-                    usuarios.nome,
-                    usuarios.email,
-                    usuarios.tipo,
-                    usuarios.status,
-                    usuarios.data_criacao
+                    usuarios.id_usuario, usuarios.nome, usuarios.email,
+                    usuarios.tipo, usuarios.status, usuarios.data_criacao
                 FROM usuarios
                 WHERE usuarios.id_usuario = %s;
-                """,
-
-                (id_usuario, )
-
+                """, (id_usuario, )
             )
+            resultado = cursor.fetchone()
 
-            return cursor.fetchone()            
-
+            self.connection_db.commit()
+            return resultado
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "get_by_id": {e}')
-
-            return False
-
+            self.connection_db.rollback() # Garante rollback em caso de erro
+            return None # Retorna None em caso de erro
+        
         finally:
-
             cursor.close()
 
-    def autenticar (self, email:str, senha:str) -> bool:
+    def autenticar(self, identificador: str, senha: str) -> Tuple[str | None, str]:
 
         """
-        Verifica a autenticidade do usuário
-        conferindo a existência do seu email
-        e senha cadastrados no banco de dados
-        """
-
-        #region Exceções
-
-        if not isinstance(email, str):
-
-            raise TypeError ('Usuarios "autenticar" - "email" deve ser do tipo String')
+        Autentica um usuário de forma genérica usando e-mail, CNPJ ou CPF.
+        Verifica a senha e as regras de negócio (status, aprovação, etc.).
         
-        if not isinstance(senha, str):
-
-            raise TypeError ('Usuarios "autenticar" - "senha" deve ser do tipo String')
-            
-        #endregion
-
+        Retorna:
+            (str | None): O token de sessão, ou None se a autenticação falhar.
+            (str): Uma mensagem de status (ex: "LOGIN_SUCESSO", "SENHA_INVALIDA").
+        """
+        
         cursor = self.connection_db.cursor(dictionary=True)
+        senha_hash = Usuarios.criptografar(senha)
+        
+        query = """
+            SELECT 
+                u.id_usuario, u.senha_hash, u.tipo, u.status,
+                c.aprovado AS cooperativa_aprovada,
+                co.ativo AS cooperado_ativo
+            FROM usuarios AS u
+            LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario
+            LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario
+            WHERE 
+                u.email = %s OR   -- Para Gestor/Root
+                c.cnpj = %s OR    -- Para Cooperativa
+                u.cpf = %s        -- Para Cooperado
+            LIMIT 1;
+        """
+        
         try:
-            senha_hash = Usuarios.criptografar(senha)
-            cursor.execute (
-                """
-                SELECT id_usuario FROM usuarios
-                WHERE usuarios.email = %s AND usuarios.senha_hash = %s;
-                """, (email, senha_hash) 
+            params = (identificador, identificador, identificador)
+            cursor.execute(query, params)
+            usuario_data = cursor.fetchone()
+
+            # Verificações de Falha
+            if not usuario_data:
+                return (None, "IDENTIFICADOR_NAO_ENCONTRADO")
+
+            if usuario_data['senha_hash'] != senha_hash:
+                return (None, "SENHA_INVALIDA")
+
+            if usuario_data['status'] != 'ativo':
+                return (None, f"USUARIO_{usuario_data['status'].upper()}")
+
+            tipo_usuario = usuario_data['tipo']
+            if tipo_usuario == 'cooperativa' and not usuario_data['cooperativa_aprovada']:
+                return (None, "COOPERATIVA_NAO_APROVADA")
+            if tipo_usuario == 'cooperado' and not usuario_data['cooperado_ativo']:
+                return (None, "COOPERADO_INATIVO")
+
+            # Sucesso
+            id_usuario = usuario_data['id_usuario']
+            
+            token_controller = Tokens(self.connection_db)
+            
+            data_expiracao = datetime.now() + timedelta(days=30) 
+
+            token_criado_sucesso = token_controller.create(
+                id_usuario=id_usuario, 
+                tipo='sessao', 
+                data_expiracao=data_expiracao
             )
-            data_user = cursor.fetchone()
-            self.connection_db.commit()
+            
+            if token_criado_sucesso:
 
-            if data_user:
-                return data_user['id_usuario'] # Retorna o ID se autenticado
+                token = token_controller.get_last_token_by_user(id_usuario, 'sessao')
+                if token:
+                    return (token, "LOGIN_SUCESSO")
+                else:
+                    return (None, "ERRO_GERAR_TOKEN")
             else:
-                return None                
-
+                return (None, "ERRO_CRIAR_TOKEN")
+        
         except Exception as e:
-
-            print(f'Erro - Usuarios "autenticar": {e}')
-
-            return False
-
+            print(f"Erro - Usuarios 'autenticar' genérico: {e}")
+            return (None, "ERRO_INTERNO")
+        
         finally:
-
             cursor.close()
 
     def trocar_senha (self, id_usuario:int, nova_senha:str) -> bool:
@@ -126,60 +152,32 @@ class Usuarios:
         #region Exceções
 
         if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "trocar_senha" - "id_usuario" deve ser do tipo Int')
-        
-        if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ser do tipo String')
-        
+            raise TypeError ('Usuarios "trocar_senha" - id_usuario deve ser int')
+        if not isinstance(nova_senha, str):
+            raise TypeError ('Usuarios "trocar_senha" - nova_senha deve ser string')
         if len(nova_senha) < 8:
+            raise ValueError ('Usuarios "trocar_senha" - nova_senha deve ter >= 8 caracteres')
 
-            raise TypeError ('Usuarios "trocar_senha" - "nova_senha" deve ter 8 ou mais caractéres')
-            
         #endregion
 
         cursor = self.connection_db.cursor()
-
         try:
-
-            nova_senha = Usuarios.criptografar(nova_senha)
+            nova_senha_hash = Usuarios.criptografar(nova_senha) 
             cursor.execute (
-
                 """
-                UPDATE usuarios
-                SET usuarios.senha_hash = %s
-                WHERE usuarios.id_usuario = %s;
-                """,
-
-                (nova_senha, id_usuario)
-
+                UPDATE usuarios SET senha_hash = %s WHERE id_usuario = %s;
+                """, (nova_senha_hash, id_usuario)
             )
-
-            return cursor.rowcount > 0 or None               
-
+            self.connection_db.commit() 
+            return cursor.rowcount > 0 
         except Exception as e:
-
             print(f'Erro - Usuarios "trocar_senha": {e}')
-
+            self.connection_db.rollback()
             return False
-
         finally:
-
             cursor.close()
 
-    def create (
-            
-        self,
-
-        nome:str,
-
-        email:str,
-        senha:str,
-
-        tipo:str
-
-    ) -> bool:
+    def create (self, nome:str, email:str, senha:str, tipo:str) -> int | None:
         
         """
         Cadastra o usuário (de forma genérica) 
@@ -189,58 +187,34 @@ class Usuarios:
         #region Exceções
 
         if not isinstance(nome, str) or not isinstance(email, str) or not isinstance(senha, str) or not isinstance(tipo, str):
-
-            raise TypeError ('Usuarios "create" - "nome", "email", "senha" e "tipo" devem ser do tipo String')
-            
+            raise TypeError ('Usuarios "create" - nome, email, senha e tipo devem ser strings')
         if len(senha) < 8:
-
-            raise ValueError ('Usuarios "create" - "senha" deve ter 8 ou mais caractéres')
-
+            raise ValueError ('Usuarios "create" - senha deve ter >= 8 caracteres')
+        
         #endregion
 
         cursor = self.connection_db.cursor()
-
         try:
 
+            senha_hash = Usuarios.criptografar(senha)
             cursor.execute (
-
-                """
-                SELECT id_usuario FROM usuarios
-                WHERE usuarios.email = %s;
-                """,
-
-                (email, )
-
-            )
-
-            # Já há um usuário com o email cadastrado
-
-            if cursor.fetchone() != None:
-                return None
-
-            senha = Usuarios.criptografar(senha)
-            cursor.execute (
-
                 """
                 INSERT INTO usuarios (nome, email, senha_hash, tipo)
                 VALUES (%s, %s, %s, %s);
-                """,
-
-                (nome, email, senha, tipo)
-
+                """, (nome, email, senha_hash, tipo)
             )
 
-            self.connection_db.commit()
-            return cursor.lastrowid
+            return cursor.lastrowid # Retorna o ID do usuário criado
 
+        except mysql.connector.IntegrityError as e:
+            print(f'Erro de Integridade - Usuarios "create": {e}')
+            return None
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "create": {e}')
-
-            return False
-
+            return None
+        
         finally:
-
             cursor.close()
 
     def enviar_email_confirmacao (self, destinatario:str, codigo_verificacao:str) -> bool:
@@ -485,47 +459,32 @@ class Usuarios:
         #region Exceções
 
         if not isinstance(id_usuario, int):
-
-            raise TypeError ('Usuarios "alterar_status" - "id_usuario" deve ser do tipo Int')
-        
+            raise TypeError ('Usuarios "alterar_status" - id_usuario deve ser int')
         if not isinstance(novo_status, str):
-
-            raise TypeError ('Usuarios "alterar_status" - "novo_status" deve ser do tipo String')
-
-        status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
-        if not novo_status in status_validos:
-
-            raise ValueError (f'Usuarios "alterar_status" - "novo_status" deve ser um destes valores: {status_validos}')
-
+            raise TypeError ('Usuarios "alterar_status" - novo_status deve ser string')
+        
         #endregion
 
+        status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
+        if novo_status not in status_validos: 
+            raise ValueError (f'Usuarios "alterar_status" - novo_status inválido: {novo_status}')
+
         cursor = self.connection_db.cursor()
-
         try:
-
             cursor.execute (
-
                 """
-                UPDATE usuarios
-                SET usuarios.status = %s
-                WHERE usuarios.id_usuario = %s;
-                """,
-
-                (novo_status, id_usuario)
-
+                UPDATE usuarios SET status = %s WHERE id_usuario = %s;
+                """, (novo_status, id_usuario)
             )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0 or None
-
+            self.connection_db.commit() 
+            return cursor.rowcount > 0 # Retorna True se alterou
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "alterar_status": {e}')
-
+            self.connection_db.rollback()
             return False
-
+        
         finally:
-
             cursor.close()
 
     def delete (self, id_usuario:int) -> bool:
@@ -538,36 +497,25 @@ class Usuarios:
         #region Exceções
 
         if not isinstance(id_usuario, int):
+            raise TypeError ('Usuarios "delete" - id_usuario deve ser int')
 
-            raise TypeError ('Usuarios "delete" - "id_usuario" deve ser do tipo Int')
-            
         #endregion
 
         cursor = self.connection_db.cursor()
-
         try:
-
             cursor.execute (
-
                 """
-                DELETE FROM usuarios
-                WHERE usuarios.id_usuario = %s;
-                """,
-
-                (id_usuario, )
-
+                DELETE FROM usuarios WHERE id_usuario = %s;
+                """, (id_usuario, )
             )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0 or None
-
+            self.connection_db.commit() 
+            return cursor.rowcount > 0 # Retorna True se deletou
+        
         except Exception as e:
-
             print(f'Erro - Usuarios "delete": {e}')
-
+            self.connection_db.rollback()
             return False
         
         finally:
-
             cursor.close()
     
