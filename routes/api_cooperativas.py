@@ -182,6 +182,95 @@ def cadastrar ():
         if conn:
             conn.close()
 
+@api_cooperativas.route('/get-by-id/<id_cooperativa>', methods=['POST'])
+def get_by_id (id_cooperativa:int):
+
+    if not id_cooperativa.isdigit():
+        return jsonify({ 'error': '"id_cooperativa" é inválido' }), 400
+    
+    id_cooperativa = int(id_cooperativa)
+
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
+
+    conn = Connection()
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+        
+        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+        
+        dados_cooperativa = Cooperativa(conn.connection_db).get_by_id(id_cooperativa)
+
+        match dados_cooperativa:
+
+            # 200 - Cooperativa consultada com sucesso
+
+            case _ if isinstance(dados_cooperativa, dict):
+        
+                return jsonify({ 'dados_cooperativa': dados_cooperativa }), 200
+
+            # 500 - Erro ao consultar cooperativa
+
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
+
+@api_cooperativas.route('/get-all', methods=['POST'])
+def get_all ():
+
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
+
+    conn = Connection()
+
+    try:
+
+        data_token = Tokens(conn.connection_db).validar(token)
+
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+        
+        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
+        
+        dados_cooperativas = Cooperativa(conn.connection_db).get_all()
+
+        match dados_cooperativas:
+
+            # 200 - Todas as cooperativas foram consultadas com sucesso
+
+            case _ if isinstance(dados_cooperativas, list):
+        
+                return jsonify({ 'dados_cooperativas': dados_cooperativas }), 200
+
+            # 500 - Erro ao consultar cooperativas
+
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        conn.close()
+
 @api_cooperativas.route('/alterar-aprovacao/<id_cooperativa>', methods=['POST'])
 def alterar_aprovacao (id_cooperativa:int):
 
