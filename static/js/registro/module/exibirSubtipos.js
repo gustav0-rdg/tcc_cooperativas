@@ -91,7 +91,7 @@ export async function exibirSubtipos() {
 
                 // Se for "criar", chama função para cadastrar novo material
                 if (selecionado.value === 'criar') {
-                    await cadastrarNovoMaterial(valor);
+                    await cadastrarNovoMaterial(valor, vendaAtual.material.id_categoria);
                 } else {
                     // Caso contrário, cadastrar como sinônimo
                     valoresCadastro.nome_padrao = selecionado.value;
@@ -153,14 +153,17 @@ async function cadastrarSinonimo(valoresCadastro) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
+    finally{
+        exibirSubtipos()
+    }
 }
 
-async function cadastrarNovoMaterial(nomeMaterial) {
+async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
     try {
-        const resposta = await fetch('/post/cadastrar-material', {
+        const resposta = await fetch('/post/cadastrar-subtipo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome_material: nomeMaterial })
+            body: JSON.stringify({ nome_especifico: nomeMaterial, id_material_base: id_material_base })
         });
 
         const data = await resposta.json();
@@ -173,5 +176,8 @@ async function cadastrarNovoMaterial(nomeMaterial) {
     } catch (error) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
+    }
+    finally{
+        exibirSubtipos()
     }
 }

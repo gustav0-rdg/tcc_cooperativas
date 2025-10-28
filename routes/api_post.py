@@ -61,3 +61,10 @@ def registrar_sinonimo():
 
     resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
     return resposta
+
+@api_post.route("/cadastrar-subtipo", methods=["POST"])
+def cadastrar_subtipo():
+    data = request.get_json()
+    conn = Connection('local')
+    resposta = Materiais(conn.connection_db).cadastrar_subtipo(data["nome_especifico"], data["id_material_base"])
+    return resposta

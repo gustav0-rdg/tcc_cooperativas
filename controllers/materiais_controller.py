@@ -39,6 +39,26 @@ class Materiais:
         finally:
             cursor.close()
 
+    def cadastrar_subtipo(self, nome_especifico, id_material_base):
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                query = """
+                INSERT INTO materiais_catalogo(id_material_base, nome_especifico)
+                VALUES(%s,%s);
+                """
+                cursor.execute(query, (id_material_base, nome_especifico))
+                self.connection_db.commit()
+                return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
+
+        except mysql.connector.Error as error:
+
+            return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
+
+        
+        finally:
+            cursor.close()
+
+
     def post_cadastrar_sinonimo(self, nome_padrao, sinonimo, id_cooperativa):
         cursor = self.connection_db.cursor(dictionary=True)
         
