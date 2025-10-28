@@ -218,7 +218,11 @@ body {
     background: none;
     border: none;
     font-size: 2rem;
-    color: var(--preto);
+    width: 40%;
+    height: 80px;
+    border-radius: 20px;
+    background-color: var(--verde-escuro);
+    color: var(--branco);
     margin-bottom: 1rem;
     padding: 0;
 }
