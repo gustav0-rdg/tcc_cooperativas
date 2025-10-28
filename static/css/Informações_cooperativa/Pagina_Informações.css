@@ -11,7 +11,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   overflow-y: auto; 
   overflow-x: hidden;
 }
@@ -31,7 +31,6 @@ main.corpo {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px; 
 }
 
 .btn-funcoes {
@@ -59,17 +58,27 @@ main.corpo {
 }
 
 .main-content {
+  flex-grow: 1;
   width: 100%;
   max-width: 600px; 
   padding: 1rem;
   box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.main-content .info-section {
+  width: 100%;
 }
 
 .card-info {
   width: 100%;
   background-color: var(--verde-claro-medio);
+  gap: 15px;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 8px rgba(0, 109, 5, 0.288);
@@ -126,15 +135,11 @@ main.corpo {
   align-items: center;
 }
 
-.phone-icon {
-  font-size: 3rem;
-  color: #007bff;
-  margin-bottom: 0.5rem;
-}
-
 .contato-card p.fw-bold {
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--verde-escuro);
 }
 
 .btn-contato {
@@ -147,15 +152,16 @@ main.corpo {
   font-size: 1.1rem;
   font-weight: bold;
   transition: background-color 0.2s, box-shadow 0.2s;
-  background-color: #fff;
-  color: #333;
-  border: 1px solid #ddd;
+  background-color: var(--verde-escuro-medio) !important;
+  color: var(--verde-claro-medio);
+  border: 1px solid var(--verde-escuro);
+  
 }
 
 .btn-contato:hover {
-  background-color: #eee;
+  background-color: var(--verde-principal) !important;
   text-decoration: none;
-  color: #333;
+  color: var(--verde-escuro) !important;
 }
 
 .btn-contato .material-icons {
@@ -163,32 +169,27 @@ main.corpo {
   margin-right: 0.5rem;
 }
 
-.btn-contato:not(.whatsapp-btn) {
-  background-color: #fff;
-  color: #007bff;
-}
-
-.btn-contato:not(.whatsapp-btn) .material-icons {
-  color: #007bff;
+.btn-contato:not(.whatsapp-btn)  {
+  color: var(--verde-claro-medio);
 }
 
 .whatsapp-btn {
-  background-color: #e9e9e9;
-  color: #25D366;
+  color: var(--verde-claro-medio);
 }
 
 .whatsapp-btn .material-icons {
-  color: #25D366;
+  color: var(--verde-claro-medio);
 }
 
-.whatsapp-btn:hover {
-  background-color: #dcdcdc;
+.whatsapp-btn:hover .material-icons {
+  color: var(--verde-escuro);
 }
 
 .card-btnEditar {
   width: 100%;
   display: flex;
   justify-content: center;
+align-items: start;
   padding-bottom: 20px; 
 }
 
