@@ -47,7 +47,7 @@ class Materiais:
             
 
             query = """
-            INSERT INTO materiais_apelidos (id_material_catalogo, nome_regional, id_apelido)
+            INSERT INTO materiais_sinonimos (id_material_catalogo, nome_sinonimo, id_cooperativa)
             VALUES (%s, %s, %s)
             """
             cursor.execute(query, (nome_padrao, sinonimo, id_cooperativa))

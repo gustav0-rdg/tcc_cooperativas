@@ -12,6 +12,7 @@ const opcoesSection = document.querySelector('.registros__opcoes');
 export const vendaAtual = {
     vendedor: {},
     material: {
+        id_categoria:0,
         categoria:'',
         subtipo:''
     },
@@ -36,17 +37,19 @@ function exibirMateriais() {
 
     opcoesSection.innerHTML = ''; // Limpar as opções anteriores
     material.forEach(item => {
+        console.log(item)
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
         div.setAttribute('data-value', `${item.nome_padrao}`);
         div.innerHTML = `
-            <h1>${item.categoria}</h1>
+            <h1>${item.nome_padrao}</h1>
         `;
         opcoesSection.appendChild(div);
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material.categoria = item.categoria; // Atualiza o material no objeto vendaAtual
+            vendaAtual.material.categoria = item.nome_padrao;
+            vendaAtual.material.id_categoria = item.id_material_catalogo // Atualiza o material no objeto vendaAtual
             etapaAtual = "subtipos"; // Muda para a etapa de vendedores
             // TROCAR ESTE PARA EXIBIR SUBTIPOS
             // exibirVendedores(); // Exibe os vendedores
