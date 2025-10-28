@@ -14,7 +14,7 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
-    def get_by_id (self, id_cooperativa:int) -> dict:
+    def get (self, identificador:int|str) -> dict:
 
         """
         Procura a cooperativa da qual o usuario
@@ -23,9 +23,9 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(id_cooperativa, int):
+        if not isinstance(identificador, (int, str)):
 
-            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
+            raise TypeError ('Cooperativa - "identificador" deve ser id_usuario, id_cooperativa ou cnpj')
 
         #endregion
 
@@ -37,19 +37,30 @@ class Cooperativa:
 
                 """
                 SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
+                    cooperativas.cnpj,
+                    cooperativas.razao_social,
+                    cooperativas.endereco,
+                    cooperativas.cidade,
+                    cooperativas.estado,
+                    cooperativas.latitude,
+                    cooperativas.longitude,
+                    cooperativas.aprovado,
+                    cooperativas.id_usuario,
+                    cooperativas.telefone,
+                    cooperativas.email,
+                    cooperativas.nome_fantasia,
+                    usuarios.status
                 FROM cooperativas
-                WHERE cooperativas.id_cooperativa = %s;
+                INNER JOIN
+                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
+                WHERE 
+                    cooperativas.id_cooperativa = %s OR
+                    cooperativas.id_usuario = %s OR
+                    cooperativas.cnpj = %s
+                LIMIT 1;
                 """,
 
-                (id_cooperativa, )
+                (identificador, )
 
             )
 
@@ -80,16 +91,22 @@ class Cooperativa:
 
                 """
                 SELECT
-                    id_cooperativa,
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
+                    cooperativas.cnpj,
+                    cooperativas.razao_social,
+                    cooperativas.endereco,
+                    cooperativas.cidade,
+                    cooperativas.estado,
+                    cooperativas.latitude,
+                    cooperativas.longitude,
+                    cooperativas.aprovado,
+                    cooperativas.id_usuario,
+                    cooperativas.telefone,
+                    cooperativas.email,
+                    cooperativas.nome_fantasia,
+                    usuarios.status
                 FROM cooperativas
+                INNER JOIN
+                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario;
                 """
 
             )
@@ -99,109 +116,6 @@ class Cooperativa:
         except Exception as e:
 
             print(f'Erro - Cooperativa "get_all": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def get_by_cnpj (self, cnpj:str) -> dict:
-
-        """
-        Consulta o CNPJ e retorna a cooperativa
-        com o CNPJ requisitado, caso registrado,
-        se não 'null'
-        """
-
-        #region Exceções
-
-        if not isinstance(cnpj, str):
-
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
-
-        #endregion
-
-        cursor = self.connection_db.cursor(dictionary=True)
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
-                FROM cooperativas
-                WHERE cooperativas.cnpj = %s;
-                """,
-
-                (cnpj, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_by_cnpj": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def get_by_usuario (self, id_usuario:int) -> dict:
-
-        """
-        Procura a cooperativa da qual o usuario
-        fornecido é o administrador
-        """
-
-        #region Exceções
-
-        if not isinstance(id_usuario, int):
-
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo Int')
-
-        #endregion
-
-        cursor = self.connection_db.cursor(dictionary=True)
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
-                FROM cooperativas
-                WHERE cooperativas.id_usuario = %s;
-                """,
-
-                (id_usuario, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_by_usuario": {e}')
 
             return False
 
