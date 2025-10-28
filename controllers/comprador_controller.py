@@ -72,8 +72,7 @@ class Compradores:
         """
         query = """
             SELECT
-                mc.categoria,
-                mc.nome_padrao,
+                mc.nome,
                 c.razao_social,
                 c.cnpj,
                 SUM(vi.quantidade_kg) AS quantidade_kg,
@@ -87,11 +86,11 @@ class Compradores:
             INNER JOIN
                 vendas_itens AS vi ON v.id_venda = vi.id_venda
             INNER JOIN
-                materiais_catalogo AS mc ON vi.id_material_catalogo = mc.id_material_catalogo
+                materiais_base AS mc ON vi.id_material_catalogo = mc.id_material_base
             WHERE
-                c.deletado_em IS NULL AND mc.id_material_catalogo = %s
+                c.deletado_em IS NULL AND mc.id_material_base = %s
             GROUP BY
-                mc.categoria, mc.nome_padrao, c.id_comprador, c.razao_social, c.cnpj
+                mc.nome, c.id_comprador, c.razao_social, c.cnpj
             ORDER BY
                 quantidade_kg DESC;
         """
