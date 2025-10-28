@@ -132,35 +132,35 @@ body {
 
 /* imagens dos cards */
 
-.cartao-material--plastico {
+.cartao-material--Plástico {
     background-image: url(../../imgs/material-tipos/plastico.jpg);
 }
 
-.cartao-material--papel {
+.cartao-material--Papel {
     background-image: url(../../imgs/material-tipos/papel.jpg);
 }
 
-.cartao-material--metal {
+.cartao-material--Metal {
     background-image: url(../../imgs/material-tipos/metal.jpg);
 }
 
-.cartao-material--madeira {
+.cartao-material--Madeira {
     background-image: url(../../imgs/material-tipos/madeira.jpg);
 }
 
-.cartao-material--pilha {
+.cartao-material--Pilha {
     background-image: url(../../imgs/material-tipos/pilha.jpg);
 }
 
-.cartao-material--borracha {
+.cartao-material--Borracha {
     background-image: url(../../imgs/material-tipos/borracha.jpg);
 }
 
-.cartao-material--papelao {
+.cartao-material--Papelão {
     background-image: url(../../imgs/material-tipos/papelao.jpg);
 }
 
-.cartao-material--vidro {
+.cartao-material--Vidro {
     background-image: url(../../imgs/material-tipos/vidro.jpg);
 }
 
@@ -272,7 +272,9 @@ body {
 }
 
 .comprador-card, .historico-card {
-    background-color: var(--verde-claro); 
+    display: flex;
+    flex-direction: column;
+    background-color: var(--verde-principal); 
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -295,6 +297,16 @@ body {
     justify-content: center;
     font-size: 2rem;
     color: #AAA; 
+}
+
+.verMais{
+    margin: 0 auto;
+    border-radius: 20px;
+    height: 50px;
+    border: 0;
+    color: var(--branco);
+    background-color: var(--verde-escuro);
+    width: 80%;
 }
 
 .comprador-info h3 {
@@ -401,4 +413,98 @@ body {
     .buscar-compradores__cartoes {
         grid-template-columns: repeat(4, 1fr);
     }
+}
+
+/* Adicione esta linha no topo do seu arquivo CSS para importar a fonte */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+.container {
+    display: flex;
+    gap: 15px; /* Mantido, mas pode diminuir se preferir (ex: 10px) */
+    padding: 20px;
+    border-radius: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: auto;
+}
+
+.item {
+    position: relative;
+    border: 2px solid var(--verde-escuro);
+    border-radius: 8px;
+    padding: 8px 30px 8px 15px; 
+    
+    background-color: var(--verde-claro-medio);
+    display: flex;
+    align-items: center;
+    font-size: 16px; 
+    
+    font-weight: 700;
+    color: var(--preto);
+}
+
+.badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    
+    background-color: var(--verde-claro);
+    border: 2px solid var(--preto);
+    border-radius: 50%;
+    font-size: 14px;
+    
+    color: var(--verde-escuro-medio);
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dropdown-btn{
+    width: 50%;
+    height: 50px;
+    margin-bottom: 10px;
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+}
+
+.dropdown-content{
+    display: flex;
+    flex-direction: column;
+    
+}
+
+.dropdown-content.hidden{
+    display: none;
+}
+
+.comentarios-livre{
+    display: flex;
+    justify-content: space-evenly;
+    width: 80%;
+    height: auto;
+    border-radius: 10px;
+    color: var(--branco);
+    margin: 10px auto;
+    padding: 10px;
+    background-color: var(--verde-escuro);
+
+}
+.comentarios-livre__avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    background-color: var(--verde-claro);
+}
+
+.comentarios-livre__text{
+    display: flex;
+    width: 300px;
+    font-size: 16px;
+    margin-left: 10px;
+    text-align: flex-start;
 }
