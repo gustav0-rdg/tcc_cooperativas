@@ -65,32 +65,6 @@ class Vendas:
         else:
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
         
-    def _buscar_id_subtipo_material(self, nome_subtipo: str) -> int:
-        """
-        Busca o ID de um subtipo de material ativo na tabela `materiais_catalogo`.
-
-        Args:
-            nome_subtipo (str): O nome exato do subtipo do material.
-
-        Returns:
-            int: O ID do subtipo do material encontrado.
-
-        Raises:
-            MaterialNaoEncontradoError: Se nenhum material ativo for encontrado com o nome fornecido.
-        """
-        with self.connection_db.cursor() as cursor:
-            # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
-            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_especifico = %s"
-            cursor.execute(query, (nome_subtipo,))
-            result = cursor.fetchone()
-
-        if result:
-            id_material = result[0]
-            print(f"Subtipo de material encontrado: '{nome_subtipo}' corresponde ao ID {id_material}.")
-            return id_material
-        else:
-            raise ValueError(f"Nenhum material ativo chamado '{nome_subtipo}' foi encontrado no catálogo.")
-          
     def _buscar_ids_feedback_tags(self, lista_tags: list[str]) -> list[int]:
         """
         Busca os IDs de uma lista de tags de feedback.
@@ -124,7 +98,6 @@ class Vendas:
         print(f"Tags de Feedback encontradas: {lista_tags} correspondem aos IDs {ids_encontrados}.")
         return ids_encontrados
     
-    
     def _buscar_ids(self, dados_frontend: dict):
         """
         Método principal que orquestra o processamento dos dados da venda.
@@ -133,21 +106,19 @@ class Vendas:
         try:       
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
-            nome_material = dados_frontend['material']['categoria']
-            id_subtipo = dados_frontend['material']['subtipo']
+            nome_material = dados_frontend['material']
             id_material = self._buscar_id_material(nome_material)
             ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material,
-                "ids_tags_feedback": ids_tags,
-                "id_subtipo": id_subtipo
+                "ids_tags_feedback": ids_tags
             }
 
         except Exception as e:
             print(f"Erro de negócio: {e}")
             return None
-
+        
     def registrar_nova_venda(self, id_cooperativa, dados_frontend):
         """
         Orquestra a criação completa de uma venda, seus itens e avaliação dentro de uma transação.
@@ -163,6 +134,7 @@ class Vendas:
         cursor = self.connection_db.cursor()
 
         try:          
+            # INSERIR NA TABELA `vendas`
             query_venda = """
                 INSERT INTO vendas (id_cooperativa, id_comprador, data_venda, valor_total)
                 VALUES (%s, %s, %s, %s)
@@ -177,19 +149,20 @@ class Vendas:
             id_venda = cursor.lastrowid # Pega o ID da venda que acabou de ser criada.
             print(f"ID da Venda: {id_venda}")
 
+            # INSERIR NA TABELA `vendas_itens`
             query_item = """
-                INSERT INTO vendas_itens (id_venda, id_material_base, id_material_catalogo, quantidade_kg, preco_por_kg)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO vendas_itens (id_venda, id_material_catalogo, quantidade_kg, preco_por_kg)
+                VALUES (%s, %s, %s, %s)
             """
             item_data = (
                 id_venda,
                 ids['id_material'],
-                ids["id_subtipo"],
                 dados_frontend['quantidade'],
                 dados_frontend['preco_por_kg']
             )
             cursor.execute(query_item, item_data)
 
+            # 3. INSERIR NA TABELA `avaliacoes_compradores`
             query_avaliacao = """
                 INSERT INTO avaliacoes_compradores 
                 (id_venda, pontualidade_pagamento, logistica_entrega, qualidade_negociacao, comentario_livre)
