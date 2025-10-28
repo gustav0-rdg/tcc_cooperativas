@@ -4,13 +4,11 @@
     font-family: inter;
 }
 
-
 body {
     background-color: var(--verde-escuro);
     min-height: 100vh;
     height: auto;
     position: relative;
-
 }
 
 body::after {
@@ -26,7 +24,6 @@ body::after {
     background-repeat: no-repeat;
     opacity: 0.1;
     z-index: -1;
-
 }
 
 .conteudo {
