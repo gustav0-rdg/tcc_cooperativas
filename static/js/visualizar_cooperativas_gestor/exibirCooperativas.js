@@ -1,4 +1,6 @@
 const listCooperativasContainer = document.getElementById('cooperativasContainer');
+const mostrandoCooperativasLabel = document.getElementById('mostrandoCooperativas');
+const totalCooperativasLabel = document.getElementById('totalCooperativas');
 
 const session_token = localStorage.getItem('session_token');
 
@@ -174,6 +176,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     else
     {
+        totalCooperativasLabel.textContent = data_cooperativas.length;
         listCooperativasContainer.innerHTML = renderizarCooperativas(data_cooperativas).join(' ');
     }
 
