@@ -408,8 +408,6 @@ def alterar_status (id_usuario:int=None):
 
         conn.close()
         
-
-
 @api_usuarios.route('/me', methods=['GET'])
 def get_meu_usuario():
 
