@@ -49,7 +49,9 @@ class Cooperativa:
                     cooperativas.telefone,
                     cooperativas.email,
                     cooperativas.nome_fantasia,
-                    usuarios.status
+                    usuarios.status,
+                    cooperativas.ultima_atualizacao,
+                    cooperativas.data_cadastro
                 FROM cooperativas
                 INNER JOIN
                     usuarios ON usuarios.id_usuario = cooperativas.id_usuario
@@ -103,7 +105,9 @@ class Cooperativa:
                     cooperativas.telefone,
                     cooperativas.email,
                     cooperativas.nome_fantasia,
-                    usuarios.status
+                    usuarios.status,
+                    cooperativas.ultima_atualizacao,
+                    cooperativas.data_cadastro
                 FROM cooperativas
                 INNER JOIN
                     usuarios ON usuarios.id_usuario = cooperativas.id_usuario;
