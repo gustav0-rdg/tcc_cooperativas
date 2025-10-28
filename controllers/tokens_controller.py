@@ -192,3 +192,34 @@ class Tokens:
         finally:
 
             cursor.close()
+
+    def get_ultimo_token_por_usuario (self, id_usuario:int, tipo:str) -> str | None:
+
+        """
+        Busca o token (string) mais recente, válido e não usado 
+        de um usuário específico.
+        """
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                """
+                SELECT token FROM tokens_validacao 
+                WHERE id_usuario = %s 
+                  AND tipo = %s 
+                  AND usado = FALSE
+                  AND data_expiracao > NOW()
+                ORDER BY data_criacao DESC 
+                LIMIT 1
+                """,
+                (id_usuario, tipo)
+            )
+            data = cursor.fetchone()
+            return data['token'] if data else None
+        
+        except Exception as e:
+            print(f'Erro - Tokens "get_last_token_by_user": {e}')
+            return None
+        
+        finally:
+            cursor.close()
