@@ -70,3 +70,7 @@ def pagina_termos_de_uso():
 @pages.route("/gerenciar-gestores", methods=["GET"])
 def pagina_gerenciar_gestores():
     return render_template("gerenciar-gestores.html")
+
+@pages.route("/login-admin" , methods=["GET"])
+def pagina_login_admin():
+    return render_template("login-admin.html")
