@@ -29,7 +29,7 @@ class Cooperativa:
 
         #endregion
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -72,7 +72,7 @@ class Cooperativa:
         cadastradas no sistema
         """
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -122,7 +122,7 @@ class Cooperativa:
 
         #endregion
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -173,7 +173,7 @@ class Cooperativa:
 
         #endregion
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
