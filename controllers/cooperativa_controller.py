@@ -259,7 +259,8 @@ class Cooperativa:
 
                 nome,
                 email,
-                senha
+                senha,
+                tipo='cooperado'
 
             )
 
@@ -309,7 +310,7 @@ class Cooperativa:
 
             cursor.close()
 
-    def alterar_aprovacao (self, cnpj:str, aprovado:bool) -> bool:
+    def alterar_aprovacao (self, id_cooperativa:int, aprovado:bool) -> bool:
         
         """
         Altera o estado de aprovação da
@@ -318,9 +319,9 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(cnpj, str):
+        if not isinstance(id_cooperativa, int):
 
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
+            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
         if not isinstance(aprovado, bool):
 
@@ -337,10 +338,10 @@ class Cooperativa:
                 """
                 UPDATE cooperativas
                 SET cooperativas.aprovado = %s
-                WHERE cooperativas.cnpj = %s;
+                WHERE cooperativas.id_cooperativa = %s;
                 """,
 
-                (aprovado, cnpj)
+                (aprovado, id_cooperativa)
 
             )
 
