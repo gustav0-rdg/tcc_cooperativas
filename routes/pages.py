@@ -2,7 +2,7 @@ from flask import render_template, Blueprint
 
 pages = Blueprint('pages', __name__)
 
-# Selecionar se é catador ou cooperativa
+# Selecionar se é cooperado ou cooperativa
 @pages.route("/", methods=["GET"])
 def pagina_inicial():
     return render_template("index.html")
@@ -17,15 +17,15 @@ def formulario_cadastro():
 
 @pages.route("/login", methods=["GET"])
 def pagina_login():
-    return render_template("login.html")
+    return render_template("login-cooperativa.html")
 
-@pages.route("/login-catador", methods=["GET"])
-def pagina_login_catador():
-    return render_template("login-catador.html")
+@pages.route("/login-cooperado", methods=["GET"])
+def pagina_login_cooperado():
+    return render_template("login-cooperado.html")
 
-@pages.route("/cadastro-catador", methods=["GET"])
-def pagina_cadastro_catador():
-    return render_template("cadastro-catador.html")
+@pages.route("/cadastro-cooperado", methods=["GET"])
+def pagina_cadastro_cooperado():
+    return render_template("cadastro-cooperado.html")
 
 @pages.route("/pagina-inicial", methods=["GET"])
 def menu_principal():
@@ -70,3 +70,7 @@ def pagina_termos_de_uso():
 @pages.route("/gerenciar-gestores", methods=["GET"])
 def pagina_gerenciar_gestores():
     return render_template("gerenciar-gestores.html")
+
+@pages.route("/login-admin" , methods=["GET"])
+def pagina_login_admin():
+    return render_template("login-admin.html")
