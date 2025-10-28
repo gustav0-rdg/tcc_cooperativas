@@ -11,65 +11,6 @@ class Gestor:
         
         self.connection_db = connection_db
 
-    def toggle_aprovacao_cooperativa (self, id_cooperativa:int, aprovacao:bool) -> bool:
-
-        #region Exceções
-
-        if not isinstance(id_cooperativa, int):
-
-            raise TypeError ('Gestor: "id_cooperativa" deve ser do tipo Int')
-        
-        if not isinstance(aprovacao, bool):
-
-            raise TypeError ('Gestor: "aprovacao" deve ser do tipo Booleano')
-        
-        #endregion
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT cooperativas.id_cooperativa FROM cooperativas
-                WHERE cooperativas.id_cooperativa = %s;
-                """,
-
-                (id_cooperativa, )
-
-            )
-
-            # Cooperativa não encontrado
-
-            if cursor.fetchone() == None:
-                return None
-
-            cursor.execute (
-
-                """
-                UPDATE cooperativa
-                SET cooperativa.aprovado = %s
-                WHERE cooperativa.id_cooperativa = %s;
-                """,
-
-                (aprovacao, id_cooperativa)
-
-            )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0 or None
-
-        except Exception as e:
-
-            print(f'Erro - Gestor "toggle_aprovacao_cooperativa": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
     def toggle_estado_usuario (self, id_usuario:int, estado:str) -> bool:
 
         #region Exceções
