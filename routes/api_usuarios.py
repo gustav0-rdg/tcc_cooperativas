@@ -72,7 +72,7 @@ def cadastrar ():
         print("CNPJ validado com sucesso!")
 
         # Banco de dados
-        conn = Connection('online')
+        conn = Connection('local')
         db = conn.connection_db
         usuarios_ctrl = Usuarios(db)
         cooperativa_ctrl = Cooperativa(db)
@@ -181,7 +181,7 @@ def login (tipo_usuario):
 
     conn = None
     try:
-        conn = Connection('online')
+        conn = Connection('local')
         db = conn.connection_db
         usuarios_ctrl = Usuarios(db)
         tokens_ctrl = Tokens(db)
@@ -248,7 +248,7 @@ def login (tipo_usuario):
         if not token_valor:
             return jsonify({'error': 'Token não fornecido'}), 401
 
-        conn = Connection('online')
+        conn = Connection('local')
         db = conn.connection_db
         tokens_ctrl = Tokens(db)
 
@@ -287,7 +287,7 @@ def alterar_senha ():
     if len(nova_senha) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
     
-    conn = Connection('online')
+    conn = Connection('local')
 
     try:
 
@@ -331,7 +331,7 @@ def delete (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('online')
+    conn = Connection('local')
 
     try:
 
@@ -392,7 +392,7 @@ def get_info (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('online')
+    conn = Connection('local')
 
     try:
 
@@ -460,7 +460,7 @@ def alterar_status (id_usuario:int=None):
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
     
-    conn = Connection('online')
+    conn = Connection('local')
 
     try:
 
