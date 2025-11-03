@@ -446,7 +446,7 @@ def enviar_documento():
             
         conn = Connection('local')
         
-        # Criação de um nome de ficheiro seguro e único | EX: doc_coop_5.pdf
+        # Criação de um nome de arquivo seguro e único | EX: doc_coop_5.pdf
         filename_base = secure_filename(f"doc_coop_{id_cooperativa}")
         extension = arquivo.filename.rsplit('.', 1)[1].lower()
         filename = f"{filename_base}.{extension}"

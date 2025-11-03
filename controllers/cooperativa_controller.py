@@ -472,7 +472,7 @@ class Cooperativa:
         try:
             cursor.execute(
                 """
-                INSERT INTO documentos_cooperativas (id_cooperativa, arquivo_url, status)
+                INSERT INTO documentos_cooperativa (id_cooperativa, arquivo_url, status)
                 VALUES (%s, %s, 'pendente');
                 """,
                 (id_cooperativa, arquivo_url)
@@ -480,4 +480,9 @@ class Cooperativa:
             
             return cursor.lastrowid
         
-        except 
+        except Exception as e:
+            print(f'Erro - Cooperativa "adicionar_documento": {e}')
+            return
+        
+        finally:
+            cursor.close
