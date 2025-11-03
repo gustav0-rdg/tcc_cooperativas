@@ -220,11 +220,13 @@ CREATE TABLE IF NOT EXISTS `vendas` (
 CREATE TABLE IF NOT EXISTS `vendas_itens` (
   `id_venda_item` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `id_venda` BIGINT UNSIGNED NOT NULL,
+  `id_material_base` INT UNSIGNED NOT NULL,
   `id_material_catalogo` INT UNSIGNED NOT NULL,
   `quantidade_kg` DECIMAL(12,3) NOT NULL CHECK (quantidade_kg > 0),
   `preco_por_kg` DECIMAL(12,4) NOT NULL CHECK (preco_por_kg > 0),
   INDEX `idx_venda` (`id_venda`),
   INDEX `idx_material` (`id_material_catalogo`),
+  INDEX `idx_material_base`(`id_material_base`),
   CONSTRAINT `fk_itens_vendas`
     FOREIGN KEY (`id_venda`)
     REFERENCES `vendas` (`id_venda`)
@@ -232,7 +234,12 @@ CREATE TABLE IF NOT EXISTS `vendas_itens` (
   CONSTRAINT `fk_itens_materiais`
     FOREIGN KEY (`id_material_catalogo`)
     REFERENCES `materiais_catalogo` (`id_material_catalogo`)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_itens_materiais_base`
+    FOREIGN KEY (`id_material_base`)
+    REFERENCES `materiais_base` (`id_material_base`)
     ON DELETE RESTRICT ON UPDATE CASCADE
+    
 );
 
 CREATE TABLE IF NOT EXISTS `feedback_tags` (
