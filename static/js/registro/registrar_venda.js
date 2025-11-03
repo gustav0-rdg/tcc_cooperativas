@@ -1,15 +1,21 @@
 import { exibirAvaliacao } from "./module/exibirAvaliacao.js";
+import { exibirSubtipos } from "./module/exibirSubtipos.js";
 import { exibirVendedores } from "./module/exibirVendedores.js";
 import { getMateriais } from "../api/getMateriais.js";
-const material = await getMateriais();
+export const material = await getMateriais();
 
+console.log('oieee', material)
 let etapaAtual = "materiais";
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
 
 export const vendaAtual = {
     vendedor: {},
-    material: {},
+    material: {
+        id_categoria:0,
+        categoria:'',
+        subtipo:''
+    },
     avaliacao: {
         comentarios_rapidos: [],
     },
@@ -31,20 +37,23 @@ function exibirMateriais() {
 
     opcoesSection.innerHTML = ''; // Limpar as opções anteriores
     material.forEach(item => {
+        console.log(item)
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
         div.setAttribute('data-value', `${item.nome_padrao}`);
         div.innerHTML = `
             <h1>${item.nome_padrao}</h1>
-            <small>${item.categoria}</small>
         `;
         opcoesSection.appendChild(div);
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material = item.nome_padrao; // Atualiza o material no objeto vendaAtual
-            etapaAtual = "vendedores"; // Muda para a etapa de vendedores
-            exibirVendedores(); // Exibe os vendedores
+            vendaAtual.material.categoria = item.nome_padrao;
+            vendaAtual.material.id_categoria = item.id_material_catalogo // Atualiza o material no objeto vendaAtual
+            etapaAtual = "subtipos"; // Muda para a etapa de vendedores
+            // TROCAR ESTE PARA EXIBIR SUBTIPOS
+            // exibirVendedores(); // Exibe os vendedores
+            exibirSubtipos();
             console.log(vendaAtual); // Apenas para visualização
         });
     });
