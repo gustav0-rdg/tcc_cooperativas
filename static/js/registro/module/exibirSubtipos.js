@@ -19,15 +19,15 @@ const swalStyles = `
   .swal-content-container {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Um espaçamento geral */
-    text-align: left; /* Alinha todo o conteúdo à esquerda */
+    gap: 15px; 
+    text-align: left; 
   }
 
   .swal-input-label {
     font-size: 1em;
     font-weight: 600;
-    color: var(--verde-escuro-medio);
-    margin-bottom: -10px; /* Puxa o input para mais perto */
+    color: var(--verde-escuro);
+    margin-bottom: -10px; 
   }
 
   .swal-input-field {
@@ -36,39 +36,44 @@ const swalStyles = `
     border-radius: 6px !important; 
     background-color: var(--verde-claro);
   }
-    .swal-input-field::placeholder{
+  
+  .swal-input-field:focus {
+    border-color: var(--verde-escuro-medio);
+    outline: none;
+    box-shadow: 0 0 5px rgba(49, 97, 16, 0.5);
+}
+
+  .swal-input-field::placeholder{
     color: var(--ver-escuro-medio)}
 
-  /* A lista de materiais */
   .swal-material-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
     max-height: 180px; 
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 1px solid var(--verde-escuro-medio);
     padding: 12px;
     border-radius: 6px; 
-    background: rgba(255,255,255,0.5); 
+    background: var(--verde-principal); 
   }
 
-  /* Cada opção de rádio (o "botão" que você queria) */
   .swal-radio-option {
     display: flex;
     align-items: center;
-    gap: 10px; /* Espaço entre o rádio e o texto */
+    gap: 10px; 
     cursor: pointer;
     padding: 8px;
-    border-radius: 4px; /* Raio menor para os itens */
+    border-radius: 4px; 
+    color: var(--verde-escuro-medio);
     transition: background-color 0.2s;
   }
-  .swal-radio-option:hover {
-    background-color: rgba(0,0,0,0.05);
-  }
+
   .swal-radio-option input[type="radio"] {
     margin: 0;
     flex-shrink: 0; 
   }
+
   .swal-radio-option label {
     font-weight: 500;
     cursor: pointer;
@@ -78,12 +83,13 @@ const swalStyles = `
     display: flex;
     align-items: center;
     text-align: center;
-    color: var(--preto);
+    color: var(--verde-escuro);
     gap: 10px;
     font-weight: bold;
     font-size: 0.9em;
     margin: 0;
   }
+  
   .swal-divider::before,
   .swal-divider::after {
     content: '';
@@ -173,8 +179,8 @@ export async function exibirSubtipos() {
             cancelButtonText: 'Cancelar',
             color: "var(--verde-escuro-medio)",
             background: "var(--verde-claro-medio)",
-            confirmButtonColor: "#1E8449",
-            cancelButtonColor: "#7DCEA0",
+            confirmButtonColor: "var(--verde-escuro-medio)",
+            cancelButtonColor: "var(--vermelho)",
             preConfirm: async () => {
                 const valor = document.getElementById('novoNomeMaterial').value.trim();
                 const selecionado = document.querySelector('input[name="materialOpcao"]:checked');
@@ -278,7 +284,13 @@ async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
         const data = await resposta.json();
 
         if (resposta.ok) {
-            await Swal.fire('🎉 Material cadastrado!', data.message, 'success');
+            await Swal.fire({
+              title:'🎉 Material cadastrado!', 
+              text: data.message, 
+              icon:'success',
+              background: 'var(--verde-claro)',
+              color: 'var(--verde-escuro)'
+            });
         } else {
             await Swal.fire('❌ Erro!', data.message, 'error');
         }
