@@ -204,3 +204,21 @@ class Vendas:
         finally:
             # Garante que o cursor seja fechado, independentemente de sucesso ou falha.
             cursor.close()
+
+    
+    # region get vendas por cooperativa
+    def get_by_coop(self, id_cooperativa):
+        """
+        Busca as vendas de uma respectiva cooperativa
+
+        param: id_cooperativa -> da respectiva cooperativa em que está sendo buscada
+        
+        return: [] -> contendo todas as vendas já feitas pela cooperativa
+        """
+        try:
+            with self.connection_db.cursor() as cursor:
+                query = """
+
+                """
+        except Exception as e:
+            print(e )
