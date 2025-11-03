@@ -1,4 +1,5 @@
-// Mascara / buscar CEP
+
+// Mascaras e CEP
 
 // --- Funções de Máscara ---
 
@@ -42,17 +43,39 @@ function formatCEP(input) {
 async function buscarCep(cepValor) {
     const cep = cepValor.replace(/\D/g, ''); 
 
+    // Campos que serão preenchidos pela API
+    const fieldsToToggle = ['endereco', 'bairro', 'cidade', 'estado'];
+
+    // Função para (des)abilitar campos
+    const toggleFields = (disabled) => {
+        fieldsToToggle.forEach(id => {
+            const field = document.getElementById(id);
+            if (field) field.disabled = disabled;
+        });
+    };
+
     if (cep.length !== 8) {
-        // Swal para caso o usuario digite um CEP menor que 8 digitos
-        Swal.showValidationMessage('CEP inválido. Deve conter 8 dígitos.');
+        toggleFields(false); 
         return; 
     }
 
     // Mostra um loading simples no SweetAlert
-    const swalTitle = Swal.getHtmlContainer().querySelector('.swal2-title');
-    swalTitle.insertAdjacentHTML('afterend', '<div id="cep-loading" class="swal2-html-container" style="display: block;">Buscando CEP...</div>');
+    const swalTitle = Swal.getTitle(); 
+    
+    let loadingDiv = document.getElementById('cep-loading');
 
+    // Adicionamos uma verificação para garantir que swalTitle não é null
+    if (swalTitle && !loadingDiv) {
+        swalTitle.insertAdjacentHTML('afterend', '<div id="cep-loading">Buscando CEP...</div>');
+        loadingDiv = document.getElementById('cep-loading');
+    }
+
+    // Desabilita campos durante a busca
+    toggleFields(true);
+
+    // Faz a requisição na API ViaCEP
     try {
+        // Busca os dados do CEP
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         
         if (!response.ok) throw new Error('CEP não encontrado');
@@ -70,16 +93,14 @@ async function buscarCep(cepValor) {
         document.getElementById('cidade').value = data.localidade;
         document.getElementById('estado').value = data.uf;
 
-        // Foca no campo "Número"
+        // Foca no campo "Número" para o usuário preencher
         document.getElementById('numero').focus();
 
     } catch (error) {
-
         Swal.showValidationMessage(`Erro ao buscar CEP: ${error.message}`);
-        
     } finally {
-        // Remove o loading
-        const loadingDiv = document.getElementById('cep-loading');
+        // Remove o loading e reabilita os campos
         if (loadingDiv) loadingDiv.remove();
+        toggleFields(false);
     }
 }
