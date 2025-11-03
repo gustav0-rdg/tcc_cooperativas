@@ -1,68 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recoopera | Buscar Compradores</title>
-    <!-- Importa o CSS do Bootstrap 5 (framework de layout e componentes prontos) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <!-- Importa o CSS personalizado da página -->
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS principal -->
     <link rel="stylesheet" href="../static/css/buscar_comprador/buscar-comprador.css">
-
-    <!-- Importa variáveis de cores globais -->
     <link rel="stylesheet" href="../static/css/root-de-cores.css">
 
-
-    <!-- Importa os ícones da biblioteca Material Icons (Google) -->
+    <!-- Ícones -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Pré-conexões para otimizar o carregamento das fontes -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Importa a fonte “Inter” usada no layout -->
+    <!-- Fonte -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Script do Bootstrap para ativar componentes interativos (como modal, dropdown etc.) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"
-        defer></script>
-
-    <!-- Link para o favicon -->
-    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous"></script>
     <script type="module" src="../static/js/buscarComprador.js" defer></script>
-
 </head>
 
 <body>
-    
-
     {% include 'includes/header.html' %}
-    <section class="conteudo">
 
-        <main class="buscar-compradores w-100">
+    <main class="conteudo">
+        <main class="buscar-compradores">
             
             <div id="secao-principal">
                 
-                <div class="row g-3 flex-column align-items-center w-100 buscar-compradores__cartoes">
-                    
+                <div class="row g-3 flex-column gap-5 align-items-center w-100 buscar-compradores__cartoes"></div>
 
-                </div>
             </div> 
+
             <section id="detalhe-material" class="hidden">
                 <button id="voltar-para-principal" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
-                <h2 id="material-titulo"></h2> <div id="conteudo-material" class="subtipos-grid">
-                    </div>
+                <h2 id="material-titulo"></h2> 
+                <div id="conteudo-material" class="subtipos-grid"></div>
             </section>
 
             <section id="detalhe-comprador" class="hidden">
                 <button id="voltar-para-materiais" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
-                
+    
                 <h1 class="buscar-compradores__titulo">Buscar compradores</h1>
                 <p class="buscar-compradores__subtitulo text-muted">Procure pelo nome de um comprador</p>
                 <div class="buscar-compradores__barra-de-busca mb-4">
@@ -70,20 +52,20 @@
                     <span class="material-icons buscar-compradores__icone">search</span>
                 </div>
 
-                <div id="conteudo-comprador">
-                    </div>
+                <div id="conteudo-comprador"></div>
             </section>
 
             <section id="detalhe-comentarios" class="hidden">
                 <button id="voltar-para-comprador" class="btn btn-voltar"><span class="material-icons">arrow_back</span></button>
                 <h2>Comentários</h2>
-                <div id="conteudo-comentarios">
-                    </div>
+                <div id="conteudo-comentarios"></div>
             </section>
             
         </main>
-    </section>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </main>
 
+    {% include 'includes/footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
