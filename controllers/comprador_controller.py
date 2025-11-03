@@ -66,33 +66,27 @@ class Compradores:
             cursor.close()
 
     
-    def get_by_materials(self, material):
+    def get_by_materials(self, material, subtipo):
         """
         Busca e agrupa compradores com base no material que compraram.
         """
         query = """
             SELECT
-                mc.nome,
+                mb.nome,
                 c.razao_social,
                 c.cnpj,
                 SUM(vi.quantidade_kg) AS quantidade_kg,
                 SUM(v.valor_total) AS valor_total,
                 AVG(c.score_confianca) AS score_confianca,
                 SUM(c.numero_avaliacoes) AS numero_avaliacoes
-            FROM
-                compradores AS c
-            INNER JOIN
-                vendas AS v ON c.id_comprador = v.id_comprador
-            INNER JOIN
-                vendas_itens AS vi ON v.id_venda = vi.id_venda
-            INNER JOIN
-                materiais_base AS mc ON vi.id_material_catalogo = mc.id_material_base
-            WHERE
-                c.deletado_em IS NULL AND mc.id_material_base = %s
-            GROUP BY
-                mc.nome, c.id_comprador, c.razao_social, c.cnpj
-            ORDER BY
-                quantidade_kg DESC;
+            FROM compradores AS c
+            INNER JOIN vendas AS v ON c.id_comprador = v.id_comprador
+            INNER JOIN vendas_itens AS vi ON v.id_venda = vi.id_venda
+            INNER JOIN materiais_base AS mb ON vi.id_material_catalogo = mb.id_material_base
+            INNER JOIN materiais_catalogo AS mc ON mb.id_material_base = mc.id_material_base
+            WHERE c.deletado_em IS NULL AND mb.id_material_base = %s AND mc.id_material_catalogo = %s
+            GROUP BY mb.nome, c.id_comprador, c.razao_social, c.cnpj
+            ORDER BY quantidade_kg DESC;
         """
         # Usar 'with' garante que o cursor será fechado mesmo se ocorrer um erro
         try:
@@ -100,7 +94,7 @@ class Compradores:
                 print(f"\nExecutando busca para: '{material if material else 'Todos os materiais'}'...")
                 
                 # Executa a query de forma segura
-                cursor.execute(query, tuple(material))
+                cursor.execute(query, (material, subtipo))
                 results = cursor.fetchall()
                 
                 print(f"Encontrados {len(results)} resultados.")
