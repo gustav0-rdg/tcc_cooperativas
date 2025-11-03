@@ -21,19 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     atualizarBotaoCarregarMais();
 });
 
-function inicializarEstadoDosFiltros() {
-    const params = new URLSearchParams(window.location.search);
-    filtrosAtivos = {
-        q: params.get('q') || '',
-        status: params.get('status') || null,
-        atividade: params.get('atividade') || null
-    };
-    if (filtrosAtivos.q) {
-        document.getElementById('searchInput').value = filtrosAtivos.q;
-    }
-    atualizarTagsFiltros();
-}
-
 function inicializarEventos() {
     const container = document.getElementById('cooperativasContainer');
 
@@ -71,6 +58,7 @@ function inicializarEventos() {
 }
 
 function preencherModalDetalhes(cardElement) {
+
     const coop = cardElement.dataset;
     if (!coop) return;
 
@@ -80,15 +68,10 @@ function preencherModalDetalhes(cardElement) {
     modalBody.innerHTML = '<div class="spinner-border text-success" role="status"><span class="visually-hidden">Carregando...</span></div>';
     modalTitle.textContent = coop.nome;
 
-    const statusMap = {
-        'aprovado': 'Aprovado',
-        'aguardando': 'Aguardando Aprovação',
-        'bloqueado': 'Bloqueado'
-    };
-    const statusText = statusMap[coop.status] || 'Indefinido';
+    const statusText = toCapitalize(coop.status || 'Indefinido');
     const statusClass = `status-${coop.status}`;
 
-    const isAtivo = (coop.ativo === 'true' || coop.ativo === 'True');
+    const isAtivo = coop.status == 'ativo';
     const activityText = isAtivo ? 'Ativo (últimos 2 meses)' : 'Inativo (mais de 2 meses)';
     const activityColor = isAtivo ? 'var(--verde-principal)' : 'var(--vermelho)';
 
@@ -106,11 +89,11 @@ function preencherModalDetalhes(cardElement) {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Data de Cadastro</span>
-                    <span class="detail-value">${coop.dataCadastro}</span>
+                    <span class="detail-value">${formatarData(coop.dataCadastro)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Último Acesso</span>
-                    <span class="detail-value">${coop.ultimoAcesso}</span>
+                    <span class="detail-value">${formatarData(coop.ultimoAcesso)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Atividade</span>
@@ -126,7 +109,7 @@ function preencherModalDetalhes(cardElement) {
             <div class="detail-grid">
                 <div class="detail-item">
                     <span class="detail-label">Telefone</span>
-                    <span class="detail-value">${coop.telefone}</span>
+                    <span class="detail-value">${formatarTelefone(coop.telefone)}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Email</span>
@@ -154,11 +137,28 @@ function preencherModalDetalhes(cardElement) {
             <div class="detail-grid">
                 <div class="detail-item">
                     <span class="detail-label">Total de Vendas</span>
-                    <span class="detail-value">${coop.totalVendas} vendas registradas</span>
+                    <span class="detail-value"><strong>${coop.totalVendas}</strong> vendas</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Materiais Vendidos</span>
-                    <span class="detail-value">${parseFloat(coop.materiaisVendidos).toLocaleString('pt-BR')} kg</span>
+                    <ul class="detail-value list-materiais-vendidos">${
+
+                        coop.materiaisVendidos != 'null'
+
+                        ?
+                        
+                        // Lista dos Materiais
+
+                        coop.materiaisVendidos.split('|').map(material => {
+                            return `<li class="materiais-vendidos-item">${material}</li>`;
+                        }).join('')
+
+                        :
+
+                        // Sem vendas registradas
+                        'Sem vendas registradas'
+
+                    }</ul>
                 </div>
             </div>
         </div>
@@ -167,16 +167,17 @@ function preencherModalDetalhes(cardElement) {
 
 function toggleBloqueioCooperativa(buttonElement) {
     const userId = buttonElement.dataset.userId;
+    console.log(userId)
     const coopNome = buttonElement.dataset.coopNome;
-    const acao = buttonElement.dataset.acao;
+    const novoStatus = buttonElement.dataset.novoStatus;
 
-    const titulo = acao === 'bloquear' ? 'Bloquear Cooperativa' : 'Desbloquear Cooperativa';
-    const texto = acao === 'bloquear' 
+    const titulo = novoStatus === 'bloqueado' ? 'Bloquear Cooperativa' : 'Desbloquear Cooperativa';
+    const texto = novoStatus === 'bloqueado' 
         ? `Tem certeza que deseja bloquear o acesso de <strong>${coopNome}</strong>?`
         : `Tem certeza que deseja desbloquear o acesso de <strong>${coopNome}</strong>?`;
-    const confirmButtonText = acao === 'bloquear' ? 'Sim, bloquear' : 'Sim, desbloquear';
-    const icon = acao === 'bloquear' ? 'warning' : 'question';
-    const confirmButtonColor = acao === 'bloquear' ? 'var(--vermelho)' : 'var(--verde-principal)';
+    const confirmButtonText = novoStatus === 'bloqueado' ? 'Sim, bloquear' : 'Sim, desbloquear';
+    const icon = novoStatus === 'bloqueado' ? 'warning' : 'question';
+    const confirmButtonColor = novoStatus === 'bloqueado' ? 'var(--vermelho)' : 'var(--verde-principal)';
 
     Swal.fire({
         title: titulo,
@@ -188,44 +189,50 @@ function toggleBloqueioCooperativa(buttonElement) {
         confirmButtonText: confirmButtonText,
         cancelButtonText: 'Cancelar',
         reverseButtons: true
-    }).then((result) => {
+    }).then(async (result) => {
 
         if (result.isConfirmed) {
             
             const url = `/api/usuarios/alterar-status/${userId}`;
 
-            fetch(url, {
+            const response = await fetch(url, {
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem('session_token')
                 },
-                body: {
-                    'novo-status': (acao === 'bloquear' ? 'bloqueado' : 'ativo')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Sucesso!',
-                        text: data.message || 'Ação realizada com sucesso.',
-                        icon: 'success',
-                        confirmButtonColor: 'var(--verde-principal)',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        location.reload(); 
-                    });
-                } else {
-                    throw new Error(data.message || 'Erro ao realizar a ação.');
-                }
-            })
-            .catch(error => {
+                body: JSON.stringify({
+                    'novo-status': novoStatus
+                })
+
+            });
+
+            const data_request = await response?.json();
+
+            if (!response.ok)
+            {
                 Swal.fire(
+
                     'Erro!',
-                    error.message || 'Não foi possível completar a ação.',
+                    data_request?.error || 'Erro Interno. Tente novamente mais tarde.',
                     'error'
+
                 );
+            }
+
+            Swal.fire({
+
+                title: 'Sucesso!',
+                text: data_request.message || 'Ação realizada com sucesso.',
+                icon: 'success',
+                confirmButtonColor: 'var(--verde-principal)',
+                confirmButtonText: 'OK'
+
+            })
+
+            .then(() => {
+                location.reload(); 
             });
         }
     });
@@ -273,42 +280,6 @@ async function carregarMais() {
     }
 }
 
-function handleSearch(e) {
-    e.preventDefault();
-    const searchTerm = document.getElementById('searchInput').value;
-    const params = new URLSearchParams(window.location.search);
-
-    if (searchTerm.trim()) {
-        params.set('q', searchTerm.trim());
-    } else {
-        params.delete('q');
-    }
-    params.delete('page');
-    window.location.search = params.toString();
-}
-
-function handleFilter(e) {
-    e.preventDefault();
-    const filterType = e.currentTarget.dataset.filter;
-    const filterValue = e.currentTarget.dataset.value;
-    const params = new URLSearchParams(window.location.search);
-
-    if (filterValue === 'todos') {
-        params.delete(filterType);
-    } else {
-        params.set(filterType, filterValue);
-    }
-    params.delete('page');
-    window.location.search = params.toString();
-}
-
-function removerFiltro(tipo) {
-    const params = new URLSearchParams(window.location.search);
-    params.delete(tipo);
-    params.delete('page');
-    window.location.search = params.toString();
-}
-
 function atualizarContador() {
     const counter = document.getElementById('resultsCount');
     if (counter) {
@@ -322,35 +293,5 @@ function atualizarBotaoCarregarMais() {
         loadMoreBtn.style.display = 'none';
     } else {
         loadMoreBtn.style.display = 'inline-block';
-    }
-}
-
-function atualizarTagsFiltros() {
-    const container = document.getElementById('activeFilters');
-    container.innerHTML = '';
-
-    if (filtrosAtivos.status) {
-        const statusText = {
-            'aprovado': 'Aprovados',
-            'aguardando': 'Aguardando',
-            'bloqueado': 'Bloqueados'
-        }[filtrosAtivos.status];
-
-        container.innerHTML += `
-            <span class="filter-tag">
-                ${statusText}
-                <i class="fas fa-times remove-filter" onclick="removerFiltro('status')"></i>
-            </span>
-        `;
-    }
-
-    if (filtrosAtivos.atividade) {
-        const atividadeText = filtrosAtivos.atividade === 'ativo' ? 'Ativos' : 'Inativos';
-        container.innerHTML += `
-            <span class="filter-tag">
-                ${atividadeText}
-                <i class="fas fa-times remove-filter" onclick="removerFiltro('atividade')"></i>
-            </span>
-        `;
     }
 }
