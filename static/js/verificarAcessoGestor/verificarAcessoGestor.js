@@ -38,8 +38,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
         }
 
-        console.log(data_usuario)
-
         if (!['root', 'gestor'].includes(data_usuario.tipo)) 
         {
             Swal.fire({
