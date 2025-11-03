@@ -25,7 +25,8 @@ export async function exibirVendedores() {
     </div>
     `;
     opcoesSection.innerHTML = '';
-    
+    compradorSection.innerHTML = '';
+
     // --- Lógica do botão de registrar novo comprador ---
     const novoComprador = document.createElement('button');
     novoComprador.className = "registros__opcoes-btn";
@@ -61,7 +62,7 @@ export async function exibirVendedores() {
                 // Registra o novo vendedor
                 const dados = await buscarVendedores(result.value);
                 const novoVendedor = await registrarNovoVendedor(dados);
-                if (novoVendedor){
+                if (novoVendedor) {
                     Swal.fire({
                         title: "Cadastro concluído.",
                         icon: "success"
@@ -84,7 +85,7 @@ async function renderizarListaDeVendedores() {
 
     // 2. Busca a lista ATUALIZADA de compradores no seu backend
     const vendedores = await getCompradores();
-    
+
     // 3. Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');

@@ -14,6 +14,7 @@ let valoresCadastro = {
 
 
 export async function exibirSubtipos() {
+    compradorSection.innerHTML = '';
     const subtipos = await getSubtipos(vendaAtual.material.id_categoria)
 
     console.log(subtipos, material.id_material_catalogo, material, vendaAtual.material.id_categoria)
@@ -153,7 +154,7 @@ async function cadastrarSinonimo(valoresCadastro) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
-    finally{
+    finally {
         exibirSubtipos()
     }
 }
@@ -177,7 +178,7 @@ async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
-    finally{
+    finally {
         exibirSubtipos()
     }
 }

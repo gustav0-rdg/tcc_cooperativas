@@ -1,5 +1,5 @@
 import mysql.connector
-from mysql.connector import MySQLConnection, CMySQLConnection
+from mysql.connector import MySQLConnection
 
 info_conexoes = {
 
@@ -72,7 +72,7 @@ class Connection:
 
     @staticmethod
     def validar (connection_db:MySQLConnection) -> bool:
-        if isinstance(connection_db, (MySQLConnection, CMySQLConnection)) and connection_db.is_connected():
+        if isinstance(connection_db, MySQLConnection) and connection_db.is_connected():
             return True
         else:
             return False

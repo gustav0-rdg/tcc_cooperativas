@@ -65,6 +65,28 @@ class Vendas:
         else:
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
         
+    def _buscar_subtipo(self, nome_subtipo):
+        """
+        Busca o ID de um material ativo na tabela `materiais_catalogo`.
+        Args:
+            nome_material (str): O nome exato do subtipo do material.
+        Returns:
+            int: O ID do material encontrado.
+        Raises:
+            MaterialNaoEncontradoError: Se nenhum material ativo for encontrado com o nome fornecido.
+        """
+        with self.connection_db.cursor() as cursor:
+            # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
+            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_especifico = %s"
+            cursor.execute(query, (nome_subtipo,))
+            result = cursor.fetchone()
+
+        if result:
+            id_subtipo = result[0]
+            print(f"Material encontrado: '{nome_subtipo}' corresponde ao ID {id_subtipo}.")
+            return id_subtipo
+        else:
+            raise ValueError(f"Nenhum material ativo chamado '{nome_subtipo}' foi encontrado no catálogo.")
     def _buscar_ids_feedback_tags(self, lista_tags: list[str]) -> list[int]:
         """
         Busca os IDs de uma lista de tags de feedback.
@@ -107,13 +129,16 @@ class Vendas:
              
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
-            nome_material = dados_frontend['material']['subtipo']
+            nome_material = dados_frontend['material']['categoria']
+            nome_subtipo = dados_frontend['material']['subtipo']
             id_material = self._buscar_id_material(nome_material)
+            id_subtipo = self._buscar_subtipo(nome_subtipo)
             ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material,
-                "ids_tags_feedback": ids_tags
+                "ids_tags_feedback": ids_tags,
+                "id_subtipo": id_subtipo
             }
 
         except Exception as e:
@@ -153,12 +178,13 @@ class Vendas:
 
             # INSERIR NA TABELA `vendas_itens`
             query_item = """
-                INSERT INTO vendas_itens (id_venda, id_material_catalogo, quantidade_kg, preco_por_kg)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO vendas_itens (id_venda, id_material_base, id_material_catalogo, quantidade_kg, preco_por_kg)
+                VALUES (%s, %s, %s, %s, %s)
             """
             item_data = (
                 id_venda,
                 ids['id_material'],
+                ids['id_subtipo'],      
                 dados_frontend['quantidade'],
                 dados_frontend['preco_por_kg']
             )
