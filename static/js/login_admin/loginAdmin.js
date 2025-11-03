@@ -1,126 +1,133 @@
-
-// Validão do formulario
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Pega os campos do formulário
     const emailInput = document.getElementById("email");
     const senhaInput = document.getElementById("senha");
     const form = document.getElementById("form-login-admin");
 
-    // Variáveis para controlar os alertas
+    if (!form || !emailInput || !senhaInput) {
+        console.error("Erro crítico: Elementos do formulário de login (form, email, senha) não encontrados no HTML!");
+        return; 
+    }
+
     let emailAlertShown = false;
     let senhaAlertShown = false;
 
-    // Validação simples para o campo de email
     emailInput.addEventListener("blur", () => {
-
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailRegex.test(emailInput.value)) {
-
+        if (emailInput.value.length > 0 && !emailRegex.test(emailInput.value)) {
             if (!emailAlertShown) {
-
                 Swal.fire({
-
-                    icon: "error",
-                    
-                    title: "Email ou senha inválido",
-
+                    icon: "warning", 
+                    title: "Formato de Email Inválido",
+                    text: "Por favor, verifique o email digitado.",
+                    timer: 2500, 
+                    showConfirmButton: false
                 }).then(() => {
-
-                    // Retorna o foco ao campo de email
-                    emailInput.focus(); 
-
                 });
-
                 emailAlertShown = true;
-
             }
-
         } else {
-
             emailAlertShown = false; 
-
         }
-
     });
 
-    // Validação da senha (mínimo de 8 caracteres)
     senhaInput.addEventListener("blur", () => {
-
-        if (senhaInput.value.length < 8) {
-
+        if (senhaInput.value.length > 0 && senhaInput.value.length < 8) {
             if (!senhaAlertShown) {
-
                 Swal.fire({
-
-                    icon: "error",
-
+                    icon: "warning",
+                    title: "Senha Curta",
                     text: "A senha deve ter no mínimo 8 caracteres.",
-
+                    timer: 2500,
+                    showConfirmButton: false
                 }).then(() => {
-
-                    senhaInput.focus(); 
-
                 });
-
-                senhaAlertShown = true; 
-
+                senhaAlertShown = true;
             }
         } else {
-
             senhaAlertShown = false; 
-
         }
-
     });
 
-    // Validação no envio do formulário
-    form.addEventListener("submit", (event) => {
-        
+    form.addEventListener("submit", async (event) => { 
+
+        event.preventDefault(); 
+
+        const email = emailInput.value;
+        const senha = senhaInput.value;
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        // Verifica se o email é válido
-        if (!emailRegex.test(emailInput.value)) {
-
-            event.preventDefault();
-
+        if (!emailRegex.test(email)) {
             Swal.fire({
-
                 icon: "error",
-
-                title: "Erro",
-
-                text: "Por favor, insira um email válido.",
-
+                title: "Email Inválido",
+                text: "Por favor, insira um email válido antes de continuar.",
             });
-
             emailInput.focus();
-
             return;
         }
 
-        // Verifica se a senha tem pelo menos 8 caracteres
-        if (senhaInput.value.length < 8) {
-
-            event.preventDefault(); 
-
+        if (senha.length < 8) {
             Swal.fire({
-
                 icon: "error",
-
-                title: "Erro",
-
+                title: "Senha Inválida",
                 text: "A senha deve ter no mínimo 8 caracteres.",
+            });
+            senhaInput.focus();
+            return; 
+        }
 
+        try {
+            Swal.fire({
+                title: 'Aguarde...',
+                text: 'Verificando suas credenciais.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
 
-            senhaInput.focus();
+            const response = await fetch('/api/usuarios/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    identificador: email, 
+                    senha: senha
+                })
+            });
 
-            return;
+            const data = await response.json();
 
+            Swal.close();
+
+            if (!response.ok) {
+                throw new Error(data.error || `Erro ${response.status} do servidor`);
+            }
+            
+            localStorage.setItem('session_token', data.token); 
+
+            Swal.fire({
+                title: 'Sucesso!',
+                text: 'Login realizado. Redirecionando...',
+                icon: 'success',
+                timer: 1500, 
+                showConfirmButton: false,
+                allowOutsideClick: false 
+            });
+
+            setTimeout(() => {
+                window.location.href = '/pagina-inicial/gestor';
+            }, 1500); 
+
+        } catch (error) {
+            Swal.close(); 
+            Swal.fire({
+                title: 'Erro no Login!',
+                text: error.message, 
+                icon: 'error',
+                confirmButtonColor: '#d33' 
+            });
         }
-
     });
-    
 });

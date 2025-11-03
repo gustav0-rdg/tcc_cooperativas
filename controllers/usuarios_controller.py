@@ -127,7 +127,7 @@ class Usuarios:
             
             if token_criado_sucesso:
 
-                token = token_controller.get_last_token_by_user(id_usuario, 'sessao')
+                token = token_controller.get_ultimo_token_por_usuario(id_usuario, 'sessao')
                 if token:
                     return (token, "LOGIN_SUCESSO")
                 else:

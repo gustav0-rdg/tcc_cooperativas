@@ -38,18 +38,29 @@ buscarCompradoresSec.addEventListener('click', async (event) => {
 async function renderizarSubtipos(subtipos, id_material) {
     buscarCompradoresSec.innerHTML = '';
     const htmlSubtipos = subtipos.map((subtipo, index) => `
-        <button class="comprador-card" data-subtipo="${subtipo.id_material_catalogo}">
+        <button class="subtipo-card" data-subtipo="${subtipo.id_material_catalogo}">
             <h1>${subtipo.nome_especifico}</h2>
         </button>
     `).join('');
-    buscarSubtipos.innerHTML = htmlSubtipos;
+    buscarSubtipos.innerHTML = `
+    <div class="subtipos">
+        <button class="btn-voltar">Voltar</button>
+        ${htmlSubtipos}
+    </div>
+    `;
     buscarSubtipos.classList.remove('hidden');
-    const btn = buscarSubtipos.querySelectorAll('.comprador-card');
+    const btnVoltar = buscarSubtipos.querySelector('.btn-voltar');
+    btnVoltar.addEventListener('click', async () =>{
+        await renderizarMateriais();
+        buscarSubtipos.classList.add('hidden')
+    })
+    const btn = buscarSubtipos.querySelectorAll('.subtipo-card');
     btn.forEach(e =>{
         e.addEventListener('click', async (event) =>{
             const id_subtipo = event.target.dataset.subtipo;
-            console.log(id_material);
-            const compradores = await getCompradoresPorMaterial(id_material)
+            const compradores = await getCompradoresPorMaterial(id_material, id_subtipo);
+            console.log(compradores);
+            
             await renderizarCompradores(compradores);
             buscarSubtipos.classList.add('hidden');
         })
@@ -58,7 +69,7 @@ async function renderizarSubtipos(subtipos, id_material) {
 
 async function renderizarCompradores(compradores) {
     buscarCompradoresSec.innerHTML = '';
-    const htmlCompradores = compradores.map((comprador, index) => `
+    const htmlCompradores = compradores.length > 0 ? compradores.map((comprador, index) => `
         <div class="comprador-card">
             <div class="comprador-header">
                 <div class="comprador-avatar">
@@ -76,7 +87,7 @@ async function renderizarCompradores(compradores) {
             <button class="verMais" data-value="${comprador.cnpj}" data-index="${index}">Ver mais</button>
 
         </div>
-    `).join('');
+    `).join('') : "<h1>Nenhum comprador disponível.</h1>    ";
 
     detalheCompradores.innerHTML = htmlCompradores;
     detalheCompradores.classList.remove('hidden')

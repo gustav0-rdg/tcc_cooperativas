@@ -67,11 +67,11 @@ def get_subtipos_materiais(material_id):
         if conn:
             conn.close()
     
-@api_get.route("/comprador/<material>", methods=["GET"])
-def get_by_material(material):
+@api_get.route("/comprador/<material>/<subtipo>", methods=["GET"])
+def get_by_material(material, subtipo):
     try:
         conn = Connection('local')
-        compradores = Compradores(conn.connection_db).get_by_materials(material)
+        compradores = Compradores(conn.connection_db).get_by_materials(material, subtipo)
         return jsonify(compradores), 200
     except Exception as e:
         print(f"Erro ao buscar ompradores por material: {e}")

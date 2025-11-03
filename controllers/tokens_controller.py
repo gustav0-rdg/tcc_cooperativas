@@ -115,9 +115,9 @@ class Tokens:
 
             raise TypeError ('Tokens - "token" deve ser do tipo String')
         
-        if len(token) != 36:
+        if len(token) != 64:
 
-            raise ValueError ('Tokens - "token" deve ter 36 caractéres')
+            raise ValueError ('Tokens - "token" deve ter 64 caractéres')
         
         #endregion
 
@@ -218,7 +218,7 @@ class Tokens:
             return data['token'] if data else None
         
         except Exception as e:
-            print(f'Erro - Tokens "get_last_token_by_user": {e}')
+            print(f'Erro - Tokens "get_ultimo_token_por_usuario": {e}')
             return None
         
         finally:
