@@ -14,7 +14,7 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
-    def get_by_id (self, id_cooperativa:int) -> dict:
+    def get (self, identificador:int|str) -> dict:
 
         """
         Procura a cooperativa da qual o usuario
@@ -23,13 +23,13 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(id_cooperativa, int):
+        if not isinstance(identificador, (int, str)):
 
-            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
+            raise TypeError ('Cooperativa - "identificador" deve ser id_usuario, id_cooperativa ou cnpj')
 
         #endregion
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -37,19 +37,47 @@ class Cooperativa:
 
                 """
                 SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
+                    cooperativas.id_cooperativa,
+                    cooperativas.cnpj,
+                    cooperativas.razao_social,
+                    cooperativas.endereco,
+                    cooperativas.cidade,
+                    cooperativas.estado,
+                    cooperativas.latitude,
+                    cooperativas.longitude,
+                    cooperativas.aprovado,
+                    cooperativas.id_usuario,
+                    cooperativas.telefone,
+                    cooperativas.email,
+                    cooperativas.nome_fantasia,
+                    usuarios.status,
+                    cooperativas.ultima_atualizacao,
+                    cooperativas.data_cadastro,
+                    COUNT(vendas.id_venda) AS `total_vendas`,
+                    COALESCE(
+                        GROUP_CONCAT(
+                            DISTINCT materiais_catalogo.nome_especifico ORDER BY materiais_catalogo.nome_especifico SEPARATOR '|'
+                        ), NULL
+                    ) AS `materiais_vendidos`
                 FROM cooperativas
-                WHERE cooperativas.id_cooperativa = %s;
+                INNER JOIN
+                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
+                LEFT JOIN
+                    vendas ON vendas.id_cooperativa = cooperativas.id_cooperativa
+                LEFT JOIN
+                    vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
+                LEFT JOIN materiais_catalogo
+                    ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
+                WHERE 
+                    cooperativas.id_cooperativa = %s OR
+                    cooperativas.id_usuario = %s OR
+                    cooperativas.cnpj = %s
+                GROUP BY
+                    cooperativas.id_cooperativa
+                LIMIT 1;
                 """,
 
-                (id_cooperativa, )
+                (identificador, identificador, identificador)
 
             )
 
@@ -72,7 +100,7 @@ class Cooperativa:
         cadastradas no sistema
         """
 
-        cursor = self.connection_db.cursor()
+        cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
@@ -80,16 +108,39 @@ class Cooperativa:
 
                 """
                 SELECT
-                    id_cooperativa,
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
+                    cooperativas.id_cooperativa,
+                    cooperativas.cnpj,
+                    cooperativas.razao_social,
+                    cooperativas.endereco,
+                    cooperativas.cidade,
+                    cooperativas.estado,
+                    cooperativas.latitude,
+                    cooperativas.longitude,
+                    cooperativas.aprovado,
+                    cooperativas.id_usuario,
+                    cooperativas.telefone,
+                    cooperativas.email,
+                    cooperativas.nome_fantasia,
+                    usuarios.status,
+                    cooperativas.ultima_atualizacao,
+                    cooperativas.data_cadastro,
+                    COUNT(vendas.id_venda) AS `total_vendas`,
+                    COALESCE(
+                        GROUP_CONCAT(
+                            DISTINCT materiais_catalogo.nome_especifico ORDER BY materiais_catalogo.nome_especifico SEPARATOR '|'
+                        ), NULL
+                    ) AS `materiais_vendidos`
                 FROM cooperativas
+                INNER JOIN
+                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
+                LEFT JOIN
+                    vendas ON vendas.id_cooperativa = cooperativas.id_cooperativa
+                LEFT JOIN
+                    vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
+                LEFT JOIN materiais_catalogo
+                    ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
+                GROUP BY
+                    cooperativas.id_cooperativa;
                 """
 
             )
@@ -106,110 +157,7 @@ class Cooperativa:
 
             cursor.close()
 
-    def get_by_cnpj (self, cnpj:str) -> dict:
-
-        """
-        Consulta o CNPJ e retorna a cooperativa
-        com o CNPJ requisitado, caso registrado,
-        se não 'null'
-        """
-
-        #region Exceções
-
-        if not isinstance(cnpj, str):
-
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo String')
-
-        #endregion
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
-                FROM cooperativas
-                WHERE cooperativas.cnpj = %s;
-                """,
-
-                (cnpj, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_by_cnpj": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def get_by_usuario (self, id_usuario:int) -> dict:
-
-        """
-        Procura a cooperativa da qual o usuario
-        fornecido é o administrador
-        """
-
-        #region Exceções
-
-        if not isinstance(id_usuario, int):
-
-            raise TypeError ('Cooperativa - "cnpj" deve ser do tipo Int')
-
-        #endregion
-
-        cursor = self.connection_db.cursor()
-
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cnpj,
-                    razao_social,
-                    endereco,
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude,
-                    aprovado
-                FROM cooperativas
-                WHERE cooperativas.id_usuario = %s;
-                """,
-
-                (id_usuario, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_by_usuario": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
-    def vincular_cooperado (
+    def vincular_cooperado(
             
         self, 
 

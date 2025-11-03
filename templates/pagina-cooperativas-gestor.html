@@ -38,7 +38,7 @@
                 <section class="page-header mb-4">
                     <div class="d-flex align-items-center gap-3 mb-2">
                         <!-- Botão para voltar à página inicial do gestor -->
-                        <a href="{{ url_for('gestor.inicio') }}" class="btn-voltar" title="Voltar">
+                        <a href="/pagina-inicial/gestor" class="btn-voltar" title="Voltar">
                             <i class="fas fa-arrow-left"></i>
                         </a>
                         <!-- Título da página -->
@@ -52,7 +52,7 @@
                 <!-- ====================== -->
                 <section class="search-section mb-4">
                     <!-- Formulário de busca (método GET) -->
-                    <form id="searchForm" method="GET" action="{{ url_for('gestor.visualizar_cooperativas') }}">
+                    <form id="searchForm" method="GET" action="{/} url_for('gestor.visualizar_cooperativas') }}">
                         <div class="row g-3">
                             
                             <!-- Campo de pesquisa -->
@@ -77,6 +77,28 @@
 
                                     <!-- Lista de filtros disponíveis -->
                                     <ul class="dropdown-menu filter-dropdown">
+                                        <!-- Filtro: Aprovação -->
+                                        <li><h6 class="dropdown-header">Aprovação</h6></li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="aprovacao" data-value="todos">
+                                                <i class="fas fa-circle-nodes"></i> Todos
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="aprovacao" data-value="true">
+                                                <i class="fas fa-check-circle text-success"></i> Aprovados
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="aprovacao" data-value="null">
+                                                <i class="fas fa-hourglass-half text-warning"></i> Aguardando Aprovação
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item filter-item" href="#" data-filter="aprovacao" data-value="false">
+                                                <i class="fas fa-times-circle text-danger"></i> Reprovados
+                                            </a>
+                                        </li>
                                         <!-- Filtro: Status -->
                                         <li><h6 class="dropdown-header">Status</h6></li>
                                         <li>
@@ -85,13 +107,13 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="aprovado">
-                                                <i class="fas fa-check-circle text-success"></i> Aprovados
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="ativo">
+                                                <i class="fas fa-check-circle text-success"></i> Ativos
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="aguardando">
-                                                <i class="fas fa-clock text-warning"></i> Aguardando
+                                            <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="pendente">
+                                                <i class="fas fa-clock text-warning"></i> Pendentes
                                             </a>
                                         </li>
                                         <li>
@@ -134,7 +156,7 @@
                 <!-- ====================== -->
                 <div class="results-counter mb-3">
                     <span id="resultsCount">
-                        Mostrando {{ cooperativas|length }} de {{ total_cooperativas }} cooperativa{{ 's' if total_cooperativas != 1 else '' }}
+                        Mostrando <span id="mostrandoCooperativas"></span> de <span id="totalCooperativas"></span> cooperativas
                     </span>
                 </div>
 
@@ -143,97 +165,7 @@
                 <!-- ====================== -->
                 <section class="cooperativas-list mb-4">
                     <div class="row g-3 g-md-4" id="cooperativasContainer">
-                        
-                        <!-- Loop Jinja2 para exibir cada cooperativa -->
-                        {% for coop in cooperativas %}
-                            <div class="col-12 col-md-6 col-xl-4">
-                                <!-- Card individual da cooperativa -->
-                                <div class="coop-card" 
-                                     data-id="{{ coop.id }}"
-                                     data-nome="{{ coop.nome }}"
-                                     data-cnpj="{{ coop.cnpj }}"
-                                     data-status="{{ coop.status }}"
-                                     data-data-cadastro="{{ coop.dataCadastro|formatar_data }}"
-                                     data-ultimo-acesso="{{ coop.ultimoAcesso|formatar_data }}"
-                                     data-ativo="{{ coop.ativo }}"
-                                     data-telefone="{{ coop.telefone }}"
-                                     data-email="{{ coop.email }}"
-                                     data-endereco="{{ coop.endereco }}"
-                                     data-cidade="{{ coop.cidade }}"
-                                     data-estado="{{ coop.estado }}"
-                                     data-total-vendas="{{ coop.totalVendas }}"
-                                     data-materiais-vendidos="{{ coop.materiaisVendidos }}">
-                                    
-                                    <!-- Cabeçalho do card -->
-                                    <div class="coop-card-header">
-                                        <div>
-                                            <h3 class="coop-name">{{ coop.nome }}</h3>
-                                            <p class="coop-cnpj">{{ coop.cnpj }}</p>
-                                        </div>
-                                        <span class="status-badge status-{{ coop.status }}">
-                                            {{ coop.status|title }}
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- Corpo do card com informações básicas -->
-                                    <div class="coop-card-body">
-                                        <div class="coop-info-item">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            <span>{{ coop.cidade }} - {{ coop.estado }}</span>
-                                        </div>
-                                        <div class="coop-info-item">
-                                            <i class="fas fa-phone"></i>
-                                            <span>{{ coop.telefone }}</span>
-                                        </div>
-                                        <div class="coop-info-item">
-                                            <i class="fas fa-envelope"></i>
-                                            <span>{{ coop.email }}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Rodapé com status de atividade e botão de ação -->
-                                    <div class="coop-card-footer">
-                                        <div class="last-access">
-                                            <i class="fas fa-clock"></i>
-                                            <span>Último acesso: {{ coop.ultimoAcesso|formatar_data }}</span>
-                                            
-                                            <!-- Indicador visual de atividade (ativo/inativo) -->
-                                            <span class="activity-indicator {{ 'activity-active' if coop.ativo else 'activity-inactive' }}" 
-                                                  title="{{ 'Ativo' if coop.ativo else 'Inativo' }}"></span>
-                                        </div>
-                                        
-                                        <!-- Botão de bloqueio ou desbloqueio, conforme status -->
-                                        {% if coop.status == 'bloqueado' %}
-                                            <button class="btn-block btn-block-success" 
-                                                    data-coop-id="{{ coop.id }}" 
-                                                    data-coop-nome="{{ coop.nome }}"
-                                                    data-acao="desbloquear">
-                                                <i class="fas fa-unlock"></i> Desbloquear
-                                            </button>
-                                        {% else %}
-                                            <button class="btn-block btn-block-danger" 
-                                                    data-coop-id="{{ coop.id }}" 
-                                                    data-coop-nome="{{ coop.nome }}"
-                                                    data-acao="bloquear">
-                                                <i class="fas fa-ban"></i> Bloquear
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-
-                        <!-- Caso não haja cooperativas -->
-                        {% if not cooperativas %}
-                            <div class="col-12">
-                                <div class="alert alert-info text-center" style="background: var(--branco); border: 2px solid var(--verde-claro-medio); border-radius: 12px;">
-                                    <i class="fas fa-info-circle" style="font-size: 2rem; color: var(--verde-principal); margin-bottom: 1rem;"></i>
-                                    <h5 style="color: var(--verde-escuro);">Nenhuma cooperativa encontrada</h5>
-                                    <p style="color: var(--cinza-claro); margin-bottom: 0;">Tente ajustar os filtros de pesquisa</p>
-                                </div>
-                            </div>
-                        {% endif %}
-
+                        <!-- Adicionado no JS -->
                     </div>
                 </section>
 
@@ -242,8 +174,8 @@
                 <!-- ====================== -->
                 <div class="text-center mb-5">
                     <button class="btn btn-load-more" id="loadMoreBtn" 
-                            data-total-exibido="{{ cooperativas|length }}" 
-                            data-total-geral="{{ total_cooperativas }}">
+                            data-total-exibido="{/} cooperativas|length }}" 
+                            data-total-geral="{/} total_cooperativas }}">
                         <i class="fas fa-chevron-down"></i> Carregar mais cooperativas
                     </button>
                 </div>
@@ -284,6 +216,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Script personalizado da página (controle de busca, filtros e ações de bloqueio/desbloqueio) -->
-    <script src="../static/js/visualizar_cooperativas_gestor/cooperativas.js"></script>
+    <script src="../static/js/visualizar_cooperativas_gestor/cooperativas_app.js" defer></script>
 </body>
 </html>

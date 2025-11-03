@@ -202,13 +202,11 @@ def cadastrar ():
         if conn:
             conn.close()
 
-@api_cooperativas.route('/get-by-id/<id_cooperativa>', methods=['POST'])
-def get_by_id (id_cooperativa:int):
+@api_cooperativas.route('/get/<identificador>', methods=['POST'])
+def get (identificador:int|str):
 
-    if not id_cooperativa.isdigit():
-        return jsonify({ 'error': '"id_cooperativa" é inválido' }), 400
-    
-    id_cooperativa = int(id_cooperativa)
+    if identificador.isdigit():
+        identificador = int(identificador)
 
     token = request.headers.get('Authorization')
     if not token:
@@ -226,7 +224,7 @@ def get_by_id (id_cooperativa:int):
         if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        dados_cooperativa = Cooperativa(conn.connection_db).get_by_id(id_cooperativa)
+        dados_cooperativa = Cooperativa(conn.connection_db).get(identificador)
 
         match dados_cooperativa:
 
@@ -379,7 +377,7 @@ def vincular_cooperado ():
         if not data_adm_cooperativa or data_adm_cooperativa['tipo'] != 'cooperativa':
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        data_cooperativa = Cooperativa(conn.connection_db).get_by_usuario(data_adm_cooperativa['id_usuario'])
+        data_cooperativa = Cooperativa(conn.connection_db).get(data_adm_cooperativa['id_usuario'])
 
         id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
 

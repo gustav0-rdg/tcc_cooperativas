@@ -240,14 +240,15 @@ main {
     font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
+    text-align: center;
 }
 
 /* Variações de Status */
-.status-aprovado {
+.status-ativo {
     background: var(--verde-claro);
     color: var(--verde-escuro-medio);
 }
-.status-aguardando {
+.status-pendente {
     background: #fff8e1; /* Amarelo claro */
     color: #e6a800;
 }
@@ -434,4 +435,23 @@ main {
 .detail-value {
     font-size: 1.05rem;
     color: var(--verde-escuro);
+}
+
+.list-materiais-vendidos
+{
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+.materiais-vendidos-item
+{
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: #f7f7f7;
+    color: #8C8C8C;
+    width: fit-content;
 }

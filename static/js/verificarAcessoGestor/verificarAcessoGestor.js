@@ -1,58 +1,68 @@
+const URL_LOGIN_ADMIN = '/login/admin';
+const cardGestores = document.getElementById('card-gestores');
+const welcomeTitle = document.querySelector('.welcome-title h1');
+
 document.addEventListener('DOMContentLoaded', async () => {
     
-    const token = localStorage.getItem('session_token');
+    var session_token = localStorage.getItem('session_token');
+    if (!session_token) window.location.href = URL_LOGIN_ADMIN;
 
-    function expulsarParaLogin(mensagem) {
-        console.error('Erro de autenticação:', mensagem);
-        localStorage.removeItem('session_token');
-        Swal.fire({
-            title: 'Acesso Negado!',
-            text: mensagem,
-            icon: 'error',
-            confirmButtonColor: '#d33'
-        }).then(() => {
-            window.location.href = '/login/admin';
-        });
-    }
+    try 
+    {
 
-    if (!token) {
-        expulsarParaLogin('Você precisa estar logado para acessar esta página.');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/usuarios/me', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await fetch (
+        
+            '/api/usuarios/get', 
+            
+            {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': session_token
+                }
             }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Token inválido ou expirado');
+        );
+    
+        const data_usuario = await response?.json();
+    
+        if (!response.ok)
+        {
+            throw new Error (
+    
+                'error' in data_usuario
+                ?
+                data_usuario.error
+                :
+                'Erro Interno. Tente novamente mais tarde.'
+    
+            );
         }
 
-        if (data.tipo !== 'gestor' && data.tipo !== 'root') {
-            expulsarParaLogin('Você não tem permissão para acessar esta área.');
-            return;
+        if (!['root', 'gestor'].includes(data_usuario.tipo)) 
+        {
+            Swal.fire({
+
+                title: 'Acesso Negado!',
+                text: 'Área restrita para gestores.',
+                icon: 'error',
+                timer: 1500
+                
+            })
+
+            .then(() => window.location.href = URL_LOGIN_ADMIN);
         }
 
-        if (data.tipo === 'root') {
-            const cardGestores = document.getElementById('card-gestores');
-            if (cardGestores) {
-                cardGestores.style.display = 'block';
-            }
+        if (data_usuario.tipo === 'root') 
+        {
+            if (cardGestores) cardGestores.style.display = 'block';
         }
 
-        const welcomeTitle = document.querySelector('.welcome-title h1');
-        if (welcomeTitle && data.nome) {
-            welcomeTitle.textContent = `Boas-vindas, ${data.nome.split(' ')[0]}!`;
-        }
-
-    } catch (error) {
-
-        expulsarParaLogin(error.message);
+        // Mensagem de Boas Vindas
+        if (welcomeTitle && data_usuario.nome) welcomeTitle.textContent = `Boas-vindas, ${data_usuario.nome.split(' ')[0]}!`;
+    } 
+    
+    catch (error) 
+    {
+        throw new Error (error.message);
     }
 });

@@ -136,10 +136,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     try {
-        const response = await fetch('/api/usuarios/me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch (
+        
+            '/api/usuarios/get', 
+            
+            {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                }
+            }
+        );
+
+        console.log(response)
+        const data = await response?.json();
+        console.log(data)
 
         if (!response.ok) {
             console.error('Token inválido ou expirado ao carregar header.');
@@ -147,7 +159,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return; 
         }
 
-        const data = await response.json();
 
         if (data.tipo === 'gestor' || data.tipo === 'root') {
             homeLink.href = '/pagina-inicial/gestor';

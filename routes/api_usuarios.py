@@ -43,9 +43,7 @@ def cadastrar ():
                 return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
             
             data_token = Tokens(conn.connection_db).validar(token)
-            usuario = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
-
-            if data_cadastro['tipo'] == 'root' or usuario['tipo'] != 'root':
+            if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
             
         #endregion
@@ -213,7 +211,7 @@ def delete (id_usuario:int=None):
 
         #region Excluindo a conta de terceiros
 
-        if data_token['id_usuario'] != id_usuario and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] == 'cooperativa':
+        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
 
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
             
@@ -274,11 +272,13 @@ def get_info (id_usuario:int=None):
 
         #region Consultando info de terceiros
 
-        if data_token['id_usuario'] != id_usuario and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] == 'cooperativa':
+        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
 
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
 
         #endregion
+
+        print(id_usuario)
 
         data_usuario = Usuarios(conn.connection_db).get_by_id(id_usuario)
         match data_usuario:
@@ -291,7 +291,7 @@ def get_info (id_usuario:int=None):
             # 200 - Informações do usuário consultadas
 
             case _ if isinstance(data_usuario, dict):
-                return jsonify({ 'data': data_usuario }), 200
+                return jsonify(data_usuario), 200
 
             # 500 - Erro ao consultar as informações usuário
 
@@ -343,13 +343,13 @@ def alterar_status (id_usuario:int=None):
 
             case 'ativo':
 
-                if not (data_token['tipo'] == 'cadastro' or (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa')):
+                if not (data_token['tipo'] == 'cadastro' or (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root'])):
 
                     return jsonify({ 'error': 'Você não tem permissão para tal ação' }), 403
                 
             case 'inativo' | 'bloqueado':
 
-                if not (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa'):
+                if not (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']):
 
                     return jsonify({ 'error': 'Você não tem permissão para tal ação' }), 403
 
@@ -359,7 +359,7 @@ def alterar_status (id_usuario:int=None):
 
         #region Alterando o status de terceiros
 
-        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] != 'cooperativa':
+        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
 
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
 
@@ -390,53 +390,54 @@ def alterar_status (id_usuario:int=None):
 
         conn.close()
         
-@api_usuarios.route('/me', methods=['GET'])
-def get_meu_usuario():
+@api_usuarios.route('/get-all-gestores', methods=['POST'])
+def get_all_gestores ():
+
+    # 400 - Token Obrigatório
+
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
 
     conn = None
     try:
 
-        token_header = request.headers.get('Authorization')
-        
-        if not token_header:
-            return jsonify({'error': 'Token não fornecido'}), 401
-        
-        try:
-            token = token_header.split(" ")[1]
-        except IndexError:
-            return jsonify({'error': 'Token mal formatado'}), 401
-
         conn = Connection('local')
-        db = conn.connection_db
-        tokens_ctrl = Tokens(db)
 
-        data_token = tokens_ctrl.validar(token)
+        # 400 - Token Inválido
 
-        if not data_token:
-            return jsonify({'error': 'Token inválido'}), 401
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+        # 403 - Sem permissão
+
+        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        id_usuario = data_token['id_usuario']
-        token_valido_agora = tokens_ctrl.get_ultimo_token_por_usuario(id_usuario, 'sessao')
+        data_gestores = Usuarios(conn.connection_db).get_all_gestores()
+        match data_gestores:
 
-        if not token_valido_agora or token_valido_agora != token:
-             return jsonify({'error': 'Token expirado ou inválido'}), 401
+            # 404 - Gestores não encontrados
 
-        usuarios_ctrl = Usuarios(db)
-        usuario_info = usuarios_ctrl.get_by_id(id_usuario)
+            case None:
+                return jsonify({ 'error': 'Gestores não encontrados' }), 404
 
-        conn.close()
+            # 200 - Informações dos gestores consultadas
 
-        if not usuario_info:
-            return jsonify({'error': 'Usuário não encontrado'}), 404
+            case _ if isinstance(data_gestores, list):
+                return jsonify(data_gestores), 200
 
-        return jsonify({
-            'id_usuario': usuario_info['id_usuario'],
-            'nome': usuario_info['nome'],
-            'email': usuario_info['email'],
-            'tipo': usuario_info['tipo']
-        }), 200
+            # 500 - Erro ao consultar gestores
 
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+            
     except Exception as e:
-        if conn: conn.close()
-        print(f"Erro GERAL na rota /me: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        if conn != None:
+            conn.close()
