@@ -213,6 +213,7 @@ function renderizarCooperativas (cooperativas)
 async function exibirCooperativas ()
 {
     const data_cooperativas = await consultarCooperativas();
+    console.log(data_cooperativas)
 
     if (data_cooperativas.length <= 0)
     {
@@ -234,6 +235,7 @@ async function exibirCooperativas ()
         const termoBusca = params.get('q')?.toLowerCase() || '';
         const status = params.get('status');
         const atividade = params.get('atividade');
+        const aprovacao = params.get('aprovacao');
 
         let cooperativasFiltradas = [...data_cooperativas];
 
@@ -270,6 +272,23 @@ async function exibirCooperativas ()
             });
         }
 
+        // Filtro por Aprovação
+
+        if (aprovacao) 
+        {
+            identificador_aprovacao = {
+
+                'aprovado': true,
+                'aguardando-aprovacao': null,
+                'reprovado': false
+
+            }
+
+            cooperativasFiltradas = cooperativasFiltradas.filter(coop => 
+                coop.aprovacao === identificador_aprovacao[aprovacao]
+            );
+        }
+
         totalCooperativasLabel.textContent = data_cooperativas.length;
         listCooperativasContainer.innerHTML = renderizarCooperativas(cooperativasFiltradas).join(' ');
     }
@@ -278,6 +297,7 @@ async function exibirCooperativas ()
 function handleSearch(e) 
 {
     e.preventDefault();
+
     const searchTerm = document.getElementById('searchInput').value;
     const params = new URLSearchParams(window.location.search);
 
@@ -292,12 +312,14 @@ function handleSearch(e)
 
 //#region Filtros
 
-function inicializarEstadoDosFiltros() {
+function inicializarEstadoDosFiltros() 
+{
     const params = new URLSearchParams(window.location.search);
     filtrosAtivos = {
         q: params.get('q') || '',
         status: params.get('status') || null,
-        atividade: params.get('atividade') || null
+        atividade: params.get('atividade') || null,
+        aprovacao: params.get('aprovacao') || null
     };
     if (filtrosAtivos.q) {
         document.getElementById('searchInput').value = filtrosAtivos.q;
@@ -321,37 +343,51 @@ function handleFilter(e)
     window.location.search = params.toString();
 }
 
-function atualizarTagsFiltros() {
+function atualizarTagsFiltros() 
+{
+    console.log(filtrosAtivos);
+
     const container = document.getElementById('activeFilters');
     container.innerHTML = '';
 
-    if (filtrosAtivos.status) {
-        const statusText = {
+    const labelsFiltros = {
+
+        'status': {
             'ativo': 'Ativos',
             'pendente': 'Pendentes',
             'bloqueado': 'Bloqueados'
-        }[filtrosAtivos.status];
+        },
 
-        container.innerHTML += `
-            <span class="filter-tag">
-                ${statusText}
-                <i class="fas fa-times remove-filter" onclick="removerFiltro('status')"></i>
-            </span>
-        `;
+        'atividade': {
+            'ativo': 'Ativos',
+            'inativo': 'Inativos'
+        },
+
+        'aprovacao': {
+            'true': 'Aprovados',
+            'null': 'Aguardando aprovação',
+            'false': 'Reprovados'
+        }
+
     }
 
-    if (filtrosAtivos.atividade) {
-        const atividadeText = filtrosAtivos.atividade === 'ativo' ? 'Ativos' : 'Inativos';
-        container.innerHTML += `
-            <span class="filter-tag">
-                ${atividadeText}
-                <i class="fas fa-times remove-filter" onclick="removerFiltro('atividade')"></i>
-            </span>
-        `;
-    }
+    let identificador = null;
+    if ('status' in filtrosAtivos) identificador = 'status';
+    else if ('atividade' in filtrosAtivos) identificador = 'atividade';
+    else if ('aprovacao' in filtrosAtivos) identificador = 'aprovacao';
+
+    if (identificador == null) throw new Error('Filtro não reconhecido');
+
+    container.innerHTML += `
+        <span class="filter-tag">
+            ${labelsFiltros[identificador][filtrosAtivos.identificador]}
+            <i class="fas fa-times remove-filter" onclick="removerFiltro('${identificador}')"></i>
+        </span>
+    `;
 }
 
-function removerFiltro(tipo) {
+function removerFiltro(tipo) 
+{
     const params = new URLSearchParams(window.location.search);
     params.delete(tipo);
     params.delete('page');

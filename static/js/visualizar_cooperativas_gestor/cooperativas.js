@@ -1,12 +1,10 @@
 let paginaAtual = 1;
 let totalCooperativas = 0;
 let totalExibido = 0;
-let filtrosAtivos = {};
 const itemsPorPagina = 10;
 let cooperativaModalInstance = null; 
 
 document.addEventListener('DOMContentLoaded', function() {
-    inicializarEstadoDosFiltros();
 
     const modalEl = document.getElementById('cooperativaModal');
     if (modalEl) {

@@ -240,6 +240,7 @@ main {
     font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
+    text-align: center;
 }
 
 /* Variações de Status */
@@ -441,6 +442,7 @@ main {
     padding: 0;
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
     gap: 2px;
 }
 .materiais-vendidos-item
