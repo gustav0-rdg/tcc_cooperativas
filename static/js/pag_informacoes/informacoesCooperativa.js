@@ -1,0 +1,1 @@
+const session_token = localStorage.getItem('session_token');
