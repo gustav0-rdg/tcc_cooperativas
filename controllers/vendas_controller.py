@@ -216,7 +216,7 @@ class Vendas:
         return: [] -> contendo todas as vendas já feitas pela cooperativa
         """
         try:
-            with self.connection_db.cursor() as cursor:
+            with self.connection_db.cursor(dictionary=True) as cursor:
                 query = """
                 SELECT 
                     mb.nome,

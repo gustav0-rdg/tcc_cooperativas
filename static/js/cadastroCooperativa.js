@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 senha: senha,
                 cnpj: cnpj // envia o CNPJ sem máscara
            }
-
+           console.log(formData);
            try {
                 const response = await fetch('/api/usuarios/cadastrar', {
                     method: 'POST',

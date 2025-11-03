@@ -236,3 +236,12 @@ align-items: start;
       max-width: 1140px;
   }
 }
+
+
+.venda-card{
+  background-color: var(--verde-escuro);
+  margin: 10px auto;
+  padding: 10px;
+  color: white;
+  border-radius: 10px;
+}
