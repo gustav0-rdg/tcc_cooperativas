@@ -82,3 +82,13 @@ button.btn-primary:hover {
 .card .btn-danger:hover {
     background-color: var(--verde-escuro);
 }
+
+.cooperado-card-clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cooperado-card-clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
