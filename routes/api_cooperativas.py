@@ -4,6 +4,9 @@ from data.connection_controller import Connection
 from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
 from controllers.cnpj_controller import CNPJ
+# imports para garantir a funcionalidade de uploads de documentos
+import os
+from werkzeug.utils import secure_filename
 
 api_cooperativas = Blueprint(
     
@@ -16,6 +19,13 @@ api_cooperativas = Blueprint(
 
 CNAES_PERMITIDOS = [3811400, 3831901, 3831999, 3832700, 3812200]
 NATUREZAS_JURIDICAS_PERMITIDAS = [2143, 3999] 
+PASTA_UPLOAD = 'static/uploads/documentos'
+EXTENSOES_PERMITIDAS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+def arquivo_permitido(nome_arquivo):
+    return '.' in nome_arquivo and \
+           nome_arquivo.rsplit('.', 1)[1].lower() in EXTENSOES_PERMITIDAS # Verifica se a extensão do arquivo está na constante
+
 
 @api_cooperativas.route('/cadastrar', methods=['POST'])
 def cadastrar ():
@@ -100,7 +110,7 @@ def cadastrar ():
         if id_status_atividade_cooperativa != 2:
             return jsonify({'error': 'O CNPJ informado está inativo.'}), 400
 
-        conn = Connection('online')
+        conn = Connection('local')
 
         conn.connection_db.start_transaction()
         print("Transação iniciada")
@@ -126,35 +136,47 @@ def cadastrar ():
             case _ if isinstance(id_usuario_criado, int):
 
                 addr = dados_cnpj.get('address', {})
-                endereco_completo = f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}"
+                company = dados_cnpj.get('company', {})
+                phones = dados_cnpj.get('phones', [{}]) # Telefones (pode haver mais de 1 no JSON)
 
-                id_cooperativa_criada = Cooperativa(conn.connection_db).create(
+                dados_criar_coop = {
+                    "id_usuario": id_usuario_criado,
+                    "cnpj": data_cadastro['cnpj'],
+                    "razao_social": company.get('name', 'Razão Social não encontrada'),
+                    "nome_fantasia": company.get('alias', 'Nome Fantasia não encontrado'),
+                    "email": dados_cnpj.get('email', data_cadastro['email']),
+                    "telefone": phones[0].get('number', 'Telefone não encontrado'), # Pega o primeiro telefone
+                    "endereco": f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}".strip(" ,-"),
+                    "cidade": addr.get('city'),
+                    "estado": addr.get('state')
+                }
 
-                    id_usuario=id_usuario_criado,
-                    cnpj=data_cadastro['cnpj'],
-                    razao_social=dados_cnpj.get('company', {}).get('name', 'Razão Social não encontrada'),
-                    endereco=endereco_completo.strip(" ,-"),
-                    cidade=addr.get('city'),
-                    estado=addr.get('state')
-                    # Latitude e longitude (não essencial por agora)
-
-                )
+                id_cooperativa_criada = Cooperativa(conn.connection_db).create(**dados_criar_coop)
 
                 match id_cooperativa_criada:
 
                     # 409 - CNPJ já cadastrado
 
                     case None:
+                        conn.connection_db.rollback()
                         return jsonify({'error': 'Este CNPJ já está cadastrado.'}), 409
 
                     # 201 - Cooperativa criada pendente e aguardando aprovação
 
                     case _ if isinstance(id_cooperativa_criada, int):
-                        return jsonify({'texto': 'Cadastro realizado com sucesso! Sua conta está pendente e está aguardando aprovação.'}), 201
+
+                        conn.connection_db.commit() 
+                        print("Transação concluída com sucesso")
+                        
+                        return jsonify({
+                            'texto': 'Cadastro realizado com sucesso! Sua conta está pendente e está aguardando aprovação.',
+                            'id_cooperativa': id_cooperativa_criada
+                        }), 201
 
                     # 500 - Erro Interno
 
                     case False | _:
+                        conn.connection_db.rollback()
                         return jsonify({'error': 'Ocorreu um erro interno no servidor durante o cadastro.'}), 500
 
             # 500 - Erro Interno
@@ -163,22 +185,20 @@ def cadastrar ():
                 return jsonify({'error': 'Ocorreu um erro interno no servidor durante o cadastro.'}), 500
     
     except Exception as e:
-
+        print(f"Erro original que causou o rollback: {e}")
         if conn and conn.connection_db.is_connected():
 
             try:
-
-                if conn.connection_db.in_transaction():
+                if conn.connection_db.in_transaction:
                     conn.connection_db.rollback()
+                    print("Rollback efetuado devido a exceção.")
 
             except Exception as rollback_err:
-
                 print(f"Erro durante o rollback: {rollback_err}")
-
+        
         return jsonify({'error': 'Ocorreu um erro interno no servidor durante o cadastro.'}), 500
     
     finally:
-
         if conn:
             conn.close()
 
@@ -192,7 +212,7 @@ def get (identificador:int|str):
     if not token:
         return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
 
-    conn = Connection()
+    conn = Connection('local')
 
     try:
 
@@ -286,7 +306,7 @@ def alterar_aprovacao (id_cooperativa:int):
     if not token:
         return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
 
-    conn = Connection()
+    conn = Connection('local')
 
     try:
 
@@ -400,3 +420,62 @@ def vincular_cooperado ():
     finally:
 
         conn.close()
+
+@api_cooperativas.route('/enviar-documento', methods=['POST'])
+def enviar_documento():
+    
+    conn = None
+    try:
+
+        if 'documento' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo enviado.'}), 400
+        
+        id_cooperativa = request.form.get('id_cooperativa')
+        if not id_cooperativa:
+            return jsonify({'error': 'ID da cooperativa não fornecido.'}), 400
+
+        arquivo = request.files['documento']
+
+        if arquivo.filename == '':
+            return jsonify({'error': 'Nome do arquivo vazio.'}), 400
+
+        if not arquivo_permitido(arquivo.filename):
+            return jsonify({'error': 'Tipo de arquivo não permitido.'}), 400
+            
+        conn = Connection('local')
+        
+        # Criação de um nome de arquivo seguro e único | EX: doc_coop_5.pdf
+        filename_base = secure_filename(f"doc_coop_{id_cooperativa}")
+        extension = arquivo.filename.rsplit('.', 1)[1].lower()
+        filename = f"{filename_base}.{extension}"
+        
+        # Cria a pasta de uploads se ela não existir
+        os.makedirs(PASTA_UPLOAD, exist_ok=True)
+        
+        filepath = os.path.join(PASTA_UPLOAD, filename)
+        arquivo.save(filepath)
+        
+        # Salva o caminho no banco de dados
+        arquivo_url = f"uploads/documentos/{filename}"
+        
+        id_documento = Cooperativa(conn.connection_db).adicionar_documento(
+            id_cooperativa=int(id_cooperativa),
+            arquivo_url=arquivo_url
+        )
+
+        if id_documento:
+            conn.connection_db.commit()
+            return jsonify({'texto': 'Documento enviado com sucesso! Aguarde a aprovação.'}), 201
+        else:
+            conn.connection_db.rollback()
+            return jsonify({'error': 'Erro ao salvar documento no banco de dados.'}), 500
+
+    except Exception as e:
+        print(f"Erro em /enviar-documento: {e}")
+        if conn:
+            conn.connection_db.rollback()
+        return jsonify({'error': 'Ocorreu um erro interno no servidor.'}), 500
+    
+    finally:
+        if conn:
+            conn.close()

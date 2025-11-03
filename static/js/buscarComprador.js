@@ -39,7 +39,7 @@ async function renderizarSubtipos(subtipos, id_material) {
     buscarCompradoresSec.innerHTML = '';
     const htmlSubtipos = subtipos.map((subtipo, index) => `
         <button class="subtipo-card" data-subtipo="${subtipo.id_material_catalogo}">
-            <h1>${subtipo.nome_especifico}</h2>
+            ${subtipo.nome_especifico}
         </button>
     `).join('');
     buscarSubtipos.innerHTML = `
@@ -58,13 +58,14 @@ async function renderizarSubtipos(subtipos, id_material) {
     btn.forEach(e =>{
         e.addEventListener('click', async (event) =>{
             const id_subtipo = event.target.dataset.subtipo;
-            const compradores = await getCompradoresPorMaterial(id_material)
+            const compradores = await getCompradoresPorMaterial(id_material, id_subtipo);
+            console.log(compradores);
+            
             await renderizarCompradores(compradores);
             buscarSubtipos.classList.add('hidden');
         })
     })
 }
-
 async function renderizarCompradores(compradores) {
     buscarCompradoresSec.innerHTML = '';
     const htmlCompradores = compradores.length > 0 ? compradores.map((comprador, index) => `
@@ -83,12 +84,11 @@ async function renderizarCompradores(compradores) {
                 </div>
             </div>
             <button class="verMais" data-value="${comprador.cnpj}" data-index="${index}">Ver mais</button>
-
         </div>
-    `).join('') : "<h1>Nenhum comprador disponível.</h1>    ";
+    `).join('') : "<h1>Nenhum comprador disponível.</h1>";
 
     detalheCompradores.innerHTML = htmlCompradores;
-    detalheCompradores.classList.remove('hidden')
+    detalheCompradores.classList.remove('hidden');
 
     const todosOsBotoes = detalheCompradores.querySelectorAll('.verMais');
 
@@ -96,48 +96,52 @@ async function renderizarCompradores(compradores) {
         botao.addEventListener('click', async (event) => {
             const compradorIndex = event.target.dataset.index;
             const compradorCnpj = event.target.dataset.value;
-            const avaliacoes = await getFeedbackTags(compradorCnpj);
-            const comentarios = await getComentarios(compradorCnpj);
-            const compradorSelecionado = compradores[compradorIndex];
-            console.log(compradorSelecionado);
-            Swal.fire({
-                title: `${compradorSelecionado.razao_social}`,
-                background: "var(--verde-principal)",
-                html: `
-                    <p><strong>Avaliação:</strong> ${compradorSelecionado.score_confianca} <i class="fa-solid fa-star" style="color: var(--verde-claro)"></i></p>
-                    <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
-                    <p><strong>Total Comprado:</strong> ${compradorSelecionado.quantidade_kg} Kgs</p>
-                    <button class="comentarios-livres dropdown-btn">
-                        Ver comentarios
-                    </button> 
-                    <div class="dropdown-content hidden">
-                    ${
-                        comentarios.map(a => `
-                            <div class="comentarios-livre">
-                                <div class="comentarios-livre__avatar"></div>
-                                <div class="comentarios-livre__text">${a.comentario_livre}</div>
-                            </div>`
-                        ).join('')
+            try {
+                const avaliacoes = await getFeedbackTags(compradorCnpj);
+                const comentarios = await getComentarios(compradorCnpj);
+                const compradorSelecionado = compradores[compradorIndex];
+
+                console.log(compradorSelecionado);
+                Swal.fire({
+                    title: `${compradorSelecionado.razao_social}`,
+                    color: "var(--verde-escuro)",
+                    background: "var(--verde-principal)",
+                    html: `
+                        <p><strong>Avaliação:</strong> ${compradorSelecionado.score_confianca} <i class="fa-solid fa-star" style="color: var(--amarelo)"></i></p>
+                        <p><strong>Valor Total Pago:</strong> R$${compradorSelecionado.valor_total}</p>
+                        <p><strong>Total Comprado:</strong> ${compradorSelecionado.quantidade_kg} Kgs</p>
+                        <button class="comentarios-livres dropdown-btn" aria-expanded="false" aria-controls="comentarios-dropdown">
+                            Ver comentários
+                        </button> 
+                        <div class="dropdown-content hidden" id="comentarios-dropdown">
+                            ${comentarios.map(a => `
+                                <div class="comentarios-livre">
+                                    <div class="comentarios-livre__avatar"></div>
+                                    <div class="comentarios-livre__text">${a.comentario_livre}</div>
+                                </div>`).join('')}
+                        </div>
+                        <div class="container">
+                            ${avaliacoes.map(a => `<div class="item">${a.texto} <span class="badge">${a.quantidade}</span></div>`).join('')}
+                        </div>`,
+                    confirmButtonText: 'Fechar',
+                    confirmButtonColor: 'var(--verde-escuro)',
+                    didOpen: () => {
+                        const comentariosBtn = Swal.getPopup().querySelector(".dropdown-btn");
+                        const comentariosSec = Swal.getPopup().querySelector(".dropdown-content");
+                        comentariosBtn.addEventListener('click', () => {
+                            const isExpanded = comentariosBtn.getAttribute('aria-expanded') === 'true';
+                            comentariosSec.classList.toggle('hidden');
+                            comentariosBtn.setAttribute('aria-expanded', !isExpanded);
+                        });
                     }
-                    </div>
-                    <div class="container">
-                    ${
-                        avaliacoes.map(a => `<div class="item">${a.texto} <span class="badge">${a.quantidade}</span></div>`
-                        ).join('')
-                    }
-                    </div>
-                    `,
-                didOpen: () =>{
-                    const comentariosBtn = Swal.getPopup().querySelector(".dropdown-btn");
-                    const comentariosSec = Swal.getPopup().querySelector(".dropdown-content");
-                    comentariosBtn.addEventListener('click', () =>{
-                        comentariosSec.classList.toggle('hidden');
-                    })
-                }
-            });
+                });
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+                Swal.fire('Erro', 'Não foi possível carregar os dados do comprador', 'error');
+            }
         });
     });
 }
 
-// Inicia o processo
+// Call to start the process
 renderizarMateriais();

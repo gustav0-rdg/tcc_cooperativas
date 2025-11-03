@@ -74,3 +74,7 @@ def pagina_gerenciar_gestores():
 @pages.route("/login-admin" , methods=["GET"])
 def pagina_login_admin():
     return render_template("login-admin.html")
+
+@pages.route("/gerenciar-cooperados", methods=["GET"])
+def paginar_gerenciar_cooperados():
+    return render_template("gerenciar-cooperados.html")

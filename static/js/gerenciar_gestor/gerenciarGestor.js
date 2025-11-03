@@ -135,6 +135,11 @@ function addGestor() {
                 return false;
             }
 
+            if (senha.length < 8) {
+                Swal.showValidationMessage('A senha deve ter pelo menos 8 caracteres');
+                return false;
+            }
+
             const createdAt = new Date().toLocaleString();
             const lastAccess = "Nunca";
 
@@ -182,11 +187,19 @@ function editGestor(email) {
             const confirmarSenha = document.getElementById('confirmarSenha').value;
 
             // validando os campos se estão preenchidos
-            if (!nome || !newEmail || !senha || !senha) {
+            if (!nome || !newEmail || !senha || !confirmarSenha) {
 
                 Swal.showValidationMessage('Por favor, preencha todos os campos');
 
                 return false;
+            }
+
+            if (senha.length < 8 || confirmarSenha.length < 8) {
+
+                Swal.showValidationMessage('A senha deve ter pelo menos 8 caracteres');
+
+                return false;
+
             }
 
             // validando se as senhas coincidem

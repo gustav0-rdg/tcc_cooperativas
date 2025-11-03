@@ -23,7 +23,7 @@ main.corpo {
   align-items: center;
 }
 
-.botoes {
+.botoes{
   background-color: var(--verde-claro-medio);
   height: 40px;
   width: 100%;
@@ -42,6 +42,10 @@ main.corpo {
   border-radius: 5px;
   font-weight: 700;
   font-size: 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-funcoes:hover {
@@ -235,4 +239,13 @@ align-items: start;
   .main-content {
       max-width: 1140px;
   }
+}
+
+
+.venda-card{
+  background-color: var(--verde-escuro);
+  margin: 10px auto;
+  padding: 10px;
+  color: white;
+  border-radius: 10px;
 }

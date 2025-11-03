@@ -3,6 +3,7 @@ from controllers.comprador_controller import Compradores
 from controllers.materiais_controller import Materiais
 from controllers.feedback_controller import Feedbacks
 from controllers.comentarios_controller import Comentarios
+from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
@@ -67,11 +68,11 @@ def get_subtipos_materiais(material_id):
         if conn:
             conn.close()
     
-@api_get.route("/comprador/<material>", methods=["GET"])
-def get_by_material(material):
+@api_get.route("/comprador/<material>/<subtipo>", methods=["GET"])
+def get_by_material(material, subtipo):
     try:
         conn = Connection('local')
-        compradores = Compradores(conn.connection_db).get_by_materials(material)
+        compradores = Compradores(conn.connection_db).get_by_materials(material, subtipo)
         return jsonify(compradores), 200
     except Exception as e:
         print(f"Erro ao buscar ompradores por material: {e}")
@@ -79,7 +80,20 @@ def get_by_material(material):
     finally:
         if conn:
             conn.close()
-    
+
+@api_get.route("/vendas/<id_cooperativa>")
+def get_vendas_by_cooperativa(id_cooperativa):
+    try:    
+        conn = Connection('local')
+        vendas = Vendas(conn.connection_db).get_by_coop(id_cooperativa)
+        return jsonify(vendas),200
+    except Exception as e:
+        print(e)
+        return jsonify({"erro":"falha ao buscar dados","error":e}),400
+    finally:
+        if conn:
+            conn.close()
+
 @api_get.route("/feedback-tags/<cnpj>", methods=["GET"])
 def get_feedback_tags_vendedor(cnpj):
     try:
