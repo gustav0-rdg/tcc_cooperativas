@@ -17,6 +17,7 @@ export async function getMateriais() {
 
         // Converte a resposta em JSON
         const data = await response.json();
+        console.log('alo', data)
         return data;
 
     } catch (error) {
