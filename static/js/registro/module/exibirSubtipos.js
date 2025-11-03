@@ -13,10 +13,8 @@ let valoresCadastro = {
     id_material_catalogo: undefined, // Adicionei isso
 }
 
-// =========================================================================
-// 1. ESTILOS DO NOVO MODAL
-// Adicionei esta variável de estilos. Ela deixa o modal bonito e responsivo.
-// =========================================================================
+
+// Estilos para o swal
 const swalStyles = `
   .swal-content-container {
     display: flex;
@@ -32,12 +30,14 @@ const swalStyles = `
     margin-bottom: -10px; /* Puxa o input para mais perto */
   }
 
-  /* Usamos a classe padrão do SweetAlert para o input de texto */
   .swal-input-field {
-    width: 100% !important; /* Garante que ocupe todo o espaço */
+    width: 100% !important; 
     margin: 0;
-    border-radius: 6px !important; /* O radius que você pediu */
+    border-radius: 6px !important; 
+    background-color: var(--verde-claro);
   }
+    .swal-input-field::placeholder{
+    color: var(--ver-escuro-medio)}
 
   /* A lista de materiais */
   .swal-material-list {
@@ -48,7 +48,7 @@ const swalStyles = `
     overflow-y: auto;
     border: 1px solid #ddd;
     padding: 12px;
-    border-radius: 6px; /* O radius que você pediu */
+    border-radius: 6px; 
     background: rgba(255,255,255,0.5); 
   }
 
@@ -74,12 +74,11 @@ const swalStyles = `
     cursor: pointer;
   }
 
-  /* O divisor "OU" */
   .swal-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    color: #888;
+    color: var(--preto);
     gap: 10px;
     font-weight: bold;
     font-size: 0.9em;
@@ -89,7 +88,7 @@ const swalStyles = `
   .swal-divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--verde-escuro);
   }
 `;
 
@@ -124,16 +123,13 @@ export async function exibirSubtipos() {
         item => item.id_material_base === vendaAtual.material.id_categoria
     );
 
-    // =========================================================================
-    // 2. GERAÇÃO CORRETA DO HTML DOS RÁDIOS
-    // Corrigi a geração dos botões de rádio.
-    // =========================================================================
+// Gerando os radios de opção
     const botoesSwalHtml = materiaisCategoriaAtual.map(mat => `
         <div class="swal-radio-option">
             <input type="radio" 
                    name="materialOpcao" 
                    id="mat-${mat.id_material_catalogo}" 
-                   value="${mat.nome_especifico}" 
+                   value="${mat.id_material_catalogo}" 
                    data-id-catalogo="${mat.id_material_catalogo}">
             <label for="mat-${mat.id_material_catalogo}">${mat.nome_especifico}</label>
         </div>
@@ -142,10 +138,6 @@ export async function exibirSubtipos() {
 
     novoSubtipo.addEventListener('click', async () => {
         
-        // =========================================================================
-        // 3. O NOVO SWALFIRE (MAIS BONITO)
-        // Substituí todo o seu Swal.fire por este.
-        // =========================================================================
         Swal.fire({
             title: 'Vincular ou Criar Material',
             icon: 'question',
