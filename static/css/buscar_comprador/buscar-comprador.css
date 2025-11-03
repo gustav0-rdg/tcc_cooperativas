@@ -110,7 +110,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 8 / 7; 
     flex-grow: 1; 
     max-width: 100%; 
     background-size: cover;
@@ -151,14 +151,16 @@ header {
 .buscar-compradores__ver-mais {
     background-color: var(--verde-escuro-medio);
     color: var(--verde-claro);
-    width: 80%; 
-    align-self: center;
+    width: 100%;
     font-weight: 600;
+    height: 50px; 
+    border-radius: 50px; 
+    border: 0; 
 }
 
 .buscar-compradores__ver-mais:hover {
-    background-color: var(--verde-principal);
-    color: var(--verde-escuro);
+    background-color: var(--verde-escuro);
+    color: var(--verde-claro);
 }
 
 /* imagens dos cards */
@@ -199,21 +201,30 @@ header {
     gap: 1rem;
 }
 
+.subtipo-card h1 {
+    color: var(--verde-escuro);
+}
+
 .btn-voltar {
     background: none;
     border: none;
-    font-size: 1.5rem; 
+    font-size: 2rem; 
+    font-weight: 600;
     width: 100%; 
     max-width: 300px;
     height: 60px;
     border-radius: 20px;
-    background-color: var(--verde-escuro);
+    background-color: var(--verde-escuro-medio);
     color: var(--verde-claro);
     margin-bottom: 1rem;
     padding: 0.5rem; 
     display: flex; 
     align-items: center;
     justify-content: center;
+}
+
+.btn-voltar:hover {
+    background-color: var(--verde-escuro);
 }
 
 .subtipos-grid {
