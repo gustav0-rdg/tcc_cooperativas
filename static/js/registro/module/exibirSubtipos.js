@@ -10,13 +10,95 @@ const compradorSection = document.querySelector('.registros__comprador');
 let valoresCadastro = {
     nome_padrao: undefined,
     sinonimo: undefined,
+    id_material_catalogo: undefined, // Adicionei isso
 }
+
+// =========================================================================
+// 1. ESTILOS DO NOVO MODAL
+// Adicionei esta variável de estilos. Ela deixa o modal bonito e responsivo.
+// =========================================================================
+const swalStyles = `
+  .swal-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Um espaçamento geral */
+    text-align: left; /* Alinha todo o conteúdo à esquerda */
+  }
+
+  .swal-input-label {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--verde-escuro-medio);
+    margin-bottom: -10px; /* Puxa o input para mais perto */
+  }
+
+  /* Usamos a classe padrão do SweetAlert para o input de texto */
+  .swal-input-field {
+    width: 100% !important; /* Garante que ocupe todo o espaço */
+    margin: 0;
+    border-radius: 6px !important; /* O radius que você pediu */
+  }
+
+  /* A lista de materiais */
+  .swal-material-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 180px; 
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 6px; /* O radius que você pediu */
+    background: rgba(255,255,255,0.5); 
+  }
+
+  /* Cada opção de rádio (o "botão" que você queria) */
+  .swal-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaço entre o rádio e o texto */
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px; /* Raio menor para os itens */
+    transition: background-color 0.2s;
+  }
+  .swal-radio-option:hover {
+    background-color: rgba(0,0,0,0.05);
+  }
+  .swal-radio-option input[type="radio"] {
+    margin: 0;
+    flex-shrink: 0; 
+  }
+  .swal-radio-option label {
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* O divisor "OU" */
+  .swal-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #888;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin: 0;
+  }
+  .swal-divider::before,
+  .swal-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+  }
+`;
 
 
 export async function exibirSubtipos() {
     compradorSection.innerHTML = '';
     const subtipos = await getSubtipos(vendaAtual.material.id_categoria)
 
+    // Debugging (mantido)
     console.log(subtipos, material.id_material_catalogo, material, vendaAtual.material.id_categoria)
 
     etapaSection.innerHTML = `
@@ -37,37 +119,62 @@ export async function exibirSubtipos() {
     novoSubtipo.className = "registros__opcoes-btn";
     novoSubtipo.classList.add("opcoes-btn__novo-comprador");
     novoSubtipo.textContent = "Outros materiais";
-    console.log(novoSubtipo, 'olha')
 
     const materiaisCategoriaAtual = subtipos.filter(
         item => item.id_material_base === vendaAtual.material.id_categoria
     );
-    console.log('')
 
-    const botoesSwal = materiaisCategoriaAtual.map(mat => `<input type="radio" id="${mat.id_material_catalogo}" class="registros__opcoes-btn swal__btn-material-existente"value="${mat.id_material_catalogo}">
-        <label for="${mat.id_material_catalogo}">${mat.nome_especifico}</label> `).join(' ');
+    // =========================================================================
+    // 2. GERAÇÃO CORRETA DO HTML DOS RÁDIOS
+    // Corrigi a geração dos botões de rádio.
+    // =========================================================================
+    const botoesSwalHtml = materiaisCategoriaAtual.map(mat => `
+        <div class="swal-radio-option">
+            <input type="radio" 
+                   name="materialOpcao" 
+                   id="mat-${mat.id_material_catalogo}" 
+                   value="${mat.nome_especifico}" 
+                   data-id-catalogo="${mat.id_material_catalogo}">
+            <label for="mat-${mat.id_material_catalogo}">${mat.nome_especifico}</label>
+        </div>
+    `).join('');
+
 
     novoSubtipo.addEventListener('click', async () => {
+        
+        // =========================================================================
+        // 3. O NOVO SWALFIRE (MAIS BONITO)
+        // Substituí todo o seu Swal.fire por este.
+        // =========================================================================
         Swal.fire({
-            title: 'Algum destes materiais é o mesmo no qual você quer registrar?',
+            title: 'Vincular ou Criar Material',
+            icon: 'question',
+            width: '550px',
             html: `
-                <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start; text-align: left;">
-                  <input type="text" placeholder="Digite o nome usado na sua região" id="novoNomeMaterial"
-                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
-                  
-                  <div id="listaMateriais" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
-                    ${botoesSwal.replaceAll(
-                'class="registros__opcoes-btn swal__btn-material-existente"',
-                'name="materialOpcao" class="swal__btn-material-existente"'
-            )}
-                  </div>
-                  
-                  <div style="margin-top: 10px; border-top: 1px solid #ccc; padding-top: 10px;">
-                    <input type="radio" name="materialOpcao" id="criar" value="criar">
-                    <label for="criar" style="margin-left: 6px;">Registrar novo material</label>
-                  </div>
+              <style>${swalStyles}</style> <div class="swal-content-container">
+                
+                <label for="novoNomeMaterial" class="swal-input-label">
+                  Qual nome você usa na sua região?
+                </label>
+                <input type="text" 
+                       placeholder="Ex: Garrafa PET, Papelão Klabin" 
+                       id="novoNomeMaterial" 
+                       class="swal2-input swal-input-field">
+                
+                <p style="margin: 5px 0 -5px 0; font-weight: 600;">Este material é o mesmo que algum abaixo?</p>
+                
+                <div id="listaMateriais" class="swal-material-list">
+                  ${botoesSwalHtml} </div>
+                
+                <div class="swal-divider">ou</div>
+                
+                <div class="swal-radio-option" style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 6px;">
+                  <input type="radio" name="materialOpcao" id="criar" value="criar">
+                  <label for="criar">É um material novo (não está na lista)</label>
                 </div>
-              `,
+        
+              </div>
+            `,
             showCancelButton: true,
             showConfirmButton: true,
             confirmButtonText: 'Confirmar',
@@ -86,17 +193,28 @@ export async function exibirSubtipos() {
                 }
 
                 if (!selecionado) {
-                    Swal.showValidationMessage('Selecione uma das opções!');
+                    Swal.showValidationMessage('Selecione uma das opções da lista ou "Material Novo"!');
                     return false;
                 }
 
                 // Se for "criar", chama função para cadastrar novo material
                 if (selecionado.value === 'criar') {
                     await cadastrarNovoMaterial(valor, vendaAtual.material.id_categoria);
+                
                 } else {
-                    // Caso contrário, cadastrar como sinônimo
-                    valoresCadastro.nome_padrao = selecionado.value;
+                    // =========================================================================
+                    // 4. CORREÇÃO NA LÓGICA DE SALVAR
+                    // Corrigi a lógica para pegar o ID e o NOME corretamente.
+                    // =========================================================================
+                    
+                    // Pegamos o ID do material padrão pelo 'data-id-catalogo'
+                    const idMaterialPadrao = selecionado.dataset.idCatalogo; 
+                    const nomeMaterialPadrao = selecionado.value; // O valor agora é o nome
+
+                    // Atualiza o objeto global que será enviado
+                    valoresCadastro.nome_padrao = nomeMaterialPadrao;
                     valoresCadastro.sinonimo = valor;
+                    valoresCadastro.id_material_catalogo = idMaterialPadrao; // << Ponto chave
 
                     await cadastrarSinonimo(valoresCadastro);
                 }
@@ -105,34 +223,31 @@ export async function exibirSubtipos() {
             }
         });
     });
-    console.log(novoSubtipo);
-    console.log(compradorSection);
+    
+    // Adiciona o botão "Outros materiais" na tela
     compradorSection.appendChild(novoSubtipo)
 
-
+    // Adiciona os botões de materiais existentes
     materiaisCategoriaAtual.forEach(item => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
-        div.setAttribute('data-value', `${item.nome_padrao}`);
+        div.setAttribute('data-value', `${item.nome_especifico}`);
         div.innerHTML = `
                 <h1>${item.nome_especifico}</h1>
                 <small>${vendaAtual.material.categoria}</small>
             `;
-        console.log(div)
         opcoesSection.appendChild(div);
 
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
             vendaAtual.material.subtipo = item.nome_especifico; // Atualiza o material no objeto vendaAtual
+            vendaAtual.material.id_material_catalogo = item.id_material_catalogo; // Guarda o ID também
 
             exibirVendedores();
             console.log(vendaAtual); // Apenas para visualização
         });
     });
-
-
 }
-
 
 
 async function cadastrarSinonimo(valoresCadastro) {
@@ -140,7 +255,8 @@ async function cadastrarSinonimo(valoresCadastro) {
         const resposta = await fetch('/post/cadastrar-sinonimo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(valoresCadastro)
+            // O objeto valoresCadastro agora contém (nome_padrao, sinonimo, id_material_catalogo)
+            body: JSON.stringify(valoresCadastro) 
         });
 
         const data = await resposta.json();
@@ -155,7 +271,7 @@ async function cadastrarSinonimo(valoresCadastro) {
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
     finally {
-        exibirSubtipos()
+        exibirSubtipos() // Recarrega a lista
     }
 }
 
@@ -179,6 +295,6 @@ async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
     finally {
-        exibirSubtipos()
+        exibirSubtipos() // Recarrega a lista
     }
 }
