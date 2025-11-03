@@ -519,3 +519,33 @@ class Usuarios:
         finally:
             cursor.close()
     
+    def get_all_gestores (self) -> Tuple[dict]:
+
+        cursor = self.connection_db.cursor(dictionary=True)
+
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    usuarios.id_usuario, 
+                    usuarios.nome, 
+                    usuarios.email,
+                    usuarios.data_criacao
+                FROM usuarios
+                WHERE usuarios.tipo = 'gestor';
+                """
+
+            )
+            
+            return cursor.fetchall()
+        
+        except Exception as e:
+
+            print(f'Erro - Usuarios "get_all_gestores": {e}')
+            return False
+        
+        finally:
+
+            cursor.close()

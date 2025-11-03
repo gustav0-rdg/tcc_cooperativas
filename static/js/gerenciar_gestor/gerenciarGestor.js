@@ -1,3 +1,105 @@
+const session_token = localStorage.getItem('session_token');
+const cardsContainer = document.getElementById('gestoresCards');
+
+async function consultarGestores ()
+{
+    const response = await fetch (
+        
+        '/api/usuarios/get-all-gestores', 
+        
+        {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': session_token
+            }
+        }
+    );
+
+    const data_gestores = await response?.json();
+
+    if (!response.ok)
+    {
+        throw new Error (
+
+            'error' in data_gestores
+            ?
+            data_gestores.error
+            :
+            'Erro Interno. Tente novamente mais tarde.'
+
+        );
+    }
+
+    return data_gestores;
+}
+
+function renderizarCards (listaGestores)
+{
+
+    listaGestores = listaGestores.map(gestor => {
+
+        return `
+            <div
+                class="card mb-3 gestor-card"
+                dataset-nome="${gestor.nome}"
+                dataset-email="${gestor.email}"
+            >
+                <div class="card-body">
+                    <h5 class="card-title">${gestor.nome}</h5>
+                    <p class="card-text">Email: ${gestor.email}</p>
+                    <p class="card-text">Criado em: ${formatarData(gestor.data_criacao)}</p>
+                    <p class="card-text">Último acesso: ${formatarData(gestor.ultimo_acesso)}</p>
+                    <p class="card-text">
+                    </p>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete(this, '${gestor.email}')">Excluir</button>
+                    <button class="btn btn-secondary btn-sm" onclick="editGestor('${gestor.email}')">Editar</button>
+                </div>
+            </div>
+        `;
+
+    });
+
+    console.log(listaGestores);
+
+    cardsContainer.innerHTML = listaGestores.join(' ');
+
+}
+
+async function exibirGestores ()
+{
+    const gestores = await consultarGestores();
+    renderizarCards(gestores);
+}
+
+function formatarData(input) 
+{
+    if (!input) return 'Não registrado';
+    // aceita string de data do backend (e.g. "Sat, 16 Mar 2024 11:10:00 GMT")
+    const d = new Date(input);
+    if (isNaN(d.getTime())) {
+        // se veio como timestamp em segundos
+        const num = Number(input);
+        if (!isNaN(num)) return formatarData(new Date(num * 1000).toString());
+        return 'Data inválida';
+    }
+    const agora = new Date();
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const ano = d.getFullYear();
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    const diffDias = Math.floor((agora - d) / (1000 * 60 * 60 * 24));
+    const tempo = diffDias === 0 ? '(Hoje)' : diffDias === 1 ? '(há 1 dia)' : `(há ${diffDias} dias)`;
+    return `${dataFormatada} ${tempo}`;
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
+    
+    if (!session_token) window.location.href = URL_LOGIN_ADMIN;
+
+    exibirGestores();
+});
+
 // Adicionar gestor
 function addGestor() {
     
@@ -47,55 +149,6 @@ function addGestor() {
 
         }
     });
-}
-
-// Salva o gestor no Local Storage
-function saveGestorToLocalStorage(gestor) {
-
-    let gestores = JSON.parse(localStorage.getItem('gestores')) || [];
-
-    gestores.push(gestor);
-
-    localStorage.setItem('gestores', JSON.stringify(gestores));
-
-}
-
-// Carrega os gestores do Local Storage
-function loadGestoresFromLocalStorage() {
-
-    const gestores = JSON.parse(localStorage.getItem('gestores')) || [];
-
-    gestores.forEach(gestor => addGestorCard(gestor));
-
-}
-
-// Adicionar um card de gestor na tela
-function addGestorCard(gestor) {
-
-    const cardsContainer = document.getElementById('gestoresCards');
-    const card = document.createElement('div');
-
-    card.className = 'card mb-3 gestor-card';
-    // Armazena o nome em minúsculas para facilitar a busca
-    card.dataset.nome = gestor.nome.toLowerCase(); 
-    // Armazena o email em minúsculas para facilitar a busca
-    card.dataset.email = gestor.email.toLowerCase(); 
-
-    card.innerHTML = `
-        <div class="card-body">
-            <h5 class="card-title">${gestor.nome}</h5>
-            <p class="card-text">Email: ${gestor.email}</p>
-            <p class="card-text">Criado em: ${gestor.createdAt}</p>
-            <p class="card-text">Último acesso: ${gestor.lastAccess}</p>
-            <p class="card-text">
-            </p>
-            <button class="btn btn-danger btn-sm" onclick="confirmDelete(this, '${gestor.email}')">Excluir</button>
-            <button class="btn btn-secondary btn-sm" onclick="editGestor('${gestor.email}')">Editar</button>
-        </div>
-    `;
-
-    cardsContainer.appendChild(card);
-
 }
 
 // Editar o gestor
@@ -219,9 +272,3 @@ function searchGestores() {
         }
     });
 }
-
-// Adiciona o evento de pesquisa ao campo de entrada
-document.getElementById('searchInput').addEventListener('input', searchGestores);
-
-// Carrega os gestores que estavam salvos no Local Storage ao iniciar a página
-document.addEventListener('DOMContentLoaded', loadGestoresFromLocalStorage);
