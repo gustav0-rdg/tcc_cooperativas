@@ -1,5 +1,7 @@
 // cooperativas_app.js
 // Módulo auto-contido que gerencia listagem, pesquisa, filtros, paginação e ações
+const sessionToken = localStorage.getItem('session_token'); // token salvo no localStorage
+
 window.CooperativasApp = (function () {
     /* -------------------------
        Configurações / Estado
@@ -26,8 +28,6 @@ window.CooperativasApp = (function () {
         loadMoreBtn: null,
         modalEl: null
     };
-
-    const sessionToken = localStorage.getItem('session_token'); // token salvo no localStorage
 
     /* -------------------------
        Utilitários de Formatação
@@ -103,7 +103,7 @@ window.CooperativasApp = (function () {
     /* -------------------------
        Filtragem (no cliente)
        ------------------------- */
-    function aplicarFiltros() {
+    function aplicarFiltros(resetPage = true) {
         const q = state.filtros.q;
         const status = state.filtros.status;
         const atividade = state.filtros.atividade;
@@ -111,63 +111,54 @@ window.CooperativasApp = (function () {
         
         let arr = [...state.all];
         
-        if (q && q.trim()) 
-        {
+        if (q && q.trim()) {
             const termo = q.trim().toLowerCase();
             const numerico = termo.replace(/\D/g, '');
-            const usarBuscaCnpj = numerico.length > 0; // só pesquisar CNPJ se usuário digitou dígitos
+            const usarBuscaCnpj = numerico.length > 0;
         
             arr = arr.filter(coop => {
-                const nome = String(coop.razao_social || '').toLowerCase();
-                const fantasia = String(coop.nome_fantasia || '').toLowerCase();
-            
-                const matchNome = nome.includes(termo);
-                const matchFantasia = fantasia.includes(termo);
-            
-                let matchCnpj = false;
-                if (usarBuscaCnpj) {
-                    const cnpjClean = String(coop.cnpj || '').replace(/\D/g, '');
-                    matchCnpj = cnpjClean.includes(numerico);
-                }
-            
-                // Se o termo tem dígitos, fazemos busca por CNPJ ou por texto.
-                // Se o termo não tem dígitos, só texto (evita includes('') sempre true).
-                return usarBuscaCnpj ? (matchNome || matchFantasia || matchCnpj) : (matchNome || matchFantasia);
+            const nome = String(coop.razao_social || '').toLowerCase();
+            const fantasia = String(coop.nome_fantasia || '').toLowerCase();
+        
+            const matchNome = nome.includes(termo);
+            const matchFantasia = fantasia.includes(termo);
+        
+            let matchCnpj = false;
+            if (usarBuscaCnpj) {
+                const cnpjClean = String(coop.cnpj || '').replace(/\D/g, '');
+                matchCnpj = cnpjClean.includes(numerico);
+            }
+        
+            return usarBuscaCnpj ? (matchNome || matchFantasia || matchCnpj) : (matchNome || matchFantasia);
             });
         }
         
-        // Status
-        if (status && status !== 'todos') 
-        {
+        if (status && status !== 'todos') {
             arr = arr.filter(coop => String(coop.status) === String(status));
         }
         
-        // Atividade (mais de 60 dias -> inativo)
-        if (atividade && atividade !== 'todos') 
-        {
+        if (atividade && atividade !== 'todos') {
             const agora = new Date();
             arr = arr.filter(coop => {
-                if (!coop.ultima_atualizacao) return atividade === 'inativo';
-                const ultima = new Date(coop.ultima_atualizacao);
-                const dias = (agora - ultima) / (1000 * 60 * 60 * 24);
-                return atividade === 'ativo' ? dias <= 60 : dias > 60;
+            if (!coop.ultima_atualizacao) return atividade === 'inativo';
+            const ultima = new Date(coop.ultima_atualizacao);
+            const dias = (agora - ultima) / (1000 * 60 * 60 * 24);
+            return atividade === 'ativo' ? dias <= 60 : dias > 60;
             });
         }
         
-        // Aprovação
-        if (aprovacao && aprovacao !== 'todos') 
-        {
+        if (aprovacao && aprovacao !== 'todos') {
             arr = arr.filter(coop => {
-                const ap = coop.aprovado;
-                if (aprovacao === 'true' || aprovacao === 'aprovado') return ap === 1 || ap === true;
-                if (aprovacao === 'null' || aprovacao === 'aguardando-aprovacao') return ap === null || ap === undefined;
-                if (aprovacao === 'false' || aprovacao === 'reprovado') return ap === 0 || ap === false;
-                return true;
+            const ap = coop.aprovado;
+            if (aprovacao === 'true' || aprovacao === 'aprovado') return ap === 1 || ap === true;
+            if (aprovacao === 'null' || aprovacao === 'aguardando-aprovacao') return ap === null || ap === undefined;
+            if (aprovacao === 'false' || aprovacao === 'reprovado') return ap === 0 || ap === false;
+            return true;
             });
         }
         
         state.filtered = arr;
-        state.page = 1; // resetar página ao aplicar filtros
+        if (resetPage) state.page = 1;
     }
 
     /* -------------------------
@@ -229,18 +220,36 @@ window.CooperativasApp = (function () {
         else el.container.insertAdjacentHTML('beforeend', html);
     }
 
-    function renderPage(append = false) {
-        const start = 0;
-        const page = state.page;
+    function renderPage(append = false) 
+    {
         const perPage = state.itemsPerPage;
-        const slice = state.filtered.slice(0, page * perPage); // mostramos de 1 até page*perPage
-        renderCards(slice, append);
+        const page = Math.max(1, state.page);
+      
+        if (append) {
+            // calcular somente os itens novos desta página (não reapendar itens já mostrados)
+            const start = (page - 1) * perPage;
+            const end = Math.min(page * perPage, state.filtered.length);
+            const newSlice = state.filtered.slice(start, end);
+            // se não houver novos itens, nada a fazer
+            if (newSlice.length > 0) {
+                renderCards(newSlice, true); // append
+            }
+        } else {
+            // renderiza do início até page*perPage (ou, alternativamente, apenas a página atual).
+            // aqui optamos por mostrar cumulativamente desde o início (comportamento "mostrar até a página X")
+            const end = Math.min(page * perPage, state.filtered.length);
+            const slice = state.filtered.slice(0, end);
+            renderCards(slice, false); // replace
+        }
+      
         updateCounters();
         updateLoadMoreVisibility();
         updateActiveFiltersUI();
     }
 
-    function updateCounters() {
+    function updateCounters() 
+    {
+        if (!el.totalLabel || !el.mostrandoLabel) return;
         el.totalLabel.textContent = state.all.length;
         el.mostrandoLabel.textContent = Math.min(state.filtered.length, state.page * state.itemsPerPage);
     }
@@ -290,13 +299,24 @@ window.CooperativasApp = (function () {
     /* -------------------------
        Mutators de filtros / URL
        ------------------------- */
-    function setFilter(key, value) {
-        state.filtros[key] = (value === 'todos' || value === null || value === '') ? null : value;
-        aplicarFiltros();
+    function setFilter(key, value) 
+    {
+        if (key === 'q') {
+          value = (typeof value === 'string' && value.trim().length > 0) ? value.trim() : null;
+        } else {
+          value = (value === 'todos' || value === null || value === '') ? null : value;
+        }
+      
+        state.filtros[key] = value;
+        aplicarFiltros(true); // reset de página ao alterar filtros via UI
         renderPage();
         updateUrlParams();
     }
-    function removeFilter(key) { setFilter(key, null); }
+
+    function removeFilter(key) 
+    { 
+        setFilter(key, null); 
+    }
 
     // atualiza URL (sem recarregar) para refletir filtros atuais
     function updateUrlParams() {
@@ -321,12 +341,24 @@ window.CooperativasApp = (function () {
     /* -------------------------
        Ações: carregar mais, toggle status, preencher modal
        ------------------------- */
-    function carregarMais() {
+    function carregarMais() 
+    {
+        // Math.ceil() -> Retorna o menor inteiro maior ou igual ao número fornecido
+        const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.itemsPerPage));
+
+        if (state.page >= maxPage) 
+        {
+            // Já está na última página; esconde botão (segurança)
+            if (el.loadMoreBtn) el.loadMoreBtn.style.display = 'none';
+            return;
+        }
+
         state.page++;
         renderPage(true);
     }
 
-    async function toggleBloqueioCooperativa(button) {
+    async function toggleBloqueioCooperativa(button) 
+    {
         const userId = button.dataset.userId;
         const novoStatus = button.dataset.novoStatus;
         const coopNome = button.dataset.coopNome;
@@ -352,9 +384,9 @@ window.CooperativasApp = (function () {
             if (sessionToken) headers['Authorization'] = sessionToken;
 
             const res = await fetch(`/api/usuarios/alterar-status/${userId}`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({ 'novo-status': novoStatus })
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ 'novo-status': novoStatus })
             });
 
             const ct = res.headers.get('content-type') || '';
@@ -364,18 +396,41 @@ window.CooperativasApp = (function () {
                 throw new Error(data?.error || data?.texto || 'Erro ao alterar status');
             }
 
-            await Swal.fire({ title: 'Sucesso', text: data?.texto || data?.message || 'Ação realizada', icon: 'success' });
-            // atualiza localmente: encontra o usuário e altera status para refletir UI sem reload
-            const idx = state.all.findIndex(x => String(x.id_usuario) === String(userId));
-            if (idx !== -1) {
-                state.all[idx].status = novoStatus;
-                aplicarFiltros();
-                renderPage();
-            } else {
-                // fallback: recarregar dados
-                await loadAndRender();
+            // Atualiza state.all (status real)
+            const idxAll = state.all.findIndex(x => String(x.id_usuario) === String(userId));
+            if (idxAll !== -1) state.all[idxAll].status = novoStatus;            
+            else 
+            {
+                // fallback: procurar por id_cooperativa no card dataset (se existir)
+                const possibleIdCoop = button.closest('.coop-card')?.dataset?.id;
+                const idxC = state.all.findIndex(x => String(x.id_cooperativa) === String(possibleIdCoop));
+                if (idxC !== -1) state.all[idxC].status = novoStatus;
             }
-        } catch (err) {
+
+            // Reaplica filtros sem resetar a página (mantém contexto)
+            aplicarFiltros(false);
+
+            // Encontra índice no array filtrado para calcular em qual página ele está
+            const idxFiltered = state.filtered.findIndex(x =>
+            String(x.id_usuario) === String(userId) || String(x.id_cooperativa) === String(button.closest('.coop-card')?.dataset?.id)
+            );
+
+            if (idxFiltered !== -1) {
+                const itemsPerPage = state.itemsPerPage || ITEMS_PER_PAGE;
+                const requiredPage = Math.ceil((idxFiltered + 1) / itemsPerPage) || 1;
+
+                if (requiredPage > state.page) state.page = requiredPage; // só sobe de página, não baixa
+            } // se idxFiltered === -1, significa que os filtros atuais ocultam o item — mantemos a página atual
+
+            // Re-renderiza já com page ajustada
+            renderPage();
+
+            await Swal.fire({ title: 'Sucesso', text: data?.texto || data?.message || 'Status atualizado', icon: 'success' });
+
+        } 
+        
+        catch (err) 
+        {
             console.error(err);
             Swal.fire('Erro', err.message || 'Não foi possível completar a ação', 'error');
         }
@@ -584,6 +639,12 @@ window.CooperativasApp = (function () {
 
 // auto init no DOMContentLoaded (se o script for carregado com defer, isso é redundante mas seguro)
 document.addEventListener('DOMContentLoaded', () => {
+
+    if (!sessionToken)
+    {
+        window.location.href = '/';
+    }
+
     if (window.CooperativasApp && typeof window.CooperativasApp.init === 'function') {
         window.CooperativasApp.init();
     }
