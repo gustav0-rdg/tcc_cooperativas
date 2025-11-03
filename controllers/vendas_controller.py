@@ -218,7 +218,28 @@ class Vendas:
         try:
             with self.connection_db.cursor() as cursor:
                 query = """
-
+                SELECT 
+                    mb.nome,
+                    mc.nome_especifico,
+                    com.razao_social as nome_comprador,
+                    coop.razao_social as nome_vendedor,
+                    v.valor_total,
+                    v.data_venda
+                FROM vendas v
+                JOIN cooperativas coop ON v.id_cooperativa = coop.id_cooperativa
+                JOIN compradores com ON v.id_comprador = com.id_comprador
+                JOIN vendas_itens vi ON v.id_venda = vi.id_venda
+                JOIN materiais_base mb ON vi.id_material_base = mb.id_material_base
+                JOIN materiais_catalogo mc ON vi.id_material_catalogo = mc.id_material_catalogo
+                WHERE v.id_cooperativa = %s
+                ORDER BY v.data_venda;
                 """
+                cursor.execute(query, (id_cooperativa,))
+                results = cursor.fetchall()
+                return results
+            
         except Exception as e:
-            print(e )
+            print(e)
+            
+        finally:
+            cursor.close()
