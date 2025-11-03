@@ -72,7 +72,7 @@ class Compradores:
         """
         query = """
             SELECT
-                mb.nome,
+                mb.nome AS material_base,
                 c.razao_social,
                 c.cnpj,
                 SUM(vi.quantidade_kg) AS quantidade_kg,
@@ -82,11 +82,14 @@ class Compradores:
             FROM compradores AS c
             INNER JOIN vendas AS v ON c.id_comprador = v.id_comprador
             INNER JOIN vendas_itens AS vi ON v.id_venda = vi.id_venda
-            INNER JOIN materiais_base AS mb ON vi.id_material_catalogo = mb.id_material_base
-            INNER JOIN materiais_catalogo AS mc ON mb.id_material_base = mc.id_material_base
-            WHERE c.deletado_em IS NULL AND mb.id_material_base = %s AND mc.id_material_catalogo = %s
+            INNER JOIN materiais_catalogo AS mc ON vi.id_material_catalogo = mc.id_material_catalogo
+            INNER JOIN materiais_base AS mb ON vi.id_material_base = mb.id_material_base
+            WHERE c.deletado_em IS NULL
+            AND mb.id_material_base = %s
+            AND mc.id_material_catalogo = %s
             GROUP BY mb.nome, c.id_comprador, c.razao_social, c.cnpj
             ORDER BY quantidade_kg DESC;
+
         """
         # Usar 'with' garante que o cursor será fechado mesmo se ocorrer um erro
         try:

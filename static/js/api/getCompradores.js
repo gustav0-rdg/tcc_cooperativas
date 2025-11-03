@@ -7,6 +7,7 @@ export async function getCompradores() {
 // Função para buscar os compradores pelo NOME do material
 export async function getCompradoresPorMaterial(nome_material, subtipo) {
     try {
+        console.log(nome_material, subtipo)
         const response = await fetch(`/get/comprador/${nome_material}/${subtipo}`);            
         const data = await response.json();
         return data;

@@ -39,7 +39,7 @@ async function renderizarSubtipos(subtipos, id_material) {
     buscarCompradoresSec.innerHTML = '';
     const htmlSubtipos = subtipos.map((subtipo, index) => `
         <button class="subtipo-card" data-subtipo="${subtipo.id_material_catalogo}">
-            <h1>${subtipo.nome_especifico}</h2>
+            ${subtipo.nome_especifico}
         </button>
     `).join('');
     buscarSubtipos.innerHTML = `
