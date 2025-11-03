@@ -51,12 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
            }
 
            try {
-                const response = await fetch('/api/usuarios/cadastrar', {
+                const response = await fetch('/api/cooperativas/cadastrar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        nome: nome,
+                        email: email,
+                        senha: senha,
+                        cnpj: cnpj
+                    })
                 });
 
                 const data = await response.json()

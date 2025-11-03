@@ -6,7 +6,7 @@ from controllers.usuarios_controller import Usuarios
 
 class Cooperativa:
 
-    def __init__(self, connection_db:MySQLConnection):
+    def __init__ (self, connection_db:MySQLConnection):
         
         if not Connection.validar(connection_db):
 
@@ -209,7 +209,7 @@ class Cooperativa:
 
             cursor.close()
 
-    def vincular_cooperado(
+    def vincular_cooperado (
             
         self, 
 
@@ -400,81 +400,84 @@ class Cooperativa:
             cursor.close()
 
     def create (
-            
-        self,
-
-        cnpj:str,
-        id_usuario:str
-
-    ) -> bool:
+        self, 
+        id_usuario: int, 
+        cnpj: str, 
+        razao_social: str,
+        nome_fantasia: str,
+        email: str,
+        telefone: str,
+        endereco: str, 
+        cidade: str, 
+        estado: str
+    ) -> int | bool | None:
         
         """
-        Registra a cooperativa no Banco de Dados
-        e relaciona-a com o usuário
+        Insere uma nova cooperativa no banco de dados.
         """
-
-        #region Exceções
-
-        if not CNPJ.validar(cnpj):
-
-            raise ValueError (f'Cooperativa "create" - O "cnpj" fornecido não é válido: {cnpj}')
         
-        #endregion
-
         cursor = self.connection_db.cursor()
 
         try:
-
+            # Verifica se o CNPJ já existe
             cursor.execute (
-
                 """
                 SELECT cooperativas.cnpj FROM cooperativas
                 WHERE cooperativas.cnpj = %s;
                 """,
-
                 (cnpj, )
-
             )
-
-            # Cooperativa já existente
 
             if cursor.fetchone() != None:
                 return None
 
-            data_cooperativa = CNPJ.consultar(cnpj)
-            if not data_cooperativa:
-                return False
+            # Insere a nova cooperativa com todos os campos
             
             cursor.execute (
-
                 """
-                INSERT INTO cooperativas (id_usuario, cnpj, razao_social, endereco, cidade, estado, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO cooperativas 
+                    (id_usuario, cnpj, razao_social, nome_fantasia, email, telefone, endereco, cidade, estado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-
                 (
                     id_usuario, 
                     cnpj,
-
-                    data_cooperativa['nature']['id'],
-                    f'{data_cooperativa['address']['street']}, {data_cooperativa['address']['number']}',    
-                    data_cooperativa['address']['city'],
-                    data_cooperativa['address']['state'],
-                    '',
-                    ''       
+                    razao_social,
+                    nome_fantasia,
+                    email,
+                    telefone,
+                    endereco,
+                    cidade,
+                    estado
                 )
-
             )
 
-            self.connection_db.commit()
+            # Retorna o ID da cooperativa que acabou de ser inserida
             return cursor.lastrowid
 
         except Exception as e:
-
             print(f'Erro - Cooperativa "create": {e}')
-
-            return False
+            return False # Retorna False (Erro)
         
         finally:
-
             cursor.close()
+
+    def adicionar_documento (self, id_cooperativa: int, arquivo_url: str) -> int | bool:
+        """
+        Insere um novo documento comprovativo para a cooperativa
+        """
+
+        cursor = self.connection_db.cursor()
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO documentos_cooperativas (id_cooperativa, arquivo_url, status)
+                VALUES (%s, %s, 'pendente');
+                """,
+                (id_cooperativa, arquivo_url)
+            )
+            
+            return cursor.lastrowid
+        
+        except 
