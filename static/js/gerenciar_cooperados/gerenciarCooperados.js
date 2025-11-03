@@ -1,9 +1,13 @@
+import { postCooperado } from "./postCooperado.js";
+
 
 // --- Event Listeners  ---
 document.getElementById('searchInput').addEventListener('input', searchCooperados);
 document.addEventListener('DOMContentLoaded', loadCooperados);
 
 // --- Funções de Renderização e UI ---
+
+document.querySelector('.btn-primary').addEventListener('click', addCooperado);
 
 function getAddEditFormHtml(cooperado = {}) {
 
@@ -198,6 +202,7 @@ function addCooperado() {
             };
 
             cooperadoService.save(cooperado);
+            postCooperado(cooperado);
 
             addCooperadoCard(cooperado);
         }

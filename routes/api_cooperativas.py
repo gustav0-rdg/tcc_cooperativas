@@ -349,10 +349,10 @@ def alterar_aprovacao (id_cooperativa:int):
 def vincular_cooperado ():
 
     data_cooperado = request.get_json()
-
-    if not data_cooperado or not all(key in data_cooperado for key in ['nome', 'email', 'senha', 'cpf', 'telefone', 'endereco', 'cidade', 'estado']):
+    print(data_cooperado)
+    if not data_cooperado or not all(key in data_cooperado for key in ['nome', 'senha', 'cpf', 'telefone', 'endereco', 'cidade', 'estado']):
         
-        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, senha, email, cpf, telefone, endereco, cidade e estado' }), 400
+        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, senha, cpf, telefone, endereco, cidade e estado' }), 400
     
     if len(data_cooperado['senha']) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
@@ -386,7 +386,6 @@ def vincular_cooperado ():
             data_cooperativa['id_cooperativa'],
 
             data_cooperado['nome'],
-            data_cooperado['email'],
             data_cooperado['senha'],
             
             data_cooperado['cpf'],
