@@ -58,7 +58,9 @@ async function renderizarSubtipos(subtipos, id_material) {
     btn.forEach(e =>{
         e.addEventListener('click', async (event) =>{
             const id_subtipo = event.target.dataset.subtipo;
-            const compradores = await getCompradoresPorMaterial(id_material)
+            const compradores = await getCompradoresPorMaterial(id_material, id_subtipo);
+            console.log(compradores);
+            
             await renderizarCompradores(compradores);
             buscarSubtipos.classList.add('hidden');
         })
