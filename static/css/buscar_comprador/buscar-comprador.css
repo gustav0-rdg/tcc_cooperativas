@@ -1,3 +1,6 @@
+/* Importa a fonte - Mantido */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -11,51 +14,53 @@ body {
     min-height: 100vh; 
     background-color: var(--verde-claro);
     align-items: center;
-    justify-content: center;
 }
-
-
 
 header {
     padding: 0 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%; 
 }
+
 .footer {
     font-size: 0.9rem;
     margin-top: auto; 
+    width: 100%; 
 }
-
 
 .conteudo {
     margin-top: 1rem;
-    padding-bottom: 1rem;
-    width: 80%;
-    height: 90%;
+    padding-bottom: 2rem; 
+    width: 95%; 
+    max-width: 1400px; 
     border-radius: 10px;
-    background-color: var(--verde-secundario);
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex-grow: 1; 
 }
 
 .buscar-compradores {
     background-color: var(--verde-principal);
     border-radius: 10px;
     display: flex;
+    flex-direction: column; 
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; 
     width: 100%;
-    height: 70vh !important;
+    min-height: 70vh; 
+    height: auto; 
     align-self: center;
     gap: 5px;
+    padding: 1.5rem; 
 }
 
 .buscar-compradores__titulo {
     font-size: 3rem;
     font-weight: 700;
-    color: var(--preto);
+    color: var(--verde-escuro);
     text-align: center;
 }
 
@@ -86,18 +91,18 @@ header {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--preto);
+    color: var(--verde-escuro);
     pointer-events: none;
 }
-
 
 .buscar-compradores__cartoes {
     display: grid;
     gap: 1.5rem;
     width: 100%;
-    max-width: 900px;
+    max-width: 1200px; 
     justify-content: center;
     margin: 0 auto;
+    margin-bottom: 15px;
 }
 
 .cartao-material {
@@ -106,99 +111,84 @@ header {
     align-items: center;
     justify-content: center;
     aspect-ratio: 1 / 1;
-    width: 100%;
+    flex-grow: 1; 
+    max-width: 100%; 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     text-decoration: none;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
-    margin-top: 10px;
+    border-radius: 8px; 
+    overflow: hidden; 
 }
 
 .buscar-comprador__conteiner {
     background-color: var(--verde-claro-medio);
     border-radius: 5px;
+    width: 100%;
+    padding: 1rem;
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.75rem; 
 }
 
 .cartao-material:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 18px rgba(26, 82, 0, 0.25);
 }
 
 .cartao-material__rotulo {
-    background-color: var(--branco);
-    color: var(--preto);
-
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
     font-weight: 600;
-
     padding: 0.5rem 1.5rem;
     border-radius: 50px;
     font-size: 1.1rem;
-
     z-index: 2;
     user-select: none;
 }
 
-.buscar-compradores__ver-mais{
-
+.buscar-compradores__ver-mais {
     background-color: var(--verde-escuro-medio);
-    color: var(--branco);
+    color: var(--verde-claro);
+    width: 80%; 
+    align-self: center;
+    font-weight: 600;
 }
 
-.buscar-compradores__ver-mais:hover{
+.buscar-compradores__ver-mais:hover {
     background-color: var(--verde-principal);
-    color: var(--preto);
+    color: var(--verde-escuro);
 }
 
 /* imagens dos cards */
-
-.cartao-material--Plástico {
-    background-image: url(../../imgs/material-tipos/plastico.jpg);
-}
-
-.cartao-material--Papel {
-    background-image: url(../../imgs/material-tipos/papel.jpg);
-}
-
-.cartao-material--Metal {
-    background-image: url(../../imgs/material-tipos/metal.jpg);
-}
-
-.cartao-material--Madeira {
-    background-image: url(../../imgs/material-tipos/madeira.jpg);
-}
-
-.cartao-material--Pilha {
-    background-image: url(../../imgs/material-tipos/pilha.jpg);
-}
-
-.cartao-material--Borracha {
-    background-image: url(../../imgs/material-tipos/borracha.jpg);
-}
-
-.cartao-material--Papelão {
-    background-image: url(../../imgs/material-tipos/papelao.jpg);
-}
-
-.cartao-material--Vidro {
-    background-image: url(../../imgs/material-tipos/vidro.jpg);
-}
+.cartao-material--Plástico { background-image: url(../../imgs/material-tipos/plastico.jpg); }
+.cartao-material--Papel { background-image: url(../../imgs/material-tipos/papel.jpg); }
+.cartao-material--Metal { background-image: url(../../imgs/material-tipos/metal.jpg); }
+.cartao-material--Madeira { background-image: url(../../imgs/material-tipos/madeira.jpg); }
+.cartao-material--Pilha { background-image: url(../../imgs/material-tipos/pilha.jpg); }
+.cartao-material--Borracha { background-image: url(../../imgs/material-tipos/borracha.jpg); }
+.cartao-material--Papelão { background-image: url(../../imgs/material-tipos/papelao.jpg); }
+.cartao-material--Vidro { background-image: url(../../imgs/material-tipos/vidro.jpg); }
 
 .hidden {
     display: none !important;
 }
 
-#detalhe-material {
+#detalhe-material, #detalhe-comprador, #detalhe-comentarios {
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
-    color: var(--preto);
-    background: var(--branco);
+    color: var(--verde-escuro);
     padding: 1.5rem;
     border-radius: 10px;
 }
 
-#detalhe-material h2 {
+#detalhe-material {
+    background: var(--verde-claro);
+}
+
+#detalhe-material h2, #detalhe-comentarios h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
 }
@@ -209,42 +199,21 @@ header {
     gap: 1rem;
 }
 
-.subtipo-card {
-    flex: 1 1 30%;
-    background-color: var(--verde-claro-medio);
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.subtipo-card:hover {
-    background-color: var(--verde-escuro);
-    color: var(--branco);
-}
-
-.comentarios {
-    margin-top: 2rem;
-}
-.comentario {
-    background: var(--verde-secundario);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-}
-    
 .btn-voltar {
     background: none;
     border: none;
-    font-size: 2rem;
-    width: 40%;
-    height: 80px;
+    font-size: 1.5rem; 
+    width: 100%; 
+    max-width: 300px;
+    height: 60px;
     border-radius: 20px;
     background-color: var(--verde-escuro);
-    color: var(--branco);
+    color: var(--verde-claro);
     margin-bottom: 1rem;
-    padding: 0;
+    padding: 0.5rem; 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
 }
 
 .subtipos-grid {
@@ -256,7 +225,7 @@ header {
 .subtipo-card {
     display: flex;
     align-items: center;
-    background-color: var(--branco);
+    background-color: var(--verde-claro);
     border: 1px solid var(--verde-claro-medio); 
     border-radius: 8px;
     padding: 1rem;
@@ -271,7 +240,7 @@ header {
 .subtipo-card:hover {
     background-color: var(--verde-claro); 
     transform: scale(1.01);
-    color: var(--preto);
+    color: var(--verde-escuro);
 }
 
 .subtipo-card img {
@@ -287,11 +256,14 @@ header {
     object-fit: contain;
 }
 
-#detalhe-comprador {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    color: var(--preto);
+#detalhe-comprador .buscar-compradores__barra-de-busca {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#detalhe-comprador .buscar-compradores__titulo {
+    font-size: 2.5rem; 
+    margin-top: 1rem;
 }
 
 .comprador-card, .historico-card {
@@ -305,6 +277,7 @@ header {
 
 .comprador-header {
     display: flex;
+    flex-wrap: wrap; 
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
@@ -314,44 +287,41 @@ header {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--branco);
+    background-color: var(--verde-claro);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
     color: #AAA; 
+    flex-shrink: 0; 
 }
 
-.verMais{
-    margin: 0 auto;
-    border-radius: 20px;
-    height: 50px;
-    border: 0;
-    color: var(--branco);
-    background-color: var(--verde-escuro);
-    width: 80%;
+.comprador-info {
+    flex-grow: 1; 
 }
 
 .comprador-info h3 {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
-    color: var(--preto);
+    color: var(--verde-escuro);
 }
 .comprador-info span {
     font-size: 0.9rem;
-    color: var(--preto); 
+    color: var(--verde-escuro);
 }
 
 .comprador-preco {
     margin-left: auto;
     font-size: 1.5rem;
     font-weight: 700;
+    text-align: right; 
+    flex-shrink: 0;
 }
 
 .comprador-card p {
     font-size: 0.9rem;
-    color: var(--preto);
+    color: var(--verde-escuro);
     line-height: 1.4;
 }
 
@@ -359,6 +329,17 @@ header {
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 1rem;
+}
+
+.verMais {
+    margin: 0 auto;
+    border-radius: 20px;
+    height: 50px;
+    border: 0;
+    color: var(--verde-claro);
+    background-color: var(--verde-escuro);
+    width: 80%;
+    max-width: 300px; 
 }
 
 .btn-comentarios {
@@ -371,19 +352,6 @@ header {
     text-decoration: underline;
 }
 
-#detalhe-comentarios {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    color: var(--preto);
-}
-
-#detalhe-comentarios h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
 .comentario-card {
     background-color: var(--verde-claro);
     border-radius: 8px;
@@ -393,54 +361,13 @@ header {
 .comentario-card p {
     margin-top: 0.5rem;
     font-size: 1rem;
-    color: var(--preto);
+    color: var(--verde-escuro);
 }
-
-.buscar-compradores__cartoes {
-    max-width: 1200px; 
-    margin-bottom: 15px;
-}
-
-#detalhe-comprador .buscar-compradores__barra-de-busca {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#detalhe-comprador .buscar-compradores__titulo {
-    font-size: 2.5rem; 
-    margin-top: 1rem;
-}
-
-@media (max-width: 599px) {
-    .buscar-compradores__cartoes {
-        grid-template-columns: 1fr;
-    }
-
-    .buscar-compradores__titulo{
-        font-size: 32px;
-    }
-}
-
-@media (min-width: 600px) and (max-width: 1023px) {
-    .buscar-compradores__cartoes {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-
-@media (min-width: 1024px) {
-    .buscar-compradores__cartoes {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* Adicione esta linha no topo do seu arquivo CSS para importar a fonte */
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
 
 .container {
     display: flex;
-    gap: 15px; /* Mantido, mas pode diminuir se preferir (ex: 10px) */
-    padding: 20px;
+    gap: 10px; 
+    padding: 15px; 
     border-radius: 15px;
     flex-wrap: wrap;
     justify-content: center;
@@ -452,14 +379,12 @@ header {
     border: 2px solid var(--verde-escuro);
     border-radius: 8px;
     padding: 8px 30px 8px 15px; 
-    
     background-color: var(--verde-claro-medio);
     display: flex;
     align-items: center;
-    font-size: 16px; 
-    
+    font-size: 14px; 
     font-weight: 700;
-    color: var(--preto);
+    color: var(--verde-escuro);
 }
 
 .badge {
@@ -468,12 +393,10 @@ header {
     right: -10px;
     width: 30px;
     height: 30px;
-    
     background-color: var(--verde-claro);
-    border: 2px solid var(--preto);
+    border: 2px solid var(--verde-claro);
     border-radius: 50%;
     font-size: 14px;
-    
     color: var(--verde-escuro-medio);
     font-weight: bold;
     display: flex;
@@ -481,49 +404,120 @@ header {
     align-items: center;
 }
 
-.dropdown-btn{
-    width: 50%;
+.dropdown-btn {
+    width: 80%; 
+    max-width: 300px; 
     height: 50px;
     margin-bottom: 10px;
     border: 0;
     border-radius: 10px;
     background-color: var(--verde-escuro);
-    color: var(--branco);
+    color: var(--verde-claro);
 }
 
-.dropdown-content{
+.dropdown-content {
     display: flex;
     flex-direction: column;
-    
+    width: 100%;
+    max-height: 200px; 
+    overflow-y: auto; 
+    gap: 10px;
 }
 
-.dropdown-content.hidden{
+.dropdown-content.hidden {
     display: none;
 }
 
-.comentarios-livre{
+.comentarios-livre {
     display: flex;
-    justify-content: space-evenly;
-    width: 80%;
+    justify-content: flex-start; 
+    width: 100%; 
     height: auto;
     border-radius: 10px;
-    color: var(--branco);
-    margin: 10px auto;
+    color: var(--verde-claro);
+    margin: 0; 
     padding: 10px;
     background-color: var(--verde-escuro);
-
 }
-.comentarios-livre__avatar{
+
+.comentarios-livre__avatar {
     width: 40px;
     height: 40px;
     border-radius: 100%;
     background-color: var(--verde-claro);
+    flex-shrink: 0;
 }
 
-.comentarios-livre__text{
+.comentarios-livre__text {
     display: flex;
-    width: 300px;
-    font-size: 16px;
+    width: auto; 
+    flex-grow: 1;
+    font-size: 14px;
     margin-left: 10px;
-    text-align: flex-start;
+    text-align: left;
+}
+
+@media (max-width: 599px) {
+    .conteudo {
+        width: 100%;
+        margin-top: 0;
+        border-radius: 0;
+        padding: 0.5rem;
+    }
+
+    .buscar-compradores {
+        padding: 0.5rem;
+        border-radius: 0;
+    }
+
+    .buscar-compradores__cartoes {
+        grid-template-columns: 1fr; 
+    }
+
+    .buscar-compradores__titulo {
+        font-size: 32px; 
+    }
+
+    .buscar-compradores__entrada {
+        font-size: 1rem; 
+    }
+
+    #detalhe-material, #detalhe-comprador, #detalhe-comentarios {
+        padding: 1rem;
+    }
+
+    .subtipo-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .subtipo-card img, .subtipo-card__simbolo {
+        height: 40px;
+        width: 40px;
+    }
+
+    .comprador-header {
+        flex-direction: column; 
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .comprador-preco {
+        margin-left: 0; 
+        font-size: 1.25rem;
+        text-align: left;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+    .buscar-compradores__cartoes {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+@media (min-width: 1024px) {
+    .buscar-compradores__cartoes {
+        grid-template-columns: repeat(4, 1fr); 
+    }
 }
