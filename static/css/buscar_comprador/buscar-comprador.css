@@ -162,14 +162,14 @@ header {
 }
 
 /* imagens dos cards */
+.cartao-material--Papel { background-image: url(../../imgs/material-tipos/papelao.jpg); }
 .cartao-material--Plástico { background-image: url(../../imgs/material-tipos/plastico.jpg); }
-.cartao-material--Papel { background-image: url(../../imgs/material-tipos/papel.jpg); }
 .cartao-material--Metal { background-image: url(../../imgs/material-tipos/metal.jpg); }
-.cartao-material--Madeira { background-image: url(../../imgs/material-tipos/madeira.jpg); }
-.cartao-material--Pilha { background-image: url(../../imgs/material-tipos/pilha.jpg); }
-.cartao-material--Borracha { background-image: url(../../imgs/material-tipos/borracha.jpg); }
-.cartao-material--Papelão { background-image: url(../../imgs/material-tipos/papelao.jpg); }
 .cartao-material--Vidro { background-image: url(../../imgs/material-tipos/vidro.jpg); }
+.cartao-material--Eletrônicos { background-image: url(../../imgs/material-tipos/eletronicos.jpg); }
+.cartao-material--Madeira { background-image: url(../../imgs/material-tipos/madeira.jpg); }
+.cartao-material--Borracha { background-image: url(../../imgs/material-tipos/borracha.jpg); }
+.cartao-material--Outros { background-image: url(../../imgs/material-tipos/outros.jpg); }
 
 .hidden {
     display: none !important;
