@@ -161,6 +161,8 @@ header {
 .buscar-compradores__ver-mais:hover {
     background-color: var(--verde-escuro);
     color: var(--verde-claro);
+    transition-duration: 0.5s;
+    transform: scale(1.01);
 }
 
 /* imagens dos cards */
@@ -225,6 +227,8 @@ header {
 
 .btn-voltar:hover {
     background-color: var(--verde-escuro);
+    transform: scale(1.01);
+    transition-duration: 0.5s;
 }
 
 .subtipos-grid {
@@ -280,7 +284,7 @@ header {
 .comprador-card, .historico-card {
     display: flex;
     flex-direction: column;
-    background-color: var(--verde-principal); 
+    background-color: var(--verde-claro-medio); 
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -303,7 +307,7 @@ header {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    color: #AAA; 
+    color: var(--verde-escuro); 
     flex-shrink: 0; 
 }
 
@@ -318,7 +322,7 @@ header {
     color: var(--verde-escuro);
 }
 .comprador-info span {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--verde-escuro);
 }
 
@@ -331,7 +335,7 @@ header {
 }
 
 .comprador-card p {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--verde-escuro);
     line-height: 1.4;
 }
@@ -345,12 +349,20 @@ header {
 .verMais {
     margin: 0 auto;
     border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
     height: 50px;
     border: 0;
     color: var(--verde-claro);
-    background-color: var(--verde-escuro);
+    background-color: var(--verde-escuro-medio);
     width: 80%;
     max-width: 300px; 
+}
+
+.verMais:hover {
+    background-color: var(--verde-escuro);
+    transition-duration: 0.5s;
+    transform: scale(1.01);
 }
 
 .btn-comentarios {
@@ -389,11 +401,11 @@ header {
     position: relative;
     border: 2px solid var(--verde-escuro);
     border-radius: 8px;
-    padding: 8px 30px 8px 15px; 
+    padding: 8px 30px 10px 15px; 
     background-color: var(--verde-claro-medio);
     display: flex;
     align-items: center;
-    font-size: 14px; 
+    font-size: 16px; 
     font-weight: 700;
     color: var(--verde-escuro);
 }
@@ -404,11 +416,11 @@ header {
     right: -10px;
     width: 30px;
     height: 30px;
-    background-color: var(--verde-claro);
-    border: 2px solid var(--verde-claro);
+    background-color: var(--verde-escuro-medio);
+    border: 2px solid var(--verde-escuro);
     border-radius: 50%;
     font-size: 14px;
-    color: var(--verde-escuro-medio);
+    color: var(--verde-claro);
     font-weight: bold;
     display: flex;
     justify-content: center;
@@ -450,6 +462,19 @@ header {
     padding: 10px;
     background-color: var(--verde-escuro);
 }
+
+.comentarios-livres {
+    font-size: 1.5rem;
+    background-color: var(--verde-escuro-medio);
+}
+
+.comentarios-livres:hover {
+    background-color: var(--verde-escuro);
+    transition-duration: 0.5s;
+    transform: scale(1.01);
+    
+}
+
 
 .comentarios-livre__avatar {
     width: 40px;
