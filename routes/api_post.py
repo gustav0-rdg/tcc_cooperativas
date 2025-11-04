@@ -20,8 +20,8 @@ def postar_dados_de_venda():
     
     dados_recebidos = request.get_json()
     conn = Connection('local')
-    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(1, dados_recebidos)
-    
+    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
+    print(processar_venda)
     return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
 
 @api_post.route("/dados-comprador", methods=["POST"])
