@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter';
 }
 
-header{
+header {
   margin-bottom: 20px;
 }
 
-body{
+body {
   background-color: var(--verde-claro);
 }
 
-.registros__etapa .etapa__progresso{
+.registros__etapa .etapa__progresso {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -23,26 +23,26 @@ body{
   width: 100%;
 }
 
-.resumo, .opcional, .avaliacao, .comentario, button{
+.resumo, .opcional, .avaliacao, .comentario, button {
   box-shadow: 
         0 1px 3px rgba(81, 109, 43, 0.2), 
         0 4px 10px rgba(113, 147, 65, 0.1); 
   transition: 1s;
 }
 
-.resumo:hover, .opcional:hover, .avaliacao:hover, .comentario:hover, .button:hover{
+.resumo:hover, .opcional:hover, .avaliacao:hover, .comentario:hover, .button:hover {
   box-shadow: 
     0 2px 5px rgba(81, 109, 43, 0.25), 
     0 8px 15px rgba(113, 147, 65, 0.15); 
     transform: translateY(-2px); 
 }
 
-.registros{
+.registros {
   display: flex;
   flex-direction: column;
 }
 
-.registros__etapa{
+.registros__etapa {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,53 +55,60 @@ body{
   background-color: var(--verde-principal);
 }
 
-.registros__opcoes{
+.registros__opcoes {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
 }
 
-.progress-container{
+.progress-container {
   width: 80%;
   border-radius: 10px;
   margin: 10px auto;
   background-color: var(--verde-claro);
 }
 
-.progress-bar{
+.progress-bar {
   width: 25%;
   height: 20px;
   background-color: var(--verde-escuro-medio);
   border-radius: 10px;
 }
 
-.progress-bar.cinquenta{
+.progress-bar.cinquenta {
   width: 50%;
 }
 
-.progress-bar.tres{
+.progress-bar.tres {
   width: 75%;
 }
 
-.progress-bar.quatro{
+.progress-bar.quatro {
   width: 100%;
 }
 
-.registros__opcoes button{
+.registros__opcoes button {
   display: flex;
   flex-direction: column;
   align-items: self-start;
-  justify-content: center;
-
+  justify-content: center; 
   padding: 10px;
   width: 80%;
-
   color: var(--verde-claro);
   border: 0;
   background-color: var(--verde-escuro-medio);
-  height: 60px;
+  min-height: 60px; 
+  height: auto;  
+  overflow-wrap: break-word;
+  word-break: break-word;
   border-radius: 10px;
+}
+
+.registros__opcoes button:hover {
+  background-color: var(--verde-escuro);
+  transform: scale(1.01);
+  transition-duration: (0.5);
 }
 
 .confirmar__venda {
@@ -113,13 +120,13 @@ body{
   font-weight: 600;
 }
 
-.avaliacao{
+.avaliacao {
   text-align: center;
   width: 80%;
   height: 100px;
 }
 
-.informacoes__vendedor{
+.informacoes__vendedor {
   width: 80%;
   display: flex;
   flex-direction: column;
@@ -129,11 +136,11 @@ body{
   padding: 10px;
 }
 
-.informacoes__vendedor small{
+.informacoes__vendedor small {
   color: var(--verde-claro);
 }
 
-.valores__kg{
+.valores__kg {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -144,11 +151,11 @@ body{
   background-color: var(--verde-claro-medio);
 }
 
-.valores__kg h3{
+.valores__kg h3 {
   color: var(--verde-escuro);
 }
 
-.valores__preco{
+.valores__preco {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -160,11 +167,11 @@ body{
 
 }
 
-.valores__preco h3{
+.valores__preco h3 {
   color: var(--verde-escuro);
 }
 
-.container__valores{
+.container__valores {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -173,7 +180,7 @@ body{
   gap: 20px;
 }
 
-.valores__kg input, .valores__preco input{
+.valores__kg input, .valores__preco input {
   width: 80px;
   height: 80px;
   border-radius: 20px;
@@ -184,7 +191,7 @@ body{
   outline: none;
 }
 
-.resumo{
+.resumo {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -196,12 +203,12 @@ body{
   border-radius: 20px;
 }
 
-.resumo h1{
+.resumo h1 {
   color: var(--verde-claro-medio);
   font-size: 24px;
 }
 
-.resumo__venda{
+.resumo__venda {
   display: flex;
   justify-content:center;
   align-items: center;
@@ -212,23 +219,24 @@ body{
   font-weight: 600;
 }
 
-.registros__opcoes p{
+.registros__opcoes p {
   font-size: 16px;
   font-weight: 600;
   color: var(--verde-claro);
 }
 
-.registros__opcoes small{
+.registros__opcoes small {
   font-size: 16px;
   font-weight: 600;
   color: var(--verde-claro-medio);
 }
 
-hr{
+hr {
   border: 2px solid var(--verde-escuro-secundario);
   width: 90%;
 }
-.resumo__venda div{
+
+.resumo__venda div {
   width: 40%;
   display: flex;
   flex-direction: column;
@@ -236,7 +244,7 @@ hr{
     align-items: center;
 }
 
-.avaliacao{
+.avaliacao {
   width: 80%;
   background-color: var(--verde-claro-medio);
   display: flex;
@@ -246,18 +254,18 @@ hr{
   border-radius: 20px;
 }
 
-.avaliacao h3{
+.avaliacao h3 {
   color: var(--verde-escuro);
 }
 
-.avaliacao input{
+.avaliacao input {
   height: 50px;
   width: 80%;
   border: 0;
   border-radius: 20px;
 }
 
-.comentario{
+.comentario {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -269,7 +277,7 @@ hr{
   background-color: var(--verde-claro-medio);
 }
 
-.comentario__btn{
+.comentario__btn {
   width: 90%;
   border-radius: 10px;
   color: var(--verde-claro) !important;
@@ -279,7 +287,7 @@ hr{
   text-align: center;
 }
 
-.opcional{
+.opcional {
   width: 80%;
   background-color: var(--verde-principal);
   border-radius: 20px;
@@ -291,7 +299,7 @@ hr{
   align-items: center;
 }
 
-.opcional textarea{
+.opcional textarea {
   width: 90%;
   border-radius: 10px;
   padding: 10px;
@@ -300,17 +308,16 @@ hr{
   color: var(--verde-claro);
 }
 
-.finalizar{
+.finalizar {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 95%;
   gap: 10px;
-
 }
 
-.finalizar button{
+.finalizar button {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -318,12 +325,12 @@ hr{
   font-weight: 600;
 }
 
-textarea, input{
+textarea, input {
   background-color: transparent;
   border: 0;
 }
 
-.relatorio_de_venda{
+.relatorio_de_venda {
   background-color: var(--verde-escuro);
   color: var(--verde-claro);
   padding: 10px;
@@ -331,11 +338,11 @@ textarea, input{
 
 }
 
-.relatorio_de_venda h3{
+.relatorio_de_venda h3 {
   color: var(--verde-claro-medio);
 }
 
-.finalizacao_sw{
+.finalizacao_sw {
   margin-top: 10px;
   display: flex;
   flex-direction: column;
@@ -344,7 +351,7 @@ textarea, input{
   gap: 10px;
 }
 
-.finalizacao_sw a{
+.finalizacao_sw a {
   width: 80%;
   height:60px;
   text-decoration: none;
@@ -356,12 +363,12 @@ textarea, input{
   border-radius: 10px;
 }
 
-.registros_{
+.registros_ {
   display: flex;
   flex-direction: column;
 }
 
-#buscarComprador{
+#buscarComprador {
   width: 90%;
   height: 50px;
   padding: 20px;
@@ -372,7 +379,7 @@ textarea, input{
   outline-color: var(--verde-escuro-medio);
 }
 
-.opcoes-btn__novo-comprador{
+.opcoes-btn__novo-comprador {
   width: 80% !important;
   display: flex;
   justify-content: center;
@@ -382,7 +389,7 @@ textarea, input{
   font-weight: bolder;
 }
 
-.opcoes-btn__novo-comprador{
+.opcoes-btn__novo-comprador {
   box-sizing: border-box;
   width: 90%; 
   max-width: 600px; 
@@ -400,33 +407,32 @@ textarea, input{
   border-radius: 10px;
 }
 
-.registros__comprador{
+.registros__comprador {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
 }
 
-.registros__comprador button{
+.registros__comprador button {
   color: var(--verde-claro);
 }
 
-i{
+i {
   font-size: 24px;
 }
 
-.ativo{
+.ativo {
   background-color: var(--verde-principal) !important;
   color: var(--verde-claro) !important; 
 }
 
 @media screen and (min-width: 768px) {
   .registros__opcoes {
-      max-width: 900px; 
-      margin: 0 auto; 
+    max-width: 900px; 
+    margin: 0 auto; 
   }
 
-  .registros__opcoes button,
   .informacoes__vendedor,
   .valores__kg,
   .valores__preco,
@@ -435,12 +441,21 @@ i{
   .comentario,
   .opcional,
   .finalizar {
-      box-sizing: border-box;
-      width: 90%; 
-      max-width: 600px; 
+    box-sizing: border-box;
+    width: 90%; 
+    max-width: 600px; 
   }
 
-  .registros__etapa{
+  .registros__opcoes button {
+    width: 350px; 
+    margin: 10px; 
+    align-items: center; 
+    text-align: center;
+    padding: 20px;
+    height: auto
+  }
+
+  .registros__etapa {
     width: 90%; 
     max-width: 600px;
     padding: 20px;
@@ -449,85 +464,85 @@ i{
   }
 
   .registros__opcoes {
-      flex-direction: row;
-      flex-wrap: wrap; 
-      justify-content: center; 
+    flex-direction: row;
+    flex-wrap: wrap; 
+    justify-content: center; 
   }
 
   .registros__opcoes button {
-      width: 350px; 
-      margin: 10px; 
-      align-items: center; 
-      text-align: center;
-      padding: 20px;
+    width: 350px; 
+    margin: 10px; 
+    align-items: center; 
+    text-align: center;
+    padding: 20px;
   }
 
   .registros__opcoes button h1 {
-      font-size: 1.5em; 
+    font-size: 1.5em; 
   }
   
   .registros {
-      align-items: center; 
+    align-items: center; 
   }
 
-  .comentario-rapido{
+  .comentario-rapido {
     width: 250px !important;
   }
 
   .container__valores {
-      display: flex;
-      flex-direction: row;
-      gap: 20px;
-      justify-content: center;
-      width: 90%; 
-      max-width: 600px; 
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    width: 90%; 
+    max-width: 600px; 
   }
 
   .valores__kg, .valores__preco {
-      width: 50%;
-      height: 250px; 
+    width: 50%;
+    height: 250px; 
   }
 
   .confirmar__venda {
-      width: 90%;
-      max-width: 600px; 
-      margin-top: 20px; 
-      display: flex;
-      justify-content: center;
-      font-weight: bolder;
+    width: 90%;
+    max-width: 600px; 
+    margin-top: 20px; 
+    display: flex;
+    justify-content: center;
+    font-weight: bolder;
   }
 
   .comentario {
-      display: grid;
-      grid-template-columns: 1fr 1fr; 
-      gap: 10px;
-      padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+    padding: 20px;
   }
 
   .comentario h3 {
-      grid-column: 1 / -1; 
-      text-align: center;
+    grid-column: 1 / -1; 
+    text-align: center;
   }
 
   .comentario__btn {
-      width: 100%; 
-      height: auto; 
-      padding: 15px;
+    width: 100%; 
+    height: auto; 
+    padding: 15px;
   }
 
   .finalizar {
-      flex-direction: row; 
-      justify-content: space-around;
-      padding: 20px 0;
+    flex-direction: row; 
+    justify-content: space-around;
+    padding: 20px 0;
   }
 
   .finalizar button {
-      width: 45%; 
-      height: 50px;
-      font-size: 1.1em;
+    width: 45%; 
+    height: 50px;
+    font-size: 1.1em;
   }
 
-  .opcoes-btn__novo-comprador{
+  .opcoes-btn__novo-comprador {
     box-sizing: border-box;
     width: 90%; 
     max-width: 600px; 
