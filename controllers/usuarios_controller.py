@@ -204,15 +204,16 @@ class Usuarios:
                 """, (nome, email, senha_hash, tipo)
             )
 
-            return cursor.lastrowid # Retorna o ID do usuário criado
+            self.connection_db.commit()
+            return cursor.lastrowid
 
         except mysql.connector.IntegrityError as e:
             print(f'Erro de Integridade - Usuarios "create": {e}')
-            return None
+            return False
         
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
-            return None
+            return False
         
         finally:
             cursor.close()
