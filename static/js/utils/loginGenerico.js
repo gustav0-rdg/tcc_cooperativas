@@ -88,5 +88,6 @@ async function loginGenerico (identificador, senha)
 
 export
 {
-    loginGenerico
+    loginGenerico,
+    getUsuarioInfo
 }
