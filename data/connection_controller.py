@@ -41,8 +41,8 @@ class Connection:
         if tipo_conexao == 'online':
             print("Configurando SSL para conexão online...")
 
-            config['ssl_disabled'] = False
-            config['ssl_verify_cert'] = True
+            # config['ssl_disabled'] = False
+            # config['ssl_verify_cert'] = True
 
         print(f"Tentando conectar a: {config.get('host')}...") 
         try:
