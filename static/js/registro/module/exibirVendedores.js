@@ -36,12 +36,33 @@ export async function exibirVendedores() {
     novoComprador.addEventListener('click', async () => {
         Swal.fire({
             title: 'Buscar novo comprador.',
-            html: `<input type="text" id="buscarComprador" />`,
+            html: `
+            <style>
+                #buscarComprador {
+                    width: 100%;
+                    margin: 0;
+                    padding: .7rem;
+                    border: 2px solid var(--verde-escuro-medio);
+                    border-radius: .5rem;
+                    box-sizing: border-box;
+                }
+                #buscarComprador:focus {
+                    outline: none;
+                    box-shadow: 0 0 5px var(--verde-escuro-medio);
+                }              
+            </style>
+            <input type="text" id="buscarComprador" />
+            `,
+
+            heightAuto: false,        
             showCancelButton: true,
             confirmButtonText: 'Buscar',
             cancelButtonText: 'Cancelar',
+            background: "var(--verde-claro)",
+            confirmButtonColor: "var(--verde-escuro-medio)",
+            cancelButtonColor: "var(--vermelho)",
             color: "var(--verde-escuro-medio)",
-            background: "var(--verde-claro-medio)",
+                      
             preConfirm: () => {
                 const valor = document.getElementById('buscarComprador').value;
                 if (!valor) {
@@ -55,25 +76,29 @@ export async function exibirVendedores() {
                 if (!isCnpj) {
                     return Swal.fire({
                         title: "Insira um CNPJ Válido",
-                        icon: "error"
+                        icon: "error",
+                        color: "var(--verde-escuro-medio)",
+                        background: "var(--verde-claro-medio)",
+                        confirmButtonColor: "var(--verde-escuro-medio)"
                     });
                 }
-
-                // Registra o novo vendedor
+    
                 const dados = await buscarVendedores(result.value);
                 const novoVendedor = await registrarNovoVendedor(dados);
                 if (novoVendedor) {
                     Swal.fire({
                         title: "Cadastro concluído.",
-                        icon: "success"
+                        icon: "success",
+                        color: "var(--verde-escuro-medio)",
+                        background: "var(--verde-claro)",
+                        confirmButtonColor: "var(--verde-escuro-medio)"
                     });
                     await renderizarListaDeVendedores();
-
                 }
-                // =======================================================
             }
         });
     });
+    
     compradorSection.appendChild(novoComprador);
     // Agora, para exibir a lista pela primeira vez, basta chamar sua nova função.
     await renderizarListaDeVendedores();
