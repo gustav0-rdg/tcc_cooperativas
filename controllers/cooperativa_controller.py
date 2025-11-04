@@ -434,3 +434,70 @@ class Cooperativa:
         
         finally:
             cursor.close
+
+    def get_pendentes_com_documentos(self) -> list | bool:
+        """
+        Busca todas as cooperativas pendentes (aprovado=FALSE)
+        e junta o primeiro documento pendente de cada uma,
+        assim como o email do usuário associado.
+        """
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            # Esta query junta usuarios (para o email), cooperativas (para os dados)
+            # e documentos_cooperativa (para o link do arquivo)
+            query = """
+                SELECT 
+                    u.email,
+                    c.id_cooperativa, 
+                    c.razao_social, 
+                    c.cnpj, 
+                    c.data_cadastro,
+                    doc.arquivo_url
+                FROM cooperativas AS c
+                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+                LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa 
+                                                       AND doc.status = 'pendente'
+                WHERE 
+                    c.aprovado = FALSE 
+                    AND u.status = 'pendente'
+                GROUP BY c.id_cooperativa;
+            """
+            cursor.execute(query)
+            return cursor.fetchall()
+
+        except Exception as e:
+            print(f'Erro - Cooperativa "get_pendentes_com_documentos": {e}')
+            return False
+        finally:
+            cursor.close()
+
+    def rejeitar_documento(self, id_cooperativa: int, id_gestor_avaliador: int, motivo: str, justificativa: str) -> bool:
+        """
+        Atualiza o status de um documento para 'negado' e regista o motivo.
+        NOTA: Este método NÃO faz commit. A transação é gerida pela API.
+        """
+        cursor = self.connection_db.cursor()
+        try:
+            motivo_completo = f"Motivo: {motivo}. Justificativa: {justificativa}"
+            
+            # Atualiza o(s) documento(s) pendente(s) desta cooperativa para 'negado'
+            cursor.execute(
+                """
+                UPDATE documentos_cooperativa 
+                SET 
+                    status = 'negado', 
+                    motivo_rejeicao = %s,
+                    data_avaliacao = NOW(),
+                    id_gestor_avaliador = %s
+                WHERE 
+                    id_cooperativa = %s AND status = 'pendente';
+                """,
+                (motivo_completo, id_gestor_avaliador, id_cooperativa)
+            )
+            return cursor.rowcount > 0 # Retorna True se algo foi atualizado
+
+        except Exception as e:
+            print(f'Erro - Cooperativa "rejeitar_documento": {e}')
+            return False
+        finally:
+            cursor.close()

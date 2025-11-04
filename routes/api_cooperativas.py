@@ -4,6 +4,7 @@ from data.connection_controller import Connection
 from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
 from controllers.cnpj_controller import CNPJ
+from controllers.email_controller import Email
 # imports para garantir a funcionalidade de uploads de documentos
 import os
 from werkzeug.utils import secure_filename
@@ -143,7 +144,7 @@ def cadastrar ():
                     "id_usuario": id_usuario_criado,
                     "cnpj": data_cadastro['cnpj'],
                     "razao_social": company.get('name', 'Razão Social não encontrada'),
-                    "nome_fantasia": company.get('alias', 'Nome Fantasia não encontrado'),
+                    "nome_fantasia": dados_cnpj.get('alias', 'Nome Fantasia não encontrado'),
                     "email": dados_cnpj.get('email', data_cadastro['email']),
                     "telefone": phones[0].get('number', 'Telefone não encontrado'), # Pega o primeiro telefone
                     "endereco": f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}".strip(" ,-"),
@@ -475,6 +476,86 @@ def enviar_documento():
         if conn:
             conn.connection_db.rollback()
         return jsonify({'error': 'Ocorreu um erro interno no servidor.'}), 500
+    
+    finally:
+        if conn:
+            conn.close()
+
+@api_cooperativas.route('/rejeitar', methods=['POST'])
+def rejeitar_cooperativa():
+    
+    token_header = request.headers.get('Authorization')
+    data = request.get_json()
+    id_cooperativa = data.get('id_cooperativa')
+    email_cooperativa = data.get('email')
+    motivo = data.get('motivo')
+    justificativa = data.get('justificativa')
+
+    if not all([token_header, id_cooperativa, email_cooperativa, motivo, justificativa]):
+        return jsonify({'error': 'Dados incompletos (token, id, email, motivo, justificativa são obrigatórios)'}), 400
+
+    conn = Connection('local')
+    try:
+        db = conn.connection_db
+        
+        token = token_header.split(" ")[1]
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido'}), 401
+        
+        id_usuario_gestor = data_token['id_usuario']
+        usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
+        
+        if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        db.start_transaction()
+
+        coop_ctrl = Cooperativa(db)
+        sucesso_doc = coop_ctrl.rejeitar_documento(id_cooperativa, id_usuario_gestor, motivo, justificativa)
+
+        cooperativa_data = coop_ctrl.get_by_id(id_cooperativa)
+        if not cooperativa_data:
+            db.rollback()
+            conn.close()
+            return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
+        
+        id_usuario_cooperativa = cooperativa_data['id_usuario']
+        sucesso_user = Usuarios(db).alterar_status(id_usuario_cooperativa, 'bloqueado')
+
+        if not (sucesso_doc and sucesso_user):
+            db.rollback()
+            conn.close()
+            return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
+
+        assunto = "Cadastro no Recoopera Rejeitado"
+        corpo_html = f"""
+        <html>
+            <head><style>/*... (adiciona algum estilo se quiser) ...*/</style></head>
+            <body>
+                <h2>Seu cadastro no Recoopera foi rejeitado.</h2>
+                <p>Olá! Após análise de um de nossos gestores, o seu pedido de cadastro foi rejeitado.</p>
+                <hr>
+                <p><strong>Motivo da Rejeição:</strong> {motivo}</p>
+                <p><strong>Justificativa do Gestor:</strong></p>
+                <p><i>"{justificativa}"</i></p>
+                <hr>
+                <p>Se isto foi um engano, por favor, contacte o suporte.</p>
+            </body>
+        </html>
+        """
+
+        Email.enviar(email_cooperativa, assunto, corpo_html) 
+
+        db.commit()
+        return jsonify({'message': 'Cooperativa rejeitada e e-mail enviado.'}), 200
+
+    except Exception as e:
+        if conn: conn.connection_db.rollback()
+        print(f"Erro em /rejeitar: {e}")
+        return jsonify({'error': f'Erro interno no servidor: {e}'}), 500
     
     finally:
         if conn:

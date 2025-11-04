@@ -451,23 +451,15 @@ class Usuarios:
             return False
 
     def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
-
         """
-        Altera o status do usuario no sistema
+        Altera o status de um usuário (ex: 'pendente', 'ativo', 'bloqueado').
+        NOTA: Este método NÃO faz commit ou rollback. A transação é gerida pela API.
         """
-
-        #region Exceções
-
-        if not isinstance(id_usuario, int):
-            raise TypeError ('Usuarios "alterar_status" - id_usuario deve ser int')
-        if not isinstance(novo_status, str):
-            raise TypeError ('Usuarios "alterar_status" - novo_status deve ser string')
         
-        #endregion
-
         status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
-        if novo_status not in status_validos: 
-            raise ValueError (f'Usuarios "alterar_status" - novo_status inválido: {novo_status}')
+        if novo_status not in status_validos:
+            print(f'Erro - Usuarios "alterar_status": novo_status inválido: {novo_status}')
+            return False
 
         cursor = self.connection_db.cursor()
         try:
@@ -476,29 +468,26 @@ class Usuarios:
                 UPDATE usuarios SET status = %s WHERE id_usuario = %s;
                 """, (novo_status, id_usuario)
             )
-            self.connection_db.commit() 
+            
             return cursor.rowcount > 0 # Retorna True se alterou
         
         except Exception as e:
             print(f'Erro - Usuarios "alterar_status": {e}')
-            self.connection_db.rollback()
+            
             return False
         
         finally:
             cursor.close()
 
     def delete (self, id_usuario:int) -> bool:
-
         """
-        Exclui permanentemente o usuário
-        do banco de dados
+        Exclui permanentemente o usuário do banco de dados.
+        NOTA: Este método NÃO faz commit ou rollback. A transação é gerida pela API.
         """
 
         #region Exceções
-
         if not isinstance(id_usuario, int):
             raise TypeError ('Usuarios "delete" - id_usuario deve ser int')
-
         #endregion
 
         cursor = self.connection_db.cursor()
@@ -508,12 +497,12 @@ class Usuarios:
                 DELETE FROM usuarios WHERE id_usuario = %s;
                 """, (id_usuario, )
             )
-            self.connection_db.commit() 
+       
             return cursor.rowcount > 0 # Retorna True se deletou
         
         except Exception as e:
             print(f'Erro - Usuarios "delete": {e}')
-            self.connection_db.rollback()
+
             return False
         
         finally:
