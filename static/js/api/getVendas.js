@@ -1,6 +1,6 @@
-export async function getVendas() {
+export async function getVendas(id_cooperativa) {
     try {
-        const response = await fetch(`/get/vendas/${1}`);
+        const response = await fetch(`/get/vendas/${id_cooperativa}`);
         // Verifica se a resposta do servidor foi um sucesso (status 200-299)
         if (!response.ok) {
             console.error("Erro do servidor:", response.status, response.statusText);

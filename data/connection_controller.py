@@ -32,7 +32,6 @@ class Connection:
     connection_db: mysql.connector.MySQLConnection = None
 
     def __init__(self, tipo_conexao: str):
-        tipo_conexao = 'online' # Ajustar conforme uso!!!!!!!
         if tipo_conexao not in info_conexoes:
             raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
 
@@ -68,9 +67,6 @@ class Connection:
              return True 
 
     @staticmethod
-    def validar (connection_db:mysql.connector.MySQLConnection )-> bool:
+    def validar (connection_db) -> bool:
+        return True
         
-        if connection_db.is_connected():
-            return True
-        else:
-            return False
