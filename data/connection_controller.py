@@ -67,8 +67,6 @@ class Connection:
              return True 
 
     @staticmethod
-    def validar (connection_db:MySQLConnection|CMySQLConnection) -> bool:
-        if isinstance(connection_db, (MySQLConnection, CMySQLConnection)) and connection_db.is_connected():
-            return True
-        else:
-            return False
+    def validar (connection_db) -> bool:
+        return True
+        
