@@ -220,10 +220,24 @@ def get (identificador:int|str):
 
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-        
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+        user = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        if not user['tipo'] in ['cooperativa','gestor', 'root']:
+
+            
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-        
+        elif user['tipo'] == 'cooperativa':
+            
+            # Pega os dados da cooperativa VINCULADA AO TOKEN
+            dados_cooperativa_logada = Cooperativa(conn.connection_db).get(user['id_usuario'])
+
+            if not dados_cooperativa_logada:
+                return jsonify({'error': 'Cooperativa associada a este usuário não encontrada.'}), 404
+
+            # Compara se o 'identificador' da URL bate com algum dos IDs
+            # da cooperativa que está logada.
+            if (identificador != dados_cooperativa_logada['id_usuario']):
+                # Se o ID da URL não bate com NENHUM, é uma tentativa de acesso indevido.
+                return jsonify({'error': 'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}), 403
         dados_cooperativa = Cooperativa(conn.connection_db).get(identificador)
 
         match dados_cooperativa:
