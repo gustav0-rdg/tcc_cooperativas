@@ -441,3 +441,88 @@ def get_all_gestores ():
 
         if conn != None:
             conn.close()
+
+@api_usuarios.route('/update', methods=['PUT'])
+@api_usuarios.route('/update/<id_usuario>', methods=['PUT'])
+def update_usuario(id_usuario: str = None):
+
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+
+    conn = None
+
+    try:
+        
+        conn = Connection('local')
+        
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': 'Token de sessão inválido ou expirado' }), 401
+
+        usuario_admin = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        if not usuario_admin:
+             return jsonify({ 'error': 'Usuário do token não encontrado' }), 404
+
+        id_usuario_alvo = None
+        if id_usuario:
+
+            if not id_usuario.isdigit():
+                 return jsonify({ 'error': '"id_usuario" da URL deve ser um Int válido' }), 400
+            
+            id_usuario_alvo = int(id_usuario)
+
+        else:
+
+            id_usuario_alvo = data_token['id_usuario']
+
+        is_self_update = (id_usuario_alvo == data_token['id_usuario'])
+        is_admin = (usuario_admin['tipo'] in ['gestor', 'root'])
+
+        if not is_self_update and not is_admin:
+            return jsonify({ 'error': 'Você não tem permissão para atualizar este usuário' }), 403
+
+        data = request.get_json()
+        if not data:
+            return jsonify({ 'error': 'Payload da requisição está vazio' }), 400
+        
+        usuario_alvo_atual = Usuarios(conn.connection_db).get_by_id(id_usuario_alvo)
+        if not usuario_alvo_atual:
+             return jsonify({ 'error': 'Usuário alvo não encontrado para atualização' }), 404
+
+        nome = data.get('nome', usuario_alvo_atual['nome'])
+        email = data.get('email', usuario_alvo_atual['email'])
+        
+        senha = data.get('senha') 
+        
+        if not nome or not email:
+            return jsonify({ 'error': 'Campos "nome" e "email" não podem ficar vazios' }), 400
+        
+        if senha and len(senha) < 8:
+            return jsonify({ 'error': 'A nova senha deve ter no minímo 8 caractéres' }), 400
+
+        senha_para_db = senha if senha else None
+        
+        update_usuario = Usuarios(conn.connection_db).update(id_usuario_alvo, nome, email, senha_para_db)
+        match update_usuario:
+
+            case None:
+                return jsonify({ 'error': 'Usuário alvo não encontrado' }), 404
+            
+            case True:
+                return jsonify({ 'texto': 'Usuário atualizado com sucesso' }), 200
+            
+            case 'EMAIL_EXISTS':
+                 return jsonify({ 'error': 'Este email já está em uso por outra conta' }), 409
+            
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro ao atualizar o usuário' }), 500
+
+    except Exception as e:
+
+        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+
+    finally:
+
+        if conn:
+            conn.close()
