@@ -149,9 +149,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         );
 
-        console.log(response)
         const data = await response?.json();
-        console.log(data)
+        sessionStorage.setItem('usuario', JSON.stringify(data));
 
         if (!response.ok) {
             console.error('Token inválido ou expirado ao carregar header.');

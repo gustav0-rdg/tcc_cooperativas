@@ -1,84 +1,227 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: var(--verde-claro);
-    margin: 0;
-    padding: 0;
+/* /static/css/gerenciar_gestor/gerenciar-gestor.css */
+
+/* Importa as variáveis de cor (ajuste o caminho se necessário) */
+@import url('../root-de-cores.css');
+
+main h1 {
+    color: var(--verde-claro);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: var(--branco);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+/* --- Seção de Pesquisa e Botão --- */
 
-h1 {
-    font-size: 2rem;
-    color: var(--verde-escuro);
-    margin-bottom: 20px;
-}
-
-#searchInput {
-    border-radius: 20px;
-    padding: 10px 15px;
-    border: 1px solid var(--verde-escuro-medio);
-    background-color: var(--branco);
-    color: var(--verde-escuro);
-}
-
-button.btn-primary {
+.search-add-section {
+    background-color: rgba(0, 0, 0, 0.2); /* Fundo escuro semitransparente */
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(106, 182, 51, 0.2); /* Borda com a cor principal */
     display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+    gap: 1rem;
     align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--verde-principal);
-    border: none;
-    color: var(--branco);
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-button.btn-primary:hover {
-    background-color: var(--verde-escuro-medio);
+.search-add-section .input-group {
+    flex: 1; /* Ocupa o espaço disponível */
+    min-width: 300px; /* Largura mínima */
 }
 
-.card {
-    background-color: var(--branco);
+.search-add-section .input-group-text {
+    background-color: var(--verde-claro);
     border: 1px solid var(--verde-claro-medio);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.card h5 {
-    margin: 0;
-    font-size: 1.50rem;
-    color: var(--verde-escuro);
-}
-
-.card p {
-    margin: 5px 0;
-    font-size: 1.15rem;
+    border-right: none;
     color: var(--verde-escuro-medio);
 }
 
-.card .btn-danger {
-    font-size: 0.8rem;
-    padding: 5px 10px;
-    border-radius: 4px;
-    background-color: var(--vermelho);
-    border: none;
-    color: var(--branco);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+#searchInput {
+    background-color: var(--verde-claro);
+    border: 1px solid var(--verde-claro-medio);
+    border-left: none;
+    color: var(--verde-escuro);
+    font-weight: 500;
+}
+#searchInput:focus {
+    background-color: var(--branco);
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.25rem rgba(106, 182, 51, 0.25);
+}
+#searchInput::placeholder {
+    color: var(--verde-escuro-medio);
+    opacity: 0.7;
 }
 
-.card .btn-danger:hover {
-    background-color: var(--verde-escuro);
+.btn-add-gestor {
+    background-color: var(--verde-principal);
+    border: none;
+    color: var(--branco);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease;
+    padding: 0.5rem 1rem;
+}
+.btn-add-gestor:hover {
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+}
+
+/* --- Container dos Cards --- */
+
+#gestoresCards {
+    display: grid;
+    /* Grid responsivo: preenche com quantos cards de 350px couberem */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+/* --- Estilização dos Cards --- */
+
+.gestor-card {
+    background-color: var(--verde-claro);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: var(--verde-escuro);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.gestor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.gestor-card .card-title {
+    color: var(--verde-escuro);
+    font-weight: 700;
+    border-bottom: 2px solid var(--verde-claro-medio);
+    padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.gestor-card .card-title .material-icons-outlined {
+    color: var(--verde-escuro-medio);
+}
+
+.gestor-card .card-text {
+    color: var(--verde-escuro-medio);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+.gestor-card .card-text strong {
+    color: var(--verde-escuro);
+    font-weight: 600;
+}
+
+/* --- Botões de Ação do Card --- */
+
+.card-actions {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha se não couber */
+    gap: 0.5rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--verde-claro-medio);
+    padding-top: 1rem;
+}
+
+.card-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.card-actions .btn .material-icons-outlined {
+    font-size: 1.1rem;
+}
+
+.btn-excluir {
+    background-color: #fce1e1; /* Fundo vermelho claro */
+    color: var(--vermelho);
+}
+.btn-excluir:hover {
+    background-color: var(--vermelho);
+    color: var(--branco);
+}
+
+.btn-editar {
+    background-color: #e0e8da; /* Fundo verde-escuro-medio bem claro */
+    color: var(--verde-escuro-medio);
+}
+.btn-editar:hover {
+    background-color: var(--verde-escuro-medio);
+    color: var(--branco);
+}
+
+/* --- 🎨 ESTILIZAÇÃO CUSTOMIZADA DO SWEETALERT 🎨 ---
+Isso aplica sua paleta de cores aos modais.
+*/
+
+.swal-popup-custom {
+    background-color: var(--verde-claro) !important;
+    border-radius: 15px !important;
+    border: 2px solid var(--verde-principal) !important;
+    color: var(--verde-escuro) !important;
+}
+.swal-popup-custom .swal2-title {
+    color: var(--verde-escuro) !important;
+    font-weight: 700 !important;
+}
+.swal-popup-custom .swal2-html-container {
+    color: var(--verde-escuro-medio) !important;
+}
+
+/* --- Inputs dentro do Modal --- */
+.swal-popup-custom .swal2-input {
+    border: 1px solid var(--verde-claro-medio) !important;
+    background-color: var(--branco) !important;
+    color: var(--verde-escuro) !important;
+}
+.swal-popup-custom .swal2-input:focus {
+    border-color: var(--verde-principal) !important;
+    box-shadow: 0 0 0 0.25rem rgba(106, 182, 51, 0.25) !important;
+}
+
+/* --- Mensagem de Validação --- */
+.swal-popup-custom .swal2-validation-message {
+    background-color: var(--vermelho) !important;
+    color: var(--branco) !important;
+    border-radius: 5px !important;
+    margin-top: 0.5rem !important;
+}
+
+/* --- Botões do Modal --- */
+.swal-popup-custom .swal2-confirm,
+.swal-popup-custom .swal-confirm-custom {
+    background-color: var(--verde-principal) !important;
+    color: var(--branco) !important;
+    font-weight: 600 !important;
+    transition: background-color 0.2s ease !important;
+}
+.swal-popup-custom .swal2-confirm:hover,
+.swal-popup-custom .swal-confirm-custom:hover {
+    background-color: var(--verde-escuro-medio) !important;
+}
+
+.swal-popup-custom .swal2-cancel,
+.swal-popup-custom .swal-cancel-custom {
+    background-color: #6c757d !important; /* Bootstrap 'secondary' */
+    font-weight: 600 !important;
+    transition: background-color 0.2s ease !important;
+}
+.swal-popup-custom .swal2-cancel:hover,
+.swal-popup-custom .swal-cancel-custom:hover {
+    background-color: #5a6268 !important;
+}
+
+/* Botão de perigo (Excluir) */
+.swal-popup-custom .swal-confirm-custom-danger {
+    background-color: var(--vermelho) !important;
+}
+.swal-popup-custom .swal-confirm-custom-danger:hover {
+    background-color: #d33 !important; /* Vermelho mais escuro */
 }
