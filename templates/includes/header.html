@@ -93,6 +93,8 @@
 </style>
 
 <script>
+const { getUserInfo } = require('../../static/utils/loginGenerico.js');
+
 document.addEventListener('DOMContentLoaded', async () => {
 
     const token = localStorage.getItem('session_token');
@@ -136,42 +138,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     try {
-        const response = await fetch (
         
-            '/api/usuarios/get', 
-            
+        //#region Validação dos dados do usuário
+
+        let user_data = sessionStorage.getItem('usuario', null);
+
+        if (user_data == null) 
+        {
+            const session_token = localStorage.getItem('session_token', null);
+
+            if (session_token == null)
             {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': token
-                }
+                user_data = await getUserInfo(session_token);
+                sessionStorage.setItem('usuario', user_data);
             }
-        );
 
-        const data = await response?.json();
-        sessionStorage.setItem('usuario', JSON.stringify(data));
-
-        if (!response.ok) {
-            console.error('Token inválido ou expirado ao carregar header.');
-            // handleLogout(); // Opcional: Deslogar automaticamente se o token for ruim
-            return; 
+            else window.location.href = '/';
         }
 
+        //#endregion
 
-        if (data.tipo === 'gestor' || data.tipo === 'root') {
+        if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
             homeLink.href = '/pagina-inicial/gestor';
-            if(headerInfoAdmin && headerNomeAdmin && data.nome) {
-                headerNomeAdmin.textContent = data.nome.split(' ')[0];
+            if(headerInfoAdmin && headerNomeAdmin && user_data.nome) {
+                headerNomeAdmin.textContent = user_data.nome.split(' ')[0];
                 headerInfoAdmin.style.display = 'block';
             }
-        } else if (data.tipo === 'cooperativa') {
+        } else if (user_data.tipo === 'cooperativa') {
             homeLink.href = '/pagina-inicial';
-             if(headerInfoCoop && headerNomeCoop && data.nome) { 
-                headerNomeCoop.textContent = data.nome; 
+             if(headerInfoCoop && headerNomeCoop && user_data.nome) { 
+                headerNomeCoop.textContent = user_data.nome; 
                 headerInfoCoop.style.display = 'block';
              }
-        } else if (data.tipo === 'cooperado') {
+        } else if (user_data.tipo === 'cooperado') {
              homeLink.href = '/pagina-inicial'; 
         }
 
