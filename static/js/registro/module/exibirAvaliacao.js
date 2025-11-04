@@ -139,7 +139,7 @@ export function exibirAvaliacao() {
 }
 
 const enviarValores = async (dados) =>{
-
+    await getCoop();
     console.log('dados', JSON.stringify(dados))
     fetch('/post/dados-venda', {
         method: 'POST',
@@ -199,4 +199,80 @@ function renderizarComentarios(tipo){
             // Aqui você pode salvar o comentário no objeto da venda, por exemplo:
         });
     })
+}
+
+
+
+
+const session_token = localStorage.getItem('session_token');
+
+async function getUsuario (){
+    const response = await fetch (
+        
+        `/api/usuarios/get`, 
+        
+        {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': session_token
+            }
+        }
+    );
+    
+    const data_request = await response?.json();
+    
+    if (!response.ok)
+    {
+        throw new Error (
+    
+            'error' in data_request
+            ?
+            data_request.error
+            :
+            'Erro Interno. Tente novamente mais tarde.'
+    
+        );
+    }
+    
+    return data_request;
+}
+
+async function getCooperativa(id){
+  const response = await fetch (
+        
+      `/api/cooperativas/get/${id }`, 
+      
+      {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': session_token
+          }
+      }
+  );
+
+  const data_request = await response?.json();
+
+  if (!response.ok)
+  {
+      throw new Error (
+
+          'error' in data_request
+          ?
+          data_request.error
+          :
+          'Erro Interno. Tente novamente mais tarde.'
+
+      );
+  }
+
+  return data_request;
+}
+
+
+const getCoop = async () =>{
+    const user = await getUsuario();
+    const cooperativa = await getCooperativa(user.id_usuario);
+    vendaAtual.id_cooperativa = cooperativa.dados_cooperativa.id_cooperativa;
 }

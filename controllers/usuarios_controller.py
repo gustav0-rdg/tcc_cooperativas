@@ -5,7 +5,7 @@ from controllers.tokens_controller import Tokens
 from controllers.email_controller import Email
 import hashlib
 from datetime import datetime, timedelta
-from typing import Tuple
+from typing import Tuple, Optional
 
 class Usuarios:
 
@@ -22,23 +22,18 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id (self, id_usuario:int) -> dict | None:
+    def get_by_id (self, id_usuario:int) -> Optional[dict]:
         """
-
-        Consulta no banco de dados o
-
-        usuário com o ID fornecido
-
+        Consulta um usuário pelo ID.
+        UM SELECT (GET) NUNCA DEVE FAZER COMMIT OU ROLLBACK.
         """
 
         #region Exceções
         if not isinstance(id_usuario, int):
             raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser int')
-
         #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
             cursor.execute (
                 """
@@ -51,13 +46,11 @@ class Usuarios:
             )
             resultado = cursor.fetchone()
 
-            self.connection_db.commit()
             return resultado
         
         except Exception as e:
             print(f'Erro - Usuarios "get_by_id": {e}')
-            self.connection_db.rollback() # Garante rollback em caso de erro
-            return None # Retorna None em caso de erro
+            return None
         
         finally:
             cursor.close()
@@ -204,15 +197,16 @@ class Usuarios:
                 """, (nome, email, senha_hash, tipo)
             )
 
-            return cursor.lastrowid # Retorna o ID do usuário criado
+            self.connection_db.commit()
+            return cursor.lastrowid
 
         except mysql.connector.IntegrityError as e:
             print(f'Erro de Integridade - Usuarios "create": {e}')
-            return None
+            return False
         
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
-            return None
+            return False
         
         finally:
             cursor.close()
@@ -451,23 +445,20 @@ class Usuarios:
             return False
 
     def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
-
         """
-        Altera o status do usuario no sistema
+        Altera o status do usuario.
+        NOTA: Este método NÃO faz commit ou rollback. A API gere a transação.
         """
 
         #region Exceções
-
         if not isinstance(id_usuario, int):
             raise TypeError ('Usuarios "alterar_status" - id_usuario deve ser int')
         if not isinstance(novo_status, str):
             raise TypeError ('Usuarios "alterar_status" - novo_status deve ser string')
-        
-        #endregion
-
         status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
         if novo_status not in status_validos: 
             raise ValueError (f'Usuarios "alterar_status" - novo_status inválido: {novo_status}')
+        #endregion
 
         cursor = self.connection_db.cursor()
         try:
@@ -476,29 +467,25 @@ class Usuarios:
                 UPDATE usuarios SET status = %s WHERE id_usuario = %s;
                 """, (novo_status, id_usuario)
             )
-            self.connection_db.commit() 
-            return cursor.rowcount > 0 # Retorna True se alterou
+
+            return cursor.rowcount > 0 
         
         except Exception as e:
             print(f'Erro - Usuarios "alterar_status": {e}')
-            self.connection_db.rollback()
             return False
         
         finally:
             cursor.close()
 
     def delete (self, id_usuario:int) -> bool:
-
         """
-        Exclui permanentemente o usuário
-        do banco de dados
+        Exclui o usuário.
+        NOTA: Este método NÃO faz commit ou rollback. A API gere a transação.
         """
 
         #region Exceções
-
         if not isinstance(id_usuario, int):
             raise TypeError ('Usuarios "delete" - id_usuario deve ser int')
-
         #endregion
 
         cursor = self.connection_db.cursor()
@@ -508,17 +495,103 @@ class Usuarios:
                 DELETE FROM usuarios WHERE id_usuario = %s;
                 """, (id_usuario, )
             )
-            self.connection_db.commit() 
-            return cursor.rowcount > 0 # Retorna True se deletou
+            return cursor.rowcount > 0
         
         except Exception as e:
             print(f'Erro - Usuarios "delete": {e}')
-            self.connection_db.rollback()
             return False
         
         finally:
             cursor.close()
-    
+
+    def update(self, id_usuario: int, nome: str, email: str, senha: str | None = None) -> bool | str | None:
+        
+        """
+        Atualiza os dados de um usuário (nome, email e opcionalmente senha).
+        
+        Retorna:
+            True: se atualizado com sucesso.
+            None: se o id_usuario não foi encontrado (nenhuma linha afetada).
+            'EMAIL_EXISTS': se o email já está em uso por outra conta.
+            False: para outros erros de banco de dados.
+        """
+
+        #region Exceções
+
+        if not isinstance(id_usuario, int):
+            raise TypeError('Usuarios "update" - id_usuario deve ser int')
+        
+        if not isinstance(nome, str) or not nome:
+            raise TypeError('Usuarios "update" - nome deve ser uma string não vazia')
+        
+        if not isinstance(email, str) or not email:
+            raise TypeError('Usuarios "update" - email deve ser uma string não vazia')
+        
+        # Valida a senha apenas se ela for fornecida
+
+        if senha is not None:
+
+            if not isinstance(senha, str):
+                raise TypeError('Usuarios "update" - senha deve ser string ou None')
+            
+            if len(senha) < 8:
+                raise ValueError('Usuarios "update" - senha deve ter >= 8 caracteres')
+            
+        #endregion
+
+        cursor = self.connection_db.cursor()
+        
+        try:
+
+            query_parts = ["nome = %s", "email = %s"]
+            params = [nome, email]
+            
+            if senha:
+                senha_hash = Usuarios.criptografar(senha)
+                query_parts.append("senha_hash = %s")
+                params.append(senha_hash)
+            
+            query = f"UPDATE usuarios SET {', '.join(query_parts)} WHERE id_usuario = %s;"
+            params.append(id_usuario)
+            
+            cursor.execute(query, tuple(params))
+
+            # Usuário não encontrado
+
+            if cursor.rowcount == 0:
+
+                self.connection_db.rollback()
+                return None
+            
+            self.connection_db.commit()
+            return True
+
+        except mysql.connector.IntegrityError as e:
+            
+            self.connection_db.rollback()
+            
+            # 1062 = Duplicate entry
+            if 'email' in str(e).lower() or '1062' in str(e):
+
+                print(f'Erro de Integridade (Email) - Usuarios "update": {e}')
+                return 'EMAIL_EXISTS'
+            
+            else:
+
+                print(f'Erro de Integridade - Usuarios "update": {e}')
+                return False
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "update": {e}')
+
+            self.connection_db.rollback()
+            return False
+            
+        finally:
+            
+            cursor.close()
+
     def get_all_gestores (self) -> Tuple[dict]:
 
         cursor = self.connection_db.cursor(dictionary=True)
