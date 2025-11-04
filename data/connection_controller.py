@@ -1,5 +1,4 @@
 import mysql.connector
-from mysql.connector import MySQLConnection, CMySQLConnection
 
 info_conexoes = {
 
@@ -30,10 +29,10 @@ info_conexoes = {
 }
 
 class Connection:
-    connection_db: MySQLConnection = None
+    connection_db: mysql.connector.MySQLConnection = None
 
     def __init__(self, tipo_conexao: str):
-        tipo_conexao = 'online' # Ajustar conforme uso!!!!!!!
+        tipo_conexao = 'local' # Ajustar conforme uso!!!!!!!
         if tipo_conexao not in info_conexoes:
             raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
 
@@ -41,9 +40,6 @@ class Connection:
 
         if tipo_conexao == 'online':
             print("Configurando SSL para conexão online...")
-
-            # config['ssl_disabled'] = False
-            # config['ssl_verify_cert'] = True
 
         print(f"Tentando conectar a: {config.get('host')}...") 
         try:
@@ -72,8 +68,9 @@ class Connection:
              return True 
 
     @staticmethod
-    def validar (connection_db:MySQLConnection|CMySQLConnection) -> bool:
-        if isinstance(connection_db, (MySQLConnection, CMySQLConnection)) and connection_db.is_connected():
+    def validar (connection_db:mysql.connector.MySQLConnection )-> bool:
+        
+        if connection_db.is_connected():
             return True
         else:
             return False
