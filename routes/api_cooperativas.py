@@ -290,59 +290,76 @@ def get_all ():
 
         conn.close()
 
-@api_cooperativas.route('/alterar-aprovacao/<id_cooperativa>', methods=['POST'])
-def alterar_aprovacao (id_cooperativa:int):
+@api_cooperativas.route('/alterar-aprovacao', methods=['POST'])
+def alterar_aprovacao (): # Remove 'id_cooperativa' dos argumentos
 
-    if not id_cooperativa.isdigit():
-        return jsonify({ 'error': '"id_cooperativa" é inválido' }), 400
-    
-    id_cooperativa = int(id_cooperativa)
+    # Apanha os dados do JSON (body)
+    data = request.get_json()
+    id_cooperativa = data.get('id_cooperativa')
+    aprovacao = data.get('aprovacao') # (o teu JS envia 'aprovacao: true')
 
-    aprovacao = request.get_json().get('aprovacao')
+    if not id_cooperativa or aprovacao is None:
+        return jsonify({ 'error': '"id_cooperativa" e "aprovacao" (bool) são obrigatórios no JSON' }), 400
 
-    if not aprovacao or not isinstance(aprovacao, bool):
-        return jsonify({ 'error': '"aprovacao" deve ser do tipo Booleano' }), 400
-
-    token = request.headers.get('Authorization')
-    if not token:
+    token_header = request.headers.get('Authorization')
+    if not token_header:
         return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
 
     conn = Connection('local')
-
     try:
-
-        data_token = Tokens(conn.connection_db).validar(token)
-
-        if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+        db = conn.connection_db
         
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+        # 1. Validação do Gestor
+        token = token_header.split(" ")[1]
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido'}), 401
+        
+        id_usuario_gestor = data_token['id_usuario']
+        # (Usamos o 'Usuarios.get_by_id' que agora está "limpo")
+        usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
+        
+        if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
+            conn.close()
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        match Cooperativa(conn.connection_db).alterar_aprovacao(id_cooperativa, aprovacao):
+        # 2. Busca o ID do usuário da cooperativa
+        coop_ctrl = Cooperativa(db)
+        # (Usamos o 'Cooperativa.get_by_id' que agora está "renomeado")
+        cooperativa = coop_ctrl.get_by_id(id_cooperativa) 
+        
+        if not cooperativa:
+            conn.close()
+            return jsonify({'error': 'Cooperativa não encontrada'}), 404
 
-            # 404 - Cooperativa não encontrada
+        id_usuario_cooperativa = cooperativa['id_usuario']
+        
+        # 3. Inicia a transação "Tudo ou Nada"
+        db.start_transaction()
+        
+        # Ação A: Atualiza a cooperativa
+        sucesso_coop = coop_ctrl.alterar_aprovacao(id_cooperativa, aprovacao)
+        
+        # Ação B: Atualiza o status do usuário (de 'pendente' para 'ativo')
+        status_usuario = 'ativo' if aprovacao else 'inativo'
+        # (Usamos o 'Usuarios.alterar_status' que agora está "limpo")
+        sucesso_user = Usuarios(db).alterar_status(id_usuario_cooperativa, status_usuario)
 
-            case None:
-                return jsonify({ 'error': 'Cooperativa não encontrado' }), 404
-
-            # 200 - Aprovação alterada
-
-            case True:
-                return jsonify({ 'texto': 'Aprovação da cooperativa alterada' }), 200
-
-            # 500 - Erro ao alterar a aprovação da cooperativa
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        if sucesso_coop and sucesso_user:
+            db.commit() # A API faz o commit!
+            return jsonify({ 'texto': 'Status da cooperativa alterado com sucesso!' }), 200
+        else:
+            db.rollback()
+            return jsonify({ 'error': 'Erro ao atualizar status (coop ou user).' }), 500
 
     except Exception as e:
-
+        if conn: conn.connection_db.rollback()
+        print(f"Erro em /alterar-aprovacao: {e}") # O teu erro 'Transaction' aparecia aqui
         return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
     finally:
-
-        conn.close()
+        if conn:
+            conn.close()
 
 @api_cooperativas.route('/vincular-cooperado', methods=['POST'])
 def vincular_cooperado ():
@@ -497,7 +514,7 @@ def rejeitar_cooperativa():
     conn = Connection('local')
     try:
         db = conn.connection_db
-        
+
         token = token_header.split(" ")[1]
         data_token = Tokens(db).validar(token)
         if not data_token:
@@ -514,6 +531,7 @@ def rejeitar_cooperativa():
         db.start_transaction()
 
         coop_ctrl = Cooperativa(db)
+
         sucesso_doc = coop_ctrl.rejeitar_documento(id_cooperativa, id_usuario_gestor, motivo, justificativa)
 
         cooperativa_data = coop_ctrl.get_by_id(id_cooperativa)
@@ -521,7 +539,7 @@ def rejeitar_cooperativa():
             db.rollback()
             conn.close()
             return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
-        
+
         id_usuario_cooperativa = cooperativa_data['id_usuario']
         sucesso_user = Usuarios(db).alterar_status(id_usuario_cooperativa, 'bloqueado')
 
@@ -529,24 +547,17 @@ def rejeitar_cooperativa():
             db.rollback()
             conn.close()
             return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
-
+        
         assunto = "Cadastro no Recoopera Rejeitado"
         corpo_html = f"""
         <html>
-            <head><style>/*... (adiciona algum estilo se quiser) ...*/</style></head>
             <body>
                 <h2>Seu cadastro no Recoopera foi rejeitado.</h2>
-                <p>Olá! Após análise de um de nossos gestores, o seu pedido de cadastro foi rejeitado.</p>
-                <hr>
                 <p><strong>Motivo da Rejeição:</strong> {motivo}</p>
-                <p><strong>Justificativa do Gestor:</strong></p>
-                <p><i>"{justificativa}"</i></p>
-                <hr>
-                <p>Se isto foi um engano, por favor, contacte o suporte.</p>
+                <p><strong>Justificativa do Gestor:</strong> "{justificativa}"</p>
             </body>
         </html>
         """
-
         Email.enviar(email_cooperativa, assunto, corpo_html) 
 
         db.commit()

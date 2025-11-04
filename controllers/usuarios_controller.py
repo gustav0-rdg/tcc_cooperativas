@@ -5,7 +5,7 @@ from controllers.tokens_controller import Tokens
 from controllers.email_controller import Email
 import hashlib
 from datetime import datetime, timedelta
-from typing import Tuple
+from typing import Tuple, Optional
 
 class Usuarios:
 
@@ -22,23 +22,18 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id (self, id_usuario:int) -> dict | None:
+    def get_by_id (self, id_usuario:int) -> Optional[dict]:
         """
-
-        Consulta no banco de dados o
-
-        usuário com o ID fornecido
-
+        Consulta um usuário pelo ID.
+        UM SELECT (GET) NUNCA DEVE FAZER COMMIT OU ROLLBACK.
         """
 
         #region Exceções
         if not isinstance(id_usuario, int):
             raise TypeError ('Usuarios "get_by_id" - "id_usuario" deve ser int')
-
         #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
             cursor.execute (
                 """
@@ -51,13 +46,11 @@ class Usuarios:
             )
             resultado = cursor.fetchone()
 
-            self.connection_db.commit()
             return resultado
         
         except Exception as e:
             print(f'Erro - Usuarios "get_by_id": {e}')
-            self.connection_db.rollback() # Garante rollback em caso de erro
-            return None # Retorna None em caso de erro
+            return None
         
         finally:
             cursor.close()
@@ -452,14 +445,19 @@ class Usuarios:
 
     def alterar_status (self, id_usuario:int, novo_status:str) -> bool:
         """
-        Altera o status de um usuário (ex: 'pendente', 'ativo', 'bloqueado').
-        NOTA: Este método NÃO faz commit ou rollback. A transação é gerida pela API.
+        Altera o status do usuario.
+        NOTA: Este método NÃO faz commit ou rollback. A API gere a transação.
         """
-        
+
+        #region Exceções
+        if not isinstance(id_usuario, int):
+            raise TypeError ('Usuarios "alterar_status" - id_usuario deve ser int')
+        if not isinstance(novo_status, str):
+            raise TypeError ('Usuarios "alterar_status" - novo_status deve ser string')
         status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
-        if novo_status not in status_validos:
-            print(f'Erro - Usuarios "alterar_status": novo_status inválido: {novo_status}')
-            return False
+        if novo_status not in status_validos: 
+            raise ValueError (f'Usuarios "alterar_status" - novo_status inválido: {novo_status}')
+        #endregion
 
         cursor = self.connection_db.cursor()
         try:
@@ -468,12 +466,11 @@ class Usuarios:
                 UPDATE usuarios SET status = %s WHERE id_usuario = %s;
                 """, (novo_status, id_usuario)
             )
-            
-            return cursor.rowcount > 0 # Retorna True se alterou
+
+            return cursor.rowcount > 0 
         
         except Exception as e:
             print(f'Erro - Usuarios "alterar_status": {e}')
-            
             return False
         
         finally:
@@ -481,8 +478,8 @@ class Usuarios:
 
     def delete (self, id_usuario:int) -> bool:
         """
-        Exclui permanentemente o usuário do banco de dados.
-        NOTA: Este método NÃO faz commit ou rollback. A transação é gerida pela API.
+        Exclui o usuário.
+        NOTA: Este método NÃO faz commit ou rollback. A API gere a transação.
         """
 
         #region Exceções
@@ -497,12 +494,10 @@ class Usuarios:
                 DELETE FROM usuarios WHERE id_usuario = %s;
                 """, (id_usuario, )
             )
-       
-            return cursor.rowcount > 0 # Retorna True se deletou
+            return cursor.rowcount > 0
         
         except Exception as e:
             print(f'Erro - Usuarios "delete": {e}')
-
             return False
         
         finally:
