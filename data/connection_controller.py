@@ -1,5 +1,5 @@
 import mysql.connector
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, CMySQLConnection
 
 info_conexoes = {
 
@@ -59,7 +59,7 @@ class Connection:
         if self.connection_db and self.connection_db.is_connected():
             try:
                 self.connection_db.close()
-                print("Conexão fechada.") # Log
+                print("Conexão fechada.")
                 return True
             except mysql.connector.Error as e:
                 print(f'Erro - Connection "close": {e}')
@@ -72,8 +72,8 @@ class Connection:
              return True 
 
     @staticmethod
-    def validar (connection_db:MySQLConnection) -> bool:
-        if isinstance(connection_db, MySQLConnection) and connection_db.is_connected():
+    def validar (connection_db:MySQLConnection|CMySQLConnection) -> bool:
+        if isinstance(connection_db, (MySQLConnection, CMySQLConnection)) and connection_db.is_connected():
             return True
         else:
             return False
