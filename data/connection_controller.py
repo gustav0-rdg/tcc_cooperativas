@@ -48,7 +48,6 @@ def __init__(self, tipo_conexao: str = 'local'):
         self.connection_db = mysql.connector.connect(**config)
         print("Conexão bem-sucedida!")
 
-<<<<<<< HEAD
     except mysql.connector.Error as e:
         print(f'Erro - Connection: Erro ao criar conexão com o Banco de Dados ({tipo_conexao}): {e}')
         self.connection_db = None
@@ -80,9 +79,3 @@ def validar(connection_db) -> bool:
         return connection_db is not None and connection_db.is_connected()
     except Exception:
         return False
-=======
-    @staticmethod
-    def validar (connection_db) -> bool:
-        return True
-        
->>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
