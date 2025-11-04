@@ -181,8 +181,8 @@ def alterar_senha ():
 
         conn.close()
 
-@api_usuarios.route('/delete', methods=['POST'])
-@api_usuarios.route('/delete/<id_usuario>', methods=['POST'])
+@api_usuarios.route('/delete', methods=['GET', 'POST'])
+@api_usuarios.route('/delete/<id_usuario>', methods=['GET', 'POST'])
 def delete (id_usuario:int=None):
 
     token = request.headers.get('Authorization')
@@ -242,8 +242,8 @@ def delete (id_usuario:int=None):
 
         conn.close()
 
-@api_usuarios.route('/get', methods=['POST'])
-@api_usuarios.route('/get/<id_usuario>', methods=['POST'])
+@api_usuarios.route('/get', methods=['GET', 'POST'])
+@api_usuarios.route('/get/<id_usuario>', methods=['GET', 'POST'])
 def get_info (id_usuario:int=None):
 
     token = request.headers.get('Authorization')
@@ -390,7 +390,7 @@ def alterar_status (id_usuario:int=None):
 
         conn.close()
         
-@api_usuarios.route('/get-all-gestores', methods=['POST'])
+@api_usuarios.route('/get-all-gestores', methods=['GET', 'POST'])
 def get_all_gestores ():
 
     # 400 - Token Obrigatório
