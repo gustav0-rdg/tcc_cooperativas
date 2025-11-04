@@ -1,50 +1,86 @@
 import { getVendas } from "../api/getVendas.js";
 
-// const session_token = localStorage.getItem('session_token');
+const session_token = localStorage.getItem('session_token');
 
-// async function getUsuario (){
-//     const response = await fetch (
+async function getUsuario (){
+    const response = await fetch (
         
-//         '/api/usuarios', 
+        `/api/usuarios/get`, 
         
-//         {
-//             method: 'POST',
-//             headers: { 
-//                 'Content-Type': 'application/json',
-//                 'Authorization': session_token
-//             }
-//         }
-//     );
+        {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': session_token
+            }
+        }
+    );
     
-//     const data_request = await response?.json();
+    const data_request = await response?.json();
     
-//     if (!response.ok)
-//     {
-//         throw new Error (
+    if (!response.ok)
+    {
+        throw new Error (
     
-//             'error' in data_request
-//             ?
-//             data_request.error
-//             :
-//             'Erro Interno. Tente novamente mais tarde.'
+            'error' in data_request
+            ?
+            data_request.error
+            :
+            'Erro Interno. Tente novamente mais tarde.'
     
-//         );
-//     }
+        );
+    }
     
-//     return data_request;
-// }
+    return data_request;
+}
 
-// document.addEventListener('DOMContentLoaded', async function () {
-    
-//     usuario = await getUsuario();
+async function getCooperativa(id){
+  const response = await fetch (
+        
+      `/api/cooperativas/get/${id }`, 
+      
+      {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': session_token
+          }
+      }
+  );
 
-// });
+  const data_request = await response?.json();
+
+  if (!response.ok)
+  {
+      throw new Error (
+
+          'error' in data_request
+          ?
+          data_request.error
+          :
+          'Erro Interno. Tente novamente mais tarde.'
+
+      );
+  }
+
+  return data_request;
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
+    
+    const usuario = await getUsuario();
+    const cooperativa = await getCooperativa(usuario.id_usuario);
+    visualizarDados(cooperativa);
+    console.log(cooperativa);
+});
 
 
 const btnVisualizarVendas = document.querySelector('.btn-vendas');
 
 btnVisualizarVendas.addEventListener('click', async () => {
-  const vendas = await getVendas(); // Assume que você tem essa função que retorna os dados de vendas
+  const usuario = await getUsuario();
+  const cooperativa = await getCooperativa(usuario.id_usuario);
+  const vendas = await getVendas(cooperativa.dados_cooperativa.id_cooperativa); // Assume que você tem essa função que retorna os dados de vendas
   console.log(vendas);
   
   // Montar HTML para exibir os dados no formato desejado
@@ -77,3 +113,47 @@ btnVisualizarVendas.addEventListener('click', async () => {
     showCloseButton: true,
   });
 });
+
+
+
+
+const visualizarDados = (dados) => {
+  const cooperativa = dados.dados_cooperativa;
+
+  // Nome e CNPJ
+  const nomeElem = document.querySelector('.cooperativa-nome');
+  const cnpjElem = document.querySelector('.cooperativa-cnpj');
+  nomeElem.textContent = `${cooperativa.razao_social}`;
+  cnpjElem.innerHTML = `<span class="cooperativa-cnpj-bold">CNPJ:</span> ${cooperativa.cnpj}`;
+
+  // Endereço + Localização
+  const enderecoElem = document.querySelector('.endereco');
+  const cidadeElem = document.querySelector('.cidade');
+
+  enderecoElem.innerHTML = `
+    <span class="material-icons">place</span>
+    ${cooperativa.endereco}
+  `;
+  cidadeElem.innerHTML = `<strong>${cooperativa.cidade}, ${cooperativa.estado}</strong>`;
+
+  // Telefones e contatos (substitui apenas os valores)
+  const telefoneLinks = document.querySelectorAll('.btn-contato');
+  if (telefoneLinks.length >= 2) {
+    // Botão "Ligar"
+    telefoneLinks[0].setAttribute('href', `tel:${cooperativa.telefone.replace(/\D/g, '')}`);
+    telefoneLinks[0].querySelector('span:last-child').textContent = cooperativa.telefone;
+
+    // Botão WhatsApp
+    telefoneLinks[1].setAttribute('href', `https://wa.me/55${cooperativa.telefone.replace(/\D/g, '')}`);
+    telefoneLinks[1].querySelector('span:last-child').textContent = cooperativa.telefone;
+  }
+
+  // Email (se quiser adicionar em outro botão/link)
+  const contatoCard = document.querySelector('.contato-card');
+  if (contatoCard && !contatoCard.querySelector('.email-info')) {
+    const emailElem = document.createElement('p');
+    emailElem.classList.add('email-info');
+    emailElem.innerHTML = `<strong>Email:</strong> ${cooperativa.email}`;
+    contatoCard.appendChild(emailElem);
+  }
+};

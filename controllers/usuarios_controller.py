@@ -138,14 +138,27 @@ class Usuarios:
                 VALUES (%s, %s, %s, %s);
             """, (nome, email, senha_hash, tipo))
 
+<<<<<<< HEAD
+=======
+            self.connection_db.commit()
+>>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
             return cursor.lastrowid
 
         except mysql.connector.IntegrityError as e:
             print(f'Erro de Integridade - Usuarios "create": {e}')
+<<<<<<< HEAD
             return None
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
             return None
+=======
+            return False
+        
+        except Exception as e:
+            print(f'Erro - Usuarios "create": {e}')
+            return False
+        
+>>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
         finally:
             cursor.close()
 
@@ -418,6 +431,99 @@ class Usuarios:
         
         finally:
             cursor.close()
+<<<<<<< HEAD
+=======
+
+    def update(self, id_usuario: int, nome: str, email: str, senha: str | None = None) -> bool | str | None:
+        
+        """
+        Atualiza os dados de um usuário (nome, email e opcionalmente senha).
+        
+        Retorna:
+            True: se atualizado com sucesso.
+            None: se o id_usuario não foi encontrado (nenhuma linha afetada).
+            'EMAIL_EXISTS': se o email já está em uso por outra conta.
+            False: para outros erros de banco de dados.
+        """
+
+        #region Exceções
+
+        if not isinstance(id_usuario, int):
+            raise TypeError('Usuarios "update" - id_usuario deve ser int')
+        
+        if not isinstance(nome, str) or not nome:
+            raise TypeError('Usuarios "update" - nome deve ser uma string não vazia')
+        
+        if not isinstance(email, str) or not email:
+            raise TypeError('Usuarios "update" - email deve ser uma string não vazia')
+        
+        # Valida a senha apenas se ela for fornecida
+
+        if senha is not None:
+
+            if not isinstance(senha, str):
+                raise TypeError('Usuarios "update" - senha deve ser string ou None')
+            
+            if len(senha) < 8:
+                raise ValueError('Usuarios "update" - senha deve ter >= 8 caracteres')
+            
+        #endregion
+
+        cursor = self.connection_db.cursor()
+        
+        try:
+
+            query_parts = ["nome = %s", "email = %s"]
+            params = [nome, email]
+            
+            if senha:
+                senha_hash = Usuarios.criptografar(senha)
+                query_parts.append("senha_hash = %s")
+                params.append(senha_hash)
+            
+            query = f"UPDATE usuarios SET {', '.join(query_parts)} WHERE id_usuario = %s;"
+            params.append(id_usuario)
+            
+            cursor.execute(query, tuple(params))
+
+            # Usuário não encontrado
+
+            if cursor.rowcount == 0:
+
+                self.connection_db.rollback()
+                return None
+            
+            self.connection_db.commit()
+            return True
+
+        except mysql.connector.IntegrityError as e:
+            
+            self.connection_db.rollback()
+            
+            # 1062 = Duplicate entry
+            if 'email' in str(e).lower() or '1062' in str(e):
+
+                print(f'Erro de Integridade (Email) - Usuarios "update": {e}')
+                return 'EMAIL_EXISTS'
+            
+            else:
+
+                print(f'Erro de Integridade - Usuarios "update": {e}')
+                return False
+
+        except Exception as e:
+
+            print(f'Erro - Usuarios "update": {e}')
+
+            self.connection_db.rollback()
+            return False
+            
+        finally:
+            
+            cursor.close()
+
+    def get_all_gestores (self) -> Tuple[dict]:
+>>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
 
     def get_all_gestores(self) -> Tuple[dict]:
         cursor = self.connection_db.cursor(dictionary=True)
