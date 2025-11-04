@@ -449,10 +449,6 @@ window.CooperativasApp = (function () {
         const statusText = toCapitalize(ds.status || 'Indefinido');
         const statusClass = `status-${ds.status}`;
 
-        const isAtivo = ds.status == 'ativo';
-        const activityText = isAtivo ? 'Ativo (últimos 2 meses)' : 'Inativo (mais de 2 meses)';
-        const activityColor = isAtivo ? 'var(--verde-principal)' : 'var(--vermelho)';
-
         // preencher com dados do dataset
         const html = `
         <div class="detail-section">
@@ -473,12 +469,6 @@ window.CooperativasApp = (function () {
                 <div class="detail-item">
                     <span class="detail-label">Último Acesso</span>
                     <span class="detail-value">${formatarData(ds.ultimoAcesso)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Atividade</span>
-                    <span class="detail-value" style="color: ${activityColor}; font-weight: 700;">
-                        ${activityText}
-                    </span>
                 </div>
             </div>
         </div>
