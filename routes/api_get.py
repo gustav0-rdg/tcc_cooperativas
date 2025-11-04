@@ -33,7 +33,6 @@ def get_feedbacks():
         if conn:
             conn.close()
     
-
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
     """
