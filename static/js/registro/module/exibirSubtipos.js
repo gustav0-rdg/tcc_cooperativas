@@ -7,12 +7,36 @@ const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
 const compradorSection = document.querySelector('.registros__comprador');
 
+// --- CORREÇÃO 1: INJETAR O ESTILO DO BOTÃO NO HEAD ---
+// Esta função garante que o estilo do botão de sucesso exista na página
+function injectSwalButtonStyles() {
+    const styleId = 'swal-custom-button-style';
+    // Só injeta o estilo se ele ainda não existir
+    if (document.getElementById(styleId)) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `
+      .swal2-confirm.swal-confirm-custom-style {
+        background-color: var(--verde-escuro-medio) !important; 
+        color: var(--verde-claro) !important;               
+      }
+    `;
+    document.head.appendChild(style);
+}
+
+// Chama a função IMEDIATAMENTE para garantir que o estilo esteja pronto
+injectSwalButtonStyles();
+// --- FIM DA CORREÇÃO 1 ---
+
+
 let valoresCadastro = {
     nome_padrao: undefined,
     sinonimo: undefined,
     id_material_catalogo: undefined, // Adicionei isso
 }
-
 
 // Estilos para o swal
 const swalStyles = `
@@ -98,6 +122,8 @@ const swalStyles = `
   }
 `;
 
+// REMOVI a constante successButtonStyle daqui, pois ela foi substituída pela função injectSwalButtonStyles()
+
 
 export async function exibirSubtipos() {
     compradorSection.innerHTML = '';
@@ -146,7 +172,8 @@ export async function exibirSubtipos() {
         
         Swal.fire({
             title: 'Vincular ou Criar Material',
-            icon: 'question',
+            // --- O ÍCONE FOI MANTIDO CONFORME SOLICITADO ---
+            icon: 'question', 
             width: '550px',
             html: `
               <style>${swalStyles}</style> <div class="swal-content-container">
@@ -260,16 +287,29 @@ async function cadastrarSinonimo(valoresCadastro) {
         const data = await resposta.json();
 
         if (resposta.ok) {
-            await Swal.fire('✅ Sucesso!', data.message, 'success');
+          await Swal.fire({
+            title: '✅ Sucesso!',
+            text: data.message,
+            icon: 'success',
+            background: "var(--verde-claro)",
+            color: "var(--verde-escuro)",
+            confirmButtonText: 'Fechar',
+            // --- CORREÇÃO 2: REMOVIDO 'html: successButtonStyle' ---
+            // html: successButtonStyle, // <--- REMOVIDO
+            customClass: {
+              confirmButton: 'swal-confirm-custom-style' // A classe agora existe globalmente
+            }
+          });
         } else {
-            await Swal.fire('❌ Erro!', data.message, 'error');
+          await Swal.fire('❌ Erro!', data.message, 'error');
         }
-    } catch (error) {
+      }
+    catch (error) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
     finally {
-        exibirSubtipos() // Recarrega a lista
+        exibirSubtipos() 
     }
 }
 
@@ -288,17 +328,23 @@ async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
               title:'🎉 Material cadastrado!', 
               text: data.message, 
               icon:'success',
-              background: 'var(--verde-claro)',
-              color: 'var(--verde-escuro)'
+              background: "var(--verde-claro)",
+              color: "var(--verde-escuro)",
+              confirmButtonText: 'Fechar',
+              // --- CORREÇÃO 2: REMOVIDO 'html: successButtonStyle' ---
+              // html: successButtonStyle, // <--- REMOVIDO
+              customClass: {
+                confirmButton: 'swal-confirm-custom-style' // A classe agora existe globalmente
+              }
             });
         } else {
             await Swal.fire('❌ Erro!', data.message, 'error');
-        }
+         }
     } catch (error) {
         console.error(error);
         Swal.fire('Erro!', 'Falha na comunicação com o servidor.', 'error');
     }
     finally {
-        exibirSubtipos() // Recarrega a lista
+        exibirSubtipos() 
     }
 }
