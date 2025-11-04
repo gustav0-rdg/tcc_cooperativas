@@ -59,7 +59,7 @@ class Connection:
         if self.connection_db and self.connection_db.is_connected():
             try:
                 self.connection_db.close()
-                print("Conexão fechada.") # Log
+                print("Conexão fechada.")
                 return True
             except mysql.connector.Error as e:
                 print(f'Erro - Connection "close": {e}')
