@@ -1,9 +1,9 @@
 <!DOCTYPE html> 
 <html lang="pt-br"> <
 <head>
-  <meta charset="UTF-8"> <!-- Define o padrão de codificação de caracteres -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Faz o layout ser responsivo em dispositivos móveis -->
-  <title>RECOOPERA | Login Cooperado</title> <!-- Define o título que aparecerá na aba do navegador -->
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>RECOOPERA | Login Cooperado</title>
 
   <!-- Importa o arquivo com as cores padrão do sistema -->
   <link rel="stylesheet" href="../static/css/root-de-cores.css">
@@ -22,41 +22,32 @@
 </head>
 
 <body>
-  <!-- Seção principal que contém o conteúdo da página -->
   <section class="conteudo">
-
-    <!-- Container para centralizar o formulário vertical e horizontalmente -->
     <div class="container d-flex justify-content-center align-items-center vh-100">
 
-      <!-- Card centralizado com sombra e espaçamento interno -->
       <div class="card shadow-lg p-4" style="max-width: 400px; width: 90%;">
-        <h1 class="text-center mb-2">Login Cooperado</h1> <!-- Título do formulário -->
+        <h1 class="text-center mb-2">Login Cooperado</h1> 
 
-        <!-- Início do formulário de login -->
         <form action="/post/login" method="post" id="form">
 
-          <!-- Campo para o CPF -->
           <div class="mb-2">
-            <label for="cnpj" class="form-label">CPF</label> <!-- Rótulo do campo -->
-            <input type="text" id="cpf" name="cpf" class="form-control" plrequired> <!-- Campo de texto para CPF -->
+            <label for="cnpj" class="form-label">CPF</label> 
+            <input type="text" id="cpf" name="cpf" class="form-control" plrequired> 
           </div>
 
-          <!-- Campo para a senha -->
           <div class="mb-2">
-            <label for="senha" class="form-label">Senha</label> <!-- Rótulo do campo -->
-            <input type="password" id="senha" name="senha" class="form-control" required> <!-- Campo de senha -->
-            <!-- Link para página de recuperação de senha -->
-            <a href="/recuperar-senha" class="link_a">Esqueceu a senha?</a>
+            <label for="senha" class="form-label">Senha</label> 
+            <input type="password" id="senha" name="senha" class="form-control" required>           
+             <p>Esqueceu a senha?<a href="/recuperar-senha" class="link_a"> Clique aqui!</a></p>           
           </div>
 
-          <!-- Botão de login (funciona como link para outra página) -->
-          <button type="submit" class="btn btn-primary w-100">Login</button>
+          <button type="submit" class="btn btn-primary btn-login w-100">Login</button>
 
-        </form> <!-- Fim do formulário -->
-      </div> <!-- Fim do card -->
-    </div> <!-- Fim do container -->
+        </form> 
+      </div> 
+    </div> 
 
-  </section> <!-- Fim da seção principal -->
+  </section> 
 </body>
 
-</html> <!-- Fim do documento HTML -->
+</html> 
