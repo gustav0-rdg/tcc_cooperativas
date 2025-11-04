@@ -33,6 +33,7 @@ class Connection:
     connection_db: MySQLConnection = None
 
     def __init__(self, tipo_conexao: str):
+        tipo_conexao = 'online' # Ajustar conforme uso!!!!!!!
         if tipo_conexao not in info_conexoes:
             raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
 
