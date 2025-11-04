@@ -23,7 +23,8 @@ body {
 }
 
 #form input:focus {
-    border-color: var(--verde-escuro-medio);
+    border: 2px solid;
+    border-color: var(--verde-escuro-medio) !important;
     box-shadow: 0 0 0 0.25rem rgba(var(--verde-escuro-medio), 0.25);
 }
 
@@ -32,14 +33,14 @@ body {
     text-align: center; 
     background-color: var(--verde-escuro-medio) !important;
     color: var(--verde-claro) !important; 
-    border: 0;
+    border: none !important;
     text-transform: uppercase;
-    font-weight: 700;
-    font-size: 1.1rem; 
+    font-weight: 700  !important;
+    font-size: 1.1rem !important; 
     padding: 10px 0; 
     border-radius: 5px;
     margin-top: 15px; 
-    transition: background-color 0.3s;
+    transition: background-color 0.3s !important;
 }
 
 .btn-login:hover {

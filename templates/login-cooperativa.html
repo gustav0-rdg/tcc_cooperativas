@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"> <!-- Define o conjunto de caracteres como UTF-8 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Garante que a página se ajuste em diferentes tamanhos de tela -->
-  <title>Login | Cooperativa</title> <!-- Título que aparece na aba do navegador -->
+  <title> RECOOPERA | Login Cooperativa</title> <!-- Título que aparece na aba do navegador -->
 
   <!-- Links para os estilos CSS personalizados -->
   <link rel="stylesheet" href="../static/css/root-de-cores.css"> <!-- Define as cores padrões do projeto -->
@@ -26,7 +26,7 @@
 
       <!-- Card com sombra, padding e tamanho máximo definido -->
       <div class="card shadow-lg p-4" style="max-width: 400px; width: 90%;">
-        <h1 class="text-center mb-2">Login</h1> <!-- Título centralizado -->
+        <h1 class="text-center mb-2">Login Cooperativa</h1> <!-- Título centralizado -->
 
         <!-- Formulário de login -->
         <form action="/post/login" method="post" id="form">
@@ -34,7 +34,7 @@
           <!-- Campo de entrada para o CNPJ -->
           <div class="mb-2">
             <label for="cnpj" class="form-label">CNPJ</label>
-            <input type="text" id="cnpj" name="cnpj" class="form-control" required>
+            <input type="text" id="cnpj" name="cnpj" class="form-control form-input" required>
           </div>
           
           <!-- Campo de entrada para a senha -->
@@ -46,7 +46,7 @@
           </div>
           
           <!-- Botão de login (simulado como link) -->
-          <button type="submit" class="btn btn-primary w-100">Login</button>
+          <button type="submit" class="btn btn-primary btn-login w-100">Login</button>
           <!-- Link para página de cadastro -->
           <p class="text-center mt-4">
             Não tem cadastro? <a href="/cadastro" class="link_a"> clique aqui </a>
