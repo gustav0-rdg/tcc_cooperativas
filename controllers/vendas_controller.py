@@ -87,6 +87,7 @@ class Vendas:
             return id_subtipo
         else:
             raise ValueError(f"Nenhum material ativo chamado '{nome_subtipo}' foi encontrado no catálogo.")
+
     def _buscar_ids_feedback_tags(self, lista_tags: list[str]) -> list[int]:
         """
         Busca os IDs de uma lista de tags de feedback.
@@ -233,8 +234,6 @@ class Vendas:
             # Garante que o cursor seja fechado, independentemente de sucesso ou falha.
             cursor.close()
 
-    
-    # region get vendas por cooperativa
     def get_by_coop(self, id_cooperativa):
         """
         Busca as vendas de uma respectiva cooperativa

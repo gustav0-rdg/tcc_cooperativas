@@ -64,8 +64,7 @@ class Compradores:
             return []
         finally: 
             cursor.close()
-
-    
+ 
     def get_by_materials(self, material, subtipo):
         """
         Busca e agrupa compradores com base no material que compraram.

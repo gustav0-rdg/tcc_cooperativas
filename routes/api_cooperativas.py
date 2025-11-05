@@ -305,75 +305,107 @@ def get_all ():
         conn.close()
 
 @api_cooperativas.route('/alterar-aprovacao', methods=['POST'])
-def alterar_aprovacao (): # Remove 'id_cooperativa' dos argumentos
+def alterar_aprovacao():
 
-    # Apanha os dados do JSON (body)
     data = request.get_json()
     id_cooperativa = data.get('id_cooperativa')
-    aprovacao = data.get('aprovacao') # (o teu JS envia 'aprovacao: true')
+    aprovacao = data.get('aprovacao')
+
 
     if not id_cooperativa or aprovacao is None:
-        return jsonify({ 'error': '"id_cooperativa" e "aprovacao" (bool) são obrigatórios no JSON' }), 400
+        return jsonify({'error': 'id_cooperativa e aprovacao são obrigatórios'}), 400
+
 
     token_header = request.headers.get('Authorization')
     if not token_header:
-        return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
+        return jsonify({'error': 'token é parâmetro obrigatório'}), 400
+
 
     conn = Connection('local')
+    if not conn.connection_db:
+        return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
+
+    db = conn.connection_db
     try:
-        db = conn.connection_db
-        
-        # 1. Validação do Gestor
-        token = token_header.split(" ")[1]
+        token = token_header.split(' ')[1]
         data_token = Tokens(db).validar(token)
         if not data_token:
             conn.close()
             return jsonify({'error': 'Token inválido'}), 401
-        
+
         id_usuario_gestor = data_token['id_usuario']
-        # (Usamos o 'Usuarios.get_by_id' que agora está "limpo")
         usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
-        
+
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()
-            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-        
-        # 2. Busca o ID do usuário da cooperativa
+            return jsonify({'error': 'Você não tem permissão para realizar tal ação'}), 403
+
         coop_ctrl = Cooperativa(db)
-        # (Usamos o 'Cooperativa.get_by_id' que agora está "renomeado")
-        cooperativa = coop_ctrl.get_by_id(id_cooperativa) 
-        
+        cooperativa = coop_ctrl.get_by_id(int(id_cooperativa))
+
         if not cooperativa:
             conn.close()
             return jsonify({'error': 'Cooperativa não encontrada'}), 404
 
+
         id_usuario_cooperativa = cooperativa['id_usuario']
-        
-        # 3. Inicia a transação "Tudo ou Nada"
+
+
+        # Garante que não há transação pendente na conexão antes de iniciar
+        try:
+            if db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+
         db.start_transaction()
-        
-        # Ação A: Atualiza a cooperativa
-        sucesso_coop = coop_ctrl.alterar_aprovacao(id_cooperativa, aprovacao)
-        
-        # Ação B: Atualiza o status do usuário (de 'pendente' para 'ativo')
-        status_usuario = 'ativo' if aprovacao else 'inativo'
-        # (Usamos o 'Usuarios.alterar_status' que agora está "limpo")
-        sucesso_user = Usuarios(db).alterar_status(id_usuario_cooperativa, status_usuario)
+
+        sucesso_coop = coop_ctrl.alterar_aprovacao(int(id_cooperativa), bool(aprovacao))
+        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'ativo' if aprovacao else 'inativo')
+
 
         if sucesso_coop and sucesso_user:
-            db.commit() # A API faz o commit!
-            return jsonify({ 'texto': 'Status da cooperativa alterado com sucesso!' }), 200
+            # Commit primeiro para garantir que a alteração seja salva
+            db.commit()
+            
+            # Envia email de aprovação ou reprovação (não bloqueia se falhar)
+            try:
+                usuario_coop = Usuarios(db).get_by_id(int(id_usuario_cooperativa))
+                if usuario_coop and usuario_coop.get('email'):
+                    if bool(aprovacao):
+                        assunto = "Cadastro no Recoopera Aprovado"
+                        corpo_html = Email.gerar_template_aprovacao(cooperativa.get('razao_social', 'Cooperativa'))
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+                    else:
+                        # Email de reprovação sem motivo específico (quando usado através de /alterar-aprovacao)
+                        assunto = "Cadastro no Recoopera Rejeitado"
+                        motivo = "Aprovação negada"
+                        justificativa = "Seu cadastro foi rejeitado. Entre em contato conosco para mais informações."
+                        corpo_html = Email.gerar_template_rejeicao(
+                            cooperativa.get('razao_social', 'Cooperativa'),
+                            motivo,
+                            justificativa
+                        )
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+            except Exception as email_error:
+                # Log do erro mas não bloqueia a resposta de sucesso
+                print(f"Erro ao enviar email (não crítico): {email_error}")
+            
+            return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
         else:
             db.rollback()
-            return jsonify({ 'error': 'Erro ao atualizar status (coop ou user).' }), 500
+            return jsonify({'error': 'Erro ao atualizar status (coop ou user).'}), 500
 
     except Exception as e:
-        if conn: conn.connection_db.rollback()
-        print(f"Erro em /alterar-aprovacao: {e}") # O teu erro 'Transaction' aparecia aqui
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
+        try:
+            if db and db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+        print(f"Erro em /alterar-aprovacao: {e}")
+        return jsonify({'error': f'Erro no servidor: {e}'}), 500
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 @api_cooperativas.route('/vincular-cooperado', methods=['POST'])
 def vincular_cooperado ():
@@ -514,7 +546,7 @@ def enviar_documento():
 
 @api_cooperativas.route('/rejeitar', methods=['POST'])
 def rejeitar_cooperativa():
-    
+
     token_header = request.headers.get('Authorization')
     data = request.get_json()
     id_cooperativa = data.get('id_cooperativa')
@@ -522,66 +554,78 @@ def rejeitar_cooperativa():
     motivo = data.get('motivo')
     justificativa = data.get('justificativa')
 
+
     if not all([token_header, id_cooperativa, email_cooperativa, motivo, justificativa]):
-        return jsonify({'error': 'Dados incompletos (token, id, email, motivo, justificativa são obrigatórios)'}), 400
+        return jsonify({'error': 'Dados incompletos'}), 400
+
 
     conn = Connection('local')
-    try:
-        db = conn.connection_db
+    if not conn.connection_db:
+        return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
 
-        token = token_header.split(" ")[1]
+    db = conn.connection_db
+    try:
+        token = token_header.split(' ')[1]
         data_token = Tokens(db).validar(token)
         if not data_token:
             conn.close()
             return jsonify({'error': 'Token inválido'}), 401
-        
+
         id_usuario_gestor = data_token['id_usuario']
         usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
-        
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
+        try:
+            if db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+
         db.start_transaction()
-
         coop_ctrl = Cooperativa(db)
+        sucesso_doc = coop_ctrl.rejeitar_documento(int(id_cooperativa), int(id_usuario_gestor), motivo, justificativa)
 
-        sucesso_doc = coop_ctrl.rejeitar_documento(id_cooperativa, id_usuario_gestor, motivo, justificativa)
 
-        cooperativa_data = coop_ctrl.get_by_id(id_cooperativa)
+        cooperativa_data = coop_ctrl.get_by_id(int(id_cooperativa))
         if not cooperativa_data:
             db.rollback()
             conn.close()
             return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
 
         id_usuario_cooperativa = cooperativa_data['id_usuario']
-        sucesso_user = Usuarios(db).alterar_status(id_usuario_cooperativa, 'bloqueado')
+        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'bloqueado')
+
 
         if not (sucesso_doc and sucesso_user):
             db.rollback()
             conn.close()
             return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
-        
-        assunto = "Cadastro no Recoopera Rejeitado"
-        corpo_html = f"""
-        <html>
-            <body>
-                <h2>Seu cadastro no Recoopera foi rejeitado.</h2>
-                <p><strong>Motivo da Rejeição:</strong> {motivo}</p>
-                <p><strong>Justificativa do Gestor:</strong> "{justificativa}"</p>
-            </body>
-        </html>
-        """
-        Email.enviar(email_cooperativa, assunto, corpo_html) 
 
+        # Commit primeiro para garantir que a alteração seja salva
         db.commit()
+
+        # Envia email de rejeição com template HTML bonito (não bloqueia se falhar)
+        try:
+            assunto = "Cadastro no Recoopera Rejeitado"
+            razao_social = cooperativa_data.get('razao_social', 'Cooperativa')
+            corpo_html = Email.gerar_template_rejeicao(razao_social, motivo, justificativa)
+            Email.enviar(email_cooperativa, assunto, corpo_html)
+        except Exception as email_error:
+            # Log do erro mas não bloqueia a resposta de sucesso
+            print(f"Erro ao enviar email (não crítico): {email_error}")
+
         return jsonify({'message': 'Cooperativa rejeitada e e-mail enviado.'}), 200
 
+
     except Exception as e:
-        if conn: conn.connection_db.rollback()
+        try:
+            if db and db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
         print(f"Erro em /rejeitar: {e}")
         return jsonify({'error': f'Erro interno no servidor: {e}'}), 500
-    
     finally:
-        if conn:
-            conn.close()
+        conn.close()

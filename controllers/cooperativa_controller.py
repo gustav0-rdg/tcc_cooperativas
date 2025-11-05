@@ -15,32 +15,29 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
-    def get_by_id (self, id_cooperativa:int) -> Optional[dict]:
-        """
-        Procura a cooperativa pelo ID.
-        """
-        #region Exceções
+    def get_by_id(self, id_cooperativa: int) -> Optional[dict]:
         if not isinstance(id_cooperativa, int):
-            raise TypeError ('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
-        #endregion
+            raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
+
 
         cursor = self.connection_db.cursor(dictionary=True)
         try:
-            cursor.execute (
+            cursor.execute(
                 """
                 SELECT
-                    c.id_cooperativa,
-                    c.id_usuario, 
-                    c.cnpj,
-                    c.razao_social,
-                    u.email
+                c.id_cooperativa,
+                c.id_usuario,
+                c.cnpj,
+                c.razao_social,
+                u.email
                 FROM cooperativas AS c
                 JOIN usuarios AS u ON c.id_usuario = u.id_usuario
                 WHERE c.id_cooperativa = %s;
                 """,
-                (id_cooperativa, )
+                (id_cooperativa,)
             )
             return cursor.fetchone()
+        
         except Exception as e:
             print(f'Erro - Cooperativa "get_by_id": {e}')
             return None
@@ -253,52 +250,31 @@ class Cooperativa:
 
             cursor.close()
 
-    def alterar_aprovacao (self, id_cooperativa:int, aprovado:bool) -> bool:
-        
-        """
-        Altera o estado de aprovação da
-        cooperativa, variando entre True or False
-        """
-
-        #region Exceções
+    def alterar_aprovacao(self, id_cooperativa: int, aprovado: bool) -> bool:
 
         if not isinstance(id_cooperativa, int):
-
-            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
-        
+            raise TypeError('Cooperativa - "id_cooperativa" deve ser int')
         if not isinstance(aprovado, bool):
+            raise TypeError('Cooperativa - "aprovado" deve ser boolean')
 
-            raise TypeError ('Cooperativa - "aprovado" deve ser do tipo Booleano')
-
-        #endregion
 
         cursor = self.connection_db.cursor()
-
         try:
-
-            cursor.execute (
-
+            cursor.execute(
                 """
                 UPDATE cooperativas
-                SET cooperativas.aprovado = %s
-                WHERE cooperativas.id_cooperativa = %s;
+                SET aprovado = %s
+                WHERE id_cooperativa = %s;
                 """,
-
                 (aprovado, id_cooperativa)
-
             )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0 or None
-
+            return cursor.rowcount > 0
+        
         except Exception as e:
-
             print(f'Erro - Cooperativa "alterar_aprovacao": {e}')
-
             return False
-
+        
         finally:
-
             cursor.close()
 
     def create (
@@ -364,11 +340,7 @@ class Cooperativa:
         finally:
             cursor.close()
 
-    def adicionar_documento (self, id_cooperativa: int, arquivo_url: str) -> int | bool:
-        """
-        Insere um novo documento comprovativo para a cooperativa
-        """
-
+    def adicionar_documento(self, id_cooperativa: int, arquivo_url: str) -> Optional[int]:
         cursor = self.connection_db.cursor()
 
         try:
@@ -379,79 +351,70 @@ class Cooperativa:
                 """,
                 (id_cooperativa, arquivo_url)
             )
-            
             return cursor.lastrowid
         
         except Exception as e:
             print(f'Erro - Cooperativa "adicionar_documento": {e}')
-            return
+            return None
         
         finally:
-            cursor.close
+            cursor.close()
 
     def get_pendentes_com_documentos(self) -> list | bool:
-        """
-        Busca todas as cooperativas pendentes (aprovado=FALSE)
-        e junta o primeiro documento pendente de cada uma,
-        assim como o email do usuário associado.
-        """
         cursor = self.connection_db.cursor(dictionary=True)
         try:
-            # Esta query junta usuarios (para o email), cooperativas (para os dados)
-            # e documentos_cooperativa (para o link do arquivo)
             query = """
-                SELECT 
+                SELECT
                     u.email,
-                    c.id_cooperativa, 
-                    c.razao_social, 
-                    c.cnpj, 
+                    c.id_cooperativa,
+                    c.razao_social,
+                    c.cnpj,
                     c.data_cadastro,
-                    doc.arquivo_url
+                    GROUP_CONCAT(DISTINCT doc.arquivo_url SEPARATOR ',') AS arquivo_url
                 FROM cooperativas AS c
                 JOIN usuarios AS u ON c.id_usuario = u.id_usuario
-                LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa 
-                                                       AND doc.status = 'pendente'
-                WHERE 
-                    c.aprovado = FALSE 
+                LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa
+                    AND doc.status = 'pendente'
+                WHERE
+                    c.aprovado = FALSE
                     AND u.status = 'pendente'
-                GROUP BY c.id_cooperativa;
-            """
+                GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_cadastro;
+                """
+            
             cursor.execute(query)
             return cursor.fetchall()
-
+        
         except Exception as e:
             print(f'Erro - Cooperativa "get_pendentes_com_documentos": {e}')
             return False
+        
         finally:
             cursor.close()
 
     def rejeitar_documento(self, id_cooperativa: int, id_gestor_avaliador: int, motivo: str, justificativa: str) -> bool:
-        """
-        Atualiza o status de um documento para 'negado' e regista o motivo.
-        NOTA: Este método NÃO faz commit. A transação é gerida pela API.
-        """
         cursor = self.connection_db.cursor()
+
         try:
             motivo_completo = f"Motivo: {motivo}. Justificativa: {justificativa}"
-            
-            # Atualiza o(s) documento(s) pendente(s) desta cooperativa para 'negado'
             cursor.execute(
                 """
-                UPDATE documentos_cooperativa 
-                SET 
-                    status = 'negado', 
-                    motivo_rejeicao = %s,
-                    data_avaliacao = NOW(),
-                    id_gestor_avaliador = %s
-                WHERE 
-                    id_cooperativa = %s AND status = 'pendente';
+                UPDATE documentos_cooperativa
+                SET
+                status = 'negado',
+                motivo_rejeicao = %s,
+                data_avaliacao = NOW(),
+                id_gestor_avaliador = %s
+                WHERE
+                id_cooperativa = %s AND status = 'pendente';
                 """,
                 (motivo_completo, id_gestor_avaliador, id_cooperativa)
-            )
-            return cursor.rowcount > 0 # Retorna True se algo foi atualizado
-
+                )
+            
+            return cursor.rowcount > 0
+        
         except Exception as e:
             print(f'Erro - Cooperativa "rejeitar_documento": {e}')
             return False
+        
         finally:
             cursor.close()
