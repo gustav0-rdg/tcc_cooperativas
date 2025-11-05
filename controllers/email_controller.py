@@ -105,7 +105,7 @@ class Email:
                     <td align="center">
                         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
                             <tr>
-                                <td style="padding: 20px 40px; background-color: #D32F2F; text-align: center; color: #ffffff;">
+                                <td style="padding: 20px 40px; background-color: #6AB633; text-align: center; color: #ffffff;">
                                     <h1 style="margin: 0; font-size: 28px; color: #ffffff;">Recoopera</h1>
                                 </td>
                             </tr>
