@@ -1,4 +1,11 @@
 from flask import Flask
+from dotenv import load_dotenv  
+from os import getenv
+
+# Carrega as variáveis do arquivo '.env'
+load_dotenv()
+
+# Importa as rotas
 from routes.pages import pages
 from routes.api_post import api_post
 from routes.api_get import api_get

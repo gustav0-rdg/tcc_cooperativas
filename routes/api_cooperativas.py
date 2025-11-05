@@ -365,12 +365,36 @@ def alterar_aprovacao():
 
 
         if sucesso_coop and sucesso_user:
+            # Commit primeiro para garantir que a alteração seja salva
             db.commit()
+            
+            # Envia email de aprovação ou reprovação (não bloqueia se falhar)
+            try:
+                usuario_coop = Usuarios(db).get_by_id(int(id_usuario_cooperativa))
+                if usuario_coop and usuario_coop.get('email'):
+                    if bool(aprovacao):
+                        assunto = "Cadastro no Recoopera Aprovado"
+                        corpo_html = Email.gerar_template_aprovacao(cooperativa.get('razao_social', 'Cooperativa'))
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+                    else:
+                        # Email de reprovação sem motivo específico (quando usado através de /alterar-aprovacao)
+                        assunto = "Cadastro no Recoopera Rejeitado"
+                        motivo = "Aprovação negada"
+                        justificativa = "Seu cadastro foi rejeitado. Entre em contato conosco para mais informações."
+                        corpo_html = Email.gerar_template_rejeicao(
+                            cooperativa.get('razao_social', 'Cooperativa'),
+                            motivo,
+                            justificativa
+                        )
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+            except Exception as email_error:
+                # Log do erro mas não bloqueia a resposta de sucesso
+                print(f"Erro ao enviar email (não crítico): {email_error}")
+            
             return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
         else:
             db.rollback()
             return jsonify({'error': 'Erro ao atualizar status (coop ou user).'}), 500
-
 
     except Exception as e:
         try:
@@ -579,20 +603,19 @@ def rejeitar_cooperativa():
             conn.close()
             return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
 
-
-        assunto = "Cadastro no Recoopera Rejeitado"
-        corpo_html = f"""
-                <html>
-                <body>
-                <h2>Seu cadastro no Recoopera foi rejeitado.</h2>
-                <p><strong>Motivo da Rejeição:</strong> {motivo}</p>
-                <p><strong>Justificativa do Gestor:</strong> "{justificativa}"</p>
-                </body>
-                </html>
-                """
-        Email.enviar(email_cooperativa, assunto, corpo_html)
-
+        # Commit primeiro para garantir que a alteração seja salva
         db.commit()
+
+        # Envia email de rejeição com template HTML bonito (não bloqueia se falhar)
+        try:
+            assunto = "Cadastro no Recoopera Rejeitado"
+            razao_social = cooperativa_data.get('razao_social', 'Cooperativa')
+            corpo_html = Email.gerar_template_rejeicao(razao_social, motivo, justificativa)
+            Email.enviar(email_cooperativa, assunto, corpo_html)
+        except Exception as email_error:
+            # Log do erro mas não bloqueia a resposta de sucesso
+            print(f"Erro ao enviar email (não crítico): {email_error}")
+
         return jsonify({'message': 'Cooperativa rejeitada e e-mail enviado.'}), 200
 
 

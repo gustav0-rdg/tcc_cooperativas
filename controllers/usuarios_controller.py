@@ -138,27 +138,21 @@ class Usuarios:
                 VALUES (%s, %s, %s, %s);
             """, (nome, email, senha_hash, tipo))
 
-<<<<<<< HEAD
-=======
             self.connection_db.commit()
->>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
             return cursor.lastrowid
 
         except mysql.connector.IntegrityError as e:
             print(f'Erro de Integridade - Usuarios "create": {e}')
-<<<<<<< HEAD
+            self.connection_db.rollback()
             return None
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
+            self.connection_db.rollback()
             return None
-=======
-            return False
-        
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
-            return False
-        
->>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
+            self.connection_db.rollback()
+            return None
         finally:
             cursor.close()
 
@@ -431,8 +425,6 @@ class Usuarios:
         
         finally:
             cursor.close()
-<<<<<<< HEAD
-=======
 
     def update(self, id_usuario: int, nome: str, email: str, senha: str | None = None) -> bool | str | None:
         
@@ -521,9 +513,6 @@ class Usuarios:
         finally:
             
             cursor.close()
-
-    def get_all_gestores (self) -> Tuple[dict]:
->>>>>>> 002e17b3071ab8a1e22d0949b75ad63ebd0d1747
 
     def get_all_gestores(self) -> Tuple[dict]:
         cursor = self.connection_db.cursor(dictionary=True)

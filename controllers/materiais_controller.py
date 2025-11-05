@@ -58,7 +58,6 @@ class Materiais:
         finally:
             cursor.close()
 
-
     def post_cadastrar_sinonimo(self, nome_padrao, sinonimo, id_cooperativa):
         cursor = self.connection_db.cursor(dictionary=True)
         

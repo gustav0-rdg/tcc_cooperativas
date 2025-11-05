@@ -365,20 +365,20 @@ class Cooperativa:
         try:
             query = """
                 SELECT
-                u.email,
-                c.id_cooperativa,
-                c.razao_social,
-                c.cnpj,
-                c.data_cadastro,
-                doc.arquivo_url
+                    u.email,
+                    c.id_cooperativa,
+                    c.razao_social,
+                    c.cnpj,
+                    c.data_cadastro,
+                    GROUP_CONCAT(DISTINCT doc.arquivo_url SEPARATOR ',') AS arquivo_url
                 FROM cooperativas AS c
                 JOIN usuarios AS u ON c.id_usuario = u.id_usuario
                 LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa
-                AND doc.status = 'pendente'
+                    AND doc.status = 'pendente'
                 WHERE
-                c.aprovado = FALSE
-                AND u.status = 'pendente'
-                GROUP BY c.id_cooperativa;
+                    c.aprovado = FALSE
+                    AND u.status = 'pendente'
+                GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_cadastro;
                 """
             
             cursor.execute(query)

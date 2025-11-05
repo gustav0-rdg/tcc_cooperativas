@@ -92,6 +92,10 @@
 
 </style>
 
+<!-- Carrega SweetAlert2 para garantir que esteja disponível em todas as páginas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -104,9 +108,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const headerInfoAdmin = document.getElementById('header-info-admin');
     const headerNomeAdmin = document.getElementById('header-nome-admin');
 
-    function handleLogout() {
+    async function handleLogout() {
         localStorage.removeItem('session_token');
-        if (typeof Swal !== 'undefined') {
+        
+        // Aguarda o SweetAlert estar disponível (caso esteja sendo carregado)
+        let swalReady = typeof Swal !== 'undefined';
+        if (!swalReady) {
+            // Tenta aguardar um pouco caso o SweetAlert esteja sendo carregado
+            await new Promise(resolve => {
+                let attempts = 0;
+                const checkSwal = setInterval(() => {
+                    if (typeof Swal !== 'undefined') {
+                        clearInterval(checkSwal);
+                        swalReady = true;
+                        resolve();
+                    }
+                    attempts++;
+                    if (attempts > 20) { // Espera até 2 segundos (20 * 100ms)
+                        clearInterval(checkSwal);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+        
+        if (typeof Swal !== 'undefined' && Swal.fire) {
             Swal.fire({
                 title: 'Desconectado',
                 text: 'Você saiu da sua conta.',
@@ -123,9 +149,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
+        logoutLink.addEventListener('click', async (e) => {
             e.preventDefault();
-            handleLogout();
+            await handleLogout();
         });
     }
 
