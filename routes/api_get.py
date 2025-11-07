@@ -2,6 +2,9 @@ from flask import Blueprint, request, redirect, jsonify
 from controllers.comprador_controller import Compradores
 from controllers.materiais_controller import Materiais
 from controllers.feedback_controller import Feedbacks
+from controllers.usuarios_controller import Usuarios
+from controllers.tokens_controller import Tokens
+from controllers.cooperativa_controller import Cooperativa
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
@@ -117,3 +120,58 @@ def get_comentarios(cnpj):
     finally:
         if conn:
             conn.close()
+
+# Ficheiro: api_get.py
+# (Adiciona esta rota, podes colocá-la perto da rota de 'contagem-pendentes')
+
+# ... (outros imports)
+# (Assegura que tens estes imports no topo)
+# from controllers.cooperativa_controller import Cooperativa
+# from controllers.tokens_controller import Tokens
+# from controllers.usuarios_controller import Usuarios
+
+# ... (outras rotas) ...
+
+@api_get.route('/cooperativas-pendentes', methods=['GET'])
+def get_cooperativas_pendentes():
+    
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    try:
+        token = token_header.split(" ")[1]
+    except IndexError:
+        return jsonify({'error': 'Token mal formatado'}), 401
+
+    conn = Connection('local')
+    
+    try:
+        # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
+        db = conn.connection_db
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+        
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get_by_id(id_usuario)
+        
+        if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Buscar os dados (usando o método novo)
+        cooperativas_pendentes = Cooperativa(db).get_pendentes_com_documentos()
+        
+        if cooperativas_pendentes is False:
+            conn.close()
+            return jsonify({'error': 'Erro ao buscar solicitações.'}), 500
+
+        conn.close()
+        return jsonify(cooperativas_pendentes), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /cooperativas-pendentes: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
