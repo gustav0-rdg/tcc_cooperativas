@@ -221,7 +221,6 @@ class Cooperativa:
         estado:str
             
     ) -> bool:
-
         """
         Relaciona o usuário fornecido com a
         cooperativa
@@ -229,7 +228,7 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(id_cooperativa, str):
+        if not isinstance(id_cooperativa, int):
 
             raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
@@ -299,7 +298,6 @@ class Cooperativa:
                 tipo='cooperado'
 
             )
-
             match cooperado:
 
                 case None:
@@ -322,7 +320,7 @@ class Cooperativa:
 
                     data_usuario = cursor.fetchone()
 
-                    if data_usuario != None:
+                    if data_usuario is None:
                         return None
                 
                     if data_usuario['tipo'] == 'cooperado':
