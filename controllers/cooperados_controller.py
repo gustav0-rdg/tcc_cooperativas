@@ -3,8 +3,7 @@ from data.connection_controller import Connection
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from usuarios_controller import Usuarios 
-
+from controllers.usuarios_controller import Usuarios
 class Catadores:
 
     def __init__(self, connection_db: MySQLConnection):
