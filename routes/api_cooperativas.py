@@ -218,19 +218,17 @@ def get (identificador:int|str):
     try:
 
         data_token = Tokens(conn.connection_db).validar(token)
-
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
         user = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
         if not user['tipo'] in ['cooperativa','gestor', 'root']:
-
+        
             
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         elif user['tipo'] == 'cooperativa':
             
             # Pega os dados da cooperativa VINCULADA AO TOKEN
-            dados_cooperativa_logada = Cooperativa(conn.connection_db).get(user['id_usuario'])
-
+            dados_cooperativa_logada = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(user['id_usuario'])
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada.'}), 404
 
@@ -239,7 +237,7 @@ def get (identificador:int|str):
             if (identificador != dados_cooperativa_logada['id_usuario']):
                 # Se o ID da URL não bate com NENHUM, é uma tentativa de acesso indevido.
                 return jsonify({'error': 'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}), 403
-        dados_cooperativa = Cooperativa(conn.connection_db).get(identificador)
+        dados_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(identificador)
 
         match dados_cooperativa:
 
@@ -441,8 +439,8 @@ def vincular_cooperado ():
         if not data_adm_cooperativa or data_adm_cooperativa['tipo'] != 'cooperativa':
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        data_cooperativa = Cooperativa(conn.connection_db).get(data_adm_cooperativa['id_usuario'])
-
+        data_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(data_adm_cooperativa['id_usuario'])
+        print(data_cooperativa)
         id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
 
             data_cooperativa['id_cooperativa'],
@@ -458,7 +456,7 @@ def vincular_cooperado ():
             data_cooperado['estado']
 
         )
-
+        print(id_cooperado)
         match id_cooperado:
 
             # 409 - Email já cadastrado
