@@ -2,6 +2,20 @@ import { getVendas } from "../api/getVendas.js";
 
 const session_token = localStorage.getItem('session_token');
 
+Swal.fire({
+  title: 'Aguarde...',
+  text: 'Processando sua solicitação',
+  icon: 'info',
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+  showConfirmButton: false,
+  timer: 6000, // 5 segundos (5000 ms)
+  timerProgressBar: true,
+  didOpen: () => {
+    Swal.showLoading();
+  }
+});
+
 async function getUsuario (){
     const response = await fetch (
         
@@ -68,20 +82,107 @@ async function getCooperativa(id){
 
 document.addEventListener('DOMContentLoaded', async function () {
     
-    const usuario = await getUsuario();
-    const cooperativa = await getCooperativa(usuario.id_usuario);
-    visualizarDados(cooperativa);
-    console.log(cooperativa);
+    // Inicia o SweetAlert de carregamento
+    Swal.fire({
+        title: 'Aguarde...',
+        text: 'Estamos buscando seus dados.',
+        icon: 'info',
+        background: "var(--verde-claro-medio)",
+        color: "var(--verde-escuro)",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading(); // Mostra o spinner
+        }
+    });
+
+    try {
+        const usuario = await getUsuario();
+        console.log(usuario);
+
+        const cooperativa = await getCooperativa(usuario.id_usuario);
+        console.log(cooperativa);
+
+        visualizarDados(cooperativa);
+
+        // Fecha o SweetAlert após o sucesso
+        Swal.close();
+
+    } catch (error) {
+        console.error(error);
+
+        // Exibe uma mensagem de erro no SweetAlert
+        Swal.fire({
+            title: 'Erro!',
+            text: 'Não foi possível carregar os dados.',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
+    }
+
 });
 
 
 const btnVisualizarVendas = document.querySelector('.btn-vendas');
 
 btnVisualizarVendas.addEventListener('click', async () => {
+  
   const usuario = await getUsuario();
   const cooperativa = await getCooperativa(usuario.id_usuario);
-  const vendas = await getVendas(cooperativa.dados_cooperativa.id_cooperativa); // Assume que você tem essa função que retorna os dados de vendas
-  console.log(vendas);
+  Swal.fire({
+    title: 'Aguarde...',
+    html: `
+      <div style="font-family: Arial, sans-serif;">
+        <p style="font-size: 15px; color: #555;">Estamos buscando seus dados de vendas</p>
+      </div>
+    `,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showConfirmButton: false,
+    background: '#F6FBF2',
+    didOpen: () => {
+      Swal.showLoading(); // ícone de carregamento
+    }
+  });
+
+  let vendas = [];
+  try {
+    vendas = await getVendas(cooperativa.dados_cooperativa.id_cooperativa);
+  } catch (err) {
+    Swal.fire({
+      title: 'Erro!',
+      text: 'Falha ao buscar vendas.',
+      icon: 'error',
+      confirmButtonColor: '#6A8B63'
+    });
+    return;
+  }
+
+  // Fecha o loading assim que a busca terminar
+  Swal.close();
+  if (vendas.length === 0) {
+    Swal.fire({
+      title: 'Nenhuma venda registrada',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 10px;">
+          <p style="font-size: 16px; color: #555;">Você ainda não registrou nenhuma venda.</p>
+          <p style="font-size: 14px; color: #777;">Quando houver vendas, elas serão exibidas aqui.</p>
+        </div>
+      `,
+      icon: 'warning',
+      confirmButtonText: 'Fechar',
+      confirmButtonColor: '#6A8B63',
+      background: '#F6FBF2',
+      customClass: {
+        popup: 'swal-popup',
+        title: 'swal-title',
+        content: 'swal-content',
+      },
+      showCloseButton: true,
+    });
+    return; // evita continuar o código
+  }
   
   // Montar HTML para exibir os dados no formato desejado
   const vendaDetails = vendas.map(venda => {
