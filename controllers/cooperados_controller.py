@@ -269,3 +269,25 @@ class Catadores:
     def reativar(self, id_catador: int) -> bool:
         print(f"Tentando reativar catador {id_catador}...")
         return self._set_status_catador(id_catador, novo_status=True)
+    
+    def get_all(self, id_cooperativa):
+        try:
+            query = """
+                SELECT 
+                    co.cpf, 
+                    co.telefone,
+                    co.endereco,
+                    co.cidade,
+                    co.estado,
+                    co.data_vinculo
+                FROM cooperados co
+                WHERE id_cooperativa = %s;
+            """
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                cursor.execute(query, (id_cooperativa,))
+                results = cursor.fetchall()
+                return results
+        except Exception as e:
+            print(e)
+        finally:
+            cursor.close()
