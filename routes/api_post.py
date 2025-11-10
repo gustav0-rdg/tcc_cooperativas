@@ -59,19 +59,22 @@ def cadastrar_cooperado():
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
 
-    
-    dados_recebidos = request.get_json()
-    conn = Connection('local')
-    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
-    print(processar_venda)
-    return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
+    try:
+        dados_recebidos = request.get_json()
+        conn = Connection('local')
+        processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
+        return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
+    except Exception as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
 
 @api_post.route("/dados-comprador", methods=["POST"])
 def postar_dados_comprador():
     conn = Connection('local')
     dados_recebidos = request.get_json()
-    dados = json.loads(dados_recebidos)
-    Compradores(conn.connection_db).create(str(dados))
+    Compradores(conn.connection_db).create(str(dados_recebidos))
     return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})
 
 # eu que fiz samuel corrija
