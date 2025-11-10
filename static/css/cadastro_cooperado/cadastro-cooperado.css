@@ -15,9 +15,14 @@ label {
     font-weight: 700;
 }
 
+input:focus {
+    border: 2px solid var(--verde-principal) !important;
+    outline: none !important;
+    box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
+}
+
 input::placeholder{
-    color: var(--verde-claro-medio) !important;
-    
+    color: var(--verde-claro-medio) !important;   
 }
 
 #form button{
