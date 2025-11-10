@@ -6,10 +6,6 @@ import html
 
 class Email:
 
-    # 1. REMOVEMOS as variáveis de classe daqui.
-    # remetente = getenv('USUARIO_EMAIL')
-    # senha = getenv('SENHA_EMAIL')
-
     @staticmethod
     def gerar_template_aprovacao(razao_social: str) -> str:
 
@@ -141,6 +137,89 @@ class Email:
                                 </td>
                             </tr>
                             
+                            <tr>
+                                <td style="padding: 20px 40px; background-color: #f9f9f9; text-align: center; color: #888888; font-size: 12px;">
+                                    <p style="margin: 0;">&copy; 2024 Recoopera. Todos os direitos reservados.</p>
+                                    <p style="margin: 5px 0 0 0;">Este é um e-mail automático, por favor, não responda.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+
+    @staticmethod
+    def gerar_template_recuperacao_senha(nome_usuario: str, url_recuperacao: str) -> str:
+
+        """
+        Gera o template HTML para email de RECUPERAÇÃO DE SENHA
+        """
+
+        # Escapar, escaped ou percent-enconding -> Processo de converter caractéres 
+        # especiais em formato seguro para serem transmitidos pela internet 
+        
+        nome_usuario_escaped = html.escape(nome_usuario)
+        url_recuperacao_escaped = html.escape(url_recuperacao) 
+        
+        return f"""
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #F6FBF2;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #F6FBF2; padding: 40px 20px;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+                            
+                            <!-- Cabeçalho (Estilo "Aprovação" - Verde Escuro) -->
+                            <tr>
+                                <td style="padding: 20px 40px; background-color: #004D2B; text-align: center; color: #ffffff;">
+                                    <h1 style="margin: 0; font-size: 28px; color: #ffffff;">Recoopera</h1>
+                                </td>
+                            </tr>
+                            
+                            <!-- Conteúdo Principal -->
+                            <tr>
+                                <td style="padding: 40px 40px 30px 40px; color: #333333;">
+                                    <h2 style="margin-top: 0; font-size: 22px; color: #004D2B;">Redefinição de Senha</h2>
+                                    
+                                    <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>{nome_usuario_escaped}</strong>!</p>
+                                    
+                                    <p style="font-size: 16px; line-height: 1.6;">
+                                        Recebemos uma solicitação para redefinir a senha da sua conta na plataforma Recoopera.
+                                    </p>
+                                    <p style="font-size: 16px; line-height: 1.6;">
+                                        Se foi você quem solicitou, clique no botão abaixo para criar uma nova senha. Este link expirará em breve.
+                                    </p>
+                                    
+                                    <!-- Botão (Estilo "Aprovação" - Verde Claro) -->
+                                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top: 30px; margin-bottom: 30px;">
+                                        <tr>
+                                            <td align="center" style="background-color: #00A859; border-radius: 8px;">
+                                                <a href="{url_recuperacao_escaped}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 8px;">
+                                                    Redefinir Minha Senha
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <p style="font-size: 16px; line-height: 1.6;">
+                                        Se você não fez esta solicitação, por favor, ignore este e-mail. Sua senha permanecerá a mesma.
+                                    </p>
+                                    <p style="font-size: 16px; line-height: 1.6;">
+                                        Atenciosamente,<br>
+                                        Equipe Recoopera
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer (Padrão) -->
                             <tr>
                                 <td style="padding: 20px 40px; background-color: #f9f9f9; text-align: center; color: #888888; font-size: 12px;">
                                     <p style="margin: 0;">&copy; 2024 Recoopera. Todos os direitos reservados.</p>
