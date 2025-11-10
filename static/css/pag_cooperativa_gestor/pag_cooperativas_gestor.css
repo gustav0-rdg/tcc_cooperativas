@@ -1,9 +1,3 @@
-/* /static/css/visualizar_cooperativas/cooperativas.css */
-
-/* 1. Estilos Gerais 
-   Removido o fundo do body, pois o fundo principal
-   será aplicado no main, como no seu .gestor-main
-*/
 body {
     display: flex;
     flex-direction: column;
@@ -14,14 +8,11 @@ main {
     flex-grow: 1;
 }
 
-/* 2. Container Principal
-   Seguindo ESTRITAMENTE o seu .gestor-main
-*/
 .cooperativas-main {
     background: var(--verde-principal);
-    min-height: calc(100vh - 120px); /* Assumindo 120px de header/footer */
+    min-height: calc(100vh - 120px); 
     padding: 3rem 1rem;
-    overflow-y: hidden; /* Do seu 'main' */
+    overflow-y: hidden; 
 }
 
 @media (max-width: 768px) {
@@ -30,11 +21,7 @@ main {
     }
 }
 
-/* 3. Cabeçalho da Página (Título e Botão Voltar)
-   Seguindo os padrões de .welcome-title e .welcome-subtitle
-*/
 .page-header .btn-voltar {
-    /* Estilo adaptado do .action-card, mas menor e circular */
     background: var(--verde-claro-medio);
     border: 3px solid var(--verde-claro-medio);
     color: var(--verde-escuro);
@@ -50,15 +37,13 @@ main {
 }
 
 .page-header .btn-voltar:hover {
-    /* Estilo de hover do .action-card */
-    transform: translateY(-3px); /* Um pouco menos que -8px */
+    transform: translateY(-3px); 
     border-color: var(--verde-principal);
     background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
     color: var(--verde-escuro-medio);
 }
 
 .page-title {
-    /* Estilo ESTRITO do .welcome-title */
     font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 700;
     color: var(--verde-escuro);
