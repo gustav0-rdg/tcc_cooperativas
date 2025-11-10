@@ -152,7 +152,7 @@ def alterar_senha ():
 
         data_token = Tokens(conn.connection_db).validar(token)
 
-        if not data_token or data_token['tipo'] != 'recuperacao_senha':
+        if not data_token or data_token['tipo'] != 'recuperacao_senha' or data_token['usado'] == False:
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
 
         match Usuarios(conn.connection_db).trocar_senha(
