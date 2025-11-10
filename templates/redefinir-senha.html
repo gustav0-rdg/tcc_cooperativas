@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Redefinir Senha</title>
+    </head>
+<body>
+    <div class="container">
+        <h2>Crie sua nova senha</h2>
+        
+        <form id="form-redefinir">
+        
+            <div class="mb-3">
+                <label for="nova-senha">Nova Senha</label>
+                <input type="password" id="nova-senha" class="form-control" required minlength="8">
+            </div>
+            
+            <div class="mb-3">
+                <label for="confirmar-senha">Confirmar Senha</label>
+                <input type="password" id="confirmar-senha" class="form-control" required minlength="8">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Salvar Nova Senha</button>
+            
+            <div id="error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+            <div id="success-msg" class="alert alert-success mt-3" style="display:none;"></div>
+        </form>
+    </div>
+
+    <script>
+
+        const TOKEN = "{{ token }}"; 
+        
+        const form = document.getElementById('form-redefinir');
+        const novaSenhaInput = document.getElementById('nova-senha');
+        const confirmarSenhaInput = document.getElementById('confirmar-senha');
+        const errorMsg = document.getElementById('error-msg');
+        const successMsg = document.getElementById('success-msg');
+
+        form.addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            const novaSenha = novaSenhaInput.value;
+            const confirmarSenha = confirmarSenhaInput.value;
+
+            if (novaSenha !== confirmarSenha) 
+            {
+                errorMsg.textContent = 'As senhas não coincidem.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (novaSenha.length < 8) 
+            {
+                errorMsg.textContent = 'A senha deve ter no mínimo 8 caracteres.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try 
+            {
+
+                const response = await fetch(
+                    
+                    '/api/usuarios/alterar-senha', 
+
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': TOKEN
+                        },
+                        body: JSON.stringify({
+                            'nova-senha': novaSenha
+                        })
+                    }
+
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) 
+                {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
+
+                successMsg.textContent = 'Senha alterada com sucesso! Redirecionando para o login...';
+                successMsg.style.display = 'block';
+                form.style.display = 'none'; // Esconde o formulário
+                
+                setTimeout(() => {
+                    window.location.href = '/login'; 
+                }, 3000);
+
+            } 
+            
+            catch (err) 
+            {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
