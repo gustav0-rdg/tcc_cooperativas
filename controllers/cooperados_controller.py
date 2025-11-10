@@ -279,8 +279,10 @@ class Catadores:
                     co.endereco,
                     co.cidade,
                     co.estado,
-                    co.data_vinculo
+                    co.data_vinculo,
+                    usuario.nome
                 FROM cooperados co
+                JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
                 WHERE id_cooperativa = %s;
             """
             with self.connection_db.cursor(dictionary=True) as cursor:
@@ -289,5 +291,31 @@ class Catadores:
                 return results
         except Exception as e:
             print(e)
+        finally:
+            cursor.close()
+
+    def search_cooperado(self, id_cooperativa, nome_cooperado):
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                termo_buscado = f"%{nome_cooperado}%"
+                query = """
+                    SELECT 
+                        co.cpf, 
+                        co.telefone,
+                        co.endereco,
+                        co.cidade,
+                        co.estado,
+                        co.data_vinculo,
+                        usuario.nome
+                    FROM cooperados co
+                    JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
+                    WHERE co.id_cooperativa = %s AND usuario.nome LIKE %s;
+                """
+                cursor.execute(query, (id_cooperativa, termo_buscado))
+                results = cursor.fetchall()
+                return results
+        except Exception as e:
+            print(e)
+            return []
         finally:
             cursor.close()
