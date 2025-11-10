@@ -1,13 +1,33 @@
 from data.connection_controller import Connection
 from mysql.connector import MySQLConnection
 import datetime
+from controllers.comprador_controller import Compradores
 
 class Vendas:
     def __init__(self, connection_db:MySQLConnection):
         if not Connection.validar(connection_db):
             raise ValueError(f'Erro - Tokens: valores inválidos para os parametros "connection_db"')
         self.connection_db = connection_db
+    def _buscar_id_cooperativa(self, cnpj: str) -> int:
+        """
+        Busca o ID de uma cooperativa ativa na tabela cooperativas a partir de seus cnpj
+        Args: 
+            cnpj (str): O CNPJ da cooperativa.
+        return:
+            int: O id da cooperativa buscada.
+        """
 
+        cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
+        with self.connection_db.cursor() as cursor:
+            query = "SELECT id_cooperativa FROM cooperativas WHERE cnpj = %s"
+            cursor.execute(query, (cnpj,))
+            result = cursor.fetchone()
+        if result:
+            id_cooperativa = result[0]
+            print(f"Cooperativa encontrada: CNPJ - {cnpj} Corresponde ao ID: {id_cooperativa}")
+            return id_cooperativa
+        else:
+            raise ValueError("Erro - Nenhuma cooperativa encontrada com o CNPJ indicado")
     def _buscar_id_comprador(self, cnpj: str) -> int:
         """
         Busca o ID de um comprador ativo na tabela `compradores` a partir do seu CNPJ.
@@ -37,7 +57,10 @@ class Vendas:
             print(f"Comprador encontrado: CNPJ {cnpj} corresponde ao ID {id_comprador}.")
             return id_comprador
         else:
-            raise ValueError(f"Nenhum comprador ativo encontrado para o CNPJ: {cnpj}")
+            conn = Connection('local')
+            new_id = Compradores(conn.connection_db).create(cnpj)
+            conn.close()
+            return new_id
 
     def _buscar_id_material(self, nome_material: str) -> int:
         """
@@ -134,19 +157,22 @@ class Vendas:
             nome_subtipo = dados_frontend['material']['subtipo']
             id_material = self._buscar_id_material(nome_material)
             id_subtipo = self._buscar_subtipo(nome_subtipo)
+            cnpj_cooperativa = dados_frontend['cnpj']
+            id_cooperativa = self._buscar_id_cooperativa(cnpj_cooperativa)
             ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material,
                 "ids_tags_feedback": ids_tags,
-                "id_subtipo": id_subtipo
+                "id_subtipo": id_subtipo,
+                "id_cooperativa": id_cooperativa
             }
 
         except Exception as e:
             print(f"Erro de negócio: {e}")
             return None
         
-    def registrar_nova_venda(self, id_cooperativa, dados_frontend):
+    def registrar_nova_venda(self, dados_frontend):
         """
         Orquestra a criação completa de uma venda, seus itens e avaliação dentro de uma transação.
 
@@ -168,7 +194,7 @@ class Vendas:
                 VALUES (%s, %s, %s, %s)
             """
             venda_data = (
-                id_cooperativa,
+                ids['id_cooperativa'],
                 ids['id_comprador'],
                 datetime.datetime.now(), # Ou a data vinda do front-end
                 dados_frontend['total']
