@@ -104,6 +104,10 @@ def pagina_redefinir_senha():
 def pagina_termos_de_uso():
     return render_template("pagina-termo.html")
 
+@pages.route("/dados-xml")
+def enviar_xml():
+    return render_template('dados_xml.html')
+
 @pages.route("/gerenciar-gestores", methods=["GET"])
 def pagina_gerenciar_gestores():
     return render_template("gerenciar-gestores.html")
