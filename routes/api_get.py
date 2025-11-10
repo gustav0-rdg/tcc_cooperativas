@@ -155,7 +155,7 @@ def get_cooperativas_pendentes():
             return jsonify({'error': 'Token inválido ou expirado'}), 401
         
         id_usuario = data_token['id_usuario']
-        usuario_info = Usuarios(db).get_by_id(id_usuario)
+        usuario_info = Usuarios(db).get(id_usuario)
         
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()

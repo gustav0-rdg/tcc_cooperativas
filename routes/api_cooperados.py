@@ -23,7 +23,7 @@ def get_cooperados(identificador: int):
         data_token = Tokens(conn.connection_db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"Token" inexistente ou inválido'}), 400
-        user = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        user = Usuarios(conn.connection_db).get(data_token['id_usuario'])
         if not user['tipo'] in ['cooperativa', 'gestor', 'root']:
             return jsonify({'error': 'Você não tem permissão para realizar tal ação'}), 403
         elif user['tipo'] == 'cooperativa':
@@ -54,7 +54,7 @@ def search_cooperado(identificador, nome):
         data_token = Tokens(conn.connection_db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"Token" inexistente ou inválido'}), 400
-        user = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        user = Usuarios(conn.connection_db).get(data_token['id_usuario'])
         if not user['tipo'] in ['cooperativa', 'gestor', 'root']:
             return jsonify({'error': 'Você não tem permissão para realizar tal ação'}), 403
         elif user['tipo'] == 'cooperativa':
