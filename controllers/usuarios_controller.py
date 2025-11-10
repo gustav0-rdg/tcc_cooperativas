@@ -145,10 +145,12 @@ class Usuarios:
             print(f'Erro de Integridade - Usuarios "create": {e}')
             self.connection_db.rollback()
             return None
+        
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
             self.connection_db.rollback()
             return None
+        
         except Exception as e:
             print(f'Erro - Usuarios "create": {e}')
             self.connection_db.rollback()
@@ -389,7 +391,7 @@ class Usuarios:
 
             return False
 
-    def alterar_status(self, id_usuario: int, novo_status: str) -> bool:
+    def alterar_status(self, id_usuario: int, novo_status: str) -> bool | None:
         
         if not isinstance(id_usuario, int):
             raise TypeError('Usuarios "alterar_status" - id_usuario deve ser int')
@@ -402,10 +404,17 @@ class Usuarios:
 
         try:
             cursor.execute("UPDATE usuarios SET status = %s WHERE id_usuario = %s;", (novo_status, id_usuario))
-            return cursor.rowcount > 0
+            
+            if cursor.rowcount == 0:
+                self.connection_db.rollback()
+                return None
+
+            self.connection_db.commit()
+            return True
         
         except Exception as e:
             print(f'Erro - Usuarios "alterar_status": {e}')
+            self.connection_db.rollback()
             return False
         
         finally:
