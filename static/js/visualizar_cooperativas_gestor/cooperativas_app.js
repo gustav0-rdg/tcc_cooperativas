@@ -1,6 +1,4 @@
-// cooperativas_app.js
-// Módulo auto-contido que gerencia listagem, pesquisa, filtros, paginação e ações
-const sessionToken = localStorage.getItem('session_token'); // token salvo no localStorage
+const sessionToken = localStorage.getItem('session_token');
 
 window.CooperativasApp = (function () {
     /* -------------------------
@@ -56,7 +54,6 @@ window.CooperativasApp = (function () {
 
     function formatarData(input) {
         if (!input) return 'Não registrado';
-        // aceita string de data do backend (e.g. "Sat, 16 Mar 2024 11:10:00 GMT")
         const d = new Date(input);
         if (isNaN(d.getTime())) {
             // se veio como timestamp em segundos
@@ -92,7 +89,6 @@ window.CooperativasApp = (function () {
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || 'Erro ao buscar cooperativas');
 
-        // O endpoint devolve array diretamente ou um objeto com dados? adaptamos
         if (Array.isArray(data)) return data;
         if (Array.isArray(data.dados_cooperativas)) return data.dados_cooperativas;
         // se o objeto principal contém a array sem nome:
@@ -235,8 +231,7 @@ window.CooperativasApp = (function () {
                 renderCards(newSlice, true); // append
             }
         } else {
-            // renderiza do início até page*perPage (ou, alternativamente, apenas a página atual).
-            // aqui optamos por mostrar cumulativamente desde o início (comportamento "mostrar até a página X")
+            // comportamento "mostrar até a página X
             const end = Math.min(page * perPage, state.filtered.length);
             const slice = state.filtered.slice(0, end);
             renderCards(slice, false); // replace
@@ -348,7 +343,7 @@ window.CooperativasApp = (function () {
 
         if (state.page >= maxPage) 
         {
-            // Já está na última página; esconde botão (segurança)
+            // Já está na última página -> esconde botão
             if (el.loadMoreBtn) el.loadMoreBtn.style.display = 'none';
             return;
         }
@@ -420,7 +415,7 @@ window.CooperativasApp = (function () {
                 const requiredPage = Math.ceil((idxFiltered + 1) / itemsPerPage) || 1;
 
                 if (requiredPage > state.page) state.page = requiredPage; // só sobe de página, não baixa
-            } // se idxFiltered === -1, significa que os filtros atuais ocultam o item — mantemos a página atual
+            }
 
             // Re-renderiza já com page ajustada
             renderPage();
