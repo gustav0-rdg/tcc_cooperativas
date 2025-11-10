@@ -15,12 +15,17 @@ label {
     font-weight: 700;
 }
 
-input::placeholder{
-    color: var(--verde-claro-medio) !important;
-    
+input:focus {
+    border: 2px solid var(--verde-principal) !important;
+    outline: none !important;
+    box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
 }
 
-#form button{
+input::placeholder{
+    color: var(--verde-claro-medio) !important; 
+}
+
+.btn {
     background-color: var(--verde-escuro-medio) !important;
     border: 0;
     text-transform: uppercase;
@@ -29,11 +34,11 @@ input::placeholder{
     height: 50px;
 }
 
-#form button:hover{
+.btn:hover{
     background-color: var(--verde-escuro) !important;
 }
 
-#form a{
+.link{
     color: var(--verde-escuro);
     text-decoration: underline;
 }
