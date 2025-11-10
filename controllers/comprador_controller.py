@@ -44,7 +44,9 @@ class Compradores:
                     INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
             """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
             self.connection_db.commit()
-
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            novo_id = cursor.fetchone()[0]
+            return novo_id
         except Exception as e:
             print(e)
         finally:
