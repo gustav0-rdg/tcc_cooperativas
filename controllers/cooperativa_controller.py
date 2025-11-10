@@ -289,6 +289,15 @@ class Cooperativa:
 
                 self.connection_db.commit()
                 return cursor.lastrowid
+            
+            def ativar_cooperado(id_usuario):
+                if not isinstance(id_usuario, int):
+                    raise TypeError("Error - ativar cooperado - id_usuario deve ser do tipo INT")
+                cursor.execute("""
+                UPDATE usuarios SET status = "ativo" WHERE id_usuario = %s;
+                """, (id_usuario,))
+                self.connection_db.commit()
+                
 
             cooperado = Usuarios(self.connection_db).create(
 
@@ -324,11 +333,13 @@ class Cooperativa:
                         return None
                 
                     if data_usuario['tipo'] == 'cooperado':
+                        ativar_cooperado(data_usuario['id_usuario'])
                         return vincular(data_usuario['id_usuario'])
 
                     return None
 
                 case _ if isinstance(cooperado, int):
+                    
                     return vincular(cooperado)
             
                 case False | _:
@@ -337,7 +348,7 @@ class Cooperativa:
         except Exception as e:
 
             print(f'Erro - Cooperativa "vincular_cooperado": {e}')
-
+            self.connection_db.rollback()
             return False
 
         finally:
