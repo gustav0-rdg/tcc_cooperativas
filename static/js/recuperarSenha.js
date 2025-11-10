@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const formRecuperacao = document.getElementById('recoverForm');
     const emailInput = document.getElementById('email');
     const btnSubmit = formRecuperacao.querySelector('button[type="submit"]');
-    const mensagemSucesso = document.getElementById('mensagemSucesso');
+    const mensagemSucesso = document.getElementById('successMsg');
 
     if (!formRecuperacao || !btnSubmit || !mensagemSucesso || !emailInput) 
     {
