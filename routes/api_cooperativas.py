@@ -221,7 +221,7 @@ def get (identificador:int|str):
 
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-        user = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        user = Usuarios(conn.connection_db).get(data_token['id_usuario'])
         if not user['tipo'] in ['cooperativa','gestor', 'root']:
 
             
@@ -278,7 +278,7 @@ def get_all ():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
         
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+        if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
         dados_cooperativas = Cooperativa(conn.connection_db).get_all()
@@ -334,7 +334,7 @@ def alterar_aprovacao():
             return jsonify({'error': 'Token inválido'}), 401
 
         id_usuario_gestor = data_token['id_usuario']
-        usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
+        usuario_info = Usuarios(db).get(id_usuario_gestor)
 
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()
@@ -370,7 +370,7 @@ def alterar_aprovacao():
             
             # Envia email de aprovação ou reprovação (não bloqueia se falhar)
             try:
-                usuario_coop = Usuarios(db).get_by_id(int(id_usuario_cooperativa))
+                usuario_coop = Usuarios(db).get(int(id_usuario_cooperativa))
                 if usuario_coop and usuario_coop.get('email'):
                     if bool(aprovacao):
                         assunto = "Cadastro no Recoopera Aprovado"
@@ -434,7 +434,7 @@ def vincular_cooperado ():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" inválido' }), 400
 
-        data_adm_cooperativa = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        data_adm_cooperativa = Usuarios(conn.connection_db).get(data_token['id_usuario'])
 
         # Autor da requisição inválido
 
@@ -572,7 +572,7 @@ def rejeitar_cooperativa():
             return jsonify({'error': 'Token inválido'}), 401
 
         id_usuario_gestor = data_token['id_usuario']
-        usuario_info = Usuarios(db).get_by_id(id_usuario_gestor)
+        usuario_info = Usuarios(db).get(id_usuario_gestor)
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
