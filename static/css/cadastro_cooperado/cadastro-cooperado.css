@@ -22,8 +22,8 @@ input:focus {
 }
 
 input::placeholder{
-    color: var(--verde-escuro-medio);
-    opacity: 0.8; 
+    color: var(--verde-escuro-medio) !important;
+    opacity: 0.8 !important; 
 }
 
 #form button{
