@@ -64,28 +64,47 @@ class Vendas:
 
     def _buscar_id_material(self, nome_material: str) -> int:
         """
-        Busca o ID de um material ativo na tabela `materiais_catalogo`.
+        Busca o ID de um material ativo na tabela `materiais_base`,
+        mesmo que o nome não seja exatamente igual (ex: "plástico bolha" → "Plástico").
 
         Args:
-            nome_material (str): O nome exato do material.
+            nome_material (str): O nome do material a ser buscado.
 
         Returns:
             int: O ID do material encontrado.
 
         Raises:
-            MaterialNaoEncontradoError: Se nenhum material ativo for encontrado com o nome fornecido.
+            ValueError: Se nenhum material ativo for encontrado.
         """
+        nome_limpo = nome_material.strip().lower()
+
         with self.connection_db.cursor() as cursor:
-            # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
-            query = "SELECT id_material_base FROM materiais_base WHERE nome = %s"
-            cursor.execute(query, (nome_material,))
+            # 🔎 Busca por similaridade (bidirecional)
+            query = """
+                SELECT id_material_base, nome
+                FROM materiais_base
+                WHERE (
+                    REPLACE(REPLACE(REPLACE(REPLACE(LOWER(%s),
+                        'á','a'),'â','a'),'ã','a'),'é','e')
+                    LIKE CONCAT('%', REPLACE(REPLACE(REPLACE(REPLACE(LOWER(nome),
+                        'á','a'),'â','a'),'ã','a'),'é','e'), '%')
+                )
+                OR REPLACE(REPLACE(REPLACE(REPLACE(LOWER(nome),
+                        'á','a'),'â','a'),'ã','a'),'é','e')
+                    LIKE CONCAT('%', REPLACE(REPLACE(REPLACE(REPLACE(LOWER(%s),
+                        'á','a'),'â','a'),'ã','a'),'é','e'), '%')
+                )
+                LIMIT 1;
+            """
+            cursor.execute(query, (nome_limpo, nome_limpo))
             result = cursor.fetchone()
 
         if result:
-            id_material = result[0]
-            print(f"Material encontrado: '{nome_material}' corresponde ao ID {id_material}.")
+            id_material, nome_encontrado = result
+            print(f"✅ Material encontrado: '{nome_material}' corresponde a '{nome_encontrado}' (ID {id_material}).")
             return id_material
         else:
+            print(f"⚠️ Nenhum material ativo encontrado para '{nome_material}'.")
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
         
     def _buscar_subtipo(self, nome_subtipo):
