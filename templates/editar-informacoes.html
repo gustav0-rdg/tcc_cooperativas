@@ -1,90 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Recoopera | Editar Informações</title>
+    <title>RECOOPERA | Editar Informações</title>
     
-    <!-- CSS principal -->
-  <link rel="stylesheet" href="../static/css/editar_informações/editar_informações.css">
+  <!-- CSS principal -->
+  <link rel="stylesheet" href="../static/css/editar__informações/editar_informações.css">
   <link rel="stylesheet" href="../static/css/root-de-cores.css">
 
   <!-- Link para o favicon -->
   <link rel="icon" href="../static/img/favicon.png" type="image/png">
-  
 
-    <title>Editar Informações - Nome da Cooperativa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/editar__informações/editar_informações.css">
-    <link rel="stylesheet" href="/static/css/root-de-cores.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 </head>
 <body>
   {% include 'includes/header.html' %}
-  <div class="container">
-    <h1>Edição das Informações da Cooperativa</h1>
+  <main>
+    <div class="container">
+      <h1>Edição das Informações da Cooperativa</h1>
 
-    <form class="edit-form" method="POST" action="/salvar_informacoes">
-      <div class="form-section">
-          <h2><i class="fas fa-building"></i> Dados da Cooperativa</h2>
-          
-          <div class="input-group">
-            <label for="nome"><i class="fas fa-handshake"></i> Nome Fantasia</label>
-            <input type="text" id="nome" name="nome" placeholder="Ex: Cooperativa Recoopera" required>
-          </div>
-  
-          <div class="input-group">
-            <label for="cnpj"><i class="fas fa-id-card"></i> CNPJ</label>
-            <input type="text" id="cnpj" name="cnpj" pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" title="Formato esperado: 00.000.000/0000-00" placeholder="Ex: 00.000.000/0001-00" required>
-          </div>
-  
-          <div class="input-group">
-            <label for="rua"><i class="fas fa-road"></i> Rua</label>
-            <input type="text" id="rua" name="rua" placeholder="Ex: Av. Principal, 123" required>
-          </div>
-          
-          <div class="input-group">
-            <label for="bairro"><i class="fas fa-map-marker-alt"></i> Bairro / Complemento</label>
-            <input type="text" id="bairro" name="bairro" placeholder="Ex: Nova vila" required>
-          </div>
-          
-          <div class="input-group">
-            <label for="cidade_estado"><i class="fas fa-city"></i> Cidade / Estado</label>
-            <input type="text" id="cidade_estado" name="cidade_estado" placeholder="Ex: São Paulo, SP" required>
-          </div>
-      </div>
-  
-      <div class="form-section">
-        <h2><i class="fas fa-phone-alt"></i> Dados de Contato e Links</h2>
-          
-        <div class="input-group">
-          <label for="telefone_fixo"><i class="fas fa-phone"></i> Telefone Fixo</label>
-          <input type="tel" id="telefone_fixo" name="telefone_fixo" pattern="\(\d{2}\) \d{4}-\d{4}" title="Formato esperado: (XX) XXXX-XXXX" placeholder="Ex: (99) 99999-9999">
+      <form class="edit-form" method="POST" action="/salvar_informacoes">
+        <div class="form-section">
+            <h2><i class="fas fa-building"></i> Dados da Cooperativa</h2>
+            
+            <div class="input-group">
+              <label for="nome"><i class="fas fa-handshake"></i> Nome Fantasia</label>
+              <input type="text" id="nome" name="nome" placeholder="Ex: Cooperativa Recoopera" required>
+            </div>
+    
+            <div class="input-group">
+              <label for="cnpj"><i class="fas fa-id-card"></i> CNPJ</label>
+              <input type="text" id="cnpj" name="cnpj" pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" title="Formato esperado: 00.000.000/0000-00" placeholder="Ex: 00.000.000/0001-00" required>
+            </div>
+    
+            <div class="input-group">
+              <label for="rua"><i class="fas fa-road"></i> Rua</label>
+              <input type="text" id="rua" name="rua" placeholder="Ex: Av. Principal, 123" required>
+            </div>
+            
+            <div class="input-group">
+              <label for="bairro"><i class="fas fa-map-marker-alt"></i> Bairro / Complemento</label>
+              <input type="text" id="bairro" name="bairro" placeholder="Ex: Nova vila" required>
+            </div>
+            
+            <div class="input-group">
+              <label for="cidade_estado"><i class="fas fa-city"></i> Cidade / Estado</label>
+              <input type="text" id="cidade_estado" name="cidade_estado" placeholder="Ex: São Paulo, SP" required>
+            </div>
         </div>
-  
-        <div class="input-group">
-          <label for="whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</label>
-          <input type="tel" id="whatsapp" name="whatsapp" pattern="\(\d{2}\) \d{5}-\d{4}" title="Formato esperado: (XX) XXXXX-XXXX" placeholder="Ex: (11) 11111-1111" required>
+    
+        <div class="form-section">
+          <h2><i class="fas fa-phone-alt"></i> Dados de Contato e Links</h2>
+            
+          <div class="input-group">
+            <label for="telefone_fixo"><i class="fas fa-phone"></i> Telefone Fixo</label>
+            <input type="tel" id="telefone_fixo" name="telefone_fixo" pattern="\(\d{2}\) \d{4}-\d{4}" title="Formato esperado: (XX) XXXX-XXXX" placeholder="Ex: (99) 99999-9999">
+          </div>
+    
+          <div class="input-group">
+            <label for="whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</label>
+            <input type="tel" id="whatsapp" name="whatsapp" pattern="\(\d{2}\) \d{5}-\d{4}" title="Formato esperado: (XX) XXXXX-XXXX" placeholder="Ex: (11) 11111-1111" required>
+          </div>
+    
+          <div class="input-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email de Contato</label>
+                <input type="email" id="email" name="email" placeholder="Ex: contato@minhacoop.com.br">
+          </div>
+    
+          <div class="input-group">
+                <label for="site"><i class="fas fa-globe"></i> Website/Link</label>
+                <input type="url" id="site" name="site" placeholder="Ex: https://www.minhacoop.org">
+          </div>
         </div>
-  
-        <div class="input-group">
-              <label for="email"><i class="fas fa-envelope"></i> Email de Contato</label>
-              <input type="email" id="email" name="email" placeholder="Ex: contato@minhacoop.com.br">
+    
+        <div class="action-buttons">
+          <button type="button" class="btn btn-cancel"><i class="fas fa-times"></i> Cancelar</button>
+          <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar Alterações</button>
         </div>
-  
-        <div class="input-group">
-              <label for="site"><i class="fas fa-globe"></i> Website/Link</label>
-              <input type="url" id="site" name="site" placeholder="Ex: https://www.minhacoop.org">
-        </div>
-      </div>
-  
-      <div class="action-buttons">
-        <button type="button" class="btn btn-cancel"><i class="fas fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar Alterações</button>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  </main>
   {% include 'includes/footer.html' %} 
 </body>
 </html>

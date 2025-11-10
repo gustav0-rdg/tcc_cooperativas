@@ -1,9 +1,9 @@
 <!DOCTYPE html> 
 <html lang="pt-br"> 
 <head>
-  <meta charset="UTF-8"> <!-- Define o conjunto de caracteres como UTF-8 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Garante que a página se ajuste em diferentes tamanhos de tela -->
-  <title>Login | Cooperativa</title> <!-- Título que aparece na aba do navegador -->
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title> RECOOPERA | Login Cooperativa</title> 
 
   <!-- Links para os estilos CSS personalizados -->
   <link rel="stylesheet" href="../static/css/root-de-cores.css"> <!-- Define as cores padrões do projeto -->
@@ -21,36 +21,27 @@
 </head>
 
 <body>
-  <!-- Seção principal do conteúdo -->
   <section class="conteudo">
 
-    <!-- Container centralizado vertical e horizontalmente -->
     <div class="container d-flex justify-content-center align-items-center vh-100">
 
-      <!-- Card com sombra, padding e tamanho máximo definido -->
       <div class="card shadow-lg p-4" style="max-width: 400px; width: 90%;">
-        <h1 class="text-center mb-2">Login</h1> <!-- Título centralizado -->
+        <h1 class="text-center mb-2">Login Cooperativa</h1> 
 
-        <!-- Formulário de login -->
-        <form id="form-login-cooperativas">
+        <form action="/post/login" method="post" id="form">
 
-          <!-- Campo de entrada para o CNPJ -->
           <div class="mb-2">
             <label for="cnpj" class="form-label">CNPJ</label>
-            <input type="text" id="cnpj" name="cnpj" class="form-control" required>
+            <input type="text" id="cnpj" name="cnpj" placeholder="11.111.111/0000-11" class="form-control form-input" required>
           </div>
           
-          <!-- Campo de entrada para a senha -->
           <div class="mb-2">
             <label for="senha" class="form-label">Senha</label>
-            <input type="password" id="senha" name="senha" class="form-control" required>
-            <!-- Link para recuperação de senha -->
+            <input type="password" id="senha" name="senha" placeholder="Ex: 12345678" class="form-control" required>
             <a href="/recuperar-senha" class="link_a">Esqueceu a senha?</a>
           </div>
           
-          <!-- Botão de login (simulado como link) -->
-          <button type="submit" class="btn btn-primary w-100">Login</button>
-          <!-- Link para página de cadastro -->
+          <button type="submit" class="btn btn-primary btn-login w-100">Login</button>
           <p class="text-center mt-4">
             Não tem cadastro? <a href="/cadastro" class="link_a"> clique aqui </a>
           </p>
@@ -60,3 +51,5 @@
 
   </section>
 </body>
+
+</html> 
