@@ -222,7 +222,7 @@ def solicitar_recuperacao_senha (email:str):
 
                             url_recuperacao = url_for(
 
-                                '',
+                                'pages.pagina_redefinir_senha',
 
                                 token=token_alterar_senha,
                                 _external=True
@@ -242,16 +242,16 @@ def solicitar_recuperacao_senha (email:str):
 
                                 destinatario=email,
                                 assunto='Recoopera - Redefinição de Senha',
-                                html=corpo_html
+                                formatacao_html=corpo_html
 
                             ):
 
-                                return jsonify({ 'error': f'Erro ao enviar e-mail: {e}' }), 500
+                                return jsonify({ 'error': 'Erro ao enviar e-mail' }), 500
                             
                         # 500 - Erro ao criar token
 
                         case False | _:
-                            return jsonify({ 'error': f'Erro no criar token: {e}' }), 500    
+                            return jsonify({ 'error': 'Erro ao criar token' }), 500    
 
                 # 200 - Email de recuperação de senha enviado
 
