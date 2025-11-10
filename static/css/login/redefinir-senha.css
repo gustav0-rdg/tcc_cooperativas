@@ -1,0 +1,58 @@
+.card {
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro-medio);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 12px;
+    max-width: 450px; /* Um pouco mais largo para os campos */
+    width: 90%;
+}
+
+.card-title {
+    color: var(--verde-escuro);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.form-label {
+    color: var(--verde-escuro-medio);
+    font-weight: 500;
+}
+
+.form-control {
+    background-color: var(--branco);
+    border: 1px solid var(--verde-claro-medio);
+    color: var(--verde-escuro);
+}
+
+.form-control:focus {
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.25rem rgba(106, 182, 51, 0.25);
+}
+
+/* --- Botão Principal (Estilo de Sucesso) --- */
+
+.btn-success {
+    background-color: var(--verde-principal);
+    border-color: var(--verde-principal);
+    color: var(--branco);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn-success:hover {
+    background-color: var(--verde-escuro-medio);
+    border-color: var(--verde-escuro-medio);
+}
+
+.link_a {
+    color: var(--verde-principal);
+    font-weight: 500;
+}
+
+.link_a:hover {
+    color: var(--verde-escuro-medio);
+}

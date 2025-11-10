@@ -72,7 +72,7 @@ def pagina_redefinir_senha():
     token = request.args.get('token')
 
     if not token:
-        return redirect(url_for('pages.pagina_login'))
+        return redirect('/')
 
     conn = Connection('local')
 
@@ -81,13 +81,14 @@ def pagina_redefinir_senha():
         # Valida o token
         data_token = Tokens(conn.connection_db).validar(token)
         
-        if not data_token or data_token['tipo'] != 'recuperacao_senha':
-            return redirect(url_for('views.pagina_login'))
+        if not data_token or data_token['tipo'] != 'recuperacao_senha' or data_token['usado'] == True:
+            return redirect('/')
         
-        return render_template('redefinir_senha.html', token=token)
+        return render_template('redefinir-senha.html', token=token)
 
     except Exception as e:
-        return redirect(url_for('pages.pagina_login'))
+        
+        return e
     
     finally:
 
