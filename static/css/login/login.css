@@ -23,9 +23,14 @@ body {
 }
 
 #form input:focus {
-    border: 2px solid;
-    border-color: var(--verde-escuro-medio) !important;
-    box-shadow: 0 0 0 0.25rem rgba(var(--verde-escuro-medio), 0.25);
+    border: 2px solid var(--verde-principal) !important;
+    outline: none !important;
+    box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
+}
+
+input::placeholder{
+    color: var(--verde-escuro-medio) !important;
+    opacity: 0.8 !important; 
 }
 
 .btn-login {
@@ -55,7 +60,6 @@ body {
 }
 
 #form a {
-    text-decoration: none;
     transition: color 0.3s;
 }
 
