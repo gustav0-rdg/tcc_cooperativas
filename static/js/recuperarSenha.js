@@ -51,21 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try 
         {
-            const response = await fetch(
-                
-                '/api/usuarios/solicitar-recuperacao', 
-                
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email: email })
-                }
-        
-            );
-
+            const response = await fetch(`/api/usuarios/recuperacao-senha/${email}`);
             const data = await response.json();
+
+            console.log(response);
 
             if (!response.ok) 
             {
