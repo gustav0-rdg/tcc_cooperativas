@@ -4,6 +4,8 @@ from controllers.cpf_controller import CPF
 from mysql.connector.connection import MySQLConnection
 from controllers.usuarios_controller import Usuarios
 from typing import Union, Optional
+from controllers.endereco_controller import Endereco
+
 
 class Cooperativa:
 
@@ -138,7 +140,6 @@ class Cooperativa:
         finally:
 
             cursor.close()
-
 
     def get_all (self) -> list:
 
@@ -413,13 +414,21 @@ class Cooperativa:
 
             if cursor.fetchone() != None:
                 return None
+            
+            latitude = None
+            longitude = None
+            
+            coordenadas = Endereco.get_coordenadas(f'{endereco}, {cidade}, {estado}, Brasil')
+            
+            if coordenadas:
+                latitude, longitude = coordenadas
 
             # Insere a nova cooperativa com todos os campos
             
             cursor.execute (
                 """
                 INSERT INTO cooperativas 
-                    (id_usuario, cnpj, razao_social, nome_fantasia, email, telefone, endereco, cidade, estado)
+                    (id_usuario, cnpj, razao_social, nome_fantasia, email, telefone, endereco, cidade, estado, latitude, longitude)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
                 (
@@ -431,7 +440,9 @@ class Cooperativa:
                     telefone,
                     endereco,
                     cidade,
-                    estado
+                    estado,
+                    latitude,
+                    longitude
                 )
             )
 
