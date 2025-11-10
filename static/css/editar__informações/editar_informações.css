@@ -1,36 +1,65 @@
-body {
-    font-family: Arial, sans-serif;
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
     background-color: var(--verde-claro);
     color: var(--verde-escuro);
+    display: flex !important;
+    flex-direction: column;
+    height: 100vh;     
+    overflow: hidden; 
+}
+
+header,
+footer {
+    flex-shrink: 0; 
+}
+
+main {
+    flex: 1; 
+    overflow-y: auto; 
 }
 
 .container {
     max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
+    margin: 20px auto 40px auto; 
 }
 
 h1 {
     color: var(--verde-escuro-medio);
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+}
+
+h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--verde-escuro-medio);
+    border-bottom: 2px solid var(--verde-escuro-medio);
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
 }
 
 .edit-form {
-    background-color: var(--verde-principal);
+    background-color: var(--verde-claro-medio);
     padding: 30px;
     border-radius: 8px;
+    border: 1px solid var(--verde-principal);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
-    gap: 30px;
     flex-wrap: wrap;
-    justify-content: space-between;
-    border: 1px solid var(--verde-claro-medio);
+    gap: 30px;
 }
 
 .form-section {
-    flex: 1 1 45%; 
+    flex: 1 1 45%;    
     min-width: 300px;
 }
 
@@ -39,49 +68,43 @@ h1 {
 }
 
 .input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: var(--verde-escuro-medio);
     display: flex;
     align-items: center;
-}
-
-.input-group label i {
-    margin-right: 8px;
-    color: var(--verde-escuro);
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--verde-escuro-medio);
 }
 
 .input-group input {
     width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
-    font-size: 1em;
+    padding: 12px;
+    font-size: 1rem;
     color: var(--verde-escuro);
+    border: 1px solid var(--verde-escuro-medio);
+    border-radius: 5px;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .input-group input:focus {
-    border-color: var(--verde-escuro-medio);
-    outline: none;
-    box-shadow: 0 0 5px rgba(49, 97, 16, 0.5);
+    border: 2px solid var(--verde-principal) !important;
+    outline: none !important;
+    box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
 }
 
 .input-group input::placeholder {
-    color: var(--verde-claro-medio);
+    color: var(--verde-escuro-medio);
     opacity: 0.8;
 }
 
 .action-buttons {
-    width: 100%;
+    width: 100%; 
     display: flex;
     justify-content: flex-end;
     gap: 15px;
-    margin-top: 30px;
+    margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid var(--verde-claro-medio);
+    border-top: 2px solid var(--verde-escuro-medio);
 }
 
 .btn {
@@ -90,45 +113,70 @@ h1 {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-    font-size: 1em;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .btn-cancel {
     background-color: var(--vermelho);
-    color: var(--branco);
+    color: var(--verde-claro);
 }
-
 .btn-cancel:hover {
-    background-color: rgb(200, 50, 50);
-    transform: translateY(-1px);
+    background-color: #c02a2a;
 }
 
 .btn-save {
     background-color: var(--verde-escuro-medio);
-    color: var(--branco);
+    color: var(--verde-claro);
 }
-
 .btn-save:hover {
-    background-color: var(--verde-escuro);
-    transform: translateY(-1px);
+    background-color: var(--verde-escuro); 
 }
 
-@media (max-width: 768px) {
-    .nav-link {
-        padding: 10px 15px;
+@media (max-width: 920px) {
+    body {
+        height: auto; 
+        overflow-y: auto; 
+    }
+
+    main {
+        overflow-y: visible; 
+        padding: 15px;
+    }
+    
+    .container {
+         margin: 10px auto;
+         width: 100%;
     }
 
     .edit-form {
         flex-direction: column;
         padding: 20px;
+        gap: 10px;
     }
 
     .form-section {
-        min-width: 100%;
+        min-width: 100%; 
     }
 
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.2rem; }
+
     .action-buttons {
+        flex-direction: column; 
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
         justify-content: center;
     }
 }
