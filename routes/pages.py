@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, flash, redirect, request, url_for
+from flask import render_template, Blueprint, redirect, request, url_for
 from controllers.tokens_controller import Tokens
 from data.connection_controller import Connection
 
@@ -72,8 +72,6 @@ def pagina_redefinir_senha():
     token = request.args.get('token')
 
     if not token:
-        
-        flash('Link de redefinição inválido ou ausente.', 'error')
         return redirect(url_for('pages.pagina_login'))
 
     conn = Connection('local')
@@ -84,15 +82,11 @@ def pagina_redefinir_senha():
         data_token = Tokens(conn.connection_db).validar(token)
         
         if not data_token or data_token['tipo'] != 'recuperacao_senha':
-
-            flash('Link de redefinição inválido ou expirado.', 'error')
             return redirect(url_for('views.pagina_login'))
         
         return render_template('redefinir_senha.html', token=token)
 
     except Exception as e:
-
-        flash('Ocorreu um erro ao processar sua solicitação.', 'error')
         return redirect(url_for('pages.pagina_login'))
     
     finally:
