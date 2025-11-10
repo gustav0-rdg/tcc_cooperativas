@@ -3,8 +3,7 @@ from data.connection_controller import Connection
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from usuarios_controller import Usuarios 
-
+from controllers.usuarios_controller import Usuarios
 class Catadores:
 
     def __init__(self, connection_db: MySQLConnection):
@@ -270,3 +269,53 @@ class Catadores:
     def reativar(self, id_catador: int) -> bool:
         print(f"Tentando reativar catador {id_catador}...")
         return self._set_status_catador(id_catador, novo_status=True)
+    
+    def get_all(self, id_cooperativa):
+        try:
+            query = """
+                SELECT 
+                    co.cpf, 
+                    co.telefone,
+                    co.endereco,
+                    co.cidade,
+                    co.estado,
+                    co.data_vinculo,
+                    usuario.nome
+                FROM cooperados co
+                JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
+                WHERE id_cooperativa = %s;
+            """
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                cursor.execute(query, (id_cooperativa,))
+                results = cursor.fetchall()
+                return results
+        except Exception as e:
+            print(e)
+        finally:
+            cursor.close()
+
+    def search_cooperado(self, id_cooperativa, nome_cooperado):
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                termo_buscado = f"%{nome_cooperado}%"
+                query = """
+                    SELECT 
+                        co.cpf, 
+                        co.telefone,
+                        co.endereco,
+                        co.cidade,
+                        co.estado,
+                        co.data_vinculo,
+                        usuario.nome
+                    FROM cooperados co
+                    JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
+                    WHERE co.id_cooperativa = %s AND usuario.nome LIKE %s;
+                """
+                cursor.execute(query, (id_cooperativa, termo_buscado))
+                results = cursor.fetchall()
+                return results
+        except Exception as e:
+            print(e)
+            return []
+        finally:
+            cursor.close()

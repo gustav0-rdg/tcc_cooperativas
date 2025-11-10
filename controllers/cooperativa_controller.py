@@ -44,6 +44,102 @@ class Cooperativa:
         finally:
             cursor.close()
 
+    def get_by_user_id(self, id_usuario: int) -> Optional[dict]:
+        if not isinstance(id_usuario, int):
+            raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
+
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                """
+                SELECT
+                c.id_cooperativa,
+                c.id_usuario,
+                c.cnpj,
+                c.razao_social,
+                u.email
+                FROM cooperativas AS c
+                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+                WHERE c.id_usuario = %s;
+                """,
+                (id_usuario,)
+            )
+            return cursor.fetchone()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "get_by_user_id": {e}')
+            return None
+        finally:
+            cursor.close()
+
+    def get_cooperativa_by_user_id (self, id_usuario) -> list:
+
+        """
+        Consulta todas as cooperativas
+        cadastradas no sistema
+        """
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        print(id_usuario)
+        try:
+
+            cursor.execute (
+
+                """
+                SELECT
+                    cooperativas.id_cooperativa,
+                    cooperativas.cnpj,
+                    cooperativas.razao_social,
+                    cooperativas.endereco,
+                    cooperativas.cidade,
+                    cooperativas.estado,
+                    cooperativas.latitude,
+                    cooperativas.longitude,
+                    cooperativas.aprovado,
+                    cooperativas.id_usuario,
+                    cooperativas.telefone,
+                    cooperativas.email,
+                    cooperativas.nome_fantasia,
+                    usuarios.status,
+                    cooperativas.ultima_atualizacao,
+                    cooperativas.data_cadastro,
+                    COUNT(vendas.id_venda) AS `total_vendas`,
+                    COALESCE(
+                        GROUP_CONCAT(
+                            DISTINCT materiais_catalogo.nome_especifico ORDER BY materiais_catalogo.nome_especifico SEPARATOR '|'
+                        ), NULL
+                    ) AS `materiais_vendidos`
+                FROM cooperativas
+                INNER JOIN
+                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
+                LEFT JOIN
+                    vendas ON vendas.id_cooperativa = cooperativas.id_cooperativa
+                LEFT JOIN
+                    vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
+                LEFT JOIN materiais_catalogo
+                    ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
+                WHERE cooperativas.id_usuario = %s
+                GROUP BY
+                    cooperativas.id_cooperativa;
+                
+                """, (id_usuario, )
+
+            )
+
+            return cursor.fetchone()
+
+        except Exception as e:
+
+            print(f'Erro - Cooperativa "get_coopeariva_by_user_id": {e}')
+
+            return False
+
+        finally:
+
+            cursor.close()
+
+
     def get_all (self) -> list:
 
         """
@@ -125,7 +221,6 @@ class Cooperativa:
         estado:str
             
     ) -> bool:
-
         """
         Relaciona o usuário fornecido com a
         cooperativa
@@ -133,7 +228,7 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(id_cooperativa, str):
+        if not isinstance(id_cooperativa, int):
 
             raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
@@ -194,6 +289,15 @@ class Cooperativa:
 
                 self.connection_db.commit()
                 return cursor.lastrowid
+            
+            def ativar_cooperado(id_usuario):
+                if not isinstance(id_usuario, int):
+                    raise TypeError("Error - ativar cooperado - id_usuario deve ser do tipo INT")
+                cursor.execute("""
+                UPDATE usuarios SET status = "ativo" WHERE id_usuario = %s;
+                """, (id_usuario,))
+                self.connection_db.commit()
+                
 
             cooperado = Usuarios(self.connection_db).create(
 
@@ -203,7 +307,6 @@ class Cooperativa:
                 tipo='cooperado'
 
             )
-
             match cooperado:
 
                 case None:
@@ -226,15 +329,17 @@ class Cooperativa:
 
                     data_usuario = cursor.fetchone()
 
-                    if data_usuario != None:
+                    if data_usuario is None:
                         return None
                 
                     if data_usuario['tipo'] == 'cooperado':
+                        ativar_cooperado(data_usuario['id_usuario'])
                         return vincular(data_usuario['id_usuario'])
 
                     return None
 
                 case _ if isinstance(cooperado, int):
+                    
                     return vincular(cooperado)
             
                 case False | _:
@@ -243,7 +348,7 @@ class Cooperativa:
         except Exception as e:
 
             print(f'Erro - Cooperativa "vincular_cooperado": {e}')
-
+            self.connection_db.rollback()
             return False
 
         finally:

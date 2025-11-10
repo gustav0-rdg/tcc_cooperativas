@@ -3,16 +3,58 @@ from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
+from controllers.cooperados_controller import Catadores
 import json
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
-@api_post.route("/cooperado", methods=["POST"])
+@api_post.route("/post/cooperado", methods=["POST"])
 def cadastrar_cooperado():
-    cpf = request.form.get("cpf")
-    nome = request.form.get("nome")
-    telefone = request.form.get("telefone")
-    data_nascimento = request.form.get("data")
-    return redirect("/login")
+    try:
+        data = request.get_json()
+
+        nome = data.get("nome")
+        email = data.get("email") or f"{data.get('cpf')}@cooperativa.org"
+        senha = data.get("senha")
+        cpf = data.get("cpf")
+        telefone = data.get("telefone")
+        endereco = data.get("endereco")
+        cidade = data.get("cidade")
+        estado = data.get("estado")
+        id_cooperativa = int(data.get("id_cooperativa"))  # exemplo fixo
+
+        conn = Connection('local')
+        catadores = Catadores(conn.connection_db).create(
+            nome=nome,
+            email=email,
+            senha=senha,
+            id_cooperativa=id_cooperativa,
+            cpf=cpf,
+            telefone=telefone,
+            endereco=endereco,
+            cidade=cidade,
+            estado=estado
+        )
+
+        if id_criado:
+            return jsonify({"s"
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            ""
+            "uccess": True, "id_catador": id_criado}), 201
+        else:
+            return jsonify({"success": False, "error": "Erro ao criar catador"}), 500
+
+    except Exception as e:
+        print(f"Erro em /post/cooperado: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
