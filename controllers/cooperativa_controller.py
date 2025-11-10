@@ -3,6 +3,7 @@ from controllers.cnpj_controller import CNPJ
 from controllers.cpf_controller import CPF
 from mysql.connector.connection import MySQLConnection
 from controllers.usuarios_controller import Usuarios
+from typing import Union, Optional
 
 class Cooperativa:
 
@@ -14,23 +15,73 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
-    def get (self, identificador:int|str) -> dict:
+    def get_by_id(self, id_cooperativa: int) -> Optional[dict]:
+        if not isinstance(id_cooperativa, int):
+            raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
 
-        """
-        Procura a cooperativa da qual o usuario
-        fornecido é o administrador
-        """
-
-        #region Exceções
-
-        if not isinstance(identificador, (int, str)):
-
-            raise TypeError ('Cooperativa - "identificador" deve ser id_usuario, id_cooperativa ou cnpj')
-
-        #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                """
+                SELECT
+                c.id_cooperativa,
+                c.id_usuario,
+                c.cnpj,
+                c.razao_social,
+                u.email
+                FROM cooperativas AS c
+                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+                WHERE c.id_cooperativa = %s;
+                """,
+                (id_cooperativa,)
+            )
+            return cursor.fetchone()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "get_by_id": {e}')
+            return None
+        finally:
+            cursor.close()
 
+    def get_by_user_id(self, id_usuario: int) -> Optional[dict]:
+        if not isinstance(id_usuario, int):
+            raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
+
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                """
+                SELECT
+                c.id_cooperativa,
+                c.id_usuario,
+                c.cnpj,
+                c.razao_social,
+                u.email
+                FROM cooperativas AS c
+                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+                WHERE c.id_usuario = %s;
+                """,
+                (id_usuario,)
+            )
+            return cursor.fetchone()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "get_by_user_id": {e}')
+            return None
+        finally:
+            cursor.close()
+
+    def get_cooperativa_by_user_id (self, id_usuario) -> list:
+
+        """
+        Consulta todas as cooperativas
+        cadastradas no sistema
+        """
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        print(id_usuario)
         try:
 
             cursor.execute (
@@ -68,16 +119,11 @@ class Cooperativa:
                     vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
                 LEFT JOIN materiais_catalogo
                     ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
-                WHERE 
-                    cooperativas.id_cooperativa = %s OR
-                    cooperativas.id_usuario = %s OR
-                    cooperativas.cnpj = %s
+                WHERE cooperativas.id_usuario = %s
                 GROUP BY
-                    cooperativas.id_cooperativa
-                LIMIT 1;
-                """,
-
-                (identificador, identificador, identificador)
+                    cooperativas.id_cooperativa;
+                
+                """, (id_usuario, )
 
             )
 
@@ -85,13 +131,14 @@ class Cooperativa:
 
         except Exception as e:
 
-            print(f'Erro - Cooperativa "get_by_id": {e}')
+            print(f'Erro - Cooperativa "get_coopeariva_by_user_id": {e}')
 
             return False
 
         finally:
 
             cursor.close()
+
 
     def get_all (self) -> list:
 
@@ -174,7 +221,6 @@ class Cooperativa:
         estado:str
             
     ) -> bool:
-
         """
         Relaciona o usuário fornecido com a
         cooperativa
@@ -182,7 +228,7 @@ class Cooperativa:
 
         #region Exceções
 
-        if not isinstance(id_cooperativa, str):
+        if not isinstance(id_cooperativa, int):
 
             raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
         
@@ -243,6 +289,15 @@ class Cooperativa:
 
                 self.connection_db.commit()
                 return cursor.lastrowid
+            
+            def ativar_cooperado(id_usuario):
+                if not isinstance(id_usuario, int):
+                    raise TypeError("Error - ativar cooperado - id_usuario deve ser do tipo INT")
+                cursor.execute("""
+                UPDATE usuarios SET status = "ativo" WHERE id_usuario = %s;
+                """, (id_usuario,))
+                self.connection_db.commit()
+                
 
             cooperado = Usuarios(self.connection_db).create(
 
@@ -252,7 +307,6 @@ class Cooperativa:
                 tipo='cooperado'
 
             )
-
             match cooperado:
 
                 case None:
@@ -275,15 +329,17 @@ class Cooperativa:
 
                     data_usuario = cursor.fetchone()
 
-                    if data_usuario != None:
+                    if data_usuario is None:
                         return None
                 
                     if data_usuario['tipo'] == 'cooperado':
+                        ativar_cooperado(data_usuario['id_usuario'])
                         return vincular(data_usuario['id_usuario'])
 
                     return None
 
                 case _ if isinstance(cooperado, int):
+                    
                     return vincular(cooperado)
             
                 case False | _:
@@ -292,59 +348,38 @@ class Cooperativa:
         except Exception as e:
 
             print(f'Erro - Cooperativa "vincular_cooperado": {e}')
-
+            self.connection_db.rollback()
             return False
 
         finally:
 
             cursor.close()
 
-    def alterar_aprovacao (self, id_cooperativa:int, aprovado:bool) -> bool:
-        
-        """
-        Altera o estado de aprovação da
-        cooperativa, variando entre True or False
-        """
-
-        #region Exceções
+    def alterar_aprovacao(self, id_cooperativa: int, aprovado: bool) -> bool:
 
         if not isinstance(id_cooperativa, int):
-
-            raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
-        
+            raise TypeError('Cooperativa - "id_cooperativa" deve ser int')
         if not isinstance(aprovado, bool):
+            raise TypeError('Cooperativa - "aprovado" deve ser boolean')
 
-            raise TypeError ('Cooperativa - "aprovado" deve ser do tipo Booleano')
-
-        #endregion
 
         cursor = self.connection_db.cursor()
-
         try:
-
-            cursor.execute (
-
+            cursor.execute(
                 """
                 UPDATE cooperativas
-                SET cooperativas.aprovado = %s
-                WHERE cooperativas.id_cooperativa = %s;
+                SET aprovado = %s
+                WHERE id_cooperativa = %s;
                 """,
-
                 (aprovado, id_cooperativa)
-
             )
-
-            self.connection_db.commit()
-            return cursor.rowcount > 0 or None
-
+            return cursor.rowcount > 0
+        
         except Exception as e:
-
             print(f'Erro - Cooperativa "alterar_aprovacao": {e}')
-
             return False
-
+        
         finally:
-
             cursor.close()
 
     def create (
@@ -410,11 +445,7 @@ class Cooperativa:
         finally:
             cursor.close()
 
-    def adicionar_documento (self, id_cooperativa: int, arquivo_url: str) -> int | bool:
-        """
-        Insere um novo documento comprovativo para a cooperativa
-        """
-
+    def adicionar_documento(self, id_cooperativa: int, arquivo_url: str) -> Optional[int]:
         cursor = self.connection_db.cursor()
 
         try:
@@ -425,12 +456,70 @@ class Cooperativa:
                 """,
                 (id_cooperativa, arquivo_url)
             )
-            
             return cursor.lastrowid
         
         except Exception as e:
             print(f'Erro - Cooperativa "adicionar_documento": {e}')
-            return
+            return None
         
         finally:
-            cursor.close
+            cursor.close()
+
+    def get_pendentes_com_documentos(self) -> list | bool:
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            query = """
+                SELECT
+                    u.email,
+                    c.id_cooperativa,
+                    c.razao_social,
+                    c.cnpj,
+                    c.data_cadastro,
+                    GROUP_CONCAT(DISTINCT doc.arquivo_url SEPARATOR ',') AS arquivo_url
+                FROM cooperativas AS c
+                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+                LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa
+                    AND doc.status = 'pendente'
+                WHERE
+                    c.aprovado = FALSE
+                    AND u.status = 'pendente'
+                GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_cadastro;
+                """
+            
+            cursor.execute(query)
+            return cursor.fetchall()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "get_pendentes_com_documentos": {e}')
+            return False
+        
+        finally:
+            cursor.close()
+
+    def rejeitar_documento(self, id_cooperativa: int, id_gestor_avaliador: int, motivo: str, justificativa: str) -> bool:
+        cursor = self.connection_db.cursor()
+
+        try:
+            motivo_completo = f"Motivo: {motivo}. Justificativa: {justificativa}"
+            cursor.execute(
+                """
+                UPDATE documentos_cooperativa
+                SET
+                status = 'negado',
+                motivo_rejeicao = %s,
+                data_avaliacao = NOW(),
+                id_gestor_avaliador = %s
+                WHERE
+                id_cooperativa = %s AND status = 'pendente';
+                """,
+                (motivo_completo, id_gestor_avaliador, id_cooperativa)
+                )
+            
+            return cursor.rowcount > 0
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "rejeitar_documento": {e}')
+            return False
+        
+        finally:
+            cursor.close()

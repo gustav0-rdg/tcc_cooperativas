@@ -1,4 +1,6 @@
-from flask import render_template, Blueprint
+from flask import render_template, Blueprint, redirect, request, url_for
+from controllers.tokens_controller import Tokens
+from data.connection_controller import Connection
 
 pages = Blueprint('pages', __name__)
 
@@ -62,6 +64,36 @@ def pagina_gerenciar_cadastros_gestor():
 @pages.route("/recuperar-senha")
 def pagina_recuperar_senha():
     return render_template("recuperar-senha.html")
+
+@pages.route('/redefinir-senha')
+def pagina_redefinir_senha():
+    
+    # Pega o token da URL. Exemplo: ?token=...
+    token = request.args.get('token')
+
+    if not token:
+        return redirect('/')
+
+    conn = Connection('local')
+
+    try:
+
+        # Valida o token
+        data_token = Tokens(conn.connection_db).validar(token)
+        
+        if not data_token or data_token['tipo'] != 'recuperacao_senha' or data_token['usado'] == True:
+            return redirect('/')
+        
+        return render_template('redefinir-senha.html', token=token)
+
+    except Exception as e:
+        
+        return e
+    
+    finally:
+
+        if conn:
+            conn.close()
 
 @pages.route("/Termos-de-Uso")
 def pagina_termos_de_uso():

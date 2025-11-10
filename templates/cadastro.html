@@ -56,7 +56,7 @@
           <div class="form-check mb-3">
             <input type="checkbox" class="form-check-input" id="termos" name="termos" required>
             <p class="form-check-label" for="termos">
-              Li e concordo com os <a href="/Termos-de-Uso" class="link">termos de uso</a>
+              Li e concordo com os <a id="termosDeUso" href="#">termos de uso</a>
             </p>
           </div>
           <button type="submit" class="btn btn-primary w-100  ">Cadastrar</button>
@@ -74,6 +74,25 @@
     <!-- Script para cadastro -->
      <script src="../static/js/cadastroCooperativa.js"></script>
   </section>
+  <script src="/static/js/termos.js"></script>
 </body>
+<script>
+  const cnpjInput = document.getElementById('cnpj');
+
+  cnpjInput.addEventListener('input', function () {
+    let value = this.value.replace(/\D/g, ""); // remove tudo que não é número
+
+    // limita a 14 números
+    if (value.length > 14) value = value.slice(0, 14);
+
+    // aplica a máscara
+    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    value = value.replace(/(\d{4})(\d)/, "$1-$2");
+
+    this.value = value;
+  });
+</script>
 
 </html>

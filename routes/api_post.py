@@ -3,34 +3,36 @@ from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
+from controllers.cooperados_controller import Catadores
 import json
-api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
-@api_post.route("/cooperado", methods=["POST"])
-def cadastrar_cooperado():
-    cpf = request.form.get("cpf")
-    nome = request.form.get("nome")
-    telefone = request.form.get("telefone")
-    data_nascimento = request.form.get("data")
-    return redirect("/login")
+api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
 
-    
-    dados_recebidos = request.get_json()
-    conn = Connection('local')
-    processar_venda = Vendas(conn.connection_db).registrar_nova_venda(1, dados_recebidos)
-    
-    return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
+    try:
+        dados_recebidos = request.get_json()
+        conn = Connection('local')
+        processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
+        return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
+    except Exception as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
 
 @api_post.route("/dados-comprador", methods=["POST"])
 def postar_dados_comprador():
-    conn = Connection('local')
-    dados_recebidos = request.get_json()
-    dados = json.loads(dados_recebidos)
-    Compradores(conn.connection_db).create(str(dados))
-    return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})
+    try:
+        conn = Connection('local')
+        dados_recebidos = request.get_json()
+        Compradores(conn.connection_db).create(str(dados_recebidos))
+        return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()
 
 # eu que fiz samuel corrija
 
@@ -64,7 +66,12 @@ def registrar_sinonimo():
 
 @api_post.route("/cadastrar-subtipo", methods=["POST"])
 def cadastrar_subtipo():
-    data = request.get_json()
-    conn = Connection('local')
-    resposta = Materiais(conn.connection_db).cadastrar_subtipo(data["nome_especifico"], data["id_material_base"])
-    return resposta
+    try:
+        data = request.get_json()
+        conn = Connection('local')
+        resposta = Materiais(conn.connection_db).cadastrar_subtipo(data["nome_especifico"], data["id_material_base"])
+        return resposta
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()

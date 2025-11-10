@@ -27,16 +27,13 @@
 
     <!-- Link para o favicon -->
     <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous" defer></script>
 
     <!-- Link Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
     <!-- Link JavaScript -->
-    <script src="../static/js/gerenciar_cooperados/utils.js" defer></script>
-    
-    <script src="../static/js/gerenciar_cooperados/cooperadoService.js" defer></script>
-    
-    <script src="../static/js/gerenciar_cooperados/gerenciarCooperados.js" defer></script>
+
 </head>
 
 <body>
@@ -50,7 +47,7 @@
 
         <section class="d-flex justify-content-center gap-5 align-items-center mb-4">
             <input type="text" id="searchInput" class="form-control w-50" placeholder="Pesquisar Cooperados">
-            <button class="btn btn-primary" onclick="addCooperado()">+</button>
+            <button class="btn btn-primary vincular__cooperado">+</button>
         </section>
 
         <section id="cooperadoCards">
@@ -80,6 +77,8 @@
             </div>
         </div>
     </div>
+    <script src="/static/js/gerenciar_cooperados/vincularCooperado.js" type="module"></script>
+    <script src="/static/js/gerenciar_cooperados/exibirCooperados.js"></script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@ from data.connection_controller import Connection
 from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
 from controllers.cnpj_controller import CNPJ
+from controllers.email_controller import Email
 # imports para garantir a funcionalidade de uploads de documentos
 import os
 from werkzeug.utils import secure_filename
@@ -143,7 +144,7 @@ def cadastrar ():
                     "id_usuario": id_usuario_criado,
                     "cnpj": data_cadastro['cnpj'],
                     "razao_social": company.get('name', 'Razão Social não encontrada'),
-                    "nome_fantasia": company.get('alias', 'Nome Fantasia não encontrado'),
+                    "nome_fantasia": dados_cnpj.get('alias', 'Nome Fantasia não encontrado'),
                     "email": dados_cnpj.get('email', data_cadastro['email']),
                     "telefone": phones[0].get('number', 'Telefone não encontrado'), # Pega o primeiro telefone
                     "endereco": f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}".strip(" ,-"),
@@ -217,14 +218,26 @@ def get (identificador:int|str):
     try:
 
         data_token = Tokens(conn.connection_db).validar(token)
-
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+        user = Usuarios(conn.connection_db).get(data_token['id_usuario'])
+        if not user['tipo'] in ['cooperativa','gestor', 'root']:
         
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+            
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-        
-        dados_cooperativa = Cooperativa(conn.connection_db).get(identificador)
+        elif user['tipo'] == 'cooperativa':
+            
+            # Pega os dados da cooperativa VINCULADA AO TOKEN
+            dados_cooperativa_logada = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(user['id_usuario'])
+            if not dados_cooperativa_logada:
+                return jsonify({'error': 'Cooperativa associada a este usuário não encontrada.'}), 404
+
+            # Compara se o 'identificador' da URL bate com algum dos IDs
+            # da cooperativa que está logada.
+            if (identificador != dados_cooperativa_logada['id_usuario']):
+                # Se o ID da URL não bate com NENHUM, é uma tentativa de acesso indevido.
+                return jsonify({'error': 'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}), 403
+        dados_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(identificador)
 
         match dados_cooperativa:
 
@@ -263,7 +276,7 @@ def get_all ():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
         
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
+        if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
         dados_cooperativas = Cooperativa(conn.connection_db).get_all()
@@ -289,58 +302,107 @@ def get_all ():
 
         conn.close()
 
-@api_cooperativas.route('/alterar-aprovacao/<id_cooperativa>', methods=['POST'])
-def alterar_aprovacao (id_cooperativa:int):
+@api_cooperativas.route('/alterar-aprovacao', methods=['POST'])
+def alterar_aprovacao():
 
-    if not id_cooperativa.isdigit():
-        return jsonify({ 'error': '"id_cooperativa" é inválido' }), 400
-    
-    id_cooperativa = int(id_cooperativa)
+    data = request.get_json()
+    id_cooperativa = data.get('id_cooperativa')
+    aprovacao = data.get('aprovacao')
 
-    aprovacao = request.get_json().get('aprovacao')
 
-    if not aprovacao or not isinstance(aprovacao, bool):
-        return jsonify({ 'error': '"aprovacao" deve ser do tipo Booleano' }), 400
+    if not id_cooperativa or aprovacao is None:
+        return jsonify({'error': 'id_cooperativa e aprovacao são obrigatórios'}), 400
 
-    token = request.headers.get('Authorization')
-    if not token:
-        return jsonify({ 'error': '"token" é parâmetro obrigatório' }), 400
+
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'token é parâmetro obrigatório'}), 400
+
 
     conn = Connection('local')
+    if not conn.connection_db:
+        return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
 
+    db = conn.connection_db
     try:
+        token = token_header.split(' ')[1]
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido'}), 401
 
-        data_token = Tokens(conn.connection_db).validar(token)
+        id_usuario_gestor = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario_gestor)
 
-        if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
-        
-        if not Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
-            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-        
-        match Cooperativa(conn.connection_db).alterar_aprovacao(id_cooperativa, aprovacao):
+        if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
+            conn.close()
+            return jsonify({'error': 'Você não tem permissão para realizar tal ação'}), 403
 
-            # 404 - Cooperativa não encontrada
+        coop_ctrl = Cooperativa(db)
+        cooperativa = coop_ctrl.get_by_id(int(id_cooperativa))
 
-            case None:
-                return jsonify({ 'error': 'Cooperativa não encontrado' }), 404
+        if not cooperativa:
+            conn.close()
+            return jsonify({'error': 'Cooperativa não encontrada'}), 404
 
-            # 200 - Aprovação alterada
 
-            case True:
-                return jsonify({ 'texto': 'Aprovação da cooperativa alterada' }), 200
+        id_usuario_cooperativa = cooperativa['id_usuario']
 
-            # 500 - Erro ao alterar a aprovação da cooperativa
 
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+        # Garante que não há transação pendente na conexão antes de iniciar
+        try:
+            if db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+
+        db.start_transaction()
+
+        sucesso_coop = coop_ctrl.alterar_aprovacao(int(id_cooperativa), bool(aprovacao))
+        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'ativo' if aprovacao else 'inativo')
+
+
+        if sucesso_coop and sucesso_user:
+            # Commit primeiro para garantir que a alteração seja salva
+            db.commit()
+            
+            # Envia email de aprovação ou reprovação (não bloqueia se falhar)
+            try:
+                usuario_coop = Usuarios(db).get(int(id_usuario_cooperativa))
+                if usuario_coop and usuario_coop.get('email'):
+                    if bool(aprovacao):
+                        assunto = "Cadastro no Recoopera Aprovado"
+                        corpo_html = Email.gerar_template_aprovacao(cooperativa.get('razao_social', 'Cooperativa'))
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+                    else:
+                        # Email de reprovação sem motivo específico (quando usado através de /alterar-aprovacao)
+                        assunto = "Cadastro no Recoopera Rejeitado"
+                        motivo = "Aprovação negada"
+                        justificativa = "Seu cadastro foi rejeitado. Entre em contato conosco para mais informações."
+                        corpo_html = Email.gerar_template_rejeicao(
+                            cooperativa.get('razao_social', 'Cooperativa'),
+                            motivo,
+                            justificativa
+                        )
+                        Email.enviar(usuario_coop['email'], assunto, corpo_html)
+            except Exception as email_error:
+                # Log do erro mas não bloqueia a resposta de sucesso
+                print(f"Erro ao enviar email (não crítico): {email_error}")
+            
+            return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
+        else:
+            db.rollback()
+            return jsonify({'error': 'Erro ao atualizar status (coop ou user).'}), 500
 
     except Exception as e:
-
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
+        try:
+            if db and db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+        print(f"Erro em /alterar-aprovacao: {e}")
+        return jsonify({'error': f'Erro no servidor: {e}'}), 500
     finally:
-
         conn.close()
 
 @api_cooperativas.route('/vincular-cooperado', methods=['POST'])
@@ -370,15 +432,15 @@ def vincular_cooperado ():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" inválido' }), 400
 
-        data_adm_cooperativa = Usuarios(conn.connection_db).get_by_id(data_token['id_usuario'])
+        data_adm_cooperativa = Usuarios(conn.connection_db).get(data_token['id_usuario'])
 
         # Autor da requisição inválido
 
         if not data_adm_cooperativa or data_adm_cooperativa['tipo'] != 'cooperativa':
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        data_cooperativa = Cooperativa(conn.connection_db).get(data_adm_cooperativa['id_usuario'])
-
+        data_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(data_adm_cooperativa['id_usuario'])
+        print(data_cooperativa)
         id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
 
             data_cooperativa['id_cooperativa'],
@@ -394,7 +456,7 @@ def vincular_cooperado ():
             data_cooperado['estado']
 
         )
-
+        print(id_cooperado)
         match id_cooperado:
 
             # 409 - Email já cadastrado
@@ -479,3 +541,89 @@ def enviar_documento():
     finally:
         if conn:
             conn.close()
+
+@api_cooperativas.route('/rejeitar', methods=['POST'])
+def rejeitar_cooperativa():
+
+    token_header = request.headers.get('Authorization')
+    data = request.get_json()
+    id_cooperativa = data.get('id_cooperativa')
+    email_cooperativa = data.get('email')
+    motivo = data.get('motivo')
+    justificativa = data.get('justificativa')
+
+
+    if not all([token_header, id_cooperativa, email_cooperativa, motivo, justificativa]):
+        return jsonify({'error': 'Dados incompletos'}), 400
+
+
+    conn = Connection('local')
+    if not conn.connection_db:
+        return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
+
+    db = conn.connection_db
+    try:
+        token = token_header.split(' ')[1]
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido'}), 401
+
+        id_usuario_gestor = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario_gestor)
+        if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        try:
+            if db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+
+        db.start_transaction()
+        coop_ctrl = Cooperativa(db)
+        sucesso_doc = coop_ctrl.rejeitar_documento(int(id_cooperativa), int(id_usuario_gestor), motivo, justificativa)
+
+
+        cooperativa_data = coop_ctrl.get_by_id(int(id_cooperativa))
+        if not cooperativa_data:
+            db.rollback()
+            conn.close()
+            return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
+
+        id_usuario_cooperativa = cooperativa_data['id_usuario']
+        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'bloqueado')
+
+
+        if not (sucesso_doc and sucesso_user):
+            db.rollback()
+            conn.close()
+            return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
+
+        # Commit primeiro para garantir que a alteração seja salva
+        db.commit()
+
+        # Envia email de rejeição com template HTML bonito (não bloqueia se falhar)
+        try:
+            assunto = "Cadastro no Recoopera Rejeitado"
+            razao_social = cooperativa_data.get('razao_social', 'Cooperativa')
+            corpo_html = Email.gerar_template_rejeicao(razao_social, motivo, justificativa)
+            Email.enviar(email_cooperativa, assunto, corpo_html)
+        except Exception as email_error:
+            # Log do erro mas não bloqueia a resposta de sucesso
+            print(f"Erro ao enviar email (não crítico): {email_error}")
+
+        return jsonify({'message': 'Cooperativa rejeitada e e-mail enviado.'}), 200
+
+
+    except Exception as e:
+        try:
+            if db and db.in_transaction:
+                db.rollback()
+        except Exception:
+            pass
+        print(f"Erro em /rejeitar: {e}")
+        return jsonify({'error': f'Erro interno no servidor: {e}'}), 500
+    finally:
+        conn.close()

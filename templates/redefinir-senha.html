@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recoopera | Redefinir Senha</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/root-de-cores.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilizacao-padrao.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/redefinir-senha.css') }}">
+    
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+</head>
+
+<body>
+    <section class="d-flex align-items-center justify-content-center vh-100 conteudo">
+
+        <div class="card shadow-lg p-4 p-md-5">
+            <div class="card-body">
+                
+                <h2 class="card-title text-center mb-3">
+                    <span class="material-icons" style="font-size: 2rem;">lock_reset</span>
+                    Crie sua nova senha
+                </h2>
+
+                <div id="success-msg" class="alert alert-success mt-3" style="display:none;"></div>
+                <div id="error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+                
+                <form id="form-redefinir">
+                
+                    <div class="mb-3">
+                        <label for="nova-senha" class="form-label">Nova Senha</label>
+                        <input type="password" id="nova-senha" class="form-control" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmar-senha" class="form-label">Confirmar Senha</label>
+                        <input type="password" id="confirmar-senha" class="form-control" required minlength="8" placeholder="Repita a nova senha">
+                        <label id="label-senhas" class="d-flex align-items-center mt-2" style="font-size: 0.9rem; visibility: hidden;">
+                            <span id="senhas-coincidem-icon" class="material-icons me-1" style="font-size: 1.1rem;"></span>
+                            <span id="senhas-coincidem-texto"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success">Salvar Nova Senha</button>
+                    </div>
+
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('pages.pagina_inicial') }}" class="link_a">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">arrow_back</span>
+                        Voltar ao Login
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const TOKEN = "{{ token }}"; 
+        
+        const form = document.getElementById('form-redefinir');
+        const novaSenhaInput = document.getElementById('nova-senha');
+        const confirmarSenhaInput = document.getElementById('confirmar-senha');
+        const errorMsg = document.getElementById('error-msg');
+        const successMsg = document.getElementById('success-msg');
+        
+        // --- 5. MUDANÇA (JavaScript e Label) ---
+        const labelSenhas = document.getElementById('label-senhas');
+        const iconSenhasCoincidem = document.getElementById('senhas-coincidem-icon');
+        const textoSenhasCoincidem = document.getElementById('senhas-coincidem-texto');
+
+        // Define os ícones e classes do Materialize (material-icons)
+        const icons = {
+            'success': 'check_circle',
+            'error': 'error'
+        };
+
+        const cores = {
+            'success': 'var(--verde-principal)', // Puxando da sua paleta de cores
+            'error': 'var(--vermelho)'
+        };
+
+        iconSenhasCoincidem.innerHTML = icons.error;
+        iconSenhasCoincidem.style.color = cores.error;
+        textoSenhasCoincidem.textContent = 'Senhas não coincidem';
+        textoSenhasCoincidem.style.color = cores.error;
+
+        function verificarCoincidencia() {
+            const novaSenha = novaSenhaInput.value;
+            const confirmarSenha = confirmarSenhaInput.value;
+
+            // Só mostra o label se ambos os campos tiverem algo
+            if (novaSenha.length > 0 && confirmarSenha.length > 0) {
+                labelSenhas.style.visibility = 'visible'; // Mostra o label
+                
+                if (novaSenha === confirmarSenha) {
+                    iconSenhasCoincidem.innerHTML = icons.success;
+                    iconSenhasCoincidem.style.color = cores.success;
+                    textoSenhasCoincidem.textContent = 'Senhas coincidem';
+                    textoSenhasCoincidem.style.color = cores.success;
+                } else {
+                    iconSenhasCoincidem.innerHTML = icons.error;
+                    iconSenhasCoincidem.style.color = cores.error;
+                    textoSenhasCoincidem.textContent = 'Senhas não coincidem';
+                    textoSenhasCoincidem.style.color = cores.error;
+                }
+            } else {
+                labelSenhas.style.visibility = 'hidden'; // Esconde se os campos estiverem vazios
+            }
+        }
+
+        // Use 'input' para verificar em tempo real, em vez de 'change'
+        novaSenhaInput.addEventListener('input', verificarCoincidencia);
+        confirmarSenhaInput.addEventListener('input', verificarCoincidencia);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // Adiciona spinner ao botão (puxei da sua outra tela)
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...`;
+
+            const novaSenha = novaSenhaInput.value;
+            const confirmarSenha = confirmarSenhaInput.value;
+
+            if (novaSenha !== confirmarSenha) {
+                errorMsg.textContent = 'As senhas não coincidem.';
+                errorMsg.style.display = 'block';
+                submitButton.disabled = false; // Restaura o botão
+                submitButton.innerHTML = originalButtonText;
+                return;
+            }
+
+            if (novaSenha.length < 8) {
+                errorMsg.textContent = 'A senha deve ter no mínimo 8 caracteres.';
+                errorMsg.style.display = 'block';
+                submitButton.disabled = false; // Restaura o botão
+                submitButton.innerHTML = originalButtonText;
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/usuarios/alterar-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': TOKEN
+                    },
+                    body: JSON.stringify({
+                        'nova-senha': novaSenha
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
+
+                successMsg.textContent = 'Senha alterada com sucesso! Redirecionando para o login...';
+                successMsg.style.display = 'block';
+                form.style.display = 'none'; // Esconde o formulário
+                labelSenhas.style.visibility = 'hidden'; // Esconde o label de senhas
+                
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('pages.pagina_inicial') }}"; // Corrigido para o link do seu 'Voltar'
+                }, 3000);
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                submitButton.disabled = false; // Restaura o botão
+                submitButton.innerHTML = originalButtonText;
+            }
+        });
+    </script>
+</body>
+</html>

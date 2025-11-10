@@ -92,92 +92,135 @@
 
 </style>
 
+<!-- Carrega SweetAlert2 para garantir que esteja disponível em todas as páginas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
 
-    const token = localStorage.getItem('session_token');
-    const homeLink = document.getElementById('home-link');
-    const logoutLink = document.getElementById('logout-link');
-    const headerInfoCoop = document.getElementById('header-info-cooperativa');
-    const headerNomeCoop = document.getElementById('header-nome-cooperativa');
-    const headerEndCoop = document.getElementById('header-endereco-cooperativa');
-    const headerInfoAdmin = document.getElementById('header-info-admin');
-    const headerNomeAdmin = document.getElementById('header-nome-admin');
-
-    function handleLogout() {
-        localStorage.removeItem('session_token');
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Desconectado',
-                text: 'Você saiu da sua conta.',
-                icon: 'info',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = '/'; 
-            });
-        } else {
-            alert('Você foi desconectado.');
-            window.location.href = '/'; 
-        }
-    }
-
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleLogout();
-        });
-    }
-
-    if (!token || !homeLink) {
-        if(logoutLink) logoutLink.style.display = 'none';
-        if(homeLink) homeLink.style.display = 'none'; 
-        return; 
-    }
+    document.addEventListener('DOMContentLoaded', async () => {
     
-    try {
-        const response = await fetch (
-        
-            '/api/usuarios/get', 
-            
-            {
+        const token = localStorage.getItem('session_token');
+        const homeLink = document.getElementById('home-link');
+        const logoutLink = document.getElementById('logout-link');
+        const headerInfoCoop = document.getElementById('header-info-cooperativa');
+        const headerNomeCoop = document.getElementById('header-nome-cooperativa');
+        const headerEndCoop = document.getElementById('header-endereco-cooperativa');
+        const headerInfoAdmin = document.getElementById('header-info-admin');
+        const headerNomeAdmin = document.getElementById('header-nome-admin');
+    
+        async function getUserInfo(session_token) {
+            const response = await fetch('/api/usuarios/get', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': token
+                    'Authorization': session_token
                 }
+            });
+    
+            const data = await response?.json();
+    
+            if (!response.ok) {
+                throw new Error(data.error || 'Não foi possível buscar os dados do usuário.');
             }
-        );
-
-        console.log(response)
-        const data = await response?.json();
-        console.log(data)
-
-        if (!response.ok) {
-            console.error('Token inválido ou expirado ao carregar header.');
-            // handleLogout(); // Opcional: Deslogar automaticamente se o token for ruim
+    
+            return data;
+        }
+    
+        async function handleLogout() {
+            localStorage.removeItem('session_token');
+            sessionStorage.removeItem('usuario');
+            
+            // Aguarda o SweetAlert estar disponível
+            let swalReady = typeof Swal !== 'undefined';
+            if (!swalReady) {
+                await new Promise(resolve => {
+                    let attempts = 0;
+                    const checkSwal = setInterval(() => {
+                        if (typeof Swal !== 'undefined') {
+                            clearInterval(checkSwal);
+                            swalReady = true;
+                            resolve();
+                        }
+                        attempts++;
+                        if (attempts > 20) {
+                            clearInterval(checkSwal);
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+            
+            if (typeof Swal !== 'undefined' && Swal.fire) {
+                Swal.fire({
+                    title: 'Desconectado',
+                    text: 'Você saiu da sua conta.',
+                    icon: 'info',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/'; 
+                });
+            } else {
+                alert('Você foi desconectado.');
+                window.location.href = '/'; 
+            }
+        }
+    
+        if (logoutLink) {
+            logoutLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await handleLogout();
+            });
+        }
+    
+        if (!token || !homeLink) {
+            if(logoutLink) logoutLink.style.display = 'none';
+            if(homeLink) homeLink.style.display = 'none'; 
             return; 
         }
-
-
-        if (data.tipo === 'gestor' || data.tipo === 'root') {
-            homeLink.href = '/pagina-inicial/gestor';
-            if(headerInfoAdmin && headerNomeAdmin && data.nome) {
-                headerNomeAdmin.textContent = data.nome.split(' ')[0];
-                headerInfoAdmin.style.display = 'block';
+        
+        try {
+            let user_data = sessionStorage.getItem('usuario');
+    
+            if (user_data) {
+                // Se existir no sessionStorage, parseia o JSON
+                user_data = JSON.parse(user_data);
+            } else {
+                // Se não existir, busca da API
+                const session_token = localStorage.getItem('session_token');
+    
+                if (session_token) {
+                    user_data = await getUserInfo(session_token);
+                    sessionStorage.setItem('usuario', JSON.stringify(user_data));
+                } else {
+                    window.location.href = '/';
+                    return;
+                }
             }
-        } else if (data.tipo === 'cooperativa') {
-            homeLink.href = '/pagina-inicial';
-             if(headerInfoCoop && headerNomeCoop && data.nome) { 
-                headerNomeCoop.textContent = data.nome; 
-                headerInfoCoop.style.display = 'block';
-             }
-        } else if (data.tipo === 'cooperado') {
-             homeLink.href = '/pagina-inicial'; 
+            // Configura o header baseado no tipo de usuário.
+            if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
+                homeLink.href = '/pagina-inicial/gestor';
+                if(headerInfoAdmin && headerNomeAdmin && user_data.nome) {
+                    headerNomeAdmin.textContent = user_data.nome.split(' ')[0];
+                    headerInfoAdmin.style.display = 'block';
+                }
+            } else if (user_data.tipo === 'cooperativa') {
+                homeLink.href = '/pagina-inicial';
+                if(headerInfoCoop && headerNomeCoop && user_data.nome) { 
+                    headerNomeCoop.textContent = user_data.nome; 
+                    headerInfoCoop.style.display = 'block';
+                }
+            } else if (user_data.tipo === 'cooperado') {
+                homeLink.href = '/pagina-inicial'; 
+            }
+    
+        } catch (error) {
+            console.error('Erro ao buscar dados do usuário para o header:', error);
+            // Em caso de erro, redireciona para login
+            localStorage.removeItem('session_token');
+            sessionStorage.removeItem('usuario');
+            window.location.href = '/';
         }
-
-    } catch (error) {
-        console.error('Erro ao buscar dados do usuário para o header:', error);
-    }
-});
-</script>
+    });
+    </script>
