@@ -22,24 +22,45 @@ class Usuarios:
 
         return hashlib.sha256(texto.encode('utf-8')).hexdigest()
     
-    def get_by_id(self, id_usuario: int) -> Optional[dict]:
-        if not isinstance(id_usuario, int):
+    def get (self, identificador_usuario: int) -> Optional[dict]:
+
+        #region Exceções
+
+        if not isinstance(identificador_usuario, (int, str)):
+
             raise TypeError('Usuarios "get_by_id" - "id_usuario" deve ser int')
 
+        #endregion
+
         cursor = self.connection_db.cursor(dictionary=True)
+
         try:
-            cursor.execute("""
-                SELECT
-                    usuarios.id_usuario, usuarios.nome, usuarios.email,
-                    usuarios.tipo, usuarios.status, usuarios.data_criacao
-                FROM usuarios
-                WHERE usuarios.id_usuario = %s;
-            """, (id_usuario,))
+
+            cursor.execute(
+                
+                """
+                    SELECT
+                        usuarios.id_usuario, usuarios.nome, usuarios.email,
+                        usuarios.tipo, usuarios.status, usuarios.data_criacao
+                    FROM usuarios
+                    WHERE 
+                        usuarios.id_usuario = %s OR
+                        usuarios.email = %s;
+                """, 
+            
+                (identificador_usuario, identificador_usuario)
+            
+            )
+
             return cursor.fetchone()
+        
         except Exception as e:
-            print(f'Erro - Usuarios "get_by_id": {e}')
-            return None
+
+            print(f'Erro - Usuarios "get": {e}')
+            return False
+        
         finally:
+
             cursor.close()
 
     def autenticar(self, identificador: str, senha: str) -> Tuple[str | None, str]:
