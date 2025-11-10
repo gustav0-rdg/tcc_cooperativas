@@ -429,7 +429,7 @@ class Cooperativa:
                 """
                 INSERT INTO cooperativas 
                     (id_usuario, cnpj, razao_social, nome_fantasia, email, telefone, endereco, cidade, estado, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
                 (
                     id_usuario, 
