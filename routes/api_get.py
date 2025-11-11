@@ -121,17 +121,6 @@ def get_comentarios(cnpj):
         if conn:
             conn.close()
 
-# Ficheiro: api_get.py
-# (Adiciona esta rota, podes colocá-la perto da rota de 'contagem-pendentes')
-
-# ... (outros imports)
-# (Assegura que tens estes imports no topo)
-# from controllers.cooperativa_controller import Cooperativa
-# from controllers.tokens_controller import Tokens
-# from controllers.usuarios_controller import Usuarios
-
-# ... (outras rotas) ...
-
 @api_get.route('/cooperativas-pendentes', methods=['GET'])
 def get_cooperativas_pendentes():
     

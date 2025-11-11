@@ -67,7 +67,23 @@ class Usuarios:
         cursor = self.connection_db.cursor(dictionary=True)
         senha_hash = Usuarios.criptografar(senha)
 
-        query = """
+        # Determina qual coluna usar para a busca
+        where_clause = ""
+        params = []
+
+        if "@" in identificador: # Parece um e-mail
+            where_clause = "u.email = %s"
+            params.append(identificador)
+        elif len(identificador) == 14 and identificador.isdigit(): # Parece um CNPJ
+            where_clause = "c.cnpj = %s"
+            params.append(identificador)
+        elif len(identificador) == 11 and identificador.isdigit(): # Parece um CPF
+            where_clause = "co.cpf = %s"
+            params.append(identificador)
+        else:
+            return (None, "IDENTIFICADOR_INVALIDO")
+
+        query = f"""
             SELECT 
                 u.id_usuario, u.senha_hash, u.tipo, u.status,
                 c.aprovado AS cooperativa_aprovada,
@@ -76,13 +92,11 @@ class Usuarios:
             LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario
             LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario
             WHERE 
-                u.email = %s OR
-                c.cnpj = %s OR
-                u.cpf = %s
+                {where_clause}
             LIMIT 1;
         """
         try:
-            cursor.execute(query, (identificador, identificador, identificador))
+            cursor.execute(query, tuple(params))
             usuario_data = cursor.fetchone()
 
             if not usuario_data:
@@ -144,7 +158,7 @@ class Usuarios:
         finally:
             cursor.close()
 
-    def create(self, nome: str, email: str, senha: str, tipo: str) -> int | None:
+    def create(self, nome: str, email: str, senha: str, tipo: str, status: str = 'pendente') -> int | None:
 
         if not isinstance(nome, str) or not isinstance(email, str) or not isinstance(senha, str) or not isinstance(tipo, str):
             raise TypeError('Usuarios "create" - nome, email, senha e tipo devem ser strings')
@@ -155,9 +169,9 @@ class Usuarios:
         try:
             senha_hash = Usuarios.criptografar(senha)
             cursor.execute("""
-                INSERT INTO usuarios (nome, email, senha_hash, tipo)
-                VALUES (%s, %s, %s, %s);
-            """, (nome, email, senha_hash, tipo))
+                INSERT INTO usuarios (nome, email, senha_hash, tipo, status)
+                VALUES (%s, %s, %s, %s, %s);
+            """, (nome, email, senha_hash, tipo, status))
 
             self.connection_db.commit()
             return cursor.lastrowid

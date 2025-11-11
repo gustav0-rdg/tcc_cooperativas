@@ -2,20 +2,20 @@ import mysql.connector
 
 
 info_conexoes = {
-'local': {
-'host': 'localhost',
-'port': '3306',
-'user': 'root',
-'password': 'root',
-'database': 'recoopera'
-},
-'online': {
-'host': 'db-recoopera.mysql.database.azure.com',
-'port': '3306',
-'user': 'godofredo',
-'password': '33351065Aa!',
-'database': 'recoopera'
-}
+    'local': {
+        'host': 'localhost',
+        'port': '3306',
+        'user': 'root',
+        'password': 'root',
+        'database': 'recoopera'
+    },
+    'online': {
+        'host': 'db-recoopera.mysql.database.azure.com',
+        'port': '3306',
+        'user': 'godofredo',
+        'password': '33351065Aa!',
+        'database': 'recoopera'
+    }
 }
 
 
