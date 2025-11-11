@@ -2,20 +2,20 @@ import mysql.connector
 
 
 info_conexoes = {
-'local': {
-'host': 'localhost',
-'port': '3306',
-'user': 'root',
-'password': 'root',
-'database': 'recoopera'
-},
-'online': {
-'host': 'db-recoopera.mysql.database.azure.com',
-'port': '3306',
-'user': 'godofredo',
-'password': '33351065Aa!',
-'database': 'recoopera'
-}
+    'local': {
+        'host': 'localhost',
+        'port': '3306',
+        'user': 'root',
+        'password': 'root',
+        'database': 'recoopera'
+    },
+    'online': {
+        'host': 'db-recoopera.mysql.database.azure.com',
+        'port': '3306',
+        'user': 'godofredo',
+        'password': '33351065Aa!',
+        'database': 'recoopera'
+    }
 }
 
 
@@ -28,7 +28,7 @@ class Connection:
     """
 
     def __init__(self, tipo_conexao: str = 'local'):
-        tipo_conexao='online'
+        tipo_conexao='local'
         if tipo_conexao not in info_conexoes:
             raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
 

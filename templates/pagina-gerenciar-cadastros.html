@@ -38,59 +38,25 @@
                 </div>
 
                 <section class="solicitacoes-list mb-4">
-                    <div class="row g-3 g-md-4" id="solicitacoesContainer">                       
-                        {% for solicitacao in solicitacoes %}
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <div class="solicitacao-card" 
-                                 data-id="{{ solicitacao.id }}"
-                                 data-email="{{ solicitacao.email }}"
-                                 data-cnpj="{{ solicitacao.cnpj }}">
-                                
-                                <div class="solicitacao-card-header">
-                                    <h3 class="solicitacao-email">{{ solicitacao.email }}</h3>
-                                    <span class="status-badge status-aguardando">Aguardando</span>
-                                </div>
-                                
-                                <div class="solicitacao-card-body">
-                                    <div class="solicitacao-info-item">
-                                        <i class="fas fa-id-card"></i>
-                                        <span>CNPJ: {{ solicitacao.cnpj }}</span>
-                                    </div>
-                                    <div class="solicitacao-info-item">
-                                        <i class="fas fa-file-alt"></i>
-                                        <span>Documento para Análise</span>
-                                    </div>
-                                    
-                                    <a href="{{ url_for('gestor.baixar_documento', id=solicitacao.id) }}" 
-                                       class="btn-download" 
-                                       download>
-                                        <i class="fas fa-download"></i> Baixar Documento
-                                    </a>
-                                </div>
-                                
-                                <div class="solicitacao-card-footer">
-                                    <button class="btn-action btn-reject">
-                                        <i class="fas fa-times-circle"></i> Rejeitar
-                                    </button>
-                                    <button class="btn-action btn-approve">
-                                        <i class="fas fa-check-circle"></i> Aprovar
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="mt-2">Buscando solicitações pendentes...</p>
+                    <!-- Spinner de Carregamento -->
+                    <div id="loading-spinner" class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
                         </div>
-                        {% endfor %}
+                        <p class="mt-2">Buscando solicitações pendentes...</p>
+                    </div>
 
-                        {% if not solicitacoes %}
-                        <div class="col-12">
-                            <div class="no-solicitacoes-alert">
-                                <i class="fas fa-check-circle"></i>
-                                <h5>Nenhuma solicitação pendente</h5>
-                                <p>Todos os cadastros estão em dia!</p>
-                            </div>
-                        </div>
+                    <!-- Alerta para quando não houver solicitações -->
+                    <div id="no-solicitacoes-alert" class="alert alert-info text-center" style="display: none;">
+                        <i class="fas fa-check-circle fa-2x mb-3"></i>
+                        <h5>Nenhuma solicitação pendente</h5>
+                        <p>Todos os cadastros estão em dia!</p>
+                    </div>
 
-                        </div>
+                    <!-- Container onde os cards de solicitação serão inseridos -->
+                    <div class="row g-3 g-md-4" id="solicitacoesContainer">
+                        <!-- Os cards serão adicionados aqui via JavaScript -->
+                    </div>
                 </section>
 
             </div>

@@ -93,6 +93,7 @@ def login_generico():
 
     try:
         data = request.get_json()
+        print(data)
         identificador = data.get('identificador')
         senha = data.get('senha')
 
