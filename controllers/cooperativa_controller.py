@@ -391,9 +391,12 @@ class Cooperativa:
         nome_fantasia: str,
         email: str,
         telefone: str,
-        endereco: str, 
+        rua: str,
+        numero: str,
+        distrito: str,
         cidade: str, 
-        estado: str
+        estado: str,
+        cep: str
     ) -> int | bool | None:
         
         """
@@ -403,6 +406,7 @@ class Cooperativa:
         cursor = self.connection_db.cursor()
 
         try:
+
             # Verifica se o CNPJ já existe
             cursor.execute (
                 """
@@ -415,12 +419,12 @@ class Cooperativa:
             if cursor.fetchone() != None:
                 return None
             
-            latitude = None
-            longitude = None
+            latitude = 0
+            longitude = 0
             
-            coordenadas = Endereco.get_coordenadas(f'{endereco}, {cidade}, {estado}, Brasil')
+            coordenadas = Endereco.get_coordenadas(f'{rua}, {cidade}, {estado}, Brasil')
             
-            if coordenadas:
+            if not coordenadas is None:
                 latitude, longitude = coordenadas
 
             # Insere a nova cooperativa com todos os campos
@@ -438,7 +442,7 @@ class Cooperativa:
                     nome_fantasia,
                     email,
                     telefone,
-                    endereco,
+                    f'{rua}, {numero} - {distrito}',
                     cidade,
                     estado,
                     latitude,

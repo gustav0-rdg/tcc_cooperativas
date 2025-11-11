@@ -7,7 +7,7 @@ class Endereco:
     def get_coordenadas(endereco:str):
 
         headers = {
-            'User-Agent': 'MeuAppDeGeocodificacao/1.0 (contato@meusite.com)'
+            'User-Agent': 'ReCoopera/1.0 (sistema.recoopera@gmail.com)'
         }
 
         url_base = "https://nominatim.openstreetmap.org/search"
@@ -28,10 +28,10 @@ class Endereco:
             if data:
 
                 resultado = data[0]
-                lat = resultado.get('lat')
-                lon = resultado.get('lon')
+                lat = float(resultado.get('lat', 0))
+                lon = float(resultado.get('lon', 0))
             
-                return (lat, lon, resultado)
+                return (lat, lon)
             
             else:
 
