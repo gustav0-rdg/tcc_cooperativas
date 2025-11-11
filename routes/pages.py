@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, redirect, request, url_for
 from controllers.tokens_controller import Tokens
 from data.connection_controller import Connection
+from routes.auth.auth_routes import token_required
 
 pages = Blueprint('pages', __name__)
 
@@ -30,34 +31,42 @@ def pagina_cadastro_cooperado():
     return render_template("cadastro-cooperado.html")
 
 @pages.route("/pagina-inicial", methods=["GET"])
+@token_required
 def menu_principal():
     return render_template("tela-inicial.html")
 
 @pages.route("/buscar-comprador", methods=['GET'])
+@token_required
 def pagina_buscar_comprador():
     return render_template("buscar-comprador.html")
 
 @pages.route("/registrar-venda")
+@token_required
 def pagina_registrar_venda():
     return render_template("registrar-venda.html")
 
 @pages.route("/pagina-informacoes")
+@token_required
 def pagina_informacoes():
     return render_template("pagina-informacoes.html")
 
 @pages.route("/editar-informacoes")
+@token_required
 def pagina_editar_informacoes():
     return render_template("editar-informacoes.html")
 
 @pages.route("/pagina-inicial/gestor")
+@token_required
 def pagina_inicial_gestor():
     return render_template("pagina-inicial-gestor.html")
 
 @pages.route("/visualizar-cooperativas")
+@token_required
 def pagina_cooperativas_gestor():
     return render_template("pagina-cooperativas-gestor.html")
 
 @pages.route("/gerenciar-cadastros")
+@token_required
 def pagina_gerenciar_cadastros_gestor():
     return render_template("pagina-gerenciar-cadastros.html")
 
@@ -100,6 +109,7 @@ def pagina_termos_de_uso():
     return render_template("pagina-termo.html")
 
 @pages.route("/gerenciar-gestores", methods=["GET"])
+@token_required
 def pagina_gerenciar_gestores():
     return render_template("gerenciar-gestores.html")
 
@@ -108,5 +118,6 @@ def pagina_login_admin():
     return render_template("login-admin.html")
 
 @pages.route("/gerenciar-cooperados", methods=["GET"])
+@token_required
 def paginar_gerenciar_cooperados():
     return render_template("gerenciar-cooperados.html")
