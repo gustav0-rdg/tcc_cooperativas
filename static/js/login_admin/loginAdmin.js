@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     icon: "warning", 
                     title: "Formato de Email Inválido",
                     text: "Por favor, verifique o email digitado.",
+                    color: "var(--verde-escuro)",
+                    background: "var(--verde-claro)",
                     timer: 2500, 
                     showConfirmButton: false
                 }).then(() => {
@@ -39,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     icon: "warning",
                     title: "Senha Curta",
                     text: "A senha deve ter no mínimo 8 caracteres.",
+                    color: "var(--verde-escuro)",
+                    background: "var(--verde-claro)",
                     timer: 2500,
                     showConfirmButton: false
                 }).then(() => {
@@ -62,6 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 icon: "error",
                 title: "Email Inválido",
+                color: "var(--verde-escuro)",
+                background: "var(--verde-claro)",
+                confirmButtonColor: 'var(--verde-escuro-medio)', 
                 text: "Por favor, insira um email válido antes de continuar.",
             });
             emailInput.focus();
@@ -72,6 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 icon: "error",
                 title: "Senha Inválida",
+                color: "var(--verde-escuro)",
+                background: "var(--verde-claro)",
                 text: "A senha deve ter no mínimo 8 caracteres.",
             });
             senhaInput.focus();
@@ -82,6 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 title: 'Aguarde...',
                 text: 'Verificando suas credenciais.',
+                color: "var(--verde-escuro)",
+                background: "var(--verde-claro)",
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -110,6 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 title: 'Sucesso!',
                 text: 'Login realizado. Redirecionando...',
+                color: "var(--verde-escuro)",
+                background: "var(--verde-claro)",
                 icon: 'success',
                 timer: 1500, 
                 showConfirmButton: false,
@@ -124,9 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.close(); 
             Swal.fire({
                 title: 'Erro no Login!',
+                color: "var(--verde-escuro)",
+                background: "var(--verde-claro)",
                 text: error.message, 
                 icon: 'error',
-                confirmButtonColor: '#d33' 
+                confirmButtonColor: 'var(--verde-escuro-medio)' 
             });
         }
     });
