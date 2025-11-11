@@ -1,0 +1,94 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Comic Neue", "Segoe UI", sans-serif;
+}
+
+/* Corpo centralizado */
+body {
+    background-color: var(--verde-claro);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Form container */
+form {
+    background: var(--branco);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 2px solid var(--verde-claro-medio);
+    box-shadow: 0 4px 10px rgba(28, 54, 10, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    width: 320px;
+}
+
+/* Rótulo (caso queira adicionar “file:”) */
+form label {
+    font-weight: bold;
+    color: var(--verde-escuro);
+    font-size: 1rem;
+    align-self: flex-start;
+}
+
+/* Container do input e texto */
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.4rem;
+}
+
+/* Input de arquivo */
+input[type="file"] {
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 10px;
+    padding: 0.6rem;
+    width: 100%;
+    cursor: pointer;
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    transition: all 0.3s ease;
+}
+
+input[type="file"]:hover {
+    border-color: var(--verde-principal);
+}
+
+/* Texto do nome do arquivo */
+.file-name {
+    font-size: 0.9rem;
+    color: var(--verde-escuro);
+    text-align: center;
+    min-height: 1rem; /* garante espaço mesmo antes de escolher arquivo */
+}
+
+/* Botão de enviar */
+button {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background-color: var(--verde-escuro-medio);
+    transform: scale(1.05);
+}
+
+/* Foco no input */
+input[type="file"]:focus {
+    outline: 2px solid var(--verde-principal);
+    outline-offset: 3px;
+}

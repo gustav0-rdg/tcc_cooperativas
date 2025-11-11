@@ -39,6 +39,23 @@ class Materiais:
         finally:
             cursor.close()
 
+    def cadastrar_subtipo_com_base(self, nome_especifico, id_material_base):
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                query = """
+            INSERT INTO materiais_catalogo(id_material_base, nome_especifico)
+            VALUES(%s,%s)
+            """
+                cursor.execute(query,(id_material_base, nome_especifico))
+                self.connection_db.commit()
+                id = cursor.lastrowid
+                return True
+        except Exception as e:
+            print(e)
+            return False
+        finally:
+            cursor.close()
+
     def cadastrar_subtipo(self, nome_especifico, id_material_base):
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:

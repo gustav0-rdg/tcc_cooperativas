@@ -3,7 +3,9 @@ from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
+from controllers.tokens_controller import Tokens
 from controllers.cooperados_controller import Catadores
+from controllers.cooperativa_controller import Cooperativa
 import json
 import xml.etree.ElementTree as ET
 import xmltodict
@@ -42,6 +44,7 @@ def enviar_dados_com_xml():
         termos_categorias = prod_nome.split()
         prod_categoria = termos_categorias[0]
         prod_subcat = prod_infos['prod']['xProd']
+
         prod_peso = float(prod_infos['prod']['qCom'])
         prod_valor_unitario = float(prod_infos['prod']['vUnCom'])
         valor_total = float(prod_infos['prod']['vProd'])
@@ -72,7 +75,9 @@ def enviar_dados_com_xml():
         else:
             return jsonify({
                 "erro": "Falha desconhecida ao registrar venda",
-                "material_invalido": f"{prod_categoria} não existe"}), 500
+                "material_invalido": f"{prod_categoria} não existe",
+                "nome_material_invalido": f"{prod_categoria
+                                             }"}), 400
 
     except ValueError as e:
         return jsonify({"erro": str(e)}), 400 
@@ -119,27 +124,29 @@ def registrar_sinonimo():
     data = request.get_json()
 
     nome_padrao = data.get('nome_padrao')
-    sinonimo = data.get('sinonimo')
-    # GRANDE AVISOOOO
-    # 
-    # 
-    # 
-    # 
-    # 
-    # 
-    # 
-    # 
-    # 
-    # TEM QUE COLOCAR O ID QUANDO FOR USAR USER
-    id_cooperativa = 1
-    
+    sinonimo = data.get('sinonimo') 
 
-    if not all([nome_padrao, sinonimo]):
-        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
-    
+    token = request.headers.get('Authorization')
     conn = Connection('local')
+    try:
+        if not token:
+            return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
+        data_token = Tokens(conn.connection_db).validar(token)
+        user_info = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(data_token['id_usuario'])
 
-    resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
+        if not user_info:
+            return jsonify({'error':'Cooperativa não encontrada.'}),400
+
+        if not all([nome_padrao, sinonimo]):
+            return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+                    
+        resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, user_info["id_cooperativa"])
+    except Exception as e:
+        print(e)
+    
+    finally:
+        if conn:
+            conn.close()
     return resposta
 
 @api_post.route("/cadastrar-subtipo", methods=["POST"])
@@ -154,4 +161,25 @@ def cadastrar_subtipo():
     finally:
         conn.close()
 
+@api_post.route("/material/<identificador>", methods=["POST"])
+def cadastrar_material(identificador):
+    conn = Connection('local')
+    token = request.headers.get('Authorization')
+    data = request.get_json()
+    try:
+        if not token:
+            return jsonify({'error':'token é obrigatório.'})
+        data_token = Tokens(conn.connection_db).validar(token)
+        user_info = Cooperativa(conn.connection_db).get_by_user_id(data_token['id_usuario']),400
+        if not user_info:
+            return jsonify({'error':'cooperativa não encontrada.'}),400
+        resp = Materiais(conn.connection_db).cadastrar_subtipo_com_base(data["nome_padrao"], identificador)
+        if resp:
+            return jsonify({'sucess': f'produto cadastrado com sucesso. {data["nome_padrao"]}'})
 
+    except Exception as e:
+        print(e)
+
+    finally:
+        if conn:
+            conn.close()

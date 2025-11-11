@@ -15,20 +15,19 @@ document.getElementById('form-xml').addEventListener('submit', async (e) => {
         const data = await response.json(); // <- Aqui lê o jsonify do Flask
 
         if (response.ok) {
-            console.log('✅ Sucesso:', data);
+            console.log(' Sucesso:', data);
             alert('Venda registrada com sucesso!');
         } else {
             console.error('Erro:', data);
             if (data.material_invalido) {
-                abrirModalCadastroMaterial();
-                alert(`Erro: ${data.material_invalido}`);
+                abrirModalCadastroMaterial(data.nome_material_invalido);
             } else {
                 alert(`Erro: ${data.erro || 'Falha desconhecida'}`);
             }
         }
 
     } catch (err) {
-        console.error('❌ Erro inesperado:', err);
+        console.error('Erro inesperado:', err);
         alert('Erro de conexão com o servidor.');
     }
 });
@@ -39,65 +38,87 @@ const swalStyles = `
   .swal-content-container {
     display: flex;
     flex-direction: column;
-    gap: 15px; 
-    text-align: left; 
+    gap: 15px;
+    text-align: left;
   }
+
   .swal-input-label {
     font-size: 1em;
     font-weight: 600;
     color: var(--verde-escuro);
-    margin-bottom: -10px; 
+    margin-bottom: -5px;
   }
+
+  /* ==== INPUTS MELHORADOS ==== */
   .swal-input-field {
-    width: 100% !important; 
+    width: 100% !important;
     margin: 0;
-    border-radius: 6px !important; 
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 10px !important;
     background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
   }
+
+  .swal-input-field::placeholder {
+    color: #4a4a4a99;
+    font-style: italic;
+  }
+
+  .swal-input-field:hover {
+    border-color: var(--verde-principal);
+    background-color: var(--branco);
+  }
+
   .swal-input-field:focus {
     border-color: var(--verde-escuro-medio);
+    background-color: var(--branco);
     outline: none;
-    box-shadow: 0 0 5px rgba(49, 97, 16, 0.5);
+    box-shadow: 0 0 5px rgba(58, 124, 24, 0.4);
   }
-  .swal-input-field::placeholder{
-    color: var(--ver-escuro-medio)
-  }
+
+  /* ==== LISTA DE CATEGORIAS ==== */
   .swal-material-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 180px; 
+    max-height: 180px;
     overflow-y: auto;
     border: 1px solid var(--verde-escuro-medio);
     padding: 12px;
-    border-radius: 6px; 
-    background: var(--verde-principal); 
+    border-radius: 8px;
+    background: var(--verde-principal);
   }
+
   .swal-radio-option {
     display: flex;
     align-items: center;
-    gap: 10px; 
+    gap: 10px;
     cursor: pointer;
     padding: 8px;
-    border-radius: 4px; 
-    color: var(--verde-escuro-medio);
+    border-radius: 6px;
+    color: var(--verde-escuro);
     transition: background-color 0.2s;
   }
+
   .swal-radio-option input[type="radio"] {
     margin: 0;
-    flex-shrink: 0; 
+    flex-shrink: 0;
   }
+
   .swal-radio-option label {
     font-weight: 500;
     cursor: pointer;
   }
-  /* Bônus: Efeito de hover para os rádios */
+
   .swal-radio-option:hover {
      background-color: var(--verde-claro);
   }
 `;
 
-// Sua função para injetar o estilo do BOTÃO
 function injectSwalButtonStyles() {
     const styleId = 'swal-custom-button-style';
     if (document.getElementById(styleId)) {
@@ -114,7 +135,6 @@ function injectSwalButtonStyles() {
     document.head.appendChild(style);
 }
 
-// Nova função para injetar o estilo do CONTEÚDO
 function injectSwalContentStyles() {
     const styleId = 'swal-custom-content-style';
     if (document.getElementById(styleId)) {
@@ -125,12 +145,6 @@ function injectSwalContentStyles() {
     style.innerHTML = swalStyles; // Usa a variável de estilos que você definiu
     document.head.appendChild(style);
 }
-
-/**
- * =================================================================
- * 3. FUNÇÃO PARA GERAR O HTML DO SWAL
- * =================================================================
- */
 
 /**
  * Gera o HTML da lista de categorias como botões de rádio.
@@ -165,10 +179,11 @@ function gerarSwalHtml() {
           <p>Carregando categorias...</p>
         </div>
         
-        <label class="swal-input-label" for="swal-nome-padrao">2. Nome Padrão do Novo Material:</label>
+        <label class="swal-input-label" for="swal-nome-padrao">2. Nome Base do Novo Material:</label>
         <input id="swal-nome-padrao" 
                class="swal-input-field" 
-               placeholder="Ex: Garrafa PET 2L, Papelão Ondulado">
+               placeholder="Ex: Garrafa PET 2L, Papelão Ondulado"
+               readonly>
         
         <label class="swal-input-label" for="swal-sinonimo">3. Sinônimo (Opcional):</label>
         <input id="swal-sinonimo" 
@@ -178,12 +193,7 @@ function gerarSwalHtml() {
     `;
 }
 
-/**
- * =================================================================
- * 4. FUNÇÃO PRINCIPAL QUE DISPARA O SWAL
- * =================================================================
- */
-function abrirModalCadastroMaterial() {
+function abrirModalCadastroMaterial(nome_invalido) {
     // Garante que os estilos estão na página
     injectSwalButtonStyles();
     injectSwalContentStyles();
@@ -201,10 +211,6 @@ function abrirModalCadastroMaterial() {
         confirmButtonText: 'Cadastrar Material',
         cancelButtonText: 'Cancelar',
         
-        /**
-         * didOpen é chamado após o modal aparecer.
-         * Usamos para injetar o conteúdo dinâmico (lista de rádios).
-         */
         didOpen: async () => {
             const container = document.getElementById('material-list-container');
             if (container) {
@@ -212,12 +218,12 @@ function abrirModalCadastroMaterial() {
                 // Use os dados reais da sua API aqui
                 container.innerHTML = gerarHtmlCategorias(materiais); 
             }
+
+            const input = document.querySelector('#swal-nome-padrao');
+            input.textContent = nome_invalido;
+            input.value = nome_invalido;
         },
 
-        /**
-         * preConfirm é chamado ANTES de fechar o modal ao clicar em "Confirmar".
-         * É o local perfeito para validar e coletar dados.
-         */
         preConfirm: () => {
             // Coleta os valores do formulário
             const radioSelecionado = document.querySelector('input[name="material_catalogo"]:checked');
@@ -235,8 +241,6 @@ function abrirModalCadastroMaterial() {
                 return false; // Impede o fechamento
             }
             
-            // Retorna os dados coletados.
-            // Isso será o `result.value` no .then()
             return {
                 id_material_catalogo: parseInt(idCategoria), // Converte para número
                 nome_padrao: nomePadrao,
@@ -256,7 +260,34 @@ function abrirModalCadastroMaterial() {
                 'success'
             );
             
-            // Ex: fetch('/api/materiais', { method: 'POST', body: JSON.stringify(result.value) })
         }
     });
+}
+
+
+
+
+
+
+
+
+
+
+
+const session_token = localStorage.getItem('session_token');
+
+async function cadastrarMateriais(id_material, nome_especifico, nome_sinonimo){
+    const resp = await fetch(`
+        /post/material/${id_material}
+        `,
+        {
+            method: 'POST',
+            headers: {
+                'Content-type':'Application/json',
+                'Authorization': session_token,
+            } ,
+            body: JSON.stringify(nome_especifico)
+
+        }
+    )
 }
