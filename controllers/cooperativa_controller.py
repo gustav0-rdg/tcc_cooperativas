@@ -305,7 +305,8 @@ class Cooperativa:
                 nome,
                 email,
                 senha,
-                tipo='cooperado'
+                tipo='cooperado',
+                status='ativo'
 
             )
             match cooperado:

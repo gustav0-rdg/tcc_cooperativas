@@ -28,8 +28,7 @@ class Catadores:
         
         cursor = self.connection_db.cursor()
         
-        tipo_usuario = 'catador'
-        status_usuario = 'ativo'
+        tipo_usuario = 'cooperado'
         
         try:
             senha_hash = Usuarios.criptografar(senha)
@@ -42,9 +41,9 @@ class Catadores:
 
             query_usuario = """
             INSERT INTO usuarios (nome, email, senha_hash, tipo, status)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, 'ativo')
             """
-            cursor.execute(query_usuario, (nome, email, senha_hash, tipo_usuario, status_usuario))
+            cursor.execute(query_usuario, (nome, email, senha_hash, tipo_usuario))
             
             id_usuario_criado = cursor.lastrowid
             
