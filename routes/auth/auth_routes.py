@@ -1,17 +1,35 @@
+from flask import Blueprint, request, redirect, url_for
+from functools import wraps
+from controllers.tokens_controller import Tokens
+from data.connection_controller import Connection
 
-from flask import Blueprint, request, render_template
-from controllers.cooperativa_controller import Cooperativa
-from controllers.cnpj_controller import CNPJ
 
+auth = Blueprint('auth', __name__)
 
-# auth = Blueprint('auth', __name__, url_prefix="/auth")
+def token_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get('token')
 
-# @auth.routes("/catador", methods=["POST"])
-# def login_catador():
-#     cpf = request.form.get("cpf")
-#     senha = request.form.get("senha")
+        if not token:
+            return redirect(url_for('pages.pagina_inicial'))
 
-# @auth.routes("/cooperativa", methods=["POST"])
-# def login_cooperativa():
-#     cnpj = request.form.get("cnpj")
-#     senha = request.form.get("senha")
+        conn = None
+        try:
+            conn = Connection('local')
+            data_token = Tokens(conn.connection_db).validar(token)
+            if not data_token or data_token['usado']:
+                # Cria uma resposta de redirecionamento
+                response = redirect(url_for('pages.pagina_inicial'))
+                # Deleta o cookie
+                response.set_cookie('token', '', expires=0)
+                return response
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return redirect(url_for('pages.pagina_inicial'))
+        finally:
+            if conn:
+                conn.close()
+        
+        return f(*args, **kwargs)
+    return decorated_function
