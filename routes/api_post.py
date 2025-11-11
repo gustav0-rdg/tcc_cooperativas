@@ -38,7 +38,10 @@ def enviar_dados_com_xml():
 
         # Dados do produto
         prod_infos = infNFe['det'][0]
-        prod_nome = prod_infos['prod']['xProd']
+        prod_nome = (prod_infos['prod']['xProd'])
+        termos_categorias = prod_nome.split()
+        prod_categoria = termos_categorias[0]
+        prod_subcat = prod_infos['prod']['xProd']
         prod_peso = float(prod_infos['prod']['qCom'])
         prod_valor_unitario = float(prod_infos['prod']['vUnCom'])
         valor_total = float(prod_infos['prod']['vProd'])
@@ -49,8 +52,8 @@ def enviar_dados_com_xml():
                 "cnpj": dest_cnpj  # comprador
             },
             "material": {
-                "categoria": prod_nome,
-                "subtipo": prod_nome
+                "categoria": prod_categoria,
+                "subtipo": prod_subcat
             },
             "quantidade": prod_peso,
             "preco_por_kg": prod_valor_unitario,
@@ -58,18 +61,28 @@ def enviar_dados_com_xml():
             "avaliacao": {
                 "nota": 5,
                 "analise": f"Avaliação automática: venda do produto {prod_nome}.",
-                "comentarios_rapidos": []
+                "comentarios_rapidos": ["Pagou adiantado"]
             }
         }
 
         
         vendas = Vendas(conn.connection_db).registrar_nova_venda(dados_frontend)
         if vendas:
-            return "foi",200
+            return jsonify({"mensagem": "Venda registrada com sucesso!"}), 200
         else:
-            return jsonify({"erro":"falha ao registrar venda"})
+            return jsonify({
+                "erro": "Falha desconhecida ao registrar venda",
+                "material_invalido": f"{prod_categoria} não existe"}), 500
+
+    except ValueError as e:
+        return jsonify({"erro": str(e)}), 400 
+
+    except KeyError as e:
+        return jsonify({"erro": f"Estrutura do XML inválida. Tag não encontrada: {e}"}), 400
+
     except Exception as e:
-        return f"Ocorreu um erro ao ler ou decodificar o arquivo: {e}", 500
+        return jsonify({"erro": f"Ocorreu um erro inesperado: {e}"}), 500
+    
     finally:
         conn.close()
 

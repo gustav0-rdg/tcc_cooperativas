@@ -47,8 +47,10 @@ class Materiais:
                 VALUES(%s,%s);
                 """
                 cursor.execute(query, (id_material_base, nome_especifico))
+                id = cursor.lastrowid
                 self.connection_db.commit()
-                return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
+                print("deu certo", nome_especifico)
+                return id, jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
 
         except mysql.connector.Error as error:
 

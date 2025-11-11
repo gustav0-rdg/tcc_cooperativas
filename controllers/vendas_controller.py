@@ -2,12 +2,14 @@ from data.connection_controller import Connection
 from mysql.connector import MySQLConnection
 import datetime
 from controllers.comprador_controller import Compradores
+from controllers.materiais_controller import Materiais
 
 class Vendas:
     def __init__(self, connection_db:MySQLConnection):
         if not Connection.validar(connection_db):
             raise ValueError(f'Erro - Tokens: valores inválidos para os parametros "connection_db"')
         self.connection_db = connection_db
+
     def _buscar_id_cooperativa(self, cnpj: str) -> int:
         """
         Busca o ID de uma cooperativa ativa na tabela cooperativas a partir de seus cnpj
@@ -28,6 +30,7 @@ class Vendas:
             return id_cooperativa
         else:
             raise ValueError("Erro - Nenhuma cooperativa encontrada com o CNPJ indicado")
+        
     def _buscar_id_comprador(self, cnpj: str) -> int:
         """
         Busca o ID de um comprador ativo na tabela `compradores` a partir do seu CNPJ.
@@ -57,9 +60,7 @@ class Vendas:
             print(f"Comprador encontrado: CNPJ {cnpj} corresponde ao ID {id_comprador}.")
             return id_comprador
         else:
-            conn = Connection('local')
-            new_id = Compradores(conn.connection_db).create(cnpj)
-            conn.close()
+            new_id = Compradores(self.connection_db).create(cnpj)
             return new_id
 
     def _buscar_id_material(self, nome_material: str) -> int:
@@ -77,37 +78,27 @@ class Vendas:
             ValueError: Se nenhum material ativo for encontrado.
         """
         nome_limpo = nome_material.strip().lower()
-
-        with self.connection_db.cursor() as cursor:
+        termo_sql = nome_limpo + '%'
+        with self.connection_db.cursor(dictionary=True) as cursor:
             # 🔎 Busca por similaridade (bidirecional)
             query = """
-                SELECT id_material_base, nome
-                FROM materiais_base
-                WHERE (
-                    REPLACE(REPLACE(REPLACE(REPLACE(LOWER(%s),
-                        'á','a'),'â','a'),'ã','a'),'é','e')
-                    LIKE CONCAT('%', REPLACE(REPLACE(REPLACE(REPLACE(LOWER(nome),
-                        'á','a'),'â','a'),'ã','a'),'é','e'), '%')
-                )
-                OR REPLACE(REPLACE(REPLACE(REPLACE(LOWER(nome),
-                        'á','a'),'â','a'),'ã','a'),'é','e')
-                    LIKE CONCAT('%', REPLACE(REPLACE(REPLACE(REPLACE(LOWER(%s),
-                        'á','a'),'â','a'),'ã','a'),'é','e'), '%')
-                )
-                LIMIT 1;
+                SELECT id_material_base, nome FROM materiais_base
+                WHERE 
+                nome COLLATE utf8mb4_general_ci LIKE %s
             """
-            cursor.execute(query, (nome_limpo, nome_limpo))
+            cursor.execute(query, (termo_sql,))
             result = cursor.fetchone()
 
         if result:
-            id_material, nome_encontrado = result
+            id_material, nome_encontrado = result["id_material_base"], result["nome"]
             print(f"✅ Material encontrado: '{nome_material}' corresponde a '{nome_encontrado}' (ID {id_material}).")
             return id_material
         else:
-            print(f"⚠️ Nenhum material ativo encontrado para '{nome_material}'.")
+            print(f" Nenhum material ativo encontrado para '{nome_material}'.")
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
+    
         
-    def _buscar_subtipo(self, nome_subtipo):
+    def _buscar_subtipo(self, nome_subtipo, nome_material):
         """
         Busca o ID de um material ativo na tabela `materiais_catalogo`.
         Args:
@@ -128,7 +119,9 @@ class Vendas:
             print(f"Material encontrado: '{nome_subtipo}' corresponde ao ID {id_subtipo}.")
             return id_subtipo
         else:
-            raise ValueError(f"Nenhum material ativo chamado '{nome_subtipo}' foi encontrado no catálogo.")
+            id_material = self._buscar_id_material(nome_material)
+            new_subtipo = Materiais(self.connection_db).cadastrar_subtipo(nome_subtipo, id_material)    
+            return new_subtipo
 
     def _buscar_ids_feedback_tags(self, lista_tags: list[str]) -> list[int]:
         """
@@ -175,10 +168,11 @@ class Vendas:
             nome_material = dados_frontend['material']['categoria']
             nome_subtipo = dados_frontend['material']['subtipo']
             id_material = self._buscar_id_material(nome_material)
-            id_subtipo = self._buscar_subtipo(nome_subtipo)
+            id_subtipo = self._buscar_subtipo(nome_subtipo, nome_material)
             cnpj_cooperativa = dados_frontend['cnpj']
             id_cooperativa = self._buscar_id_cooperativa(cnpj_cooperativa)
             ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
+
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material,
@@ -227,6 +221,7 @@ class Vendas:
                 INSERT INTO vendas_itens (id_venda, id_material_base, id_material_catalogo, quantidade_kg, preco_por_kg)
                 VALUES (%s, %s, %s, %s, %s)
             """
+            print(ids)
             item_data = (
                 id_venda,
                 ids['id_material'],
