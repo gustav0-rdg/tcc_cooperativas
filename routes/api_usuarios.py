@@ -47,16 +47,18 @@ def cadastrar ():
             if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
             
+            status_usuario = 'ativo' if data_cadastro['tipo'] == 'gestor' else 'pendente'
+
         #endregion
 
         novo_usuario = Usuarios(conn.connection_db).create(
 
             data_cadastro['nome'],
-
             data_cadastro['email'],
             data_cadastro['senha'],
-
-            data_cadastro['tipo']
+            data_cadastro['tipo'],
+            # Se for cooperativa, o status default 'pendente' será usado.
+            status=status_usuario if data_cadastro['tipo'] != 'cooperativa' else 'pendente'
 
         )
 
