@@ -40,6 +40,11 @@ main {
     margin-bottom: 1rem;
 }
 
+.welcome-icon i {
+    font-size: 4rem; 
+    color: var(--verde-escuro); 
+  }
+
 .welcome-subtitle {
     font-size: clamp(1.1rem, 3vw, 1.5rem);
     color: var(--verde-escuro-medio);
