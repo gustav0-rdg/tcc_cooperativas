@@ -1,35 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Verifica se o gestor está logado (procurando o token)
     const token = localStorage.getItem('session_token');
     
     if (!token) {
+        // Se não houver token, expulsa o utilizador
         Swal.fire('Erro', 'Acesso negado. Faça o login como gestor.', 'error')
             .then(() => window.location.href = '/login-admin');
         return;
     }
     
-    const container = document.getElementById('solicitacoesContainer');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const noSolicitacoesAlert = document.getElementById('no-solicitacoes-alert');
-    const resultsCount = document.getElementById('resultsCount');
-
-    if (!container || !loadingSpinner || !noSolicitacoesAlert) {
-        console.error('Um ou mais elementos essenciais não foram encontrados no DOM.');
-        return;
-    }
-    
-    carregarSolicitacoes(token, container, loadingSpinner, noSolicitacoesAlert, resultsCount);
+    // 2. Se estiver logado, carrega as solicitações pendentes
+    carregarSolicitacoes(token);
 });
 
 /**
  * Busca as solicitações pendentes na API e manda desenhar os cards
  * @param {string} token - O token de sessão do gestor
- * @param {HTMLElement} container - O container dos cards
- * @param {HTMLElement} loadingSpinner - O spinner de carregamento
- * @param {HTMLElement} noSolicitacoesAlert - O alerta de "nenhuma solicitação"
- * @param {HTMLElement} resultsCount - O contador de resultados
  */
-async function carregarSolicitacoes(token, container, loadingSpinner, noSolicitacoesAlert, resultsCount) {
+async function carregarSolicitacoes(token) {
+    const container = document.getElementById('solicitacoesContainer');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const noSolicitacoesAlert = document.getElementById('no-solicitacoes-alert');
+    const resultsCount = document.getElementById('resultsCount'); // Assumindo que tens um span com este ID
+
     try {
+        // Chama a rota da API que vamos criar no Passo 3
         const response = await fetch('/get/cooperativas-pendentes', {
             method: 'GET',
             headers: {
@@ -37,18 +32,22 @@ async function carregarSolicitacoes(token, container, loadingSpinner, noSolicita
             }
         });
 
+        // Esconde o spinner de qualquer forma
         loadingSpinner.style.display = 'none';
 
         const data = await response.json();
 
         if (!response.ok) {
+            // O erro 404 vai cair aqui
             throw new Error(data.error || 'Erro ao buscar solicitações');
         }
 
         if (data.length === 0) {
+            // Se não houver dados, mostra o alerta de "nada pendente"
             noSolicitacoesAlert.style.display = 'block';
             if(resultsCount) resultsCount.textContent = 'Nenhuma solicitação pendente.';
         } else {
+            // Se houver dados, cria os cards
             if(resultsCount) resultsCount.textContent = `Exibindo ${data.length} solicitação(ões) pendente(s).`;
             data.forEach(solicitacao => {
                 const card = criarCardSolicitacao(solicitacao, token);
@@ -58,7 +57,7 @@ async function carregarSolicitacoes(token, container, loadingSpinner, noSolicita
 
     } catch (error) {
         console.error('Erro em carregarSolicitacoes:', error);
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        loadingSpinner.style.display = 'none';
         if(resultsCount) resultsCount.textContent = 'Erro ao carregar solicitações.';
         Swal.fire('Erro', error.message, 'error');
     }
