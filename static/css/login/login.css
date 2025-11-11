@@ -55,7 +55,7 @@ input::placeholder{
 }
 
 #form p {
-    color: var(--verde-escuro) !important;
+    color: var(--verde-escuro-medio) !important;
     font-size: 0.95rem;
 }
 
@@ -64,7 +64,7 @@ input::placeholder{
 }
 
 .link_a {
-    color: var(--verde-escuro-medio);
+    color: var(--verde-escuro);
 }
 
 .link_a:hover {
