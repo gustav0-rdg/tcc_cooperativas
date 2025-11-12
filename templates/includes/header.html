@@ -2,22 +2,18 @@
     
     <section class="header__informacoes">
         <section class="logo">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo__img" alt="Logo Recoopera">
+            <a href="#" id="logo-home-link">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo__img" alt="Logo Recoopera">
+            </a>
         </section>
         
-        <section class="header__informacoes-cooperativa" id="header-info-cooperativa" style="display: none;"> 
-            <h3 id="header-nome-cooperativa"></h3> 
-            <small id="header-endereco-cooperativa"></small>
-        </section>
+        <section class="header__informacoes-usuario" id="header-info-usuario" style="display: none;"> 
+            <h3 id="header-usuario-nome"></h3>      <small id="header-usuario-contexto"></small> </section>
 
-        <section class="header__informacoes-admin" id="header-info-admin" style="display: none;">
-             <h3>Painel Administrativo</h3>
-             <small id="header-nome-admin"></small> 
-        </section>
     </section>
 
     <section class="header__acoes">
-        <a href="/pagina-inicial" id="home-link"> <i class="fa-solid fa-house"></i>
+        <a href="#" id="home-link"> <i class="fa-solid fa-house"></i>
         </a>
         <a href="#" id="logout-link"> 
            <i class="fa-solid fa-right-from-bracket"></i> 
@@ -33,194 +29,188 @@
         justify-content: space-between;
         align-items: center;
         background-color: var(--verde-principal);
-        padding: 0 15px;
-        box-sizing: border-box; 
+        color: var(--verde-escuro);
+        padding: 0 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .header__informacoes {
         display: flex;
         align-items: center;
-        gap: 15px; 
+        gap: 15px;
     }
-
     .logo {
-        width: 60px;
-        height: 60px;
-        flex-shrink: 0; 
+        height: 100%;
+        display: flex;
+        align-items: center;
     }
     .logo__img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%; 
-        object-fit: cover; 
+        height: 60px;
+        width: auto;
     }
-
-    .header__informacoes-cooperativa,
-    .header__informacoes-admin {
-        color: var(--verde-claro);
-        line-height: 1.3; 
-    }
-    .header__informacoes-cooperativa h3,
-    .header__informacoes-admin h3 {
-        margin-bottom: 0.1rem;
-        font-size: 1rem; 
-        font-weight: 600;
-        color: var(--branco); 
-    }
-    .header__informacoes-cooperativa small,
-    .header__informacoes-admin small {
-        color: #e0e0e0c9; 
-        font-size: 0.8rem;
-        display: block; 
-    }
-
     .header__acoes {
         display: flex;
         align-items: center;
-        gap: 20px; 
+        gap: 20px;
+    }
+    .header__acoes a {
+        color: var(--verde-escuro);
+        font-size: 1.5rem; 
+        text-decoration: none;
+    }
+    .header__acoes a:hover {
+        color: var(--branco);
     }
 
-    .header__acoes a i { 
-        font-size: 26px; 
-        color: var(--verde-claro); 
-        transition: transform 0.2s ease, color 0.2s ease; 
+    .header__informacoes-usuario {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        color: var(--verde-escuro);
+        line-height: 1.2;
     }
-    .header__acoes a:hover i {
-        transform: scale(1.15); 
-        color: var(--branco); 
+    .header__informacoes-usuario h3 {
+        font-size: 1.1rem; 
+        font-weight: 700;
+        margin: 0;
+        color: var(--verde-escuro);
+    }
+    .header__informacoes-usuario small {
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin: 0;
+        color: var(--verde-escuro);
+        opacity: 0.9;
     }
 
 </style>
 
-<!-- Carrega SweetAlert2 para garantir que esteja disponível em todas as páginas -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-
-    document.addEventListener('DOMContentLoaded', async () => {
-    
-        const token = localStorage.getItem('session_token');
-        const homeLink = document.getElementById('home-link');
+    (async function () {
+        // Seletores dos elementos de UI
+        const logoLink = document.getElementById('logo-home-link');
+        const homeIconLink = document.getElementById('home-link');
         const logoutLink = document.getElementById('logout-link');
-        const headerInfoCoop = document.getElementById('header-info-cooperativa');
-        const headerNomeCoop = document.getElementById('header-nome-cooperativa');
-        const headerEndCoop = document.getElementById('header-endereco-cooperativa');
-        const headerInfoAdmin = document.getElementById('header-info-admin');
-        const headerNomeAdmin = document.getElementById('header-nome-admin');
-    
-        async function getUserInfo(session_token) {
+
+        // Seletores da nova seção de info
+        const infoUsuario = document.getElementById('header-info-usuario');
+        const usuarioNome = document.getElementById('header-usuario-nome');
+        const usuarioContexto = document.getElementById('header-usuario-contexto');
+
+        async function getUserInfo(token) {
             const response = await fetch('/api/usuarios/get', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': session_token
+                    'Authorization': token
                 }
             });
-    
-            const data = await response?.json();
-    
             if (!response.ok) {
-                throw new Error(data.error || 'Não foi possível buscar os dados do usuário.');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Não foi possível buscar dados do usuário');
             }
-    
-            return data;
+            return await response.json();
         }
-    
-        async function handleLogout() {
+
+        // Função para limpar a sessão
+        function doLogout() {
             localStorage.removeItem('session_token');
             sessionStorage.removeItem('usuario');
-            
-            // Aguarda o SweetAlert estar disponível
-            let swalReady = typeof Swal !== 'undefined';
-            if (!swalReady) {
-                await new Promise(resolve => {
-                    let attempts = 0;
-                    const checkSwal = setInterval(() => {
-                        if (typeof Swal !== 'undefined') {
-                            clearInterval(checkSwal);
-                            swalReady = true;
-                            resolve();
-                        }
-                        attempts++;
-                        if (attempts > 20) {
-                            clearInterval(checkSwal);
-                            resolve();
-                        }
-                    }, 100);
-                });
-            }
-            
-            if (typeof Swal !== 'undefined' && Swal.fire) {
-                Swal.fire({
-                    title: 'Desconectado',
-                    text: 'Você saiu da sua conta.',
-                    icon: 'info',
-                    timer: 1500,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = '/'; 
-                });
-            } else {
-                alert('Você foi desconectado.');
-                window.location.href = '/'; 
-            }
-        }
-    
-        if (logoutLink) {
-            logoutLink.addEventListener('click', async (e) => {
-                e.preventDefault();
-                await handleLogout();
-            });
-        }
-    
-        if (!token || !homeLink) {
-            if(logoutLink) logoutLink.style.display = 'none';
-            if(homeLink) homeLink.style.display = 'none'; 
-            return; 
-        }
-        
-        try {
-            let user_data = sessionStorage.getItem('usuario');
-    
-            if (user_data) {
-                // Se existir no sessionStorage, parseia o JSON
-                user_data = JSON.parse(user_data);
-            } else {
-                // Se não existir, busca da API
-                const session_token = localStorage.getItem('session_token');
-    
-                if (session_token) {
-                    user_data = await getUserInfo(session_token);
-                    sessionStorage.setItem('usuario', JSON.stringify(user_data));
-                } else {
-                    window.location.href = '/';
-                    return;
-                }
-            }
-            // Configura o header baseado no tipo de usuário.
-            if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
-                homeLink.href = '/pagina-inicial/gestor';
-                if(headerInfoAdmin && headerNomeAdmin && user_data.nome) {
-                    headerNomeAdmin.textContent = user_data.nome.split(' ')[0];
-                    headerInfoAdmin.style.display = 'block';
-                }
-            } else if (user_data.tipo === 'cooperativa') {
-                homeLink.href = '/pagina-inicial';
-                if(headerInfoCoop && headerNomeCoop && user_data.nome) { 
-                    headerNomeCoop.textContent = user_data.nome; 
-                    headerInfoCoop.style.display = 'block';
-                }
-            } else if (user_data.tipo === 'cooperado') {
-                homeLink.href = '/pagina-inicial'; 
-            }
-    
-        } catch (error) {
-            console.error('Erro ao buscar dados do usuário para o header:', error);
-            // Em caso de erro, redireciona para login
-            localStorage.removeItem('session_token');
-            sessionStorage.removeItem('usuario');
+            document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             window.location.href = '/';
         }
-    });
-    </script>
+
+        try {
+            const session_token = localStorage.getItem('session_token');
+            let user_data = sessionStorage.getItem('usuario');
+
+            if (!session_token) {
+                doLogout();
+                return;
+            }
+
+            if (!user_data) {
+                user_data = await getUserInfo(session_token);
+                sessionStorage.setItem('usuario', JSON.stringify(user_data));
+            } else {
+                user_data = JSON.parse(user_data);
+            }
+
+            let linkDestino = '/pagina-inicial'; 
+            
+            if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
+                linkDestino = '/pagina-inicial/gestor';
+            }
+            
+            logoLink.href = linkDestino;
+            homeIconLink.href = linkDestino;
+
+            if (infoUsuario && usuarioNome && usuarioContexto) {
+                let nomeExibido = user_data.nome; 
+                let contextoExibido = ''; 
+
+                if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
+                    contextoExibido = user_data.tipo.charAt(0).toUpperCase() + user_data.tipo.slice(1); // Coloca a inicial em maiscula
+                
+                } else if (user_data.tipo === 'cooperativa' && user_data.dados_cooperativa) {
+                    contextoExibido = user_data.dados_cooperativa.razao_social; 
+                
+                } else if (user_data.tipo === 'cooperado' && user_data.dados_cooperado) {
+                    contextoExibido = user_data.dados_cooperado.razao_social; 
+                }
+
+                // Preenche os campos e exibe a seção
+                usuarioNome.textContent = nomeExibido;
+                usuarioContexto.textContent = contextoExibido;
+                infoUsuario.style.display = 'flex';
+            }
+
+        } catch (error) {
+            console.error('Erro ao configurar o header:', error);
+            doLogout();
+        }
+
+        if (logoutLink) {
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Sair?',
+                        text: "Tem certeza que deseja encerrar a sessão?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sim, sair',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: 'var(--verde-escuro-medio)',
+                        cancelButtonColor: '#d33',
+                        
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Sessão encerrada!',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true
+                            }).then(() => {
+                                doLogout();
+                            });
+                        }
+                    });
+                } else {
+                    console.warn("SweetAlert (Swal) não está definido. Fazendo logout direto.");
+                    doLogout();
+                }
+            });
+        }
+        
+    })();
+</script>

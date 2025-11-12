@@ -105,7 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.error || `Erro ${response.status} do servidor`);
             }
             
-            localStorage.setItem('session_token', data.token); 
+            localStorage.setItem('session_token', data.token);
+            document.cookie = `session_token=${data.token}; path=/; max-age=2592000`; // 30 dias
 
             Swal.fire({
                 title: 'Sucesso!',

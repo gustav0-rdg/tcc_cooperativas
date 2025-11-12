@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify, url_for
 from controllers.usuarios_controller import Usuarios
+from controllers.cooperados_controller import Catadores
+from controllers.cooperativa_controller import Cooperativa
 from data.connection_controller import Connection
 from controllers.tokens_controller import Tokens
 from controllers.email_controller import Email
@@ -334,69 +336,49 @@ def delete (id_usuario:int=None):
 
         conn.close()
 
-@api_usuarios.route('/get', methods=['GET', 'POST'])
-@api_usuarios.route('/get/<id_usuario>', methods=['GET', 'POST'])
-def get_info (id_usuario:int=None):
-
-    token = request.headers.get('Authorization')
-    if not token:
-        return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+@api_usuarios.route('/get', methods=['POST'])
+def get_usuario():
     
+    token = request.headers.get('Authorization')
+    
+    if not token:
+        return jsonify({ 'error': '"Token" é um parâmetro obrigatório' }), 400
+
     conn = Connection('local')
+    db = conn.connection_db
 
     try:
-
-        data_token = Tokens(conn.connection_db).validar(token)
+        # Valida o token e busca o usuário
+        data_token = Tokens(db).validar(token)
         
         if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
+            return jsonify({ 'error': '"Token" inexistente ou inválido'}), 401
         
-        if id_usuario != None:
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
 
-            if not id_usuario.isdigit():
-                return jsonify({ 'error': '"id_usuario" deve ser um Int' }), 400
+        if not usuario_info:
+            return jsonify({ 'error': 'Usuário não encontrado' }), 404
+        
 
-            id_usuario = int(id_usuario)
-
-        else:
-
-            id_usuario = data_token['id_usuario']
-
-        #region Consultando info de terceiros
-
-        if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
-
-            return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-
-        #endregion
-
-        print(id_usuario)
-
-        data_usuario = Usuarios(conn.connection_db).get(id_usuario)
-        match data_usuario:
-
-            # 404 - Usuário não encontrado
-
-            case None:
-                return jsonify({ 'error': 'Usuário não encontrado' }), 404
-
-            # 200 - Informações do usuário consultadas
-
-            case _ if isinstance(data_usuario, dict):
-                return jsonify(data_usuario), 200
-
-            # 500 - Erro ao consultar as informações usuário
-
-            case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
-    
-    except Exception as e:
-
-        return jsonify({ 'error': f'Erro no servidor: {e}' }), 500
-
-    finally:
+        if usuario_info['tipo'] == 'cooperativa':
+            dados_cooperativa = Cooperativa(db).get_cooperativa_by_user_id(id_usuario)
+            if dados_cooperativa:
+                usuario_info['dados_cooperativa'] = dados_cooperativa
+        
+        elif usuario_info['tipo'] == 'cooperado':
+            dados_cooperado = Catadores(db).get_cooperado_e_cooperativa_by_user_id(id_usuario)
+            if dados_cooperado:
+                usuario_info['dados_cooperado'] = dados_cooperado
 
         conn.close()
+        return jsonify(usuario_info), 200
+
+    except Exception as e:
+        print(f"Erro em /api/usuarios/get: {e}")
+        if conn:
+            conn.close()
+        return jsonify({ 'error': f'Erro interno: {e}' }), 500
 
 @api_usuarios.route('/alterar-status', methods=['POST'])
 @api_usuarios.route('/alterar-status/<id_usuario>', methods=['POST'])
