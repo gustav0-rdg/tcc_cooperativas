@@ -1,6 +1,7 @@
 /* Importa a fonte - Mantido */
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
+/* Reset Básico */
 * {
     margin: 0;
     padding: 0;
@@ -13,548 +14,385 @@ body {
     flex-direction: column;
     min-height: 100vh; 
     background-color: var(--verde-claro);
-    align-items: center;
-    overflow-x: hidden;
+    color: var(--verde-escuro);
 }
 
-header {
-    padding: 0 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 100%; 
+main {
+    flex-grow: 1; /* Faz o main ocupar o espaço até o footer */
 }
 
-.footer {
-    font-size: 0.9rem;
-    margin-top: auto; 
-    width: 100%; 
+/* --- Cabeçalho da Página --- */
+.page-header {
+    border-bottom: 2px solid var(--verde-claro-medio);
+    padding-bottom: 1rem;
+}
+.page-title {
+    color: var(--verde-escuro);
+    font-weight: 700;
+}
+.page-subtitle {
+    color: var(--verde-escuro-medio);
+    font-size: 1.1rem;
 }
 
-.conteudo {
-    margin-top: 1rem;
-    padding-bottom: 2rem; 
-    width: 95%; 
-    max-width: 1400px; 
-    border-radius: 10px;
+/* --- Seção de Filtros --- */
+.filters-section {
+    background-color: var(--verde-claro);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filters-section .form-label {
+    color: var(--verde-escuro);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.filters-section .form-select,
+.filters-section .form-control {
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--branco);
+    color: var(--verde-escuro);
+}
+
+.filters-section .form-select:focus,
+.filters-section .form-control:focus {
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+    outline: none;
+}
+
+.filters-section .btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.filters-section .btn-primary {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+}
+
+.filters-section .btn-primary:hover {
+    background-color: var(--verde-escuro-medio);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(60, 103, 29, 0.3);
+}
+
+.filters-section .btn-secondary {
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+}
+
+.filters-section .btn-secondary:hover {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 182, 51, 0.3);
+}
+
+/* --- Estilo do Card do Comprador --- */
+.comprador-card {
+    background-color: var(--branco);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    flex-grow: 1; 
+    height: 100%; /* Garante que os cards na mesma linha tenham mesma altura */
 }
 
-.buscar-compradores {
-    background-color: var(--verde-principal);
-    border-radius: 10px;
+.comprador-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(60, 103, 29, 0.15);
+    border-color: var(--verde-principal);
+}
+
+/* Cabeçalho do Card (Nome e Score) */
+.card-header {
     display: flex;
-    flex-direction: column; 
-    align-items: center;
-    justify-content: flex-start; 
-    width: 100%;
-    min-height: 70vh; 
-    height: auto; 
-    align-self: center;
-    gap: 5px;
-    padding: 1.5rem; 
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
 }
 
-.buscar-compradores__titulo {
-    font-size: 3rem;
+.card-title {
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--verde-escuro);
-    text-align: center;
+    margin-bottom: 0.25rem;
 }
 
-.buscar-compradores__subtitulo {
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
+.card-location {
+    font-size: 0.9rem;
+    color: var(--verde-escuro-medio);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.card-location .material-icons {
+    font-size: 1rem;
 }
 
-.buscar-compradores__barra-de-busca {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 2rem;
-    justify-self: center;
-}
-
-.buscar-compradores__entrada {
-    height: 3rem;
-    padding-left: 1rem;
-    font-size: 1.2rem;
-    padding-right: 2.5rem;
-    border-radius: 0.5rem;
-}
-
-.buscar-compradores__icone {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+.card-score {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--verde-escuro);
-    pointer-events: none;
+}
+.card-score .fa-star {
+    color: #FFC107; /* Amarelo Estrela */
 }
 
-.buscar-compradores__cartoes {
-    display: grid;
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 1200px; 
-    justify-content: center;
-    margin: 0 auto;
+/* Corpo do Card (Preços) */
+.card-body {
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--verde-claro-medio);
+    padding-top: 1rem;
+    flex-grow: 1; /* Empurra o footer do card para baixo */
+}
+
+.card-price-info {
+    font-size: 0.95rem;
+    color: var(--verde-escuro-medio);
+    margin-bottom: 0.25rem;
+}
+.card-price-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--verde-principal);
+}
+.card-price-material {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+.card-no-price {
+    font-size: 0.95rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Footer do Card (Placeholder) */
+.card-footer {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--verde-principal);
+}
+
+/* --- Estilos do Modal (SweetAlert) --- */
+.swal-modal-container {
+    text-align: left;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px; /* Espaço para a barra de rolagem */
+}
+
+/* Estilos para as avaliações agrupadas */
+.avaliacao-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.avaliacao-item {
+    border-bottom: 1px solid var(--verde-claro-medio);
+    padding: 15px 0;
     margin-bottom: 15px;
 }
 
-.cartao-material {
-    position: relative;
+.avaliacao-item:last-child {
+    border-bottom: none;
+}
+
+.avaliacao-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    aspect-ratio: 8 / 7; 
-    flex-grow: 1; 
-    max-width: 100%; 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    text-decoration: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    border-radius: 8px; 
-    overflow: hidden; 
+    margin-bottom: 10px;
 }
 
-.buscar-comprador__conteiner {
-    background-color: var(--verde-claro-medio);
-    border-radius: 5px;
-    width: 100%;
-    padding: 1rem;
-    display: flex; 
-    flex-direction: column; 
-    gap: 0.75rem; 
-}
-
-.cartao-material:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(26, 82, 0, 0.25);
-}
-
-.cartao-material__rotulo {
-    background-color: var(--verde-claro);
-    color: var(--verde-escuro);
+.avaliacao-data {
     font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    z-index: 2;
-    user-select: none;
-}
-
-.buscar-compradores__ver-mais {
-    background-color: var(--verde-escuro-medio);
-    color: var(--verde-claro);
-    width: 100%;
-    font-weight: 600;
-    height: 50px; 
-    border-radius: 50px; 
-    border: 0; 
-}
-
-.buscar-compradores__ver-mais:hover {
-    background-color: var(--verde-escuro);
-    color: var(--verde-claro);
-    transition-duration: 0.5s;
-    transform: scale(1.01);
-}
-
-/* imagens dos cards */
-.cartao-material--Papel { background-image: url(../../imgs/material-tipos/papelao.jpg); }
-.cartao-material--Plástico { background-image: url(../../imgs/material-tipos/plastico.jpg); }
-.cartao-material--Metal { background-image: url(../../imgs/material-tipos/metal.jpg); }
-.cartao-material--Vidro { background-image: url(../../imgs/material-tipos/vidro.jpg); }
-.cartao-material--Eletrônicos { background-image: url(../../imgs/material-tipos/eletronicos.jpg); }
-.cartao-material--Madeira { background-image: url(../../imgs/material-tipos/madeira.jpg); }
-.cartao-material--Borracha { background-image: url(../../imgs/material-tipos/borracha.jpg); }
-.cartao-material--Outros { background-image: url(../../imgs/material-tipos/outros.jpg); }
-
-.hidden {
-    display: none !important;
-}
-
-#detalhe-material, #detalhe-comprador, #detalhe-comentarios {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    color: var(--verde-escuro);
-    padding: 1.5rem;
-    border-radius: 10px;
-}
-
-#detalhe-material {
-    background: var(--verde-claro);
-}
-
-#detalhe-material h2, #detalhe-comentarios h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.subtipos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.subtipo-card h1 {
     color: var(--verde-escuro);
 }
 
-.btn-voltar {
-    background: none;
-    border: none;
-    font-size: 2rem; 
-    font-weight: 600;
-    width: 100%; 
-    max-width: 300px;
-    height: 60px;
-    border-radius: 20px;
-    background-color: var(--verde-escuro-medio);
-    color: var(--verde-claro);
-    margin-bottom: 1rem;
-    padding: 0.5rem; 
-    display: flex; 
-    align-items: center;
-    justify-content: center;
+.avaliacao-count {
+    font-size: 0.9rem;
+    color: var(--verde-escuro-medio);
 }
 
-.btn-voltar:hover {
-    background-color: var(--verde-escuro);
-    transform: scale(1.01);
-    transition-duration: 0.5s;
-}
-
-.subtipos-grid {
+.avaliacao-scores {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 5px;
+    margin-bottom: 10px;
 }
 
-.subtipo-card {
+.score-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    background-color: var(--verde-claro);
-    border: 1px solid var(--verde-claro-medio); 
-    border-radius: 8px;
-    padding: 1rem;
-    cursor: pointer;
-    transition: 0.2s;
-    gap: 1rem;
-    flex: 1 1 100%;
-    text-align: left;
+}
+
+.score-label {
+    font-weight: 500;
+    color: var(--verde-escuro-medio);
+}
+
+.avaliacao-comentarios {
+    margin-top: 10px;
+}
+
+.avaliacao-comentario {
+    font-size: 0.95rem;
+    color: var(--verde-escuro);
+    font-style: italic;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    border-left: 3px solid var(--verde-claro-medio);
+}
+
+.swal-modal-title {
+    font-size: 1.8rem;
     font-weight: 700;
-}
-
-.subtipo-card:hover {
-    background-color: var(--verde-claro); 
-    transform: scale(1.01);
     color: var(--verde-escuro);
+    margin-bottom: 5px;
 }
 
-.subtipo-card img {
-    height: 60px;
-    width: 60px;
-    object-fit: contain;
-}
-
-.subtipo-card__simbolo {
-    margin-left: auto;
-    height: 40px;
-    width: 40px;
-    object-fit: contain;
-}
-
-#detalhe-comprador .buscar-compradores__barra-de-busca {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#detalhe-comprador .buscar-compradores__titulo {
-    font-size: 2.5rem; 
-    margin-top: 1rem;
-}
-
-.comprador-card, .historico-card {
+.swal-modal-location {
+    font-size: 1rem;
+    color: var(--verde-escuro-medio);
+    margin-bottom: 1.5rem;
     display: flex;
-    flex-direction: column;
-    background-color: var(--verde-claro-medio); 
-    border-radius: 8px;
-    padding: 1rem;
+    align-items: center;
+    gap: 0.3rem;
+}
+.swal-modal-location .material-icons {
+    font-size: 1.1rem;
+}
+
+.swal-modal-section {
     margin-bottom: 1.5rem;
 }
 
-.comprador-header {
-    display: flex;
-    flex-wrap: wrap; 
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.comprador-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: var(--verde-claro);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: var(--verde-escuro); 
-    flex-shrink: 0; 
-}
-
-.comprador-info {
-    flex-grow: 1; 
-}
-
-.comprador-info h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--verde-escuro);
-}
-.comprador-info span {
-    font-size: 1rem;
-    color: var(--verde-escuro);
-}
-
-.comprador-preco {
-    margin-left: auto;
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: right; 
-    flex-shrink: 0;
-}
-
-.comprador-card p {
-    font-size: 1rem;
-    color: var(--verde-escuro);
-    line-height: 1.4;
-}
-
-.historico-card h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.verMais {
-    margin: 0 auto;
-    border-radius: 20px;
-    font-size: 1.5rem;
+.swal-modal-subtitle {
+    font-size: 1.3rem;
     font-weight: 600;
-    height: 50px;
-    border: 0;
-    color: var(--verde-claro);
-    background-color: var(--verde-escuro-medio);
-    width: 80%;
-    max-width: 300px; 
+    color: var(--verde-principal);
+    border-bottom: 2px solid var(--verde-claro-medio);
+    padding-bottom: 5px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.verMais:hover {
-    background-color: var(--verde-escuro);
-    transition-duration: 0.5s;
-    transform: scale(1.01);
+/* Contatos */
+.contact-list {
+    list-style: none;
+    padding-left: 0;
 }
-
-.btn-comentarios {
-    font-weight: 700;
+.contact-list li {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+.contact-list .material-icons {
     color: var(--verde-escuro-medio);
-    cursor: pointer;
-    text-decoration: none;
-}
-.btn-comentarios:hover {
-    text-decoration: underline;
 }
 
-.comentario-card {
+/* Materiais e Preços */
+.material-price-list {
+    list-style: none;
+    padding-left: 0;
+}
+.material-price-item {
     background-color: var(--verde-claro);
     border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.comentario-card p {
-    margin-top: 0.5rem;
-    font-size: 1rem;
+.material-name {
+    font-weight: 600;
     color: var(--verde-escuro);
 }
+.material-price-range {
+    font-weight: 500;
+    color: var(--verde-principal);
+}
 
-.container {
+/* Avaliações (Tags) */
+.feedback-tags-container {
     display: flex;
-    gap: 10px; 
-    padding: 15px; 
-    border-radius: 15px;
     flex-wrap: wrap;
-    justify-content: center;
-    height: auto;
-}
-
-.item {
-    position: relative;
-    border: 2px solid var(--verde-escuro);
-    border-radius: 8px;
-    padding: 8px 30px 10px 15px; 
-    background-color: var(--verde-claro-medio);
-    display: flex;
-    align-items: center;
-    font-size: 16px; 
-    font-weight: 700;
-    color: var(--verde-escuro);
-}
-
-.badge {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    width: 30px;
-    height: 30px;
-    background-color: var(--verde-escuro-medio);
-    border: 2px solid var(--verde-escuro);
-    border-radius: 50%;
-    font-size: 14px;
-    color: var(--verde-claro);
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.dropdown-btn {
-    width: 80%; 
-    max-width: 300px; 
-    height: 50px;
-    margin-bottom: 10px;
-    border: 0;
-    border-radius: 10px;
-    background-color: var(--verde-escuro);
-    color: var(--verde-claro);
-}
-
-.dropdown-content {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-height: 200px; 
-    overflow-y: auto; 
     gap: 10px;
 }
-
-.dropdown-content.hidden {
-    display: none;
-}
-
-.comentarios-livre {
+.feedback-tag {
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
     display: flex;
-    justify-content: flex-start; 
-    width: 100%; 
-    height: auto;
-    border-radius: 10px;
-    color: var(--verde-claro);
-    margin: 0; 
-    padding: 10px;
-    background-color: var(--verde-escuro);
+    align-items: center;
+    gap: 5px;
+}
+.feedback-tag.positivo {
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+    border: 1px solid var(--verde-principal);
+}
+.feedback-tag.negativo {
+    background-color: #ffebee; /* Vermelho claro */
+    color: #c62828; /* Vermelho escuro */
+    border: 1px solid #ef9a9a;
+}
+.tag-count {
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.1);
 }
 
-.comentarios-livres {
-    font-size: 1.5rem;
-    background-color: var(--verde-escuro-medio);
+/* Comentários Livres */
+.comment-list {
+    list-style: none;
+    padding-left: 0;
 }
-
-.comentarios-livres:hover {
-    background-color: var(--verde-escuro);
-    transition-duration: 0.5s;
-    transform: scale(1.01);
-    
+.comment-item {
+    border-bottom: 1px solid var(--verde-claro-medio);
+    padding: 10px 0;
+    margin-bottom: 10px;
 }
-
-
-.comentarios-livre__avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 100%;
-    background-color: var(--verde-claro);
-    flex-shrink: 0;
+.comment-item:last-child {
+    border-bottom: none;
 }
-
-.comentarios-livre__text {
-    display: flex;
-    width: auto; 
-    flex-grow: 1;
-    font-size: 14px;
-    margin-left: 10px;
-    text-align: left;
+.comment-text {
+    font-size: 1rem;
+    color: var(--verde-escuro);
+    font-style: italic;
 }
-
-@media (max-width: 599px) {
-    .conteudo {
-        width: 100%;
-        margin-top: 0;
-        border-radius: 0;
-        padding: 0.5rem;
-    }
-
-    .buscar-compradores {
-        padding: 0.5rem;
-        border-radius: 0;
-    }
-
-    .buscar-compradores__cartoes {
-        grid-template-columns: 1fr; 
-    }
-
-    .buscar-compradores__titulo {
-        font-size: 32px; 
-    }
-
-    .buscar-compradores__entrada {
-        font-size: 1rem; 
-    }
-
-    #detalhe-material, #detalhe-comprador, #detalhe-comentarios {
-        padding: 1rem;
-    }
-
-    .subtipo-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .subtipo-card img, .subtipo-card__simbolo {
-        height: 40px;
-        width: 40px;
-    }
-
-    .comprador-header {
-        flex-direction: column; 
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .comprador-preco {
-        margin-left: 0; 
-        font-size: 1.25rem;
-        text-align: left;
-    }
-}
-
-@media (min-width: 600px) and (max-width: 1023px) {
-    .buscar-compradores__cartoes {
-        grid-template-columns: repeat(2, 1fr); 
-    }
-}
-
-@media (min-width: 1024px) {
-    .buscar-compradores__cartoes {
-        grid-template-columns: repeat(4, 1fr); 
-    }
+.comment-anon {
+    font-size: 0.85rem;
+    color: var(--verde-escuro-medio);
+    margin-top: 5px;
 }
