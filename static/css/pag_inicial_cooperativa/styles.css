@@ -59,9 +59,10 @@ body {
 }
 
 .acoes p {
-    font-size: clamp(1.5rem, 4vw, 2rem); 
-    margin-bottom: 20px;
-    color: var(--verde-escuro) !important;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    margin: 0;
+    color: var(--preto) !important;
+    opacity: 0.9;
 }
 
 .acoes__cooperativa {
@@ -84,8 +85,32 @@ body {
     color: var(--verde-claro) !important;
 }
 
-.acoes__cooperativa-btn {
-    display: flex; 
+.acao-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--branco);
+    border-radius: 15px;
+    padding: 50px 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.acao-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    border-color: var(--verde-principal);
+    cursor: pointer;
+}
+
+.card-icon {
+    width: 70px;
+    height: 70px;
+    background-color: var(--verde-principal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
