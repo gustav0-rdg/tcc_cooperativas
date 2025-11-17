@@ -20,8 +20,11 @@
     {% include 'includes/header.html' %}
     <div class="corpo">
         <main class="acoes">
-            <h1>Bem-vindo!</h1>
-            <p>Como podemos te ajudar?</p>
+            <div class="welcome-section">
+                <img src="/static/img/logo.png" alt="Logo Recoopera" class="logo-welcome">
+                <h1>Bem-vindo ao Recoopera!</h1>
+                <p>Escolha uma das opções abaixo para continuar</p>
+            </div>
             <section class="acoes__cooperativa">
                 <a class="acao-card" href="/buscar-comprador">
                     <div class="card-icon">
@@ -51,7 +54,7 @@
                 </a>
             </section>
         </main>
-    </div> 
+    </div>
     
     {% include 'includes/footer.html' %}
 </body>
