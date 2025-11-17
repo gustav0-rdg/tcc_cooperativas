@@ -126,15 +126,17 @@ class Vendas:
         Método principal que orquestra o processamento dos dados da venda.
         Por enquanto, ele apenas executa o passo 1.
         """
-        try:    
-             
+        try:
+
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
             nome_material = dados_frontend['material']['categoria']
             nome_subtipo = dados_frontend['material']['subtipo']
             id_material = self._buscar_id_material(nome_material)
             id_subtipo = self._buscar_subtipo(nome_subtipo)
-            ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
+            ids_tags = []
+            if 'avaliacao' in dados_frontend and 'comentarios_rapidos' in dados_frontend['avaliacao']:
+                ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material,
@@ -154,14 +156,14 @@ class Vendas:
             id_cooperativa (int): O ID da cooperativa que está realizando a venda.
             dados_frontend (dict): O dicionário de dados vindo do front-end.
         """
-        print('dados frontedn', dados_frontend)  
+        print('dados frontedn', dados_frontend)
         # Buscar e validar todos os IDs antes de iniciar a transação.
         ids = self._buscar_ids(dados_frontend)
 
         # Inicia o cursor que será usado em toda a transação.
         cursor = self.connection_db.cursor()
 
-        try:          
+        try:
             # INSERIR NA TABELA `vendas`
             query_venda = """
                 INSERT INTO vendas (id_cooperativa, id_comprador, data_venda, valor_total)
@@ -185,40 +187,43 @@ class Vendas:
             item_data = (
                 id_venda,
                 ids['id_material'],
-                ids['id_subtipo'],      
+                ids['id_subtipo'],
                 dados_frontend['quantidade'],
                 dados_frontend['preco_por_kg']
             )
             cursor.execute(query_item, item_data)
 
-            # 3. INSERIR NA TABELA `avaliacoes_compradores`
-            query_avaliacao = """
-                INSERT INTO avaliacoes_compradores 
-                (id_venda, pontualidade_pagamento, logistica_entrega, qualidade_negociacao, comentario_livre)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            nota = dados_frontend['avaliacao']['nota']
-            avaliacao_data = (
-                id_venda,
-                nota, # Usando a mesma nota para as três colunas
-                nota,
-                nota,
-                dados_frontend['avaliacao']['analise']
-            )
-            cursor.execute(query_avaliacao, avaliacao_data)
-            id_avaliacao = cursor.lastrowid # Pega o ID da avaliação criada.
-            print(f"ID da Avaliação: {id_avaliacao}")
-            
-            # 4. INSERIR NA TABELA `avaliacao_feedback_selecionado` (se houver tags)
-            if ids['ids_tags_feedback']:
-                query_tags = """
-                    INSERT INTO avaliacao_feedback_selecionado (id_avaliacao, id_feedback_tag)
-                    VALUES (%s, %s)
+            # 3. INSERIR NA TABELA `avaliacoes_compradores` (apenas se avaliação foi fornecida)
+            if 'avaliacao' in dados_frontend:
+                query_avaliacao = """
+                    INSERT INTO avaliacoes_compradores
+                    (id_venda, pontualidade_pagamento, logistica_entrega, qualidade_negociacao, comentario_livre)
+                    VALUES (%s, %s, %s, %s, %s)
                 """
-                # Prepara uma lista de tuplas para inserção em lote
-                tags_data = [(id_avaliacao, id_tag) for id_tag in ids['ids_tags_feedback']]
-                cursor.executemany(query_tags, tags_data) # executemany é eficiente para múltiplas inserções.
-                print("Tags de feedback selecionadas inseridas com sucesso.")
+                nota = dados_frontend['avaliacao']['nota']
+                avaliacao_data = (
+                    id_venda,
+                    nota, # Usando a mesma nota para as três colunas
+                    nota,
+                    nota,
+                    dados_frontend['avaliacao']['analise']
+                )
+                cursor.execute(query_avaliacao, avaliacao_data)
+                id_avaliacao = cursor.lastrowid # Pega o ID da avaliação criada.
+                print(f"ID da Avaliação: {id_avaliacao}")
+
+                # 4. INSERIR NA TABELA `avaliacao_feedback_selecionado` (se houver tags)
+                if ids['ids_tags_feedback']:
+                    query_tags = """
+                        INSERT INTO avaliacao_feedback_selecionado (id_avaliacao, id_feedback_tag)
+                        VALUES (%s, %s)
+                    """
+                    # Prepara uma lista de tuplas para inserção em lote
+                    tags_data = [(id_avaliacao, id_tag) for id_tag in ids['ids_tags_feedback']]
+                    cursor.executemany(query_tags, tags_data) # executemany é eficiente para múltiplas inserções.
+                    print("Tags de feedback selecionadas inseridas com sucesso.")
+            else:
+                print("Avaliação pulada, inserindo apenas venda e itens.")
 
             # Se todas as operações foram bem-sucedidas, confirma a transação.
             self.connection_db.commit()
