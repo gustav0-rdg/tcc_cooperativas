@@ -1,29 +1,47 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
 <header class="header">
-    
+
     <section class="header__informacoes">
         <section class="logo">
             <a href="#" id="logo-home-link">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo__img" alt="Logo Recoopera">
             </a>
         </section>
-        
-        <section class="header__informacoes-usuario" id="header-info-usuario" style="display: none;"> 
-            <h3 id="header-usuario-nome"></h3>      <small id="header-usuario-contexto"></small> </section>
+
+        <section class="header__informacoes-usuario" id="header-info-usuario" style="display: none;">
+            <h3 id="header-usuario-nome"></h3> <small id="header-usuario-contexto"></small>
+        </section>
 
     </section>
 
     <section class="header__acoes">
+        <a href="#" id="notifications-link" title="Avaliações Pendentes">
+            <i class="fa-solid fa-bell"></i>
+            <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+        </a>
         <a href="#" id="home-link"> <i class="fa-solid fa-house"></i>
         </a>
-        <a href="#" id="logout-link"> 
-           <i class="fa-solid fa-right-from-bracket"></i> 
+        <a href="#" id="logout-link">
+            <i class="fa-solid fa-right-from-bracket"></i>
         </a>
     </section>
 </header>
-
 <style>
+    :root {
+        /* Cores Principais */
+        --verde-claro: #F6FBF2;
+        --verde-claro-medio: #A0D978;
+        --verde-principal: #6AB633;
+        --verde-escuro-medio: #3C671D;
+        --verde-escuro: #1C360A;
+        --branco: #ffffff;
+        --cinza-texto: #555;
+        --sombra-suave: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
     .header {
-        width: 100%; 
+        width: 100%;
         height: 80px;
         display: flex;
         justify-content: space-between;
@@ -34,32 +52,47 @@
         position: sticky;
         top: 0;
         z-index: 1000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Adicionado fonte padrão */
     }
+
     .header__informacoes {
         display: flex;
         align-items: center;
         gap: 15px;
     }
+
     .logo {
         height: 100%;
         display: flex;
         align-items: center;
     }
+
     .logo__img {
         height: 60px;
         width: auto;
     }
+
     .header__acoes {
         display: flex;
         align-items: center;
         gap: 20px;
     }
+
     .header__acoes a {
         color: var(--verde-escuro);
-        font-size: 1.5rem; 
+        font-size: 1.5rem;
         text-decoration: none;
+        /* AJUSTE CRÍTICO: Permite que o badge absoluto se posicione relativo a este ícone */
+        position: relative;
+        display: flex;
+        /* Melhora o alinhamento do ícone */
+        align-items: center;
+        justify-content: center;
+        transition: color 0.3s ease;
     }
+
     .header__acoes a:hover {
         color: var(--branco);
     }
@@ -72,33 +105,181 @@
         color: var(--verde-escuro);
         line-height: 1.2;
     }
+
     .header__informacoes-usuario h3 {
-        font-size: 1.1rem; 
+        font-size: 1.1rem;
         font-weight: 700;
         margin: 0;
-        color: var(--verde-escuro);
     }
+
     .header__informacoes-usuario small {
         font-size: 0.85rem;
         font-weight: 500;
-        margin: 0;
-        color: var(--verde-escuro);
         opacity: 0.9;
     }
 
-</style>
+    /* AJUSTE: Badge de Notificação Centralizado */
+    .notification-badge {
+        position: absolute;
+        top: -6px;
+        /* Puxa um pouco para cima */
+        right: -6px;
+        /* Puxa um pouco para a direita */
+        background-color: #ff4747;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        border: 2px solid var(--verde-principal);
+        /* Cria uma borda da cor do header para separar visualmente */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
+    /* --- NOVO CSS PARA O MODAL DE AVALIAÇÕES PENDENTES --- */
+
+    /* Container da lista com scroll suave */
+    .avaliacoes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-height: 60vh;
+        /* Limita altura para telas pequenas */
+        overflow-y: auto;
+        padding: 10px;
+        text-align: left;
+        /* Reseta o alinhamento central do SweetAlert */
+    }
+
+    /* Estilização da Barra de Scroll da lista */
+    .avaliacoes-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .avaliacoes-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .avaliacoes-list::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    .avaliacoes-list::-webkit-scrollbar-thumb:hover {
+        background: var(--verde-claro-medio);
+    }
+
+    /* Card Individual Moderno */
+    .avaliacao-card {
+        background-color: var(--branco);
+        border-radius: 16px;
+        padding: 20px;
+        position: relative;
+        box-shadow: var(--sombra-suave);
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Efeito Hover no Card */
+    .avaliacao-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        border-color: var(--verde-claro-medio);
+    }
+
+    /* Borda lateral colorida para identidade visual */
+    .avaliacao-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 15px;
+        bottom: 15px;
+        width: 4px;
+        background-color: var(--verde-principal);
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* Cabeçalho do Card (Nome da empresa) */
+    .card-header-title {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--verde-escuro);
+        font-weight: 700;
+        padding-left: 10px;
+        /* Espaço para a borda colorida */
+    }
+
+    /* Grid para os detalhes (Material, Valor, Data) */
+    .card-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 15px;
+        font-size: 0.9rem;
+        color: var(--cinza-texto);
+        padding-left: 10px;
+    }
+
+    .detail-item strong {
+        color: var(--verde-escuro-medio);
+        font-weight: 600;
+    }
+
+    /* Botão Moderno */
+    .btn-avaliar-moderno {
+        margin-top: 5px;
+        background: linear-gradient(135deg, var(--verde-principal), var(--verde-escuro-medio));
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        transition: filter 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-avaliar-moderno:hover {
+        filter: brightness(1.1);
+    }
+
+    .btn-avaliar-moderno:active {
+        transform: scale(0.98);
+    }
+
+    /* Ajustes do Titulo do Sweet Alert */
+    div:where(.swal2-container) h2:where(.swal2-title) {
+        color: var(--verde-escuro) !important;
+        font-size: 1.6em !important;
+    }
+</style>
 <script>
     (async function () {
         // Seletores dos elementos de UI
         const logoLink = document.getElementById('logo-home-link');
         const homeIconLink = document.getElementById('home-link');
         const logoutLink = document.getElementById('logout-link');
-
-        // Seletores da nova seção de info
         const infoUsuario = document.getElementById('header-info-usuario');
         const usuarioNome = document.getElementById('header-usuario-nome');
         const usuarioContexto = document.getElementById('header-usuario-contexto');
+
+        // --- CORREÇÃO AQUI: Declarar as variáveis no escopo da função principal ---
+        let session_token = null;
+        let user_data = null;
 
         async function getUserInfo(token) {
             const response = await fetch('/api/usuarios/get', {
@@ -115,7 +296,6 @@
             return await response.json();
         }
 
-        // Função para limpar a sessão
         function doLogout() {
             localStorage.removeItem('session_token');
             sessionStorage.removeItem('usuario');
@@ -124,45 +304,46 @@
         }
 
         try {
-            const session_token = localStorage.getItem('session_token');
-            let user_data = sessionStorage.getItem('usuario');
+            // --- CORREÇÃO AQUI: Apenas atribuir os valores (sem const/let) ---
+            session_token = localStorage.getItem('session_token');
+            let stored_user_data = sessionStorage.getItem('usuario'); // Variável temporária local
 
             if (!session_token) {
                 doLogout();
                 return;
             }
 
-            if (!user_data) {
+            if (!stored_user_data) {
                 user_data = await getUserInfo(session_token);
                 sessionStorage.setItem('usuario', JSON.stringify(user_data));
             } else {
-                user_data = JSON.parse(user_data);
+                user_data = JSON.parse(stored_user_data);
             }
 
-            let linkDestino = '/pagina-inicial'; 
-            
+            // Lógica de redirecionamento e preenchimento do header
+            let linkDestino = '/pagina-inicial';
+
             if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
                 linkDestino = '/pagina-inicial/gestor';
             }
-            
+
             logoLink.href = linkDestino;
             homeIconLink.href = linkDestino;
 
             if (infoUsuario && usuarioNome && usuarioContexto) {
-                let nomeExibido = user_data.nome; 
-                let contextoExibido = ''; 
+                let nomeExibido = user_data.nome;
+                let contextoExibido = '';
 
                 if (user_data.tipo === 'gestor' || user_data.tipo === 'root') {
-                    contextoExibido = user_data.tipo.charAt(0).toUpperCase() + user_data.tipo.slice(1); // Coloca a inicial em maiscula
-                
+                    contextoExibido = user_data.tipo.charAt(0).toUpperCase() + user_data.tipo.slice(1);
+
                 } else if (user_data.tipo === 'cooperativa' && user_data.dados_cooperativa) {
-                    contextoExibido = user_data.dados_cooperativa.nome_fantasia;
-                
+                    contextoExibido = user_data.dados_cooperativa.razao_social;
+
                 } else if (user_data.tipo === 'cooperado' && user_data.dados_cooperado) {
-                    contextoExibido = user_data.dados_cooperado.razao_social; 
+                    contextoExibido = user_data.dados_cooperado.razao_social;
                 }
 
-                // Preenche os campos e exibe a seção
                 usuarioNome.textContent = nomeExibido;
                 usuarioContexto.textContent = contextoExibido;
                 infoUsuario.style.display = 'flex';
@@ -171,12 +352,142 @@
         } catch (error) {
             console.error('Erro ao configurar o header:', error);
             doLogout();
+            return; // Importante parar a execução aqui se der erro
+        }
+
+        // --- O restante do código agora funcionará pois user_data e session_token foram declarados acima ---
+
+        async function fetchAvaliacoesPendentes(idCooperativa) {
+            console.log(session_token);
+            const response = await fetch(`/get/avaliacoes-pendentes/${idCooperativa}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': session_token // Agora session_token é visível aqui
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erro ao buscar avaliações pendentes');
+            }
+            return await response.json();
+        }
+
+        function showAvaliacoesPendentes(avaliacoes) {
+            if (!avaliacoes || avaliacoes.length === 0) {
+                Swal.fire({
+                    title: 'Tudo em dia!',
+                    text: 'Você não possui avaliações pendentes no momento.',
+                    icon: 'success',
+                    confirmButtonText: 'Legal',
+                    confirmButtonColor: 'var(--verde-principal)'
+                });
+                return;
+            }
+
+            // Construção do HTML Moderno
+            let htmlContent = '<div class="avaliacoes-list">';
+
+            avaliacoes.forEach(avaliacao => {
+                // Formatação de moeda
+                const valorFormatado = parseFloat(avaliacao.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                htmlContent += `
+                    <div class="avaliacao-card">
+                        <h4 class="card-header-title">${avaliacao.comprador_nome}</h4>
+                        
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <strong>Material:</strong><br> ${avaliacao.material_nome}
+                                <small style="color: #888">(${avaliacao.subtipo_nome})</small>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Quantidade:</strong><br> ${avaliacao.quantidade_kg} kg
+                            </div>
+                            <div class="detail-item">
+                                <strong>Data:</strong><br> ${new Date(avaliacao.data_venda).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Total:</strong><br> ${valorFormatado}
+                            </div>
+                        </div>
+
+                        <button class="btn-avaliar btn-avaliar-moderno" data-id="${avaliacao.id_avaliacao_pendente}">
+                            <i class="fa-solid fa-star"></i> Avaliar Venda
+                        </button>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
+
+            Swal.fire({
+                title: 'Avaliações Pendentes',
+                html: htmlContent,
+                showCloseButton: true,
+                showConfirmButton: false,
+                width: '500px', // Largura mais elegante
+                background: '#F6FBF2', // Fundo levemente esverdeado (var(--verde-claro))
+                customClass: {
+                    popup: 'swal-border-radius'
+                }
+            });
+
+            // Reatribuir os eventos de clique aos novos botões
+            document.querySelectorAll('.btn-avaliar').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Previne comportamento padrão e busca o ID mesmo se clicar no ícone dentro do botão
+                    e.preventDefault();
+                    const btnElement = e.target.closest('.btn-avaliar');
+                    const idAvaliacao = btnElement.getAttribute('data-id');
+
+                    // Fecha o modal atual antes de abrir o próximo para evitar conflitos visuais
+                    Swal.close();
+
+                    // Pequeno delay para transição suave
+                    setTimeout(() => {
+                        exibirAvaliacaoPendente(idAvaliacao);
+                    }, 100);
+                });
+            });
+        }
+        // Verificação segura de user_data antes de acessar
+        if (user_data && (user_data.tipo === 'cooperativa' || user_data.tipo === 'cooperado')) {
+            const idCooperativa = user_data.dados_cooperativa ? user_data.dados_cooperativa.id_cooperativa : user_data.dados_cooperado.id_cooperativa;
+            try {
+                const avaliacoes = await fetchAvaliacoesPendentes(idCooperativa);
+                const notificationBadge = document.getElementById('notification-badge');
+                if (avaliacoes.length > 0) {
+                    notificationBadge.textContent = avaliacoes.length;
+                    notificationBadge.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar avaliações pendentes:', error);
+            }
+        }
+
+        const notificationsLink = document.getElementById('notifications-link');
+        if (notificationsLink) {
+            notificationsLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                // Agora user_data é acessível aqui
+                if (user_data && (user_data.tipo === 'cooperativa' || user_data.tipo === 'cooperado')) {
+                    const idCooperativa = user_data.dados_cooperativa ? user_data.dados_cooperativa.id_cooperativa : user_data.dados_cooperado.id_cooperativa;
+                    try {
+                        const avaliacoes = await fetchAvaliacoesPendentes(idCooperativa);
+                        showAvaliacoesPendentes(avaliacoes);
+                    } catch (error) {
+                        console.error('Erro ao buscar avaliações pendentes:', error);
+                        Swal.fire({
+                            title: 'Erro',
+                            text: 'Não foi possível carregar as avaliações pendentes.',
+                            icon: 'error'
+                        });
+                    }
+                }
+            });
         }
 
         if (logoutLink) {
             logoutLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: 'Sair?',
@@ -187,11 +498,8 @@
                         cancelButtonText: 'Cancelar',
                         confirmButtonColor: 'var(--verde-escuro-medio)',
                         cancelButtonColor: '#d33',
-                        
                     }).then((result) => {
-
                         if (result.isConfirmed) {
-
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
@@ -206,11 +514,848 @@
                         }
                     });
                 } else {
-                    console.warn("SweetAlert (Swal) não está definido. Fazendo logout direto.");
                     doLogout();
                 }
             });
         }
+
+        // Função para exibir avaliação pendente
+        async function exibirAvaliacaoPendente(idAvaliacao) {
+            try {
+                // Buscar dados da avaliação pendente
+                const response = await fetch(`/get/avaliacao-pendente/${idAvaliacao}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': session_token
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar dados da avaliação');
+                }
+                const avaliacao = await response.json();
+
+                // Buscar feedbacks
+                const feedbacksResponse = await fetch('/get/feedbacks');
+                const feedbacks = feedbacksResponse.ok ? await feedbacksResponse.json() : [];
+
+                // Renderizar o modal de avaliação
+                renderizarAvaliacaoModal(avaliacao, feedbacks, idAvaliacao);
+            } catch (error) {
+                console.error('Erro ao exibir avaliação:', error);
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Não foi possível carregar a avaliação.',
+                    icon: 'error'
+                });
+            }
+        }
+
+        function renderizarAvaliacaoModal(avaliacao, feedbacks, idAvaliacao) {
+            // Formatação de moeda para exibição
+            const valorFormatado = parseFloat(avaliacao.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoKgFormatado = parseFloat(avaliacao.preco_por_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const htmlContent = `
+        <div class="avaliacao-modal-container">
+            
+            <header class="modal-header">
+                <h2 class="modal-title">Como foi a venda?</h2>
+                <p class="modal-subtitle">Sua opinião ajuda a fortalecer a comunidade.</p>
+                
+                <div class="progress-wrapper">
+                    <div class="progress-track">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span class="progress-text">Etapa Final</span>
+                </div>
+            </header>
+
+            <div class="modal-body">
+                <div class="resumo-card">
+                    <div class="resumo-header">
+                        <span class="empresa-nome">${avaliacao.comprador_nome}</span>
+                        <small class="empresa-cnpj">${avaliacao.comprador_cnpj}</small>
+                    </div>
+                    <div class="resumo-grid">
+                        <div class="resumo-item">
+                            <span class="label">Material</span>
+                            <span class="value">${avaliacao.material_nome} <small>(${avaliacao.subtipo_nome})</small></span>
+                        </div>
+                        <div class="resumo-item right">
+                            <span class="label">Peso</span>
+                            <span class="value">${avaliacao.quantidade_kg} Kg</span>
+                        </div>
+                        <div class="resumo-item">
+                            <span class="label">Valor Total</span>
+                            <span class="value destaque">${valorFormatado}</span>
+                        </div>
+                        <div class="resumo-item right">
+                            <span class="label">Preço/Kg</span>
+                            <span class="value">${precoKgFormatado}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="avaliacao-stars-section">
+                    <h3>Toque para avaliar</h3>
+                    <div class="estrelas-container">
+                        <i class="fa-regular fa-star estrela-icon" data-index="1"></i>
+                        <i class="fa-regular fa-star estrela-icon" data-index="2"></i>
+                        <i class="fa-regular fa-star estrela-icon" data-index="3"></i>
+                        <i class="fa-regular fa-star estrela-icon" data-index="4"></i>
+                        <i class="fa-regular fa-star estrela-icon" data-index="5"></i>
+                    </div>
+                    <div id="feedback-texto-nota" class="feedback-nota"></div>
+                </div>
+
+                <div class="comentarios-rapidos-wrapper"></div>
+
+                <div class="comentario-opcional-wrapper">
+                    <label for="comentarioInput">Algum detalhe extra? (Opcional)</label>
+                    <textarea id="comentarioInput" rows="3" placeholder="Conte mais sobre sua experiência..."></textarea>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button class="btn-pular">Pular</button>
+                <button class="btn-finalizar">Enviar Avaliação</button>
+            </footer>
+        </div>
+    `;
+
+            Swal.fire({
+                html: htmlContent,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '550px',
+                padding: '0',
+                background: '#ffffff',
+                customClass: {
+                    popup: 'swal-rounded-popup',
+                    closeButton: 'swal-close-btn-custom'
+                }
+            });
+
+            // --- INJEÇÃO DE CSS (Scoped para o Modal) ---
+            const style = document.createElement('style');
+            style.textContent = `
+        /* Reset e Base */
+        .btn-pular{
+            display: none;
+        }
+        .avaliacao-modal-container {
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--verde-escuro);
+            text-align: left;
+            overflow: hidden;
+            border-radius: 20px;
+        }
         
-    })();
+        /* Header */
+        .modal-header {
+            padding: 25px 30px 15px;
+            text-align: center;
+            background: var(--branco);
+        }
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--verde-escuro);
+        }
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0 15px;
+        }
+        
+        /* Barra de Progresso Estilizada */
+        .progress-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--verde-claro-medio), var(--verde-principal));
+            border-radius: 10px;
+        }
+        .progress-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--verde-principal);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Corpo do Modal */
+        .modal-body {
+            padding: 10px 30px;
+        }
+
+        /* Card Resumo */
+        .resumo-card {
+            background-color: var(--verde-claro);
+            border: 1px solid #e0ebd0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .resumo-header {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .empresa-nome {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        .empresa-cnpj {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .resumo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .resumo-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .resumo-item.right {
+            text-align: right;
+        }
+        .resumo-item .label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .resumo-item .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .resumo-item .value.destaque {
+            color: var(--verde-escuro-medio);
+            font-weight: 800;
+        }
+
+        /* Estrelas */
+        .avaliacao-stars-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .avaliacao-stars-section h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .estrelas-container {
+            display: inline-flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .estrela-icon {
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .estrela-icon:hover {
+            transform: scale(1.2);
+        }
+        .estrela-icon.active {
+            color: #FFD700;
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
+        }
+        .feedback-nota {
+            min-height: 20px;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--verde-escuro-medio);
+        }
+
+        /* Tags / Chips de Comentário */
+        .comentarios-rapidos-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .chip-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #555;
+            padding: 6px 14px;
+            border-radius: 50px; /* Formato Pílula */
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .chip-btn:hover {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+        }
+        .chip-btn.ativo {
+            background-color: var(--verde-claro);
+            border-color: var(--verde-principal);
+            color: var(--verde-escuro-medio);
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Textarea */
+        .comentario-opcional-wrapper {
+            margin-bottom: 10px;
+        }
+        .comentario-opcional-wrapper label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--verde-escuro);
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            resize: vertical;
+            background-color: #fdfdfd;
+            transition: border-color 0.3s;
+            box-sizing: border-box; /* Importante para não quebrar o layout */
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--verde-principal);
+            background-color: #fff;
+        }
+
+        /* Footer botões */
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 30px 30px;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .btn-finalizar, .btn-pular {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-finalizar {
+            flex: 2; /* Botão maior */
+            background: var(--verde-principal);
+            color: white;
+            box-shadow: 0 4px 10px rgba(106, 182, 51, 0.25);
+        }
+        .btn-finalizar:hover {
+            background: var(--verde-escuro-medio);
+            transform: translateY(-1px);
+        }
+        .btn-pular {
+            flex: 1;
+            background: transparent;
+            color: #888;
+        }
+        .btn-pular:hover {
+            background: #f5f5f5;
+            color: #555;
+        }
+        
+        /* Ajuste do SweetAlert */
+        .swal-rounded-popup {
+            border-radius: 20px !important;
+        }
+        .swal-close-btn-custom {
+            box-shadow: none !important;
+        }
+    `;
+            document.head.appendChild(style);
+
+            // --- LÓGICA DO COMPONENTE ---
+
+            const estrelas = document.querySelectorAll('.estrela-icon');
+            const feedbackNota = document.getElementById('feedback-texto-nota');
+            const containerComentarios = document.querySelector('.comentarios-rapidos-wrapper');
+            let avaliacaoData = {
+                nota: 0,
+                comentarios_rapidos: [],
+                analise: ''
+            };
+
+            // Descrições das notas (Feedback visual)
+            const descricoesNota = ["", "Muito Ruim", "Ruim", "Razoável", "Bom", "Excelente"];
+
+            // Eventos das Estrelas
+            estrelas.forEach((estrela) => {
+                const index = parseInt(estrela.getAttribute('data-index'));
+
+                // Hover In
+                estrela.addEventListener('mouseover', () => {
+                    atualizarVisualEstrelas(index);
+                    feedbackNota.textContent = descricoesNota[index];
+                    feedbackNota.style.color = index <= 2 ? 'var(--vermelho)' : 'var(--verde-escuro-medio)';
+                });
+
+                // Hover Out
+                estrela.addEventListener('mouseout', () => {
+                    atualizarVisualEstrelas(avaliacaoData.nota);
+                    feedbackNota.textContent = descricoesNota[avaliacaoData.nota] || "";
+                });
+
+                // Click
+                estrela.addEventListener('click', () => {
+                    avaliacaoData.nota = index;
+                    // Animação de clique
+                    estrela.style.transform = "scale(0.9)";
+                    setTimeout(() => estrela.style.transform = "scale(1.2)", 100);
+
+                    atualizarVisualEstrelas(index);
+                    carregarTags(index);
+                });
+            });
+
+            function atualizarVisualEstrelas(qtd) {
+                estrelas.forEach((estrela, i) => {
+                    if (i < qtd) {
+                        estrela.classList.remove('fa-regular');
+                        estrela.classList.add('fa-solid', 'active');
+                    } else {
+                        estrela.classList.remove('fa-solid', 'active');
+                        estrela.classList.add('fa-regular');
+                    }
+                });
+            }
+
+            // Renderização das Tags (Chips)
+            function carregarTags(nota) {
+                const tipo = nota <= 2 ? "negativo" : "positivo";
+                containerComentarios.innerHTML = ''; // Limpa anteriores
+
+                // Filtra tags baseado na nota
+                const comentariosFiltrados = feedbacks.filter(c => c.tipo === tipo);
+
+                // Animação de entrada suave
+                containerComentarios.style.opacity = 0;
+
+                if (comentariosFiltrados.length === 0) {
+                    containerComentarios.innerHTML = '<small style="color:#999">Selecione uma nota para ver opções rápidas.</small>';
+                }
+
+                comentariosFiltrados.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.className = 'chip-btn';
+                    btn.textContent = c.texto;
+                    btn.onclick = () => {
+                        btn.classList.toggle('ativo');
+                        const txt = c.texto;
+                        const idx = avaliacaoData.comentarios_rapidos.indexOf(txt);
+                        if (idx > -1) avaliacaoData.comentarios_rapidos.splice(idx, 1);
+                        else avaliacaoData.comentarios_rapidos.push(txt);
+                    };
+                    containerComentarios.appendChild(btn);
+                });
+
+                setTimeout(() => {
+                    containerComentarios.style.transition = "opacity 0.5s";
+                    containerComentarios.style.opacity = 1;
+                }, 50);
+            }
+
+            // Eventos dos Botões de Ação
+            const btnFinalizar = document.querySelector('.btn-finalizar');
+            const btnPular = document.querySelector('.btn-pular');
+            const txtComentario = document.getElementById('comentarioInput');
+
+            btnFinalizar.addEventListener('click', async () => {
+                if (avaliacaoData.nota < 1) {
+                    Swal.showValidationMessage('Por favor, selecione pelo menos uma estrela.');
+                    return;
+                }
+
+                // Botão Loading
+                btnFinalizar.textContent = 'Enviando...';
+                btnFinalizar.disabled = true;
+
+                avaliacaoData.analise = txtComentario.value;
+
+                try {
+                    const response = await fetch(`/post/finalizar-avaliacao-pendente/${idAvaliacao}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': session_token
+                        },
+                        body: JSON.stringify(avaliacaoData)
+                    });
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: 'Sua avaliação foi registrada.',
+                            confirmButtonColor: 'var(--verde-principal)',
+                            timer: 2000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error('Falha no envio');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire('Erro', 'Não foi possível registrar a avaliação.', 'error');
+                    btnFinalizar.textContent = 'Enviar Avaliação';
+                    btnFinalizar.disabled = false;
+                }
+            });
+
+            btnPular.addEventListener('click', () => {
+                Swal.fire({
+                    title: 'Tem certeza?',
+                    text: "Deseja avaliar esta venda mais tarde?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#999',
+                    cancelButtonColor: 'var(--verde-principal)',
+                    confirmButtonText: 'Sim, pular',
+                    cancelButtonText: 'Não, quero avaliar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.close();
+                    }
+                });
+            });
+        }
+        const htmlContent = `
+                <div class="avaliacao-modal">
+                    <div class="etapa__progresso">
+                        <h1>Como foi a venda?</h1>
+                        <small>Sua opinião vale muito!</small>
+                        <div class="progress-container">
+                            <div class="progress-bar quatro"></div>
+                        </div>
+                        <span class="progress-label">Passo 4 de 4</span>
+                    </div>
+                    <div class="resumo">
+                        <h1>Resumo da venda</h1>
+                        <div class="resumo__venda">
+                            <div>
+                                <p>${avaliacao.subtipo_nome}</p>
+                                <small>${avaliacao.quantidade_kg} Kg</small>
+                            </div>
+                            <div>
+                                <p>R$${avaliacao.valor_total}</p>
+                                <small>R$${avaliacao.preco_por_kg}/Kg</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <p>${avaliacao.comprador_nome}</p>
+                        <small>${avaliacao.comprador_cnpj}</small>
+                    </div>
+                    <div class="avaliacao">
+                        <h3>Como você avalia esse comprador?</h3>
+                        <div class="estrelas">
+                            <i class="fa-regular fa-star estrela" data-index="1"></i>
+                            <i class="fa-regular fa-star estrela" data-index="2"></i>
+                            <i class="fa-regular fa-star estrela" data-index="3"></i>
+                            <i class="fa-regular fa-star estrela" data-index="4"></i>
+                            <i class="fa-regular fa-star estrela" data-index="5"></i>
+                        </div>
+                    </div>
+                    <div class="comentario"></div>
+                    <div class="opcional">
+                        <h3>Quer contar mais alguma coisa?</h3>
+                        <textarea rows="4" class="opcional__comentario"></textarea>
+                    </div>
+                    <div class="finalizar">
+                        <button class="finalizar__btn">Finalizar avaliação</button>
+                        <button class="pular-avaliacao">Pular avaliação</button>
+                    </div>
+                </div>
+            `;
+
+        Swal.fire({
+            title: 'Avaliar Comprador',
+            html: htmlContent,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: '600px',
+            customClass: {
+                popup: 'avaliacao-popup'
+            }
+        });
+
+        // Adicionar estilos CSS inline para o modal
+        const style = document.createElement('style');
+        style.textContent = `
+                .avaliacao-popup .swal2-html-container {
+                    padding: 0;
+                }
+                .avaliacao-modal {
+                    font-family: Arial, sans-serif;
+                    color: var(--verde-escuro);
+                }
+                .etapa__progresso {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .progress-container {
+                    background-color: #e0e0e0;
+                    height: 10px;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                }
+                .progress-bar.quatro {
+                    width: 100%;
+                    height: 100%;
+                    background-color: var(--verde-principal);
+                    border-radius: 5px;
+                }
+                .resumo {
+                    background-color: #f9f9f9;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                }
+                .resumo__venda {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                .estrelas {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin: 15px 0;
+                }
+                .estrela {
+                    font-size: 2rem;
+                    cursor: pointer;
+                    color: black;
+                }
+                .estrela:hover,
+                .estrela.active {
+                    color: yellow;
+                }
+                .comentario__btn {
+                    background-color: #f0f0f0;
+                    border: 1px solid #ddd;
+                    padding: 5px 10px;
+                    margin: 5px;
+                    border-radius: 3px;
+                    cursor: pointer;
+                }
+                .comentario__btn.ativo {
+                    background-color: var(--verde-principal);
+                    color: white;
+                }
+                .opcional__comentario {
+                    width: 100%;
+                    border: 1px solid #ddd;
+                    border-radius: 3px;
+                    padding: 8px;
+                }
+                .finalizar {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 20px;
+                }
+                .finalizar__btn,
+                .pular-avaliacao {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+                .finalizar__btn {
+                    background-color: var(--verde-principal);
+                    color: white;
+                }
+                .pular-avaliacao {
+                    background-color: #ccc;
+                    color: black;
+                }
+            `;
+        document.head.appendChild(style);
+
+        // Lógica das estrelas
+        const estrelas = document.querySelectorAll('.estrela');
+        let avaliacaoSelecionada = 0;
+        let notaAtual;
+
+        estrelas.forEach((estrela, index) => {
+            estrela.addEventListener('mouseover', () => {
+                preencherEstrelas(index + 1);
+            });
+
+            estrela.addEventListener('mouseout', () => {
+                preencherEstrelas(avaliacaoSelecionada);
+            });
+
+            estrela.addEventListener('click', () => {
+                avaliacaoSelecionada = index + 1;
+                notaAtual = avaliacaoSelecionada;
+                mudarTipo(notaAtual);
+                preencherEstrelas(avaliacaoSelecionada);
+            });
+        });
+
+        function preencherEstrelas(qtd) {
+            estrelas.forEach((estrela, i) => {
+                if (i < qtd) {
+                    estrela.classList.remove('fa-regular');
+                    estrela.classList.add('fa-solid');
+                    estrela.style.color = "yellow";
+                } else {
+                    estrela.classList.remove('fa-solid');
+                    estrela.classList.add('fa-regular');
+                    estrela.style.color = "black";
+                }
+            });
+        }
+
+        // Comentário opcional
+        let comentarioOpcional = '';
+        const opcionalComentario = document.querySelector('.opcional__comentario');
+        opcionalComentario.addEventListener('input', (e) => {
+            comentarioOpcional = e.target.value;
+        });
+
+        // Função para mudar tipo de comentários
+        function mudarTipo(nota) {
+            let tipo;
+            if (nota <= 2) {
+                tipo = "negativo";
+            } else {
+                tipo = "positivo";
+            }
+            renderizarComentarios(tipo);
+        }
+
+        // Renderizar comentários
+        function renderizarComentarios(tipo) {
+            const comentariosHtml = document.querySelector('.comentario');
+            comentariosHtml.innerHTML = '';
+            const comentariosFiltrados = feedbacks.filter(c => c.tipo === tipo);
+            comentariosFiltrados.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'comentario__btn comentario-rapido';
+                btn.setAttribute('data-value', c.texto);
+                btn.textContent = c.texto;
+                comentariosHtml.appendChild(btn);
+            });
+
+            const botoes = comentariosHtml.querySelectorAll('.comentario__btn');
+            botoes.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    btn.classList.toggle('ativo');
+                    const index = avaliacaoData.comentarios_rapidos.indexOf(btn.dataset.value);
+                    if (index > -1) {
+                        avaliacaoData.comentarios_rapidos.splice(index, 1);
+                    } else {
+                        avaliacaoData.comentarios_rapidos.push(btn.dataset.value);
+                    }
+                });
+            });
+        }
+
+        // Dados da avaliação
+        let avaliacaoData = {
+            nota: 0,
+            comentarios_rapidos: [],
+            analise: ''
+        };
+
+        // Botões finalizar e pular
+        const finalizarBtn = document.querySelector('.finalizar__btn');
+        const pularBtn = document.querySelector('.pular-avaliacao');
+
+        finalizarBtn.addEventListener('click', async () => {
+            if (notaAtual < 1) {
+                Swal.fire({
+                    title: 'Avaliação obrigatória',
+                    text: 'Por favor, selecione pelo menos 1 estrela.',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            avaliacaoData.nota = notaAtual;
+            avaliacaoData.analise = comentarioOpcional;
+
+            try {
+                const response = await fetch(`/post/finalizar-avaliacao-pendente/${idAvaliacao}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': session_token
+                    },
+                    body: JSON.stringify(avaliacaoData)
+                });
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Avaliação registrada!",
+                        text: "Obrigado por avaliar o comprador. Isso ajuda toda a comunidade.",
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Recarregar a página ou atualizar a lista de avaliações pendentes
+                        location.reload();
+                    });
+                } else {
+                    throw new Error('Erro ao finalizar avaliação');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Não foi possível finalizar a avaliação.',
+                    icon: 'error'
+                });
+            }
+        });
+
+        pularBtn.addEventListener('click', () => {
+            Swal.fire({
+                title: 'Pular avaliação?',
+                text: "Tem certeza que deseja pular esta avaliação?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, pular',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Para pular, podemos simplesmente fechar o modal
+                    Swal.close();
+                }
+            });
+        });
+    }
+
+    ) ();
 </script>
