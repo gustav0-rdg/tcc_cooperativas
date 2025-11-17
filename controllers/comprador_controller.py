@@ -85,8 +85,7 @@ class Compradores:
                     score_confianca,
                     numero_avaliacoes,
                     data_cadastro                    
-                FROM compradores
-                WHERE compradores.deletado_em = NULL;
+                FROM compradores;
                 """
 
             )
@@ -94,13 +93,13 @@ class Compradores:
             dados = cursor.fetchall()
 
             # Para cada comprador, calcular a distância até o usuário
-            
-            for comprador in dados:
+            if user_lat != None and user_lon != None:
+                for comprador in dados:
 
-                # Calculando a distância usando a função Haversine
+                    # Calculando a distância usando a função Haversine
 
-                distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
-                comprador['distancia'] = distancia
+                    distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
+                    comprador['distancia'] = distancia
 
             return dados
 

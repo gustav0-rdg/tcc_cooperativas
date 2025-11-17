@@ -15,7 +15,8 @@ api_get = Blueprint('api_get', __name__, url_prefix='/get')
 def get_compradores():
     try:
         conn = Connection('local')
-        compradores = Compradores(conn.connection_db).get_all()
+        compradores = Compradores(conn.connection_db).get_all(None, None)
+        print(compradores)
         return jsonify(compradores), 200
     except Exception as e:
         print(f"Erro ao buscar compradores: {e}")

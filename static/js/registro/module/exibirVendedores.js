@@ -110,7 +110,7 @@ async function renderizarListaDeVendedores() {
 
     // 2. Busca a lista ATUALIZADA de compradores no seu backend
     const vendedores = await getCompradores();
-
+    console.log(vendedores);
     // 3. Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
