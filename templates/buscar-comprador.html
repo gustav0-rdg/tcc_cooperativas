@@ -29,6 +29,10 @@
 
         <!-- Filtros de Busca -->
         <section class="filters-section mb-4">
+            <div class="mb-4">
+                <label for="search-input" class="form-label">Buscar por nome ou CNPJ</label>
+                <input type="text" id="search-input" class="form-control" placeholder="Digite o nome do comprador">
+            </div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="material-filter" class="form-label">Material</label>
@@ -41,27 +45,51 @@
                     <label for="estado-filter" class="form-label">Estado</label>
                     <select id="estado-filter" class="form-select">
                         <option value="">Todos os estados</option>
-                        <option value="SP">São Paulo</option>
-                        <option value="RJ">Rio de Janeiro</option>
-                        <option value="MG">Minas Gerais</option>
-                        <option value="RS">Rio Grande do Sul</option>
-                        <option value="PR">Paraná</option>
-                        <option value="SC">Santa Catarina</option>
-                        <option value="GO">Goiás</option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AP">Amapá</option>
+                        <option value="AM">Amazonas</option>
                         <option value="BA">Bahia</option>
+                        <option value="CE">Ceará</option>
+                        <option value="DF">Distrito Federal</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="GO">Goiás</option>
+                        <option value="MA">Maranhão</option>
+                        <option value="MT">Mato Grosso</option>
+                        <option value="MS">Mato Grosso do Sul</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="PA">Pará</option>
+                        <option value="PB">Paraíba</option>
+                        <option value="PR">Paraná</option>
                         <option value="PE">Pernambuco</option>
-                        <!-- Adicionar mais estados conforme necessário -->
+                        <option value="PI">Piauí</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="RN">Rio Grande do Norte</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="RO">Rondônia</option>
+                        <option value="RR">Roraima</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="SE">Sergipe</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="TO">Tocantins</option>
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label for="search-input" class="form-label">Buscar por nome</label>
-                    <input type="text" id="search-input" class="form-control" placeholder="Digite o nome do comprador">
+                    <label for="radius-filter" class="form-label">Raio de Busca</label>
+                    <input type="range" id="radius-filter" class="form-range" min="10" max="500" step="10" value="100">
+                    <div class="d-flex justify-content-between mt-1">
+                        <small class="text-muted">10 km</small>
+                        <small class="text-muted">500 km</small>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <strong><span id="radius-value" class="text-success">100</span> km</strong>
+                    </div>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-12">
                     <button id="apply-filters" class="btn btn-primary me-2">Aplicar Filtros</button>
-                    <button id="clear-filters" class="btn btn-secondary">Limpar Filtros</button>
+                    <button id="clear-filters" class="btn">Limpar Filtros</button>
                 </div>
             </div>
         </section>
@@ -75,11 +103,10 @@
                 <p class="mt-3 fs-5">Buscando compradores...</p>
             </div>
 
-            <div id="error-message" class="alert alert-danger d-none" role="alert">
-                <h4 class="alert-heading">Oops! Algo deu errado.</h4>
-                <p>Não foi possível carregar os compradores. Tente novamente mais tarde.</p>
-                <hr>
-                <p class="mb-0" id="error-detail"></p>
+            <div id="error-message" class="alert alert-danger d-none text-center pt-5 pb-5" role="alert">
+                <h4 class="alert-heading" id="error-title">Oops! Algo deu errado.</h4>
+                <hr class="mb-4 mt-4">
+                <p class="mb-0">Não foi possível carregar os compradores. Tente novamente mais tarde.</p>
             </div>
 
             <div id="cards-container" class="row g-3">

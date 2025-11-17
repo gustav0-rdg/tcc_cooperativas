@@ -13,12 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Função principal para carregar e renderizar os compradores
  */
-async function carregarCompradores(material = '', distancia = '', searchQuery = '') {
+async function carregarCompradores(filtros = {}) {
     const token = localStorage.getItem('session_token');
     const cardsContainer = document.getElementById('cards-container');
     const loadingSpinner = document.getElementById('loading-spinner');
     const errorMessage = document.getElementById('error-message');
     const errorDetail = document.getElementById('error-detail');
+    const errorTitle = document.getElementById('error-title');
 
     if (!token) {
         mostrarErro('Sessão inválida. Faça o login novamente.', 'Token não encontrado.');
@@ -26,33 +27,42 @@ async function carregarCompradores(material = '', distancia = '', searchQuery = 
     }
 
     try {
-        // Construir URL com parâmetros de filtro
-        let url = '/get/compradores-destaque';
-        const params = new URLSearchParams();
-        if (material) params.append('material', material);
-        if (distancia) params.append('estado', distancia); // Usando estado como proxy para distancia, ajustar se necessário
-        if (searchQuery) params.append('search', searchQuery); // Adicionar parâmetro de busca se suportado
-        if (params.toString()) url += '?' + params.toString();
+        // Mostrar loading
+        loadingSpinner.classList.remove('d-none');
+        errorMessage.classList.add('d-none');
+        cardsContainer.innerHTML = '';
 
-        // 2. Chama a nova API de "destaques" com filtros
+        // Construir URL com parâmetros de filtro
+        const params = new URLSearchParams();
+        if (filtros.material) params.append('material', filtros.material);
+        if (filtros.estado) params.append('estado', filtros.estado);
+        if (filtros.raio) params.append('raio', filtros.raio);
+
+        const url = '/get/compradores' + (params.toString() ? '?' + params.toString() : '');
+        
+        console.log('Buscando compradores com URL:', url);
+
         const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+            headers: { 
+                'Authorization': token 
             }
         });
 
         const data = await response.json();
 
+        console.log(data)
+
         if (!response.ok) {
-            throw new Error(data.erro || 'Erro ao buscar dados.');
+            throw new Error(data.error || 'Erro ao buscar dados.');
         }
 
-        // 3. Renderiza os cards
-        loadingSpinner.classList.add('d-none'); // Esconde o loading
-        cardsContainer.innerHTML = ''; // Limpa o container
+        // Esconde o loading
+        loadingSpinner.classList.add('d-none');
 
+        // Renderiza os cards
         if (data.length === 0) {
-            cardsContainer.innerHTML = '<p class="text-center fs-5">Nenhum comprador encontrado com os filtros aplicados.</p>';
+            cardsContainer.innerHTML = '<div class="col-12"><p class="text-center fs-5 text-muted">Nenhum comprador encontrado com os filtros aplicados.</p></div>';
+            mostrarErro('oi', 'oi', 'warning')
             return;
         }
 
@@ -63,14 +73,28 @@ async function carregarCompradores(material = '', distancia = '', searchQuery = 
 
     } catch (err) {
         console.error('Erro em carregarCompradores:', err);
-        mostrarErro('Não foi possível carregar os compradores.', err.message);
+        mostrarErro('Não foi possível carregar os compradores.', err.message, );
     }
 
     // Função interna de ajuda para mostrar erros
-    function mostrarErro(mensagem, detalhe) {
+    function mostrarErro(mensagem, detalhe, type='alert') {
         loadingSpinner.classList.add('d-none');
         errorMessage.classList.remove('d-none');
-        errorDetail.textContent = detalhe;
+        errorTitle.textContent = detalhe;
+        errorDetail.textContent = mensagem; 
+
+        switch (type)
+        {
+            case 'alert':
+
+                errorMessage.className = 'alert alert-danger d-none text-center pt-5 pb-5';
+                break;
+
+            case 'warning':
+
+                errorMessage.className = 'alert alert-warning d-none text-center pt-5 pb-5';
+                break;
+        }
     }
 }
 
@@ -80,6 +104,9 @@ async function carregarCompradores(material = '', distancia = '', searchQuery = 
  * @returns {HTMLElement} O elemento <div> do card
  */
 function criarCardComprador(comprador) {
+
+    console.log(comprador);
+
     const col = document.createElement('div');
     col.className = 'col-12 col-md-6 col-lg-4';
 
@@ -91,19 +118,33 @@ function criarCardComprador(comprador) {
     // Converte o score (Ex: 4.5) em estrelas
     const scoreHtml = gerarEstrelas(comprador.score_confianca);
 
+    // Mostra a distância se disponível
+    let distanciaHtml = '';
+    if (comprador.distancia !== undefined) {
+        distanciaHtml = `<div class="card-distance"><span class="material-icons">near_me</span> ${comprador.distancia} km</div>`;
+    }
+
     // Formata o preço, se existir
     let precoHtml = '<p class="card-no-price">Nenhum preço registrado recentemente.</p>';
-    if (comprador.preco_min_kg && comprador.preco_max_kg && comprador.ultimo_material_comprado) {
-        const precoMin = parseFloat(comprador.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const precoMax = parseFloat(comprador.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if (comprador.preco_maximo && comprador.preco_minimo) 
+    {
+        const precoMin = parseFloat(comprador.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const precoMax = parseFloat(comprador.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         let faixaPreco = `${precoMin} /Kg`;
         if (precoMin !== precoMax) {
             faixaPreco = `${precoMin} a ${precoMax} /Kg`;
         }
         precoHtml = `
-            <p class="card-price-info">Faixa de preço (14 dias):</p>
-            <span class="card-price-value">${faixaPreco}</span>
-            <p class="card-price-material">em ${comprador.ultimo_material_comprado}</p>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="material-icons">near_me</span>
+                    <span class="card-price-info">${precoMin}</span>
+                </div>
+                <div>
+                    <span class="material-icons">near_me</span>
+                    <span class="card-price-info">${precoMax}</span>
+                </div>
+            </div>
         `;
     }
 
@@ -115,6 +156,7 @@ function criarCardComprador(comprador) {
                     <span class="material-icons">place</span>
                     ${comprador.cidade || 'Não informado'}, ${comprador.estado || 'NI'}
                 </div>
+                ${distanciaHtml}
             </div>
             <div class="card-score">
                 ${scoreHtml}
@@ -237,8 +279,8 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
     let materiaisHtml = '';
     if (detalhes.materiais_comprados && detalhes.materiais_comprados.length > 0) {
         materiaisHtml = detalhes.materiais_comprados.map(mat => {
-            const precoMin = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const precoMax = parseFloat(mat.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoMin = parseFloat(mat.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoMax = parseFloat(mat.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             let faixaPreco = `${precoMin} /Kg`;
             // Só mostra faixa (Ex: R$1,50 a R$2,00) se os preços forem diferentes
             if (precoMin !== precoMax) {
@@ -391,19 +433,48 @@ async function carregarMateriaisFiltro() {
     if (!token) return;
 
     try {
-        const response = await fetch('/get/materiais', {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response_materiais = await fetch('/get/materiais', {
+            headers: { 
+                'Authorization': token 
+            }
         });
 
-        const materiais = await response.json();
+        const materiais = await response_materiais.json();
 
-        if (response.ok && materiais.length > 0) {
-            materiais.forEach(material => {
-                const option = document.createElement('option');
-                option.value = material.id_material_base;
-                option.textContent = material.nome;
-                materialFilter.appendChild(option);
-            });
+        if (response_materiais.ok && materiais.length > 0) {
+            // Processar cada material
+            for (const material of materiais) {
+                // Criar optgroup para o material base
+                const optgroupMaterial = document.createElement('optgroup');
+                optgroupMaterial.setAttribute('label', material.nome);
+
+                // Adicionar opção "Todos de [Material]"
+                const optionTodos = document.createElement('option');
+                optionTodos.value = material.id_material_base;
+                optionTodos.textContent = `✓ Todos de ${material.nome}`;
+                optionTodos.className = 'material-all-option';
+                optgroupMaterial.appendChild(optionTodos);
+
+                // Buscar subtipos
+                const response_subtipos = await fetch(`/get/subtipos/${material.id_material_base}`, {
+                    headers: { 
+                        'Authorization': token 
+                    }
+                });
+
+                const subtipos = await response_subtipos.json();
+                
+                // Adicionar cada subtipo
+                subtipos.forEach(subtipo => {
+                    const optionSubtipo = document.createElement('option');
+                    optionSubtipo.value = material.id_material_base; // Usa o ID do material base
+                    optionSubtipo.textContent = `  ${subtipo.descricao}`;
+                    optionSubtipo.className = 'material-subtipo-option';
+                    optgroupMaterial.appendChild(optionSubtipo);
+                });
+
+                materialFilter.appendChild(optgroupMaterial);
+            }
         }
     } catch (err) {
         console.error('Erro ao carregar materiais:', err);
@@ -417,11 +488,18 @@ function configurarFiltros() {
     const applyFiltersBtn = document.getElementById('apply-filters');
     const clearFiltersBtn = document.getElementById('clear-filters');
     const searchInput = document.getElementById('search-input');
+    const radiusFilter = document.getElementById('radius-filter');
+    const radiusValue = document.getElementById('radius-value');
 
     applyFiltersBtn.addEventListener('click', aplicarFiltros);
     clearFiltersBtn.addEventListener('click', limparFiltros);
 
-    // Busca em tempo real no campo de texto
+    // Atualiza o valor do raio em tempo real
+    radiusFilter.addEventListener('input', (e) => {
+        radiusValue.textContent = e.target.value;
+    });
+
+    // Busca em tempo real no campo de texto (filtro local)
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
         filtrarCompradoresLocal(query);
@@ -434,10 +512,17 @@ function configurarFiltros() {
 async function aplicarFiltros() {
     const material = document.getElementById('material-filter').value;
     const estado = document.getElementById('estado-filter').value;
-    const searchQuery = document.getElementById('search-input').value.toLowerCase();
+    const raio = document.getElementById('radius-filter').value;
+
+    const filtros = {};
+    if (material) filtros.material = material;
+    if (estado) filtros.estado = estado;
+    if (raio) filtros.raio = parseFloat(raio);
+
+    console.log('Aplicando filtros:', filtros);
 
     // Recarregar compradores com filtros aplicados
-    await carregarCompradores(material, estado, searchQuery);
+    await carregarCompradores(filtros);
 }
 
 /**
@@ -447,9 +532,11 @@ function limparFiltros() {
     document.getElementById('material-filter').value = '';
     document.getElementById('estado-filter').value = '';
     document.getElementById('search-input').value = '';
+    document.getElementById('radius-filter').value = '100';
+    document.getElementById('radius-value').textContent = '100';
 
     // Recarrega todos os compradores
-    carregarCompradores();
+    carregarCompradores({});
 }
 
 /**

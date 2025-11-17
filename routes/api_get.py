@@ -13,13 +13,69 @@ api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
 @api_get.route("/compradores", methods=["GET"])
 def get_compradores():
+    """
+    Rota para buscar compradores com filtros opcionais.
+    Query params:
+        - material: ID do material base (opcional)
+        - estado: Sigla do estado (opcional)
+        - raio: Raio em km (opcional)
+    """
+    token = request.headers.get('Authorization')
+
+    if not token:
+        return jsonify({ 'texto': '"token" é parâmetro obrigatório' }), 400
+
+    conn = None
     try:
         conn = Connection('local')
-        compradores = Compradores(conn.connection_db).get_all()
-        return jsonify(compradores), 200
+
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({ 'error': '"Token" inexistente ou inválido'}), 401
+
+        id_usuario = data_token['id_usuario']
+
+        coop_info = Cooperativa(conn.connection_db).get_by_user_id(id_usuario)
+        if not coop_info:
+            return jsonify({ 'error': 'Cooperativa não encontrada' }), 404
+
+        # Obter parâmetros de filtro da query string
+        material_id = request.args.get('material', type=int)
+        estado = request.args.get('estado', type=str)
+        raio_km = request.args.get('raio', type=float)
+
+        print(f"Filtros aplicados - Material: {material_id}, Estado: {estado}, Raio: {raio_km} km")
+
+        # Buscar compradores com filtros
+        compradores = Compradores(conn.connection_db).get_all(
+            user_lat=coop_info['latitude'],
+            user_lon=coop_info['longitude'],
+            material_id=material_id,
+            estado=estado,
+            raio_km=raio_km
+        )
+
+        print(f"Total de compradores retornados: {len(compradores) if isinstance(compradores, list) else 0}")
+
+        match compradores:
+            # 404 - Compradores não encontrados
+            case _ if isinstance(compradores, list) and len(compradores) <= 0:
+                return jsonify({ 'error': 'Nenhum comprador encontrado com os filtros aplicados' }), 404
+                
+            # 200 - Compradores consultados
+            case _ if isinstance(compradores, list) and len(compradores) > 0:
+                return jsonify(compradores), 200
+
+            # 500 - Erro ao consultar compradores
+            case False | _:
+                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+
     except Exception as e:
         print(f"Erro ao buscar compradores: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
+    
     finally:
         if conn:
             conn.close()
@@ -104,7 +160,6 @@ def get_subtipos_materiais(material_id):
     try:
         conn = Connection('local')
         materiais = Materiais(conn.connection_db).get_subtipos(material_id)
-        conn.close()
         return jsonify(materiais), 200
     except Exception as e:
         print(f"Erro ao buscar materiais: {e}")

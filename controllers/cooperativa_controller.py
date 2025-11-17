@@ -60,7 +60,9 @@ class Cooperativa:
                 c.id_usuario,
                 c.cnpj,
                 c.razao_social,
-                u.email
+                u.email,
+                c.latitude,
+                c.longitude
                 FROM cooperativas AS c
                 JOIN usuarios AS u ON c.id_usuario = u.id_usuario
                 WHERE c.id_usuario = %s;

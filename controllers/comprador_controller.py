@@ -106,56 +106,98 @@ class Compradores:
         finally:
             cursor.close()
 
-    def get_all(self, user_lat:float, user_lon:float) -> dict:
-
+    def get_all(self, user_lat:float, user_lon:float, material_id=None, estado=None, raio_km=None) -> list:
+        """
+        Busca todos os compradores com filtros opcionais.
+        
+        Args:
+            user_lat: Latitude do usuário
+            user_lon: Longitude do usuário
+            material_id: ID do material base para filtrar (opcional)
+            estado: Sigla do estado para filtrar (opcional)
+            raio_km: Raio máximo em km para filtrar por distância (opcional)
+        """
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
-            cursor.execute(
-
-                """
+            # Query base
+            query = """
                 SELECT
-                    id_comprador,
-                    razao_social, 
-                    cnpj, 
-                    email, 
-                    telefone, 
-                    endereco, 
-                    cidade, 
-                    estado, 
-                    score_confianca, 
-                    latitude, 
-                    longitude,
-                    score_confianca,
-                    numero_avaliacoes,
-                    data_cadastro                    
-                FROM compradores
-                WHERE compradores.deletado_em = NULL;
-                """
+                    c.id_comprador,
+                    c.razao_social, 
+                    c.cnpj, 
+                    c.email, 
+                    c.telefone, 
+                    c.endereco, 
+                    c.cidade, 
+                    c.estado, 
+                    c.score_confianca, 
+                    c.latitude, 
+                    c.longitude,
+                    c.numero_avaliacoes,
+                    c.data_cadastro,
+                    MAX(vi.preco_por_kg) AS `preco_maximo`,
+                    MIN(vi.preco_por_kg) AS `preco_minimo`
+                FROM compradores c
+                LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
+                LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
+            """
+            
+            params = []
+            where_clauses = []
 
-            )
+            # Filtro por material (se comprou esse material)
 
+            if material_id:
+
+                where_clauses.append("vi.id_material_base = %s")
+                params.append(material_id)
+
+            # Filtro por estado
+            if estado:
+                where_clauses.append("c.estado = %s")
+                params.append(estado)
+
+            # Adiciona WHERE se houver filtros
+            if where_clauses:
+                query += " WHERE " + " AND ".join(where_clauses)
+
+            query += """
+                GROUP BY 
+                    c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
+                    c.endereco, c.cidade, c.estado, c.score_confianca, 
+                    c.latitude, c.longitude, c.numero_avaliacoes, c.data_cadastro
+            """
+
+            query += " ORDER BY c.score_confianca DESC;"
+
+            cursor.execute(query, params)
             dados = cursor.fetchall()
 
             # Para cada comprador, calcular a distância até o usuário
+            compradores_filtrados = []
             
             for comprador in dados:
-
                 # Calculando a distância usando a função Haversine
-
                 distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
-                comprador['distancia'] = distancia
+                comprador['distancia'] = round(distancia, 2)
 
-            return dados
+                # Filtro por raio (se especificado)
+                if raio_km is None or distancia <= raio_km:
+                    compradores_filtrados.append(comprador)
+
+            # Ordena por distância (mais próximos primeiro)
+            compradores_filtrados.sort(key=lambda x: x['distancia'])
+
+            return compradores_filtrados
 
         except Exception as e:
-
             print(f"Erro ao buscar compradores: {e}")
-            return []
+            import traceback
+            traceback.print_exc()
+            return False
         
         finally:
-
             cursor.close()
  
     def get_by_materials(self, material, subtipo):
