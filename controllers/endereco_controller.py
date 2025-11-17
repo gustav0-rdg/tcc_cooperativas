@@ -7,6 +7,12 @@ class Endereco:
     @staticmethod
     def get_coordenadas(endereco:str):
 
+        """
+        Consulta a API da Nominatim para conseguir
+        as coordenadas (latitude e longitude) de
+        um endereço
+        """
+
         headers = {
             'User-Agent': 'ReCoopera/1.0 (sistema.recoopera@gmail.com)'
         }
