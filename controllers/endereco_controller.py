@@ -1,13 +1,20 @@
 import urllib.parse
 import requests
+import math
 
 class Endereco:
 
     @staticmethod
     def get_coordenadas(endereco:str):
 
+        """
+        Consulta a API da Nominatim para conseguir
+        as coordenadas (latitude e longitude) de
+        um endereço
+        """
+
         headers = {
-            'User-Agent': 'MeuAppDeGeocodificacao/1.0 (contato@meusite.com)'
+            'User-Agent': 'ReCoopera/1.0 (sistema.recoopera@gmail.com)'
         }
 
         url_base = "https://nominatim.openstreetmap.org/search"
@@ -28,10 +35,10 @@ class Endereco:
             if data:
 
                 resultado = data[0]
-                lat = resultado.get('lat')
-                lon = resultado.get('lon')
+                lat = float(resultado.get('lat', 0))
+                lon = float(resultado.get('lon', 0))
             
-                return (lat, lon, resultado)
+                return (lat, lon)
             
             else:
 
@@ -42,3 +49,30 @@ class Endereco:
 
             print(f"Erro ao chamar a API da Nominatim: {e}")
             return None
+        
+    @staticmethod        
+    def haversine(lat1, lon1, lat2, lon2):
+
+        """
+        A fórmula de Haversine é um cálculo matemático usado para determinar a 
+        distância entre dois pontos na superfície da Terra usando latitude e longitude.
+        Ela leva em conta a curvatura da Terra, garantindo que a distância seja 
+        muito mais precisa do que uma simples conta em linha reta no plano.
+        """
+
+        # Converte as coordenadas de graus para radianos
+        lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+
+        # Diferenças entre as coordenadas
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        # Fórmula de Haversine
+        a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        # Raio da Terra (em quilômetros)
+        R = 6371.0
+
+        # Distância em quilômetros
+        return R * c

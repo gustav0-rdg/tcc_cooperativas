@@ -147,9 +147,12 @@ def cadastrar ():
                     "nome_fantasia": dados_cnpj.get('alias', 'Nome Fantasia não encontrado'),
                     "email": dados_cnpj.get('email', data_cadastro['email']),
                     "telefone": phones[0].get('number', 'Telefone não encontrado'), # Pega o primeiro telefone
-                    "endereco": f"{addr.get('street', '')}, {addr.get('number', '')} {addr.get('details', '')} - {addr.get('district', '')}".strip(" ,-"),
-                    "cidade": addr.get('city'),
-                    "estado": addr.get('state')
+                    "rua": addr.get('street', ''),
+                    "numero": addr.get('number', ''),
+                    "distrito": addr.get('district', ''),
+                    "cidade": addr.get('city', ''),
+                    "estado": addr.get('state', ''),
+                    "cep": addr.get('zip', '')
                 }
 
                 id_cooperativa_criada = Cooperativa(conn.connection_db).create(**dados_criar_coop)

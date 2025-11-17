@@ -2,6 +2,7 @@ import mysql.connector
 from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 from controllers.cnpj_controller import CNPJ
+from controllers.endereco_controller import Endereco
 
 class Compradores:
     def __init__(self, connection_db:MySQLConnection):
@@ -40,9 +41,19 @@ class Compradores:
             email_info = emails_list[0] if emails_list else {}
             email = email_info.get('address') if email_info else None
                         
+            latitude = 0
+            longitude = 0
+            
+            coordenadas = Endereco.get_coordenadas(f'{rua}, {cidade}, {estado}, Brasil')
+            
+            print(coordenadas)
+
+            if not coordenadas is None:
+                latitude, longitude = coordenadas
+
             cursor.execute("""
-                    INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
-            """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
+                    INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email, latitude, longitude) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);
+            """, (cnpj, razao_social, endereco,cidade, estado, telefone, email, latitude, longitude))
             self.connection_db.commit()
 
         except Exception as e:
