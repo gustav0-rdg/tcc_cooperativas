@@ -1,6 +1,7 @@
 from data.connection_controller import Connection
 from mysql.connector import MySQLConnection
 import datetime
+from controllers.avaliacoes_controller import Avaliacoes
 
 class Vendas:
     def __init__(self, connection_db:MySQLConnection):
@@ -223,6 +224,13 @@ class Vendas:
                     cursor.executemany(query_tags, tags_data) # executemany é eficiente para múltiplas inserções.
                     print("Tags de feedback selecionadas inseridas com sucesso.")
             else:
+                # Inserir avaliação pendente se não houver avaliação
+                avaliacoes_controller = Avaliacoes(self.connection_db)
+                sucesso = avaliacoes_controller.inserir_avaliacao_pendente(id_venda, id_cooperativa)
+                if sucesso:
+                    print("Avaliação pendente inserida com sucesso.")
+                else:
+                    print("Erro ao inserir avaliação pendente.")
                 print("Avaliação pulada, inserindo apenas venda e itens.")
 
             # Se todas as operações foram bem-sucedidas, confirma a transação.

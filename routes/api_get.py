@@ -7,6 +7,7 @@ from controllers.tokens_controller import Tokens
 from controllers.cooperativa_controller import Cooperativa
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
+from controllers.avaliacoes_controller import Avaliacoes
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
@@ -163,4 +164,83 @@ def get_cooperativas_pendentes():
     except Exception as e:
         if conn: conn.close()
         print(f"Erro em /cooperativas-pendentes: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_get.route('/avaliacoes-pendentes/<id_cooperativa>', methods=['GET'])
+def get_avaliacoes_pendentes(id_cooperativa):
+    """
+    Rota para obter as avaliações pendentes de uma cooperativa específica.
+    """
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+    print(token_header)
+
+    conn = Connection('local')
+
+    try:
+        # 1. Validar o Token e Permissão
+        db = conn.connection_db
+        data_token = Tokens(db).validar(token_header)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Buscar as avaliações pendentes
+        avaliacoes_pendentes = Avaliacoes(db).get_avaliacoes_pendentes(int(id_cooperativa))
+
+        conn.close()
+        return jsonify(avaliacoes_pendentes), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /avaliacoes-pendentes: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_get.route('/avaliacao-pendente/<id_avaliacao_pendente>', methods=['GET'])
+def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
+    """
+    Rota para obter uma avaliação pendente específica por ID.
+    """
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    conn = Connection('local')
+
+    try:
+        # 1. Validar o Token e Permissão
+        db = conn.connection_db
+        data_token = Tokens(db).validar(token_header)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Buscar a avaliação pendente
+        avaliacao = Avaliacoes(db).get_avaliacao_pendente_por_id(int(id_avaliacao_pendente))
+
+        if not avaliacao:
+            conn.close()
+            return jsonify({'error': 'Avaliação não encontrada'}), 404
+
+        conn.close()
+        return jsonify(avaliacao), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /avaliacao-pendente: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500
