@@ -2,6 +2,7 @@ import mysql.connector
 from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 from controllers.cnpj_controller import CNPJ
+from controllers.endereco_controller import Endereco
 
 class Compradores:
     def __init__(self, connection_db:MySQLConnection):
@@ -89,10 +90,8 @@ class Compradores:
             
             # ===== INSERÇÃO NO BANCO =====
             cursor.execute("""
-                INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email, whatsapp) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-            """, (cnpj, razao_social, endereco, cidade, estado, telefone, email, whatsapp))
-            
+                    INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
+            """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
             self.connection_db.commit()
             
             print(f"✅ Comprador cadastrado: {razao_social}")
