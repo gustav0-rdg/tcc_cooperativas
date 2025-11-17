@@ -55,7 +55,7 @@ export function exibirAvaliacao() {
     </div>
     <div class="finalizar">
         <button class="finalizar__btn">Finalizar registro</button>
-        <button>Pular avaliação</button>
+        <button class="pular-avaliacao">Pular avaliação</button>
     </div>
     `;
 
@@ -110,9 +110,38 @@ export function exibirAvaliacao() {
     
     const finalizar = opcoesSection.querySelector('.finalizar');
     const finalizarBtn = finalizar.querySelector('.finalizar__btn');
+    const pularBtn = finalizar.querySelector('.pular-avaliacao');
+
     finalizarBtn.addEventListener('click', () => {
         vendaAtual.avaliacao.nota = notaAtual;
         vendaAtual.avaliacao.analise = comentarioOpcional;
+
+        enviarValores(vendaAtual);
+
+        Swal.fire({
+            icon: "success",
+            title: "Venda registrada!",
+            html: `
+            <div class="relatorio_de_venda">
+                <h3> R$${vendaAtual.total}</h3>
+                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.subtipo} para ${vendaAtual.vendedor.razao_social}</p>
+            </div>
+            <div class="finalizacao_sw">
+                <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
+                <a href="/registrar-venda">Registrar nova venda</a>
+                <a href="/pagina-inicial">Voltar ao ínicio</a>
+            </div>
+                `,
+            color: "var(--verde-escuro)",
+            background: "var(--branco)",
+            showConfirmButton: false,
+            showCancelButton: false,
+        })
+    })
+
+    pularBtn.addEventListener('click', () => {
+        // Remove a avaliação do objeto vendaAtual
+        delete vendaAtual.avaliacao;
 
         enviarValores(vendaAtual);
 
