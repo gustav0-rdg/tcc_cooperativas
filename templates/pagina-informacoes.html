@@ -4,67 +4,279 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RECOOPERA | Informações Cooperativa</title>
-    <link rel="stylesheet" href="../static/css/Informações_cooperativa/Pagina_Informações.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="../static/css/pagina_informacoes/pagina_informacoes.css">
     <link rel="stylesheet" href="../static/css/root-de-cores.css">
-
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous" defer></script>
-
+    <script src="https://kit.fontawesome.com/2fcc2a2373.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
 </head>
 
 <body>
-  {% include 'includes/header.html' %}
+    {% include 'includes/header.html' %}
 
-  <div class="botoes">
-    <button onclick="window.location" class="btn-funcoes btn-info">Informações</button>
-    <a href="/gerenciar-cooperados" class="btn-funcoes btn-cooperados">Cooperados</a>
-    <button class="btn-funcoes btn-vendas">Vendas</button>
-  </div>
+    <main class="container my-4">
+        <section class="page-header mb-4">
+            <h1 class="page-title">Painel da Cooperativa</h1>
+            <p class="page-subtitle">Gerencie informações, cooperados e histórico de vendas.</p>
+        </section>
 
-  <main class="main-content">
+        <!-- Bootstrap Tabs Navigation -->
+        <ul class="nav nav-tabs" id="spa-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">
+                    <i class="fas fa-building"></i> Informações
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cooperados-tab" data-bs-toggle="tab" data-bs-target="#cooperados" type="button" role="tab" aria-controls="cooperados" aria-selected="false">
+                    <i class="fas fa-users"></i> Cooperados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#vendas" type="button" role="tab" aria-controls="vendas" aria-selected="false">
+                    <i class="fas fa-chart-line"></i> Histórico de Vendas
+                </button>
+            </li>
+        </ul>
 
-    <section class="info-section">
+        <!-- Tab Content -->
+        <div class="tab-content" id="spa-tab-content">
+            <!-- Informações Tab -->
+            <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                <div id="loading-spinner-info" class="loading-spinner d-none">
+                    <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-3 fs-5">Carregando informações...</p>
+                </div>
 
-      <h2 class="section-title">Sobre a cooperativa</h2>
-      <div class="card-info cooperativa-card">
-        <div class="text-center mb-3">
-          <p class="cooperativa-nome"><strong></strong></p>
-          <p class="cooperativa-cnpj"><span class="cooperativa-cnpj-bold"></span> </p>
+                <div id="error-message-info" class="error-message alert alert-danger d-none" role="alert">
+                    <h4 class="alert-heading">Erro ao carregar dados</h4>
+                    <p id="error-detail-info">Não foi possível carregar as informações da cooperativa. Tente novamente.</p>
+                </div>
+
+                <div id="main-content-info" class="info-grid d-none">
+                    <div class="info-card">
+                        <h3><i class="fas fa-building"></i> Sobre a Cooperativa</h3>
+                        <div class="info-item">
+                            <div class="info-label">Nome Fantasia</div>
+                            <div class="info-value" id="cooperativa-nome">Carregando...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">CNPJ</div>
+                            <div class="info-value" id="cooperativa-cnpj">Carregando...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Endereço</div>
+                            <div class="info-value" id="cooperativa-endereco">Carregando...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cidade</div>
+                            <div class="info-value" id="cooperativa-cidade">Carregando...</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-phone-alt"></i> Contato</h3>
+                        <div class="info-item">
+                            <div class="info-label">Telefone Fixo</div>
+                            <div class="info-value" id="cooperativa-telefone">Não informado</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">WhatsApp</div>
+                            <div class="info-value">
+                                <a href="#" class="contact-link" id="whatsapp-link">
+                                    <i class="fab fa-whatsapp"></i> Entrar em contato
+                                </a>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value" id="cooperativa-email">Não informado</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Website</div>
+                            <div class="info-value">
+                                <a href="#" class="contact-link" id="site-link" target="_blank">
+                                    <i class="fas fa-globe"></i> Visitar site
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de Edição -->
+                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">Editar Informações da Cooperativa</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="edit-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-nome" class="form-label">Nome Fantasia</label>
+                                                <input type="text" class="form-control" id="edit-nome" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-cnpj" class="form-label">CNPJ</label>
+                                                <input type="text" class="form-control" id="edit-cnpj" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-rua" class="form-label">Rua</label>
+                                                <input type="text" class="form-control" id="edit-rua" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-bairro" class="form-label">Bairro</label>
+                                                <input type="text" class="form-control" id="edit-bairro" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-cidade" class="form-label">Cidade</label>
+                                                <input type="text" class="form-control" id="edit-cidade" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-estado" class="form-label">Estado</label>
+                                                <input type="text" class="form-control" id="edit-estado" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-telefone" class="form-label">Telefone Fixo</label>
+                                                <input type="text" class="form-control" id="edit-telefone">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-whatsapp" class="form-label">WhatsApp</label>
+                                                <input type="text" class="form-control" id="edit-whatsapp">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="edit-email">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="edit-site" class="form-label">Website</label>
+                                                <input type="url" class="form-control" id="edit-site">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="save-changes-btn">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="edit-info-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">
+                        <i class="fas fa-edit"></i> Editar Informações
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cooperados Tab -->
+            <div class="tab-pane fade" id="cooperados" role="tabpanel" aria-labelledby="cooperados-tab">
+                <div class="d-flex justify-content-center gap-5 align-items-center mb-4">
+                    <input type="text" id="searchInput" class="form-control w-50" placeholder="Pesquisar Cooperados">
+                    <button class="btn btn-primary vincular__cooperado">+</button>
+                </div>
+
+                <div id="cooperadoCards"></div>
+
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Tem certeza que deseja excluir este cooperado?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendas Tab -->
+            <div class="tab-pane fade" id="vendas" role="tabpanel" aria-labelledby="vendas-tab">
+                <div id="loading-spinner-vendas" class="loading-spinner d-none">
+                    <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-3 fs-5">Carregando histórico de vendas...</p>
+                </div>
+
+                <div id="error-message-vendas" class="error-message alert alert-danger d-none" role="alert">
+                    <h4 class="alert-heading">Erro ao carregar dados</h4>
+                    <p>Não foi possível carregar o histórico de vendas. Tente novamente.</p>
+                </div>
+
+                <div id="vendas-content" class="d-none">
+                    <table class="table table-striped" id="vendas-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Material</th>
+                                <th>Subtipo</th>
+                                <th>Comprador</th>
+                                <th>Valor Total</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendas-tbody">
+                            <!-- Vendas serão inseridas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="text-center localizacao">
-          <p class="endereco">
-            <span class="material-icons">place</span>
-          </p>
-          <p class="cidade"><strong></strong></p>
+
+        <div class="action-buttons mt-4">
+            <a href="/pagina-inicial" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Voltar à Página Inicial
+            </a>
         </div>
-      </div>
+    </main>
 
-    </section>
+    {% include 'includes/footer.html' %}
 
-    <section class="info-section mt-4">
-      <h2 class="section-title"></h2>
-      <div class="card-info contato-card">
-        <div class="w-100 text-center mb-3">
-          <p class="fw-bold"></p>
-        </div>
-        <a href="tel:1633333333" class="btn-contato w-100 mb-3">
-          <span class="material-icons">phone_android</span>
-          <span></span>
-        </a>
-        <a href="https://wa.me/5516999999999" target="_blank" class="btn-contato w-100 whatsapp-btn">
-          <span class="material-icons">chat</span> <span></span>
-        </a>
-      </div>
-    </section>
-
-  </main>
-
-  <div class="card-btnEditar">
-    <a href="editar_informações.html" class="btn-editar">Editar</a>
-  </div>
-
-  {% include 'includes/footer.html' %}
-  <script src="/static/js/pag_informacoes/informacoesCooperativa.js" type="module"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="../static/js/paginaInformacoes/paginaInformacoes.js"></script>
 </body>
 </html>
