@@ -61,19 +61,56 @@ class Compradores:
         finally:
             cursor.close()
 
-    def get_all(self):
+    def get_all(self, user_lat:float, user_lon:float) -> dict:
+
         cursor = self.connection_db.cursor(dictionary=True)
+
         try:
-            cursor.execute("""
-            SELECT razao_social, cnpj, email, telefone, endereco, cidade, estado, score_confianca
-            FROM compradores 
-        """, ())
+
+            cursor.execute(
+
+                """
+                SELECT
+                    id_comprador,
+                    razao_social, 
+                    cnpj, 
+                    email, 
+                    telefone, 
+                    endereco, 
+                    cidade, 
+                    estado, 
+                    score_confianca, 
+                    latitude, 
+                    longitude,
+                    score_confianca,
+                    numero_avaliacoes,
+                    data_cadastro                    
+                FROM compradores
+                WHERE compradores.deletado_em = NULL;
+                """
+
+            )
+
             dados = cursor.fetchall()
 
+            # Para cada comprador, calcular a distância até o usuário
+            
+            for comprador in dados:
+
+                # Calculando a distância usando a função Haversine
+
+                distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
+                comprador['distancia'] = distancia
+
             return dados
+
         except Exception as e:
+
+            print(f"Erro ao buscar compradores: {e}")
             return []
-        finally: 
+        
+        finally:
+
             cursor.close()
  
     def get_by_materials(self, material, subtipo):
