@@ -360,7 +360,7 @@ window.CooperativasApp = (function () {
 
         const titulo = novoStatus === 'bloqueado' ? 'Bloquear cooperativa' : 'Desbloquear Cooperativa';
         const texto = novoStatus === 'bloqueado' ? `Tem certeza que deseja bloquear ${coopNome}?` : `Tem certeza que deseja desbloquear ${coopNome}?`;
-        const confirmButtonText = novoStatus === 'bloqueado' ? 'Sim, bloquear' : 'Sim, desbloquear';
+        const confirmButtonText = novoStatus === 'bloqueado' ? 'Bloquear' : 'Desbloquear';
 
         const confirm = await Swal.fire({
             title: titulo,
