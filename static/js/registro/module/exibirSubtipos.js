@@ -315,9 +315,14 @@ async function cadastrarSinonimo(valoresCadastro) {
 
 async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
     try {
+        const session_token = localStorage.getItem('session_token');
+        console.log(session_token);
         const resposta = await fetch('/post/cadastrar-subtipo', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': session_token,
+            },
             body: JSON.stringify({ nome_especifico: nomeMaterial, id_material_base: id_material_base })
         });
 

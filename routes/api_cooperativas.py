@@ -202,6 +202,7 @@ def cadastrar ():
         
         return jsonify({'error': 'Ocorreu um erro interno no servidor durante o cadastro.'}), 500
     
+    
     finally:
         if conn:
             conn.close()

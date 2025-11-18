@@ -4,6 +4,7 @@ from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
 from controllers.cooperados_controller import Catadores
+from controllers.cooperativa_controller import Cooperativa
 from controllers.tokens_controller import Tokens
 from controllers.avaliacoes_controller import Avaliacoes
 import json
@@ -44,27 +45,28 @@ def registrar_sinonimo():
 
     nome_padrao = data.get('nome_padrao')
     sinonimo = data.get('sinonimo')
-    # GRANDE AVISOOOO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    # TEM QUE COLOCAR O ID QUANDO FOR USAR USER
-    id_cooperativa = 1
-
-
-    if not all([nome_padrao, sinonimo]):
-        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
-
-    conn = Connection('local')
-
-    resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
-    return resposta
+    token = request.headers.get('Authorization')
+    print(token)
+    try:
+        conn = Connection('local')
+        if not token:
+            return jsonify({'erro':f'"Token" é um parâmetro obrigatório'}),400
+        user_data = Tokens(conn.connection_db).validar(token)
+        if user_data["token"] != token:
+            return jsonify({"erro":"token inválido."}),404
+        
+        coop_data = Cooperativa(conn.connection_db).get_by_user_id(user_data["id_usuario"])
+        if coop_data:
+            resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, coop_data["id_cooperativa"])
+        else:
+            return jsonify({'erro':'Não foi possível cadastrar um novo sinonimo.'})
+        return jsonify({"sucesso":f'Novo sinonimo cadastrado. {resposta}'})
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro":f"não foi possivel cadastrar um novo sinonimo: {e}"})
+    finally:
+        if conn:
+            conn.close()
 
 @api_post.route("/cadastrar-sinonimo-base", methods=["POST"])
 def registrar_sinonimo_base():
