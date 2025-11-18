@@ -325,24 +325,19 @@ class Catadores:
             
     def get_cooperado_e_cooperativa_by_user_id(self, id_usuario: int) -> Optional[dict]:
         """
-        Busca um cooperado e o nome da sua cooperativa pelo id_usuario.
+        Busca um cooperado e o nome da sua cooperativa pelo id_usuario usando v_cooperados_cooperativa.
         """
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT 
-                    co.*, 
-                    coop.razao_social
-                FROM cooperados AS co
-                JOIN cooperativas AS coop ON co.id_cooperativa = coop.id_cooperativa
-                WHERE co.id_usuario = %s;
+                SELECT * FROM v_cooperados_cooperativa WHERE id_usuario = %s;
             """, (id_usuario,))
             return cursor.fetchone()
-        
+
         except Exception as e:
             print(f"Erro em 'get_cooperado_e_cooperativa_by_user_id': {e}")
             return None
-        
+
         finally:
             cursor.close()
 

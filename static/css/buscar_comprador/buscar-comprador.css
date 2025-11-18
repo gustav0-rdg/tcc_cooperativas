@@ -145,6 +145,19 @@ main {
     font-size: 1rem;
 }
 
+.card-distance {
+    font-size: 0.85rem;
+    color: var(--verde-principal);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+.card-distance .material-icons {
+    font-size: 0.9rem;
+}
+
 .card-score {
     display: flex;
     align-items: center;
@@ -153,7 +166,7 @@ main {
     font-weight: 700;
     color: var(--verde-escuro);
 }
-.card-score .fa-star {
+.card-score .fa-star, .card-score .fa-star-half-alt {
     color: #FFC107; /* Amarelo Estrela */
 }
 
@@ -395,4 +408,130 @@ main {
     font-size: 0.85rem;
     color: var(--verde-escuro-medio);
     margin-top: 5px;
+}
+
+/* --- Estilização COMPLETA do Filtro de Raio (Range Slider) --- */
+
+/* 1. Corrige a 'pista' (track) do slider */
+.filters-section .form-range {
+    background-image: none; /* FORÇA a remoção do gradiente padrão */
+    background-color: var(--verde-claro-medio);
+    height: 0.6rem;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* 2. Estiliza o 'pegador' (thumb) - Mantido */
+.filters-section .form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: var(--verde-principal);
+    border: 3px solid var(--branco);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    margin-top: -0.45rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.filters-section .form-range::-moz-range-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: var(--verde-principal);
+    border: 3px solid var(--branco);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* 3. Efeito de Foco (Brilho verde) - Mantido */
+.filters-section .form-range:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+}
+
+/* 4. Efeito Hover no Thumb - Mantido */
+.filters-section .form-range::-webkit-slider-thumb:hover,
+.filters-section .form-range:focus::-webkit-slider-thumb {
+    background-color: var(--verde-escuro-medio);
+    transform: scale(1.1);
+}
+
+.filters-section .form-range::-moz-range-thumb:hover,
+.filters-section .form-range:focus::-moz-range-thumb {
+    background-color: var(--verde-escuro-medio);
+    transform: scale(1.1);
+}
+
+/* 5. Estiliza o NOVO 'switch' (checkbox) */
+.filters-section .form-check-input {
+    border-color: var(--verde-claro-medio);
+    cursor: pointer;
+}
+.filters-section .form-check-input:checked {
+    background-color: var(--verde-principal);
+    border-color: var(--verde-principal);
+}
+.filters-section .form-check-input:focus {
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+}
+.filters-section .form-check-label {
+    font-weight: 600;
+    color: var(--verde-escuro);
+    cursor: pointer;
+}
+
+/* 6. Estiliza o 'fieldset' quando desabilitado */
+#radius-controls:disabled {
+    opacity: 0.5; /* Deixa tudo 'apagado' */
+    pointer-events: none; /* Desabilita cliques */
+}
+/* Deixa o thumb cinza quando desabilitado */
+#radius-controls:disabled .form-range::-webkit-slider-thumb {
+    background-color: var(--verde-escuro-medio);
+}
+#radius-controls:disabled .form-range::-moz-range-thumb {
+    background-color: var(--verde-escuro-medio);
+}
+
+/* 7. Estiliza os textos (Min, Max, Valor) */
+#radius-controls .small.text-muted {
+    color: var(--verde-escuro-medio) !important;
+    font-weight: 500;
+}
+#radius-controls #radius-value {
+    color: var(--verde-principal); /* Cor de destaque para o valor */
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* --- Estilização do Filtro de Materiais --- */
+.material-all-option {
+    font-weight: 700;
+    color: var(--verde-escuro);
+    background-color: var(--verde-claro-medio);
+    padding: 0.5rem;
+}
+
+.material-subtipo-option {
+    padding-left: 1.5rem;
+    color: var(--verde-escuro-medio);
+}
+
+#material-filter optgroup {
+    font-weight: 700;
+    color: var(--verde-escuro);
+    font-style: normal;
+}
+
+#material-filter option {
+    padding: 0.5rem;
+}
+
+#material-filter option:hover {
+    background-color: var(--verde-claro-medio);
 }
