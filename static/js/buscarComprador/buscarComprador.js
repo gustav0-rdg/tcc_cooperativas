@@ -274,7 +274,7 @@ async function abrirModalDetalhes(comprador) {
             html: modalHtml,
             width: '800px', // Modal mais largo
             confirmButtonText: 'Fechar',
-            confirmButtonColor: 'var(--verde-escuro-medio)'
+        confirmButtonColor: 'var(--verde-claro-medio)'
         });
 
     } catch (err) {

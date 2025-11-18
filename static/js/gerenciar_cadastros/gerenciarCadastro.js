@@ -131,7 +131,7 @@ function handleAprovar(id, token, cardElement) {
         showCancelButton: true,
         confirmButtonText: 'Sim, aprovar!',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: 'var(--verde-principal)',
+        confirmButtonColor: 'var(--verde-claro-medio)',
         cancelButtonColor: 'var(--vermelho)'
     }).then(async (result) => {
         if (result.isConfirmed) {
@@ -187,7 +187,7 @@ async function handleRejeitar(id, email, token, cardElement) {
         showCancelButton: true,
         confirmButtonText: 'Sim, rejeitar e enviar e-mail',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: 'var(--vermelho)',
+        confirmButtonColor: 'var(--verde-claro-medio)',
         focusConfirm: false,
         preConfirm: () => {
             const motivo = document.getElementById('swal-motivo').value;

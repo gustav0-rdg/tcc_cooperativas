@@ -358,18 +358,19 @@ window.CooperativasApp = (function () {
         const novoStatus = button.dataset.novoStatus;
         const coopNome = button.dataset.coopNome;
 
-        const titulo = novoStatus === 'bloqueado' ? 'Bloquear Cooperativa' : 'Desbloquear Cooperativa';
+        const titulo = novoStatus === 'bloqueado' ? 'Bloquear cooperativa' : 'Desbloquear Cooperativa';
         const texto = novoStatus === 'bloqueado' ? `Tem certeza que deseja bloquear ${coopNome}?` : `Tem certeza que deseja desbloquear ${coopNome}?`;
-        const confirmButtonText = novoStatus === 'bloqueado' ? 'Sim, bloquear' : 'Sim, desbloquear';
+        const confirmButtonText = novoStatus === 'bloqueado' ? 'Bloquear' : 'Desbloquear';
 
         const confirm = await Swal.fire({
             title: titulo,
             html: texto,
             icon: novoStatus === 'bloqueado' ? 'warning' : 'question',
             showCancelButton: true,
+            confirmButtonColor: 'var(--verde-claro-medio)',
             confirmButtonText,
             cancelButtonText: 'Cancelar',
-            reverseButtons: true
+            cancelButtonColor: 'var(--vermelho)',  
         });
 
         if (!confirm.isConfirmed) return;

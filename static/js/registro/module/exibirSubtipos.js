@@ -206,7 +206,7 @@ export async function exibirSubtipos() {
             cancelButtonText: 'Cancelar',
             color: "var(--verde-escuro-medio)",
             background: "var(--verde-claro-medio)",
-            confirmButtonColor: "var(--verde-escuro-medio)",
+            confirmButtonColor: "var(--verde-claro-medio)",
             cancelButtonColor: "var(--vermelho)",
             preConfirm: async () => {
                 const valor = document.getElementById('novoNomeMaterial').value.trim();
