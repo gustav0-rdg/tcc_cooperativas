@@ -135,10 +135,10 @@ class Compradores:
                 FROM compradores c
                 LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
                 LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
-            """
+                """,
             
-            params = []
-            where_clauses = []
+                params = [],
+                where_clauses = []
 
             )
 
