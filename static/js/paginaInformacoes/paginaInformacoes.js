@@ -274,25 +274,41 @@ function configurarVincularCooperado() {
 
     btnVinculo.addEventListener('click', () => {
         Swal.fire({
-            title: 'Cadastrar Cooperado',
+            title: '<span style="color: var(--verde-escuro)">Cadastrar Cooperado</span>',
+            // O HTML agora usa a estrutura de Grid e as classes modern-input
             html: `
-                <input id="nome" class="swal2-input" placeholder="Nome completo" required>
-                <input id="email" class="swal2-input" placeholder="Email" type="email" required>
-                <input id="cpf" class="swal2-input" placeholder="CPF (000.000.000-00)" maxlength="14" required>
-                <input id="telefone" class="swal2-input" placeholder="Telefone (00 00000-0000)" maxlength="15" required>
-                <input id="endereco" class="swal2-input" placeholder="Endereço completo" required>
-                <input id="cidade" class="swal2-input" placeholder="Cidade" required>
-                <input id="estado" class="swal2-input" placeholder="Estado (UF)" maxlength="2" required>
-                <input id="senha" class="swal2-input" placeholder="Senha" type="password" required>
-                <input id="confirmar-senha" class="swal2-input" placeholder="Confirmar Senha" type="password" required>
+                <div class="swal-form-grid">
+                    <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
+                    
+                    <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
+                    
+                    <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
+                    <input id="telefone" class="modern-input" placeholder="Telefone" maxlength="15" required>
+                    
+                    <input id="endereco" class="modern-input swal-full-width" placeholder="Endereço completo" required>
+                    
+                    <input id="cidade" class="modern-input" placeholder="Cidade" required>
+                    <input id="estado" class="modern-input" placeholder="UF" maxlength="2" style="text-transform:uppercase" required>
+                    
+                    <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
+                    <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
+                </div>
             `,
             showCancelButton: true,
             confirmButtonText: 'Cadastrar',
             cancelButtonText: 'Cancelar',
+            confirmButtonColor: 'var(--verde-principal)', // Botão usando a cor principal
+            cancelButtonColor: 'var(--vermelho)',
+            width: '600px', // Um pouco mais largo para acomodar as colunas
+            padding: '2em',
+            background: 'var(--branco)',
+            
             didOpen: () => {
                 // Aplicar máscara ao CPF
                 const cpfInput = document.getElementById('cpf');
-                aplicarMascaraCPF(cpfInput);
+                if (typeof aplicarMascaraCPF === 'function') {
+                     aplicarMascaraCPF(cpfInput);
+                }
             },
             preConfirm: () => {
                 const nome = document.getElementById('nome').value.trim();
@@ -333,7 +349,8 @@ function configurarVincularCooperado() {
             Swal.fire({
                 title: 'Enviando dados...',
                 allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
+                didOpen: () => Swal.showLoading(),
+                color: 'var(--verde-escuro)'
             });
 
             try {
@@ -350,11 +367,25 @@ function configurarVincularCooperado() {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
 
-                Swal.fire('Sucesso', 'Cooperado cadastrado com sucesso!', 'success');
-                carregarCooperados(); // Recarregar lista
+                Swal.fire({
+                    title: 'Sucesso',
+                    text: 'Cooperado cadastrado com sucesso!',
+                    icon: 'success',
+                    confirmButtonColor: 'var(--verde-principal)'
+                });
+                
+                // Verifica se a função existe antes de chamar para evitar erros
+                if (typeof carregarCooperados === 'function') {
+                    carregarCooperados(); 
+                }
 
             } catch (err) {
-                Swal.fire('Erro', err.message || 'Erro ao cadastrar cooperado.', 'error');
+                Swal.fire({
+                    title: 'Erro',
+                    text: err.message || 'Erro ao cadastrar cooperado.',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--vermelho)'
+                });
             }
         });
     });
@@ -412,21 +443,12 @@ async function carregarHistoricoVendas() {
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         vendasContent.classList.add('d-none');
-
-        // Obter ID da cooperativa
-        const userResponse = await fetch('/api/usuarios/get', {
-            method: 'POST',
+        const userData = JSON.parse(sessionStorage.getItem('usuario'))
+        const response = await fetch(`/get/vendas/${userData.dados_cooperativa.id_cooperativa}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': token
-            }
-        });
-        const userData = await userResponse.json();
-        if (!userResponse.ok) throw new Error(userData.error);
-
-        const response = await fetch(`/get/vendas/${userData.id_usuario}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -471,9 +493,6 @@ function exibirHistoricoVendas(vendas) {
             <td>${venda.nome_especifico || 'N/A'}</td>
             <td>${venda.nome_comprador || 'N/A'}</td>
             <td>R$ ${parseFloat(venda.valor_total).toFixed(2)}</td>
-            <td>
-                ${podeEditar ? `<button class="btn btn-sm btn-warning editar-venda" data-venda='${JSON.stringify(venda)}'>Editar</button>` : '<span class="text-muted">Edição expirada</span>'}
-            </td>
         `;
 
         tbody.appendChild(row);
