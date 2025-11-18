@@ -6,23 +6,17 @@ body {
 .card {
     max-width: 400px; 
     width: 90%; 
-    background-color: var(--verde-claro-medio) !important;
+    background-color: var(--branco) !important;
     color: var(--verde-escuro-secundario);
     border-radius: 10px;
 }
 
-.card h1 {
-    font-weight: 700;
-    color: var(--verde-escuro);
-    font-size: 1.8rem; 
-}
-
-#form label {
+#form-login-cooperativas label {
     color: var(--verde-escuro-medio);
-    font-weight: 600;
+    font-weight: 700;
 }
 
-#form input:focus {
+#form-login-cooperativas input:focus {
     border: 2px solid var(--verde-principal) !important;
     outline: none !important;
     box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
@@ -44,7 +38,6 @@ input::placeholder{
     font-size: 1.1rem !important; 
     padding: 10px 0; 
     border-radius: 5px;
-    margin-top: 15px; 
     transition: background-color 0.3s !important;
 }
 
@@ -54,12 +47,12 @@ input::placeholder{
     text-decoration: none !important; 
 }
 
-#form p {
+#form-login-cooperativas p {
     color: var(--verde-escuro) !important;
     font-size: 0.95rem;
 }
 
-#form a {
+#form-login-cooperativas a {
     transition: color 0.3s;
 }
 
@@ -70,4 +63,15 @@ input::placeholder{
 .link_a:hover {
     color: var(--verde-escuro);
     text-decoration: underline;
+}
+
+.titulo{
+    font-size: 34px !important;
+    font-weight: 700;
+    color: var(--verde-escuro-medio);
+}
+
+.titulo .material-symbols-outlined
+{
+    font-size: 1em;
 }

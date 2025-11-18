@@ -106,22 +106,15 @@ class Compradores:
         finally:
             cursor.close()
 
-    def get_all(self, user_lat:float, user_lon:float, material_id=None, estado=None, raio_km=None) -> list:
-        """
-        Busca todos os compradores com filtros opcionais.
-        
-        Args:
-            user_lat: Latitude do usuário
-            user_lon: Longitude do usuário
-            material_id: ID do material base para filtrar (opcional)
-            estado: Sigla do estado para filtrar (opcional)
-            raio_km: Raio máximo em km para filtrar por distância (opcional)
-        """
+    def get_all(self, user_lat:float, user_lon:float) -> dict:
+
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-            # Query base
-            query = """
+
+            cursor.execute(
+
+                """
                 SELECT
                     c.id_comprador,
                     c.razao_social, 
@@ -137,8 +130,7 @@ class Compradores:
                     c.numero_avaliacoes,
                     c.data_cadastro,
                     MAX(vi.preco_por_kg) AS `preco_maximo`,
-                    MIN(vi.preco_por_kg) AS `preco_minimo`,
-                    AVG(vi.preco_por_kg) AS `preco_medio`
+                    MIN(vi.preco_por_kg) AS `preco_minimo`
                 FROM compradores c
                 LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
                 LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
@@ -198,14 +190,13 @@ class Compradores:
             return compradores_filtrados
 
         except Exception as e:
+
             print(f"Erro ao buscar compradores: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
+            return []
         
         finally:
+
             cursor.close()
- 
     def get_by_materials(self, material, subtipo):
         """
         Busca e agrupa compradores com base no material que compraram usando v_compradores_publico.

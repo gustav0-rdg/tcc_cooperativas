@@ -160,3 +160,183 @@ main {
         gap: 1.5rem;
     }
 }
+
+#vendas-table {
+    border-radius: 12px; /* Arredondamento nos cantos da tabela */
+    overflow: hidden; /* Garante que o cabeçalho obedeça o arredondamento */
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+#vendas-table thead th {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+}
+
+#vendas-table tbody tr:hover {
+    background-color: var(--verde-claro); /* Efeito hover suave no desktop */
+}
+
+/* ============================================================
+   TRANSFORMAÇÃO EM CARDS (Para telas menores que 768px)
+   ============================================================ */
+@media screen and (max-width: 768px) {
+
+    /* 1. Desmonta a estrutura de tabela nativa */
+    #vendas-table, 
+    #vendas-table tbody, 
+    #vendas-table tr, 
+    #vendas-table td {
+        display: block;
+        width: 100%;
+    }
+
+    /* 2. Esconde o cabeçalho da tabela (Data, Material, etc) */
+    #vendas-table thead {
+        display: none; 
+    }
+
+    /* 3. Remove a cor zebrada do Bootstrap para não ficar estranho nos cards */
+    .table-striped > tbody > tr:nth-of-type(odd) > * {
+        --bs-table-accent-bg: transparent;
+        color: inherit;
+    }
+
+    /* 4. Estiliza a LINHA (tr) como se fosse um CARTÃO */
+    #vendas-table tbody tr {
+        background-color: var(--branco);
+        margin-bottom: 15px; /* Espaço entre os cards */
+        border: 2px solid var(--verde-claro-medio); /* Borda verde bonita */
+        border-radius: 16px; /* Bem arredondado */
+        box-shadow: 0 4px 10px rgba(60, 103, 29, 0.1); /* Sombra suave */
+        padding: 8px 0;
+        position: relative;
+    }
+
+    /* 5. Estiliza as CÉLULAS (td) para parecerem linhas de informação */
+    #vendas-table td {
+        display: flex;
+        justify-content: space-between; /* Texto na esquerda, valor na direita */
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--verde-claro);
+        text-align: right;
+        font-size: 0.9rem; /* Tamanho bom para iPhone SE */
+        color: var(--preto);
+    }
+
+    /* Remove borda do último item do card */
+    #vendas-table td:last-child {
+        border-bottom: none;
+    }
+
+    /* 6. A MÁGICA: Insere os títulos das colunas via CSS */
+    /* Isso cria o texto do lado esquerdo sem mexer no HTML */
+    #vendas-table td::before {
+        content: ""; /* Valor padrão */
+        font-weight: 700;
+        color: var(--verde-escuro-medio);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        text-align: left;
+    }
+
+    /* Mapeamento Manual das Colunas (Baseado no seu <thead>) */
+    
+    /* 1ª Coluna: Data */
+    #vendas-table td:nth-of-type(1)::before {
+        content: "Data";
+    }
+
+    /* 2ª Coluna: Material */
+    #vendas-table td:nth-of-type(2)::before {
+        content: "Material";
+    }
+
+    /* 3ª Coluna: Subtipo */
+    #vendas-table td:nth-of-type(3)::before {
+        content: "Subtipo";
+    }
+
+    /* 4ª Coluna: Comprador */
+    #vendas-table td:nth-of-type(4)::before {
+        content: "Comprador";
+    }
+
+    /* 5ª Coluna: Valor Total */
+    #vendas-table td:nth-of-type(5) {
+        font-weight: bold;
+        color: var(--verde-principal); /* Destaque para o dinheiro */
+        font-size: 1rem;
+    }
+    #vendas-table td:nth-of-type(5)::before {
+        content: "Valor Total";
+        color: var(--verde-escuro); /* Mantém o título escuro */
+        font-weight: 700;
+    }
+}
+
+/* CSS Para o sweeet alert de registro de cooperados */
+
+.swal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas */
+    gap: 15px; /* Espaço entre os inputs */
+    padding: 10px;
+    text-align: left;
+}
+
+/* Fazendo alguns inputs ocuparem a linha inteira */
+.swal-full-width {
+    grid-column: span 2;
+}
+
+/* Estilização Moderna dos Inputs */
+.modern-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 15px;
+    
+    /* Design Arredondado e Cores */
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 12px; /* Arredondamento suave */
+    background-color: var(--verde-claro); /* Fundo bem suave */
+    color: var(--verde-escuro);
+    font-size: 1rem;
+    
+    /* Transição suave para animações */
+    transition: all 0.3s ease;
+    outline: none; /* Remove o outline padrão feio */
+}
+
+/* Efeito ao passar o mouse (Hover) */
+.modern-input:hover {
+    border-color: var(--verde-principal);
+    background-color: var(--branco);
+}
+
+/* Efeito ao clicar/focar (Focus) */
+.modern-input:focus {
+    border-color: var(--verde-escuro-medio);
+    background-color: var(--branco);
+    /* Glow verde ao redor */
+    box-shadow: 0 0 0 4px rgba(106, 182, 51, 0.2); 
+}
+
+/* Placeholder com a cor da identidade */
+.modern-input::placeholder {
+    color: var(--verde-escuro-medio);
+    opacity: 0.7;
+}
+
+.nav-link{
+    color: var(--verde-escuro);
+}
+
+.nav-link:hover{
+    color: var(--verde-principal);
+}
+
