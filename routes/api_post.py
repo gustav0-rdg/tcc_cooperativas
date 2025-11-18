@@ -5,6 +5,7 @@ from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
 from controllers.cooperados_controller import Catadores
 from controllers.tokens_controller import Tokens
+from controllers.avaliacoes_controller import Avaliacoes
 import json
 
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
@@ -150,3 +151,50 @@ def cadastrar_sinonimo_base():
     finally:
         if 'conn' in locals():
             conn.close()
+@api_post.route("/finalizar-avaliacao-pendente/<int:id_avaliacao_pendente>", methods=["POST"])
+def finalizar_avaliacao_pendente(id_avaliacao_pendente):
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+
+
+    conn = Connection('local')
+
+    try:
+        # 1. Validar o Token e Permissão
+        db = conn.connection_db
+        from controllers.tokens_controller import Tokens
+        from controllers.usuarios_controller import Usuarios
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Receber dados da avaliação
+        dados_avaliacao = request.get_json()
+        if not dados_avaliacao:
+            return jsonify({'error': 'Dados da avaliação não fornecidos'}), 400
+
+        # 3. Finalizar avaliação pendente
+        avaliacoes_controller = Avaliacoes(db)
+        sucesso = avaliacoes_controller.finalizar_avaliacao_pendente(id_avaliacao_pendente, dados_avaliacao)
+
+        if sucesso:
+            conn.close()
+            return jsonify({'status': 'sucesso', 'mensagem': 'Avaliação finalizada com sucesso!'}), 200
+        else:
+            conn.close()
+            return jsonify({'error': 'Erro ao finalizar avaliação'}), 500
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /finalizar-avaliacao-pendente: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500

@@ -1,6 +1,7 @@
 // Aguarda o DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
     carregarInformacoesCooperativa();
+    configurarSPATabs();
 });
 
 /**
@@ -8,9 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function carregarInformacoesCooperativa() {
     const token = localStorage.getItem('session_token');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const errorMessage = document.getElementById('error-message');
-    const mainContent = document.getElementById('main-content');
+    const user_data = JSON.parse(sessionStorage.getItem('usuario'));
+    const loadingSpinner = document.getElementById('loading-spinner-info');
+    const errorMessage = document.getElementById('error-message-info');
+    const mainContent = document.getElementById('main-content-info');
 
     if (!token) {
         mostrarErro('Sessão inválida. Faça o login novamente.');
@@ -21,21 +23,8 @@ async function carregarInformacoesCooperativa() {
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         mainContent.classList.add('d-none');
-
-        const response = await fetch('/get/cooperativa-info', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.erro || 'Erro ao buscar dados da cooperativa.');
-        }
-
         // Preenche os elementos com os dados
-        preencherInformacoes(data);
+        preencherInformacoes(user_data.dados_cooperativa);
 
         loadingSpinner.classList.add('d-none');
         mainContent.classList.remove('d-none');
@@ -53,11 +42,11 @@ function preencherInformacoes(data) {
     // Sobre a Cooperativa
     document.getElementById('cooperativa-nome').textContent = data.nome_fantasia || 'Não informado';
     document.getElementById('cooperativa-cnpj').textContent = data.cnpj || 'Não informado';
-    document.getElementById('cooperativa-endereco').textContent = `${data.rua || ''}, ${data.bairro || ''}`.trim() || 'Não informado';
+    document.getElementById('cooperativa-endereco').textContent = data.endereco || 'Não informado';
     document.getElementById('cooperativa-cidade').textContent = data.cidade_estado || 'Não informado';
 
     // Contato
-    document.getElementById('cooperativa-telefone').textContent = data.telefone_fixo || 'Não informado';
+    document.getElementById('cooperativa-telefone').textContent = data.telefone_fixo || data.telefone  || 'Não informado';
     document.getElementById('cooperativa-email').textContent = data.email || 'Não informado';
 
     // WhatsApp

@@ -8,6 +8,7 @@ from controllers.cooperativa_controller import Cooperativa
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
 from controllers.precos_controller import Precos
+from controllers.avaliacoes_controller import Avaliacoes
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
