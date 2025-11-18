@@ -3,6 +3,7 @@ import { material } from "../registrar_venda.js";
 
 import { vendaAtual } from "../registrar_venda.js";
 import { exibirVendedores } from "./exibirVendedores.js";
+
 const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
 const compradorSection = document.querySelector('.registros__comprador');
@@ -221,7 +222,7 @@ export async function exibirSubtipos() {
                     Swal.showValidationMessage('Selecione uma das opções da lista ou "Material Novo"!');
                     return false;
                 }
-
+                console.log(vendaAtual)
                 // Se for "criar", chama função para cadastrar novo material
                 if (selecionado.value === 'criar') {
                     await cadastrarNovoMaterial(valor, vendaAtual.material.id_categoria);

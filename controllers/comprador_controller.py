@@ -173,7 +173,7 @@ class Compradores:
 
             cursor.execute(query, params)
             dados = cursor.fetchall()
-
+            compradores_filtrados = []
             # Para cada comprador, calcular a distância até o usuário
             if user_lat != None and user_lon != None:
                 for comprador in dados:
@@ -190,7 +190,10 @@ class Compradores:
             # Ordena por distância (mais próximos primeiro)
             compradores_filtrados.sort(key=lambda x: x['distancia'])
 
-            return compradores_filtrados
+            if len(compradores_filtrados) > 0:
+                return compradores_filtrados
+            else:
+                return dados
 
         except Exception as e:
             print(f"Erro ao buscar compradores: {e}")

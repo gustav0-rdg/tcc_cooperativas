@@ -48,7 +48,7 @@ function exibirMateriais() {
         // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
             vendaAtual.material.categoria = item.nome_padrao;
-            vendaAtual.material.id_categoria = item.id_material_catalogo // Atualiza o material no objeto vendaAtual
+            vendaAtual.material.id_categoria = item.id_material_base // Atualiza o material no objeto vendaAtual
             etapaAtual = "subtipos"; // Muda para a etapa de vendedores
             // TROCAR ESTE PARA EXIBIR SUBTIPOS
             // exibirVendedores(); // Exibe os vendedores

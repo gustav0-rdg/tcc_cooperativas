@@ -503,17 +503,19 @@
         // ----------------- MODAL DE AVALIAÇÃO (DETALHE) -----------------
         async function exibirAvaliacaoPendente(idAvaliacao) {
             try {
-                const response = await fetch(`/get/avaliacao-pendente/${idAvaliacao}`, {
+                const response = await fetch(`/get/avaliacoes-pendentes/${idAvaliacao}`, {
                     method: 'GET',
                     headers: {
+                        'Content-Type':'application/json',
                         'Authorization': session_token
                     }
                 });
+                console.log(response);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar dados da avaliação');
                 }
                 const avaliacao = await response.json();
-
+                
                 const feedbacksResponse = await fetch('/get/feedbacks');
                 const feedbacks = feedbacksResponse.ok ? await feedbacksResponse.json() : [];
 
@@ -529,6 +531,7 @@
         }
 
         function renderizarAvaliacaoModal(avaliacao, feedbacks, idAvaliacao) {
+            console.log(avaliacao);
             const valorFormatado = parseFloat(avaliacao.valor_total).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
@@ -537,7 +540,6 @@
                 style: 'currency',
                 currency: 'BRL'
             });
-
             const htmlContent = `
                 <div class="avaliacao-modal-container">
                     <header class="modal-header">
