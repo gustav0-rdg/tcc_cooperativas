@@ -331,3 +331,11 @@ main {
     color: var(--verde-escuro-medio);
     opacity: 0.7;
 }
+
+.nav-link{
+    color: var(--verde-escuro);
+}
+
+.nav-link:hover{
+    color: var(--verde-principal);
+}
