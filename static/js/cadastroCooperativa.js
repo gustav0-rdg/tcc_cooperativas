@@ -1,3 +1,5 @@
+const cnpjInput = document.getElementById('cnpj');
+
 document.addEventListener('DOMContentLoaded', () => {
     const formCadastro = document.getElementById('formCadastro');
 
@@ -137,4 +139,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+});
+
+// Mascara
+
+cnpjInput.addEventListener('input', function () {
+    let value = this.value.replace(/\D/g, ""); // remove tudo que não é número
+
+    // limita a 14 números
+    if (value.length > 14) value = value.slice(0, 14);
+
+    // aplica a máscara
+    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    value = value.replace(/(\d{4})(\d)/, "$1-$2");
+
+    this.value = value;
 });
