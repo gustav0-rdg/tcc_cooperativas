@@ -39,3 +39,13 @@ ol,
 ul {
     list-style: none;
 }
+
+.btn-voltar
+{
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+}
