@@ -42,27 +42,45 @@ def get_cooperados(identificador: int):
     
     finally:
         conn.close()
-
-@api_cooperados.route('/delete/<id_cooperado>')
-def delete_cooperado(id_cooperado):
-    token = request.headers.get('authorization')
+@api_cooperados.route('/delete/<int:id_catador>', methods=["DELETE"])
+def delete_cooperado(id_catador):
+    token = request.headers.get('Authorization')  # case-insensitive, só por padrão
     if not token:
-        return jsonify({'erro':'"Token" é um parametro obrigatório'}),400
+        return jsonify({'erro': '"Token" é um parametro obrigatório'}), 400
+
     conn = Connection('local')
+
     try:
         data_token = Tokens(conn.connection_db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({'error':'"Token" inexistente ou inválido'}),400
+            return jsonify({'error': '"Token" inexistente ou inválido'}), 400
+
         user = Usuarios(conn.connection_db).get(data_token['id_usuario'])
-        if not user['tipo'] in ['cooperativa', 'gestor', 'root']:
-            return jsonify({'error':'você não tem permissão pra realizar tal ação'})
-        elif user['tipo'] == 'cooperativa':
-            
+        cooperativa = Cooperativa(conn.connection_db).get_by_user_id(user["id_usuario"])
+        if user['tipo'] not in ['cooperativa', 'gestor', 'root']:
+            return jsonify({'error': 'Você não tem permissão pra realizar tal ação'}), 403
+
+        catadores_ctrl = Catadores(conn.connection_db)
+        catador = catadores_ctrl.get_by_id_catador(id_catador)
+        if not catador:
+            return jsonify({'error': f'Cooperado com id {id_catador} não encontrado'}), 404
+
+        if user["tipo"] == "cooperativa" and catador["id_cooperativa"] != cooperativa["id_cooperativa"]:
+
+            return jsonify({'error': 'Você não pode remover cooperados de outra cooperativa'}), 403
+
+        delete_ok = catadores_ctrl.delete_cooperado(catador["id_usuario"], id_catador)
+        
+        if delete_ok:
+            return jsonify({"sucesso": f"Cooperado correspondente ao id {id_catador} excluído"}), 200
+        else:
+            return jsonify({'erro': 'Erro desconhecido ao excluir cooperado.'}), 500
+
     except Exception as e:
-        return jsonify({'error': f'Erro no servidor {e}'}),500
-    
+        return jsonify({'error': f'Erro no servidor {e}'}), 500
+
     finally:
-        conn.close()    
+        conn.close()
 
 @api_cooperados.route('/get/<identificador>/<nome>', methods=["POST"])
 def search_cooperado(identificador, nome):
