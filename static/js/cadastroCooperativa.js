@@ -86,21 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const idCooperativa = data.id_cooperativa;
 
-                // Solicita o arquivo de comprovação
-                const { value: file } = await Swal.fire({
-                    title: 'Pré-cadastro realizado!',
-                    text: 'Envie um documento (ATA ou similar) que comprove a legitimidade da cooperativa.',
-                    input: 'file',
-                    inputLabel: 'O documento será analisado por um gestor.',
-                    inputAttributes: {
-                        'accept': 'image/png, image/jpeg, image/jpg, application/pdf',
-                        'aria-label': 'Upload do documento de comprovação'
-                    },
-                    confirmButtonText: 'Enviar Documento',
-                    confirmButtonColor: 'var(--verde-claro-medio)',
-                    showCancelButton: true,
-                    cancelButtonText: 'Enviar depois',
-                    allowOutsideClick: false,
+                const formData = new FormData();
+                    formData.append('documento', documentoATA);
+                    formData.append('id_cooperativa', idCooperativa);
+
+                const fileResponse = await fetch('/api/cooperativas/enviar-documento', {
+                    method: 'POST',
+                    body: formData
                 });
 
                 if (file) {

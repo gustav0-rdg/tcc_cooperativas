@@ -134,6 +134,11 @@ main {
     margin-bottom: 0.25rem;
 }
 
+.card-cnpj {
+    font-size: 0.9em;
+    color: #b9b9b9;
+}
+
 .card-location {
     font-size: 0.9rem;
     color: var(--verde-escuro-medio);
@@ -534,4 +539,597 @@ main {
 
 #material-filter option:hover {
     background-color: var(--verde-claro-medio);
+}
+/* Importa a fonte - Mantido */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+}
+
+main {
+    flex-grow: 1; /* Faz o main ocupar o espaço até o footer */
+}
+
+/* --- Cabeçalho da Página --- */
+.page-header {
+    border-bottom: 2px solid var(--verde-claro-medio);
+    padding-bottom: 1rem;
+}
+.page-title {
+    color: var(--verde-escuro);
+    font-weight: 700;
+}
+.page-subtitle {
+    color: var(--verde-escuro-medio);
+    font-size: 1.1rem;
+}
+
+/* --- Seção de Filtros --- */
+.filters-section {
+    background-color: var(--verde-claro);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filters-section .form-label {
+    color: var(--verde-escuro);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.filters-section .form-select,
+.filters-section .form-control {
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--branco);
+    color: var(--verde-escuro);
+}
+
+.filters-section .form-select:focus,
+.filters-section .form-control:focus {
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+    outline: none;
+}
+
+.filters-section .btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.filters-section .btn-primary {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+}
+
+.filters-section .btn-primary:hover {
+    background-color: var(--verde-escuro-medio);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(60, 103, 29, 0.3);
+}
+
+.filters-section .btn-secondary {
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+}
+
+.filters-section .btn-secondary:hover {
+    background-color: var(--verde-principal);
+    color: var(--branco);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 182, 51, 0.3);
+}
+
+/* --- Estilo do Card do Comprador --- */
+.comprador-card {
+    background-color: var(--branco);
+    border: 1px solid var(--verde-claro-medio);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Garante que os cards na mesma linha tenham mesma altura */
+}
+
+.comprador-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(60, 103, 29, 0.15);
+    border-color: var(--verde-principal);
+}
+
+/* Cabeçalho do Card (Nome e Score) */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--verde-escuro);
+    margin-bottom: 0.25rem;
+}
+
+.card-location {
+    font-size: 0.9rem;
+    color: var(--verde-escuro-medio);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.card-location .material-icons {
+    font-size: 1rem;
+}
+
+.card-distance {
+    font-size: 0.85rem;
+    color: royalblue;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+.card-distance .material-icons {
+    font-size: 0.9rem;
+}
+
+.card-score {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 1.1rem;
+    color: var(--verde-escuro);
+}
+.card-score .fa-star, .card-score .fa-star-half-alt {
+    color: #FFC107; /* Amarelo Estrela */
+}
+
+/* Corpo do Card (Preços) */
+.card-body {
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--verde-claro-medio);
+    padding-top: 1rem;
+    flex-grow: 1; /* Empurra o footer do card para baixo */
+}
+
+.card-price-info {
+    font-size: 0.95rem;
+    color: var(--verde-escuro-medio);
+    margin-bottom: 0.25rem;
+}
+.card-price-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--verde-principal);
+}
+.card-price-material {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+.card-no-price {
+    font-size: 0.95rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Footer do Card (Placeholder) */
+.card-footer {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--verde-principal);
+}
+
+/* --- Estilos do Modal (SweetAlert) --- */
+.swal-modal-container {
+    text-align: left;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px; /* Espaço para a barra de rolagem */
+}
+
+/* Estilos para as avaliações agrupadas */
+.avaliacao-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.avaliacao-item {
+    border-bottom: 1px solid var(--verde-claro-medio);
+    padding: 15px 0;
+    margin-bottom: 15px;
+}
+
+.avaliacao-item:last-child {
+    border-bottom: none;
+}
+
+.avaliacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.avaliacao-data {
+    font-weight: 600;
+    color: var(--verde-escuro);
+}
+
+.avaliacao-count {
+    font-size: 0.9rem;
+    color: var(--verde-escuro-medio);
+}
+
+.avaliacao-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.score-label {
+    font-weight: 500;
+    color: var(--verde-escuro-medio);
+}
+
+.avaliacao-comentarios {
+    margin-top: 10px;
+}
+
+.avaliacao-comentario {
+    font-size: 0.95rem;
+    color: var(--verde-escuro);
+    font-style: italic;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    border-left: 3px solid var(--verde-claro-medio);
+}
+
+.swal-modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--verde-escuro);
+    margin-bottom: 5px;
+}
+
+.swal-modal-location {
+    font-size: 1rem;
+    color: var(--verde-escuro-medio);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.swal-modal-location .material-icons {
+    font-size: 1.1rem;
+}
+
+.swal-modal-section {
+    margin-bottom: 1.5rem;
+}
+
+.swal-modal-subtitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--verde-principal);
+    border-bottom: 2px solid var(--verde-claro-medio);
+    padding-bottom: 5px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Contatos */
+.contact-list {
+    list-style: none;
+    padding-left: 0;
+}
+.contact-list li {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+.contact-list .material-icons {
+    color: var(--verde-escuro-medio);
+}
+
+/* Materiais e Preços */
+.material-price-list {
+    list-style: none;
+    padding-left: 0;
+}
+.material-price-item {
+    background-color: var(--verde-claro);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.material-name {
+    font-weight: 600;
+    color: var(--verde-escuro);
+}
+.material-price-range {
+    font-weight: 500;
+    color: var(--verde-principal);
+}
+
+/* Avaliações (Tags) */
+.feedback-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.feedback-tag {
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.feedback-tag.positivo {
+    background-color: var(--verde-claro-medio);
+    color: var(--verde-escuro);
+    border: 1px solid var(--verde-principal);
+}
+.feedback-tag.negativo {
+    background-color: #ffebee; /* Vermelho claro */
+    color: #c62828; /* Vermelho escuro */
+    border: 1px solid #ef9a9a;
+}
+.tag-count {
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.1);
+}
+
+/* Comentários Livres */
+.comment-list {
+    list-style: none;
+    padding-left: 0;
+}
+.comment-item {
+    border-bottom: 1px solid var(--verde-claro-medio);
+    padding: 10px 0;
+    margin-bottom: 10px;
+}
+.comment-item:last-child {
+    border-bottom: none;
+}
+.comment-text {
+    font-size: 1rem;
+    color: var(--verde-escuro);
+    font-style: italic;
+}
+.comment-anon {
+    font-size: 0.85rem;
+    color: var(--verde-escuro-medio);
+    margin-top: 5px;
+}
+
+/* --- Estilização COMPLETA do Filtro de Raio (Range Slider) --- */
+
+/* 1. Corrige a 'pista' (track) do slider */
+.filters-section .form-range {
+    background-image: none; /* FORÇA a remoção do gradiente padrão */
+    background-color: var(--verde-claro-medio);
+    height: 0.6rem;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* 2. Estiliza o 'pegador' (thumb) - Mantido */
+.filters-section .form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: var(--verde-principal);
+    border: 3px solid var(--branco);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    margin-top: -0.45rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.filters-section .form-range::-moz-range-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: var(--verde-principal);
+    border: 3px solid var(--branco);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* 3. Efeito de Foco (Brilho verde) - Mantido */
+.filters-section .form-range:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+}
+
+/* 4. Efeito Hover no Thumb - Mantido */
+.filters-section .form-range::-webkit-slider-thumb:hover,
+.filters-section .form-range:focus::-webkit-slider-thumb {
+    background-color: var(--verde-escuro-medio);
+    transform: scale(1.1);
+}
+
+.filters-section .form-range::-moz-range-thumb:hover,
+.filters-section .form-range:focus::-moz-range-thumb {
+    background-color: var(--verde-escuro-medio);
+    transform: scale(1.1);
+}
+
+/* 5. Estiliza o NOVO 'switch' (checkbox) */
+.filters-section .form-check-input {
+    border-color: var(--verde-claro-medio);
+    cursor: pointer;
+}
+.filters-section .form-check-input:checked {
+    background-color: var(--verde-principal);
+    border-color: var(--verde-principal);
+}
+.filters-section .form-check-input:focus {
+    border-color: var(--verde-principal);
+    box-shadow: 0 0 0 0.2rem rgba(106, 182, 51, 0.25);
+}
+.filters-section .form-check-label {
+    font-weight: 600;
+    color: var(--verde-escuro);
+    cursor: pointer;
+}
+
+/* 6. Estiliza o 'fieldset' quando desabilitado */
+#radius-controls:disabled {
+    opacity: 0.5; /* Deixa tudo 'apagado' */
+    pointer-events: none; /* Desabilita cliques */
+}
+/* Deixa o thumb cinza quando desabilitado */
+#radius-controls:disabled .form-range::-webkit-slider-thumb {
+    background-color: var(--verde-escuro-medio);
+}
+#radius-controls:disabled .form-range::-moz-range-thumb {
+    background-color: var(--verde-escuro-medio);
+}
+
+/* 7. Estiliza os textos (Min, Max, Valor) */
+#radius-controls .small.text-muted {
+    color: var(--verde-escuro-medio) !important;
+    font-weight: 500;
+}
+#radius-controls #radius-value {
+    color: var(--verde-principal); /* Cor de destaque para o valor */
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* --- Estilização do Filtro de Materiais --- */
+.material-all-option {
+    font-weight: 700;
+    color: var(--verde-escuro);
+    background-color: var(--verde-claro-medio);
+    padding: 0.5rem;
+}
+
+.material-subtipo-option {
+    padding-left: 1.5rem;
+    color: var(--verde-escuro-medio);
+}
+
+#material-filter optgroup {
+    font-weight: 700;
+    color: var(--verde-escuro);
+    font-style: normal;
+}
+
+#material-filter option {
+    padding: 0.5rem;
+}
+
+#material-filter option:hover {
+    background-color: var(--verde-claro-medio);
+}
+
+.nota-comprador
+{
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 100%;
+}
+
+.card-distance .material-icons {
+    font-size: 0.9rem;
+}
+
+.card-price-info
+{
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+.card-price-info .material-icons
+{
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.card-max-price
+{
+    color: var(--verde-principal);
+}
+
+.card-min-price
+{
+    color: crimson;
+}
+
+.card-min-max-price
+{
+    border-bottom: 1px dashed var(--verde-claro-medio);
+    padding-bottom: 16px;
+}
+
+.avg-price-label
+{
+    font-weight: 500;
+    font-size: 0.7em;
+    color: #000;
+}
+
+.card-avg-price
+{
+    font-size: 1.1em;
+    color: royalblue;
 }
