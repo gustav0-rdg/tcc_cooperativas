@@ -11,6 +11,7 @@ async function carregarInformacoesCooperativa() {
     const token = localStorage.getItem('session_token');
     const user_data = JSON.parse(sessionStorage.getItem('usuario'));
     const loadingSpinner = document.getElementById('loading-spinner-info');
+    console.log(loadingSpinner)
     const errorMessage = document.getElementById('error-message-info');
     const mainContent = document.getElementById('main-content-info');
 
