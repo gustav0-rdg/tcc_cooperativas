@@ -197,6 +197,24 @@ CREATE TABLE IF NOT EXISTS `materiais_sinonimos` (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `materiais_sinonimos_base` (
+  `id_sinonimo` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_material_base` INT UNSIGNED NOT NULL,
+  `id_cooperativa` BIGINT UNSIGNED NOT NULL,
+  `nome_sinonimo` VARCHAR(255) NOT NULL,
+  INDEX `idx_material_base_sinonimo` (`id_material_base`),
+  INDEX `idx_cooperativa_sinonimo_base` (`id_cooperativa`),
+  UNIQUE INDEX `uidx_coop_nome_sinonimo_base` (`id_cooperativa`, `nome_sinonimo`),
+  CONSTRAINT `fk_sinonimos_base`
+    FOREIGN KEY (`id_material_base`)
+    REFERENCES `materiais_base` (`id_material_base`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_sinonimos_cooperativas_base`
+    FOREIGN KEY (`id_cooperativa`)
+    REFERENCES `cooperativas` (`id_cooperativa`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 -- ============================================================================
 -- Tabelas de Vendas e Avaliações
 -- ============================================================================
@@ -361,14 +379,6 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
 -- Dados Iniciais
 -- ============================================================================
 
-INSERT INTO `materiais_base` (`nome`, `descricao`) VALUES
-('Papel/Papelão', 'Todos os tipos de papéis e papelões recicláveis.'),
-('Plástico', 'Diversos tipos de polímeros plásticos.'),
-('Metal', 'Metais ferrosos e não ferrosos.'),
-('Vidro', 'Embalagens e cacos de vidro.'),
-('Eletrônicos', 'Resíduos de Equipamentos Elétricos e Eletrônicos (REEE).'),
-('Madeira', 'Resíduos de madeira e paletes.'),
-('Outros', 'Materiais não classificados nas categorias anteriores.');
 
 INSERT INTO `config_sistema` (`chave`, `valor`, `descricao`) VALUES
 ('peso_pontualidade', '0.5', 'Peso da nota de pontualidade no pagamento'),
@@ -381,10 +391,8 @@ INSERT INTO `config_sistema` (`chave`, `valor`, `descricao`) VALUES
 ('min_avaliacoes_confianca', '10', 'Número mínimo de avaliações para confiança estatística plena.'),
 ('peso_prior_bayesiano', '3', 'Fator de suavização bayesiana.');
 
-INSERT INTO `feedback_tags` (`texto`, `tipo`) VALUES
-('Pagou adiantado', 'positivo'), ('Pagou na hora', 'positivo'), ('Logística eficiente', 'positivo'),
-('Comunicação clara', 'positivo'), ('Pouca burocracia', 'positivo'), ('Atrasou o pagamento', 'negativo'),
-('Difícil de contatar', 'negativo'), ('Logística complicada', 'negativo'), ('Muitas exigências', 'negativo');
+-- Adicionar coluna whatsapp na tabela compradores
+ALTER TABLE `compradores` ADD COLUMN `whatsapp` VARCHAR(20) NULL AFTER `telefone`;
 
 -- ============================================================================
 -- FUNÇÕES, TRIGGERS, PROCEDURES E EVENTS
@@ -538,7 +546,7 @@ DELIMITER ;
 CREATE OR REPLACE VIEW `v_compradores_publico` AS
 SELECT
   id_comprador, razao_social, cidade, estado, latitude, longitude,
-  telefone, email, score_confianca, numero_avaliacoes
+  telefone, email, whatsapp, score_confianca, numero_avaliacoes
 FROM compradores WHERE deletado_em IS NULL;
 
 CREATE OR REPLACE VIEW `v_precos_mercado_anonimizado` AS
@@ -584,6 +592,33 @@ FROM materiais_catalogo mc
 JOIN materiais_base mb ON mc.id_material_base = mb.id_material_base
 LEFT JOIN materiais_sinonimos ms ON mc.id_material_catalogo = ms.id_material_catalogo
 GROUP BY mc.id_material_catalogo;
+
+CREATE OR REPLACE VIEW `v_compradores_destaque` AS
+SELECT
+  c.id_comprador,
+  c.razao_social,
+  c.cidade,
+  c.estado,
+  c.score_confianca,
+  c.numero_avaliacoes,
+  c.cnpj,
+  c.whatsapp,
+  MIN(v.valor_total / vi.quantidade_kg) AS preco_min_kg,
+  MAX(v.valor_total / vi.quantidade_kg) AS preco_max_kg,
+  (SELECT mc.nome_especifico
+   FROM vendas v2
+   JOIN vendas_itens vi2 ON v2.id_venda = vi2.id_venda
+   JOIN materiais_catalogo mc ON vi2.id_material_catalogo = mc.id_material_catalogo
+   WHERE v2.id_comprador = c.id_comprador
+   ORDER BY v2.data_venda DESC
+   LIMIT 1) AS ultimo_material_comprado
+FROM compradores c
+LEFT JOIN vendas v ON v.id_comprador = c.id_comprador AND v.data_venda >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda AND vi.quantidade_kg > 0
+WHERE c.deletado_em IS NULL AND c.score_confianca >= 0
+GROUP BY c.id_comprador
+ORDER BY c.score_confianca DESC
+LIMIT 20;
 
 -- ============================================================================
 -- CRIAÇÃO DE ROLES E PERMISSÕES
