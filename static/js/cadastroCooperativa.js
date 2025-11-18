@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cnpjInput = document.getElementById('cnpj');
             const cnpj = cnpjInput.value.replace(/\D/g, ''); // Remove máscara
             const termos = document.getElementById('termos').checked;
+            const documentoATA = document.getElementById('uploadAta').files[0];
 
             if (senha !== confirmaSenha) {
                 Swal.fire({
@@ -121,12 +122,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: formData
                     });
 
-                    const fileData = await fileResponse.json();
+                const fileData = await fileResponse.json();
 
-                    if (!fileResponse.ok) {
-                        throw new Error(fileData.error || 'Não foi possível enviar o documento.');
-                    }
+                if (!fileResponse.ok) {
+                    throw new Error(fileData.error || 'Não foi possível enviar o documento.');
+                }
 
+                Swal.fire({
+
+                    title: 'Sucesso!',
+                    text: 'Arquivo enviado. Aguarde a aprovação por e-mail!',
+                    icon: 'success',
+                    confirmButtonText: 'Confirmar'
+                    
+                }).then(() => {
+                    window.location.href = '/login';
+                });
                     Swal.fire({
                         title: 'Sucesso!',
                         text: 'Arquivo enviado. Aguarde a aprovação por e-mail!',

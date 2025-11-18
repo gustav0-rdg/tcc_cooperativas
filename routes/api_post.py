@@ -107,9 +107,10 @@ def cadastrar_subtipo():
         data = request.get_json()
         conn = Connection('local')
         resposta = Materiais(conn.connection_db).cadastrar_subtipo(data["nome_especifico"], data["id_material_base"])
-        return resposta
+        return jsonify({'sucesso':'cadastro'})
     except Exception as e:
         print(e)
+        return jsonify({'erro':e})
     finally:
         conn.close()
 
