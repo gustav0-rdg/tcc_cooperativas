@@ -137,7 +137,8 @@ class Compradores:
                     c.numero_avaliacoes,
                     c.data_cadastro,
                     MAX(vi.preco_por_kg) AS `preco_maximo`,
-                    MIN(vi.preco_por_kg) AS `preco_minimo`
+                    MIN(vi.preco_por_kg) AS `preco_minimo`,
+                    AVG(vi.preco_por_kg) AS `preco_medio`
                 FROM compradores c
                 LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
                 LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda

@@ -130,19 +130,27 @@ function criarCardComprador(comprador) {
     {
         const precoMin = parseFloat(comprador.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const precoMax = parseFloat(comprador.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const precoMedio = parseFloat(comprador.preco_medio).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
         let faixaPreco = `${precoMin} /Kg`;
         if (precoMin !== precoMax) {
             faixaPreco = `${precoMin} a ${precoMax} /Kg`;
         }
         precoHtml = `
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="material-icons">near_me</span>
-                    <span class="card-price-info">${precoMin}</span>
+            <div>
+                <div class="d-flex justify-content-between card-min-max-price">
+                    <div class="card-price-info card-max-price">
+                        <span class="material-icons">north</span>
+                        <span>${precoMin} /Kg</span>
+                    </div>
+                    <div class="card-price-info card-min-price">
+                        <span class="material-icons">south</span>
+                        <span>${precoMax} /Kg</span>
+                    </div>
                 </div>
-                <div>
-                    <span class="material-icons">near_me</span>
-                    <span class="card-price-info">${precoMax}</span>
+                <div class="d-flex flex-column text-center card-avg-price mt-3 card-price-info">
+                    <span class="avg-price-label">Preço Médio</span>
+                    <span>${precoMedio} /Kg</span>
                 </div>
             </div>
         `;
@@ -202,7 +210,7 @@ function gerarEstrelas(score) {
             estrelas += vazia; // Estrela vazia
         }
     }
-    return `<span>${scoreNum.toFixed(1)}</span> ${estrelas}`;
+    return `<span class="nota-comprador">${scoreNum.toFixed(1)}</span> ${estrelas}`;
 }
 
 /**
@@ -279,8 +287,13 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
     let materiaisHtml = '';
     if (detalhes.materiais_comprados && detalhes.materiais_comprados.length > 0) {
         materiaisHtml = detalhes.materiais_comprados.map(mat => {
-            const precoMin = parseFloat(mat.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const precoMax = parseFloat(mat.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            console.log('oi')
+            console.log(mat)
+
+            const precoMin = parseFloat(mat.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoMax = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
             let faixaPreco = `${precoMin} /Kg`;
             // Só mostra faixa (Ex: R$1,50 a R$2,00) se os preços forem diferentes
             if (precoMin !== precoMax) {
@@ -293,6 +306,7 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
                     <span class="material-price-range">${faixaPreco}</span>
                 </li>
             `;
+
         }).join('');
     } else {
         materiaisHtml = '<p>Este comprador ainda não registrou compras de materiais específicos.</p>';

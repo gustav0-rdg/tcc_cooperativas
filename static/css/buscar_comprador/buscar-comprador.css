@@ -147,7 +147,7 @@ main {
 
 .card-distance {
     font-size: 0.85rem;
-    color: var(--verde-principal);
+    color: royalblue;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -160,10 +160,10 @@ main {
 
 .card-score {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 0.3rem;
     font-size: 1.1rem;
-    font-weight: 700;
     color: var(--verde-escuro);
 }
 .card-score .fa-star, .card-score .fa-star-half-alt {
@@ -534,4 +534,60 @@ main {
 
 #material-filter option:hover {
     background-color: var(--verde-claro-medio);
+}
+
+.nota-comprador
+{
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 100%;
+}
+
+.card-distance .material-icons {
+    font-size: 0.9rem;
+}
+
+.card-price-info
+{
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+.card-price-info .material-icons
+{
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.card-max-price
+{
+    color: var(--verde-principal);
+}
+
+.card-min-price
+{
+    color: crimson;
+}
+
+.card-min-max-price
+{
+    border-bottom: 1px dashed var(--verde-claro-medio);
+    padding-bottom: 16px;
+}
+
+.avg-price-label
+{
+    font-weight: 500;
+    font-size: 0.7em;
+    color: #000;
+}
+
+.card-avg-price
+{
+    font-size: 1.1em;
+    color: royalblue;
 }
