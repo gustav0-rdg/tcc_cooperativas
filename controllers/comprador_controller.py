@@ -175,18 +175,22 @@ class Compradores:
             cursor.execute(query, params)
             dados = cursor.fetchall()
 
+            compradores_filtrados = []
+
             # Para cada comprador, calcular a distância até o usuário
             if user_lat != None and user_lon != None:
+
                 for comprador in dados:
 
                     # Calculando a distância usando a função Haversine
 
                     distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
-                    comprador['distancia'] = distancia
+                    comprador['distancia'] = round(distancia, 2)
 
-                # Filtro por raio (se especificado)
-                if raio_km is None or distancia <= raio_km:
-                    compradores_filtrados.append(comprador)
+                    # Filtro por raio (se especificado)
+
+                    if raio_km is None or distancia <= raio_km:
+                        compradores_filtrados.append(comprador)
 
             # Ordena por distância (mais próximos primeiro)
             compradores_filtrados.sort(key=lambda x: x['distancia'])
