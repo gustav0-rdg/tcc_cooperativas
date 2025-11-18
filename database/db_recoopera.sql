@@ -272,6 +272,8 @@ CREATE TABLE IF NOT EXISTS `avaliacoes_pendentes` (
   `id_venda` bigint unsigned NOT NULL,
   `id_cooperativa` bigint unsigned NOT NULL,
   `status_avaliacao` varchar(20) NOT NULL DEFAULT 'pendente',
+  `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
   UNIQUE INDEX `uidx_id_venda` (`id_venda`),
   INDEX `idx_cooperativa_status` (`id_cooperativa`, `status_avaliacao`),
 
@@ -285,6 +287,7 @@ CREATE TABLE IF NOT EXISTS `avaliacoes_pendentes` (
     REFERENCES `cooperativas` (`id_cooperativa`)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS `avaliacao_feedback_selecionado` (
   `id_avaliacao` BIGINT UNSIGNED NOT NULL,

@@ -51,7 +51,7 @@ class Catadores:
                 raise Exception("Falha ao obter o ID do usuário criado.")
 
             query_catador = """
-            INSERT INTO catadores (id_usuario, id_cooperativa, cpf, telefone, 
+            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, 
                                    endereco, cidade, estado)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
@@ -81,15 +81,15 @@ class Catadores:
     def get_by_id_catador(self, id_catador: int) -> Optional[Dict[str, Any]]:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
-            query = """
+            query = """ 
             SELECT 
                 cat.*, 
                 u.nome, 
                 u.email, 
                 u.status
-            FROM catadores cat
+            FROM cooperados cat
             JOIN usuarios u ON cat.id_usuario = u.id_usuario
-            WHERE cat.id_catador = %s
+            WHERE cat.id_cooperado = %s
             """
             cursor.execute(query, (id_catador,))
             resultado = cursor.fetchone()
@@ -117,7 +117,7 @@ class Catadores:
                 u.nome, 
                 u.email, 
                 u.status
-            FROM catadores cat
+            FROM cooperados cat
             JOIN usuarios u ON cat.id_usuario = u.id_usuario
             WHERE cat.id_usuario = %s
             """
@@ -147,7 +147,7 @@ class Catadores:
                 cat.id_catador, cat.id_usuario, cat.cpf, cat.telefone, 
                 cat.cidade, cat.ativo, cat.data_vinculo,
                 u.nome, u.email
-            FROM catadores cat
+            FROM cooperados cat
             JOIN usuarios u ON cat.id_usuario = u.id_usuario
             WHERE cat.id_cooperativa = %s
             """
@@ -205,7 +205,7 @@ class Catadores:
             return True 
 
         try:
-            query = f"UPDATE catadores SET {', '.join(updates)} WHERE id_catador = %s"
+            query = f"UPDATE cooperados SET {', '.join(updates)} WHERE id_catador = %s"
             params.append(id_catador)
             
             cursor.execute(query, tuple(params))
@@ -230,7 +230,7 @@ class Catadores:
         try:
             self.connection_db.start_transaction() 
 
-            cursor.execute("SELECT id_usuario FROM catadores WHERE id_catador = %s", (id_catador,))
+            cursor.execute("SELECT id_usuario FROM cooperados WHERE id_cooperado = %s", (id_catador,))
             catador_data = cursor.fetchone()
             
             if not catador_data:
@@ -241,9 +241,9 @@ class Catadores:
             id_usuario = catador_data['id_usuario']
 
             query_catador = """
-            UPDATE catadores
+            UPDATE cooperados
             SET ativo = %s, data_desvinculo = %s
-            WHERE id_catador = %s
+            WHERE id_cooperado = %s
             """
             cursor.execute(query_catador, (novo_status, data_desvinculo, id_catador))
 
@@ -273,6 +273,8 @@ class Catadores:
         try:
             query = """
                 SELECT 
+                    co.id_usuario,
+                    co.id_cooperado,
                     co.cpf, 
                     co.telefone,
                     co.endereco,
@@ -299,6 +301,8 @@ class Catadores:
                 termo_buscado = f"%{nome_cooperado}%"
                 query = """
                     SELECT 
+                        co.id_usuario,
+                        co.id_cooperado,
                         co.cpf, 
                         co.telefone,
                         co.endereco,
@@ -341,3 +345,23 @@ class Catadores:
         
         finally:
             cursor.close()
+
+    def delete_cooperado(self, id_usuario: int, id_cooperado: int) -> bool:
+        try:
+            with self.connection_db.cursor() as cursor:
+                print(id_cooperado, id_usuario)
+                cursor.execute(
+                    "DELETE FROM cooperados WHERE id_cooperado = %s;",
+                    (id_cooperado,)
+                )
+                cursor.execute(
+                    "DELETE FROM usuarios WHERE id_usuario = %s;",
+                    (id_usuario,)
+                )
+            self.connection_db.commit()
+            return True
+
+        except Exception as e:
+            self.connection_db.rollback() # Retornando os dados pro banco de dados caso algum erro aconteça
+            print(f"Erro ao deletar cooperado/usuário: {e}")
+            return False
