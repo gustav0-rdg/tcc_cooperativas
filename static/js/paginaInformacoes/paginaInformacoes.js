@@ -275,21 +275,15 @@ function configurarVincularCooperado() {
     btnVinculo.addEventListener('click', () => {
         Swal.fire({
             title: '<span style="color: var(--verde-escuro)">Cadastrar Cooperado</span>',
-            // O HTML agora usa a estrutura de Grid e as classes modern-input
             html: `
                 <div class="swal-form-grid">
                     <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
-                    
                     <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
-                    
                     <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
                     <input id="telefone" class="modern-input" placeholder="Telefone" maxlength="15" required>
-                    
                     <input id="endereco" class="modern-input swal-full-width" placeholder="Endereço completo" required>
-                    
                     <input id="cidade" class="modern-input" placeholder="Cidade" required>
                     <input id="estado" class="modern-input" placeholder="UF" maxlength="2" style="text-transform:uppercase" required>
-                    
                     <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
                     <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
                 </div>
@@ -297,17 +291,15 @@ function configurarVincularCooperado() {
             showCancelButton: true,
             confirmButtonText: 'Cadastrar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: 'var(--verde-principal)', // Botão usando a cor principal
+            confirmButtonColor: 'var(--verde-principal)', // Ajustado
             cancelButtonColor: 'var(--vermelho)',
-            width: '600px', // Um pouco mais largo para acomodar as colunas
+            width: '600px',
             padding: '2em',
             background: 'var(--branco)',
-            
             didOpen: () => {
-                // Aplicar máscara ao CPF
                 const cpfInput = document.getElementById('cpf');
                 if (typeof aplicarMascaraCPF === 'function') {
-                     aplicarMascaraCPF(cpfInput);
+                    aplicarMascaraCPF(cpfInput);
                 }
             },
             preConfirm: () => {
@@ -350,7 +342,7 @@ function configurarVincularCooperado() {
                 title: 'Enviando dados...',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading(),
-                color: 'var(--verde-escuro)'
+                confirmButtonColor: 'var(--verde-principal)'
             });
 
             try {
@@ -371,12 +363,11 @@ function configurarVincularCooperado() {
                     title: 'Sucesso',
                     text: 'Cooperado cadastrado com sucesso!',
                     icon: 'success',
-                    confirmButtonColor: 'var(--verde-principal)'
+                    confirmButtonColor: 'var(--verde-principal)' 
                 });
-                
-                // Verifica se a função existe antes de chamar para evitar erros
+
                 if (typeof carregarCooperados === 'function') {
-                    carregarCooperados(); 
+                    carregarCooperados();
                 }
 
             } catch (err) {
@@ -384,7 +375,7 @@ function configurarVincularCooperado() {
                     title: 'Erro',
                     text: err.message || 'Erro ao cadastrar cooperado.',
                     icon: 'error',
-                    confirmButtonColor: 'var(--vermelho)'
+                    confirmButtonColor: 'var(--vermelho)' // Mantido
                 });
             }
         });
@@ -401,6 +392,8 @@ function confirmarRemocaoCooperado(idCooperado) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Remover',
+        confirmButtonColor: 'var(--verde-principal)',
+        cancelButtonColor: 'var(--vermelho)',
         cancelButtonText: 'Cancelar'
     }).then(async (result) => {
         if (!result.isConfirmed) return;
