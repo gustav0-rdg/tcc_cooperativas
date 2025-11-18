@@ -95,25 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
 
-                if (file) {
-                    Swal.fire({
-                        title: 'Enviando...',
-                        text: 'Aguarde enquanto o arquivo é enviado.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    const formData = new FormData();
-                    formData.append('documento', file);
-                    formData.append('id_cooperativa', idCooperativa);
-
-                    const fileResponse = await fetch('/api/cooperativas/enviar-documento', {
-                        method: 'POST',
-                        body: formData
-                    });
-
                 const fileData = await fileResponse.json();
 
                 if (!fileResponse.ok) {
@@ -121,36 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 Swal.fire({
-
                     title: 'Sucesso!',
                     text: 'Arquivo enviado. Aguarde a aprovação por e-mail!',
                     icon: 'success',
-                    confirmButtonText: 'Confirmar'
-                    
+                    confirmButtonText: 'Confirmar',
+                    confirmButtonColor: 'var(--verde-claro-medio)'
                 }).then(() => {
                     window.location.href = '/login';
                 });
-                    Swal.fire({
-                        title: 'Sucesso!',
-                        text: 'Arquivo enviado. Aguarde a aprovação por e-mail!',
-                        icon: 'success',
-                        confirmButtonText: 'Confirmar',
-                        confirmButtonColor: 'var(--verde-claro-medio)'
-                    }).then(() => {
-                        window.location.href = '/login';
-                    });
-
-                } else {
-                    Swal.fire({
-                        title: 'Pendente!',
-                        text: 'Seu pré-cadastro está feito. Envie o documento mais tarde para aprovação!',
-                        icon: 'warning',
-                        confirmButtonText: 'Entendido',
-                        confirmButtonColor: 'var(--verde-claro-medio)'
-                    }).then(() => {
-                        window.location.href = '/login';
-                    });
-                }
 
             } catch (error) {
                 console.error("Erro no fetch:", error);
