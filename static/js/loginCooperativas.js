@@ -70,23 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (status === 'SUCCESS_LOGIN') 
             {
                 Swal.fire({
-
+                    title: 'Sucesso!',
+                    text: 'Login realizado. Redirecionando...',
                     icon: 'success',
-                    title: 'Autenticado com sucesso',
+                    timer: 1500, 
                     showConfirmButton: false,
-                    timer: 1500
-
+                    allowOutsideClick: false 
                 });
-
-                setTimeout(
-
-                    function () {
-                        window.location.href = data;
-                    },
-
-                    1500
-
-                )
+    
+                setTimeout(() => {
+                    window.location.href = '/pagina-inicial';
+                }, 1500);
             }
 
             else 
