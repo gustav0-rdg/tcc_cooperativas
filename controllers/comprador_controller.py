@@ -130,7 +130,8 @@ class Compradores:
                     c.numero_avaliacoes,
                     c.data_cadastro,
                     MAX(vi.preco_por_kg) AS `preco_maximo`,
-                    MIN(vi.preco_por_kg) AS `preco_minimo`
+                    MIN(vi.preco_por_kg) AS `preco_minimo`,
+                    AVG(vi.preco_por_kg) AS `preco_medio`
                 FROM compradores c
                 LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
                 LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
@@ -139,32 +140,8 @@ class Compradores:
             params = []
             where_clauses = []
 
-            # Filtro por material (se comprou esse material)
+            )
 
-            if material_id:
-
-                where_clauses.append("vi.id_material_base = %s")
-                params.append(material_id)
-
-            # Filtro por estado
-            if estado:
-                where_clauses.append("c.estado = %s")
-                params.append(estado)
-
-            # Adiciona WHERE se houver filtros
-            if where_clauses:
-                query += " WHERE " + " AND ".join(where_clauses)
-
-            query += """
-                GROUP BY 
-                    c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
-                    c.endereco, c.cidade, c.estado, c.score_confianca, 
-                    c.latitude, c.longitude, c.numero_avaliacoes, c.data_cadastro
-            """
-
-            query += " ORDER BY c.score_confianca DESC;"
-
-            cursor.execute(query, params)
             dados = cursor.fetchall()
 
             compradores_filtrados = []
