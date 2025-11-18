@@ -97,57 +97,15 @@ def get_feedbacks():
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
     """
-    Rota para obter a lista completa de materiais do catálogo com sinônimos da cooperativa.
+    Rota para obter a lista completa de materiais do catálogo.
     """
-    conn = None
     try:
         conn = Connection('local')
         materiais = Materiais(conn.connection_db).get_all()
-
-        # Obter id_cooperativa do token
-        id_cooperativa = None
-        token_header = request.headers.get('Authorization')
-        if token_header:
-            try:
-                token = token_header.split(" ")[1]
-                data_token = Tokens(conn.connection_db).validar(token)
-                if data_token and data_token['tipo'] == 'sessao':
-                    id_cooperativa = data_token['id_usuario']  # Assumindo que id_usuario é id_cooperativa
-            except Exception as e:
-                print(f"Erro ao validar token: {e}")
-
-        # Adicionar sinônimos da cooperativa se token válido
-        if id_cooperativa:
-            cursor = conn.connection_db.cursor(dictionary=True)
-            query_sinonimos = """
-            SELECT msb.id_material_base, msb.nome_sinonimo
-            FROM materiais_sinonimos_base msb
-            WHERE msb.id_cooperativa = %s
-            """
-            cursor.execute(query_sinonimos, (id_cooperativa,))
-            sinonimos = cursor.fetchall()
-            cursor.close()
-
-            # Criar dicionário de sinônimos por material base
-            sinonimos_dict = {}
-            for sin in sinonimos:
-                if sin['id_material_base'] not in sinonimos_dict:
-                    sinonimos_dict[sin['id_material_base']] = []
-                sinonimos_dict[sin['id_material_base']].append(sin['nome_sinonimo'])
-
-            # Adicionar sinônimos aos materiais
-            for material in materiais:
-                material['sinonimos'] = sinonimos_dict.get(material['id_material_base'], [])
-        else:
-            # Sem token, sinônimos vazios
-            for material in materiais:
-                material['sinonimos'] = []
-
+        conn.close()
         return jsonify(materiais), 200
     except Exception as e:
         print(f"Erro ao buscar materiais: {e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
         if conn:
@@ -181,6 +139,46 @@ def get_by_material(material, subtipo):
     finally:
         if conn:
             conn.close()
+
+
+@api_get.route('/avaliacoes-pendentes/<id_cooperativa>', methods=['GET'])
+def get_avaliacoes_pendentes(id_cooperativa):
+    """
+    Rota para obter as avaliações pendentes de uma cooperativa específica.
+    """
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+    print(token_header)
+
+    conn = Connection('local')
+
+    try:
+        # 1. Validar o Token e Permissão
+        db = conn.connection_db
+        data_token = Tokens(db).validar(token_header)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Buscar as avaliações pendentes
+        avaliacoes_pendentes = Avaliacoes(db).get_avaliacoes_pendentes(int(id_cooperativa))
+
+        conn.close()
+        return jsonify(avaliacoes_pendentes), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /avaliacoes-pendentes: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+
 
 @api_get.route("/vendas/<id_cooperativa>")
 def get_vendas_by_cooperativa(id_cooperativa):
