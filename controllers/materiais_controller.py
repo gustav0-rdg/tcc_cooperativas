@@ -24,8 +24,8 @@ class Materiais:
         try:
 
             # O argumento dictionary=True faz com que os resultados venham como dicionários
-            query = "SELECT id_material_base, nome FROM materiais_base"
-            cursor.execute(query)
+            query = "SELECT id_material_base, nome as nome_padrao FROM materiais_base"
+            cursor.execute(query,)
 
             # 4. Busca todos os resultados
             materiais = cursor.fetchall()
