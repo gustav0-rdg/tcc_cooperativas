@@ -16,24 +16,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const cnpj = cnpjInput.value.replace(/\D/g, ''); // Remove máscara
             const termos = document.getElementById('termos').checked;
 
-            // Validações básicas
             if (senha !== confirmaSenha) {
-                Swal.fire('Erro', 'As senhas não coincidem!', 'error');
+                Swal.fire({
+                    icon: "error",
+                    title: "Erro",
+                    text: "As senhas não coincidem",
+                    confirmButtonColor: 'var(--verde-claro-medio)'
+                });
                 return;
             }
 
             if (senha.length < 8 || senha.length > 32) {
-                Swal.fire('Erro', 'A senha deve conter entre 8 e 32 caracteres.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'A senha deve conter entre 8 e 32 caracteres.',
+                    confirmButtonColor: 'var(--verde-claro-medio)'
+                });
                 return;
             }
 
             if (!termos) {
-                Swal.fire('Atenção', 'Você deve aceitar os termos de uso para continuar.', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Você deve aceitar os termos de uso para continuar.',
+                    confirmButtonColor: 'var(--verde-claro-medio)'
+                });
                 return;
             }
 
             if (cnpj.length !== 14) {
-                Swal.fire('Erro', 'O CNPJ deve conter 14 dígitos.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'O CNPJ deve conter 14 dígitos.',
+                    confirmButtonColor: 'var(--verde-claro-medio)'
+                });
                 return;
             }
 
@@ -47,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // Faz o PRÉ-CADASTRO
                 const response = await fetch('/api/cooperativas/cadastrar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -78,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'aria-label': 'Upload do documento de comprovação'
                     },
                     confirmButtonText: 'Enviar Documento',
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: 'var(--verde-claro-medio)',
                     showCancelButton: true,
                     cancelButtonText: 'Enviar depois',
                     allowOutsideClick: false,
@@ -113,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: 'Sucesso!',
                         text: 'Arquivo enviado. Aguarde a aprovação por e-mail!',
                         icon: 'success',
-                        confirmButtonText: 'Confirmar'
+                        confirmButtonText: 'Confirmar',
+                        confirmButtonColor: 'var(--verde-claro-medio)'
                     }).then(() => {
                         window.location.href = '/login';
                     });
@@ -123,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: 'Pendente!',
                         text: 'Seu pré-cadastro está feito. Envie o documento mais tarde para aprovação!',
                         icon: 'warning',
-                        confirmButtonText: 'Entendido'
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: 'var(--verde-claro-medio)'
                     }).then(() => {
                         window.location.href = '/login';
                     });
@@ -131,29 +151,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 console.error("Erro no fetch:", error);
-                Swal.fire(
-                    'Erro no Cadastro',
-                    error.message || 'Não foi possível completar o cadastro. Tente novamente mais tarde.',
-                    'error'
-                );
+                Swal.fire({
+                    title: 'Erro no Cadastro',
+                    text: error.message || 'Não foi possível completar o cadastro. Tente novamente mais tarde.',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--verde-claro-medio)'
+                });
             }
         });
     }
 });
 
-// Mascara
+// Mascara CNPJ
+if (cnpjInput) {
+    cnpjInput.addEventListener('input', function () {
+        let value = this.value.replace(/\D/g, ""); // remove tudo que não é número
 
-cnpjInput.addEventListener('input', function () {
-    let value = this.value.replace(/\D/g, ""); // remove tudo que não é número
+        // limita a 14 números
+        if (value.length > 14) value = value.slice(0, 14);
 
-    // limita a 14 números
-    if (value.length > 14) value = value.slice(0, 14);
+        // aplica a máscara
+        value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        value = value.replace(/(\d{4})(\d)/, "$1-$2");
 
-    // aplica a máscara
-    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-    value = value.replace(/(\d{4})(\d)/, "$1-$2");
-
-    this.value = value;
-});
+        this.value = value;
+    });
+}
