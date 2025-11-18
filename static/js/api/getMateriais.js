@@ -8,7 +8,7 @@ export async function getMateriais() {
     try {
         // Faz a requisição para a rota que criamos no backend
         const response = await fetch("/get/materiais");
-
+        console.log(response);
         // Verifica se a resposta do servidor foi um sucesso (status 200-299)
         if (!response.ok) {
             console.error("Erro do servidor:", response.status, response.statusText);
