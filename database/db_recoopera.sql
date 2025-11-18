@@ -285,6 +285,28 @@ CREATE TABLE IF NOT EXISTS `avaliacoes_compradores` (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `avaliacoes_pendentes` (
+  `id_avaliacao_pendente` BIGINT unsigned AUTO_INCREMENT PRIMARY KEY,
+  `id_venda` bigint unsigned NOT NULL,
+  `id_cooperativa` bigint unsigned NOT NULL,
+  `status_avaliacao` varchar(20) NOT NULL DEFAULT 'pendente',
+  `data_criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE INDEX `uidx_id_venda` (`id_venda`),
+  INDEX `idx_cooperativa_status` (`id_cooperativa`, `status_avaliacao`),
+
+  CONSTRAINT `fk_pendentes_vendas`
+    FOREIGN KEY (`id_venda`)
+    REFERENCES `vendas` (`id_venda`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_pendentes_cooperativas`
+    FOREIGN KEY (`id_cooperativa`)
+    REFERENCES `cooperativas` (`id_cooperativa`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+
 CREATE TABLE IF NOT EXISTS `avaliacao_feedback_selecionado` (
   `id_avaliacao` BIGINT UNSIGNED NOT NULL,
   `id_feedback_tag` INT UNSIGNED NOT NULL,
@@ -650,6 +672,8 @@ GRANT SELECT, UPDATE (nome, senha_hash) ON `recoopera`.`usuarios` TO 'cooperado_
 
 GRANT EXECUTE ON PROCEDURE `recoopera`.`buscar_material_por_nome` TO 'cooperado_role';
 
+GRANT INSERT, SELECT, UPDATE, DELETE ON `recoopera`.`avaliacoes_pendentes` TO 'cooperativa_role';
+
 -- ============================================================================
 -- ÍNDICES ADICIONAIS PARA PERFORMANCE
 -- ============================================================================
@@ -663,6 +687,8 @@ CREATE INDEX idx_venda_data_comprador ON vendas(id_comprador, data_venda DESC);
 INSERT INTO `usuarios` (`nome`, `email`, `senha_hash`, `tipo`, `status`)
 VALUES
 ('Administrador Root', 'root@recoopera.com', '639e4eeb4030a3cce2f9874f7d99e724aabe569c52874b01208d642fbe068227', 'root', 'ativo');
+
+GRANT SELECT ON `recoopera`.`avaliacoes_pendentes` TO 'cooperado_role';
 
 -- Restaura as configurações originais do MySQL
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -20,25 +20,41 @@
     {% include 'includes/header.html' %}
     <div class="corpo">
         <main class="acoes">
-            <h1>Bem-vindo!</h1>
-            <p>Como podemos te ajudar?</p>
+            <div class="welcome-section">
+                <img src="/static/img/logo.png" alt="Logo Recoopera" class="logo-welcome">
+                <h1>Bem-vindo ao Recoopera!</h1>
+                <p>Escolha uma das opções abaixo para continuar</p>
+            </div>
             <section class="acoes__cooperativa">
-                
-                <div>
-                    <a href="/buscar-comprador" class="acoes__cooperativa-btn">buscar comprador</a>
-                </div>
+                <a class="acao-card" href="/buscar-comprador">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3>Buscar Comprador</h3>
+                    <p>Encontre compradores interessados nos seus materiais recicláveis.</p>
+                    <span class="acoes__cooperativa-btn">Acessar</span>
+                </a>
 
-                 <div>
-                     <a href="/pagina-informacoes" class="acoes__cooperativa-btn">pagina informacoes</a>
-                 </div>
+                <a class="acao-card" href="/pagina-informacoes">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-info-circle"></i>
+                    </div>
+                    <h3>Página de Informações</h3>
+                    <p>Veja detalhes sobre sua cooperativa e materiais disponíveis.</p>
+                    <span class="acoes__cooperativa-btn">Acessar</span>
+                </a>
 
-                 <div>
-                     <a href="/registrar-venda" class="acoes__cooperativa-btn">registrar venda</a>
-                 </div>
-
+                <a class="acao-card" href="/registrar-venda">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3>Registrar Venda</h3>
+                    <p>Registre suas vendas de materiais recicláveis de forma rápida.</p>
+                    <span class="acoes__cooperativa-btn">Acessar</span>
+                </a>
             </section>
         </main>
-    </div> 
+    </div>
     
     {% include 'includes/footer.html' %}
 </body>
