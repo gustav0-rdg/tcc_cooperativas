@@ -59,7 +59,7 @@ export async function exibirVendedores() {
             confirmButtonText: 'Buscar',
             cancelButtonText: 'Cancelar',
             background: "var(--verde-claro)",
-            confirmButtonColor: "var(--verde-escuro-medio)",
+            confirmButtonColor: "var(--verde-claro-medio)",
             cancelButtonColor: "var(--vermelho)",
             color: "var(--verde-escuro-medio)",
                       
@@ -79,7 +79,7 @@ export async function exibirVendedores() {
                         icon: "error",
                         color: "var(--verde-escuro-medio)",
                         background: "var(--verde-claro-medio)",
-                        confirmButtonColor: "var(--verde-escuro-medio)"
+                        confirmButtonColor: "var(--verde-claro-medio)"
                     });
                 }
     
@@ -91,7 +91,7 @@ export async function exibirVendedores() {
                         icon: "success",
                         color: "var(--verde-escuro-medio)",
                         background: "var(--verde-claro)",
-                        confirmButtonColor: "var(--verde-escuro-medio)"
+                        confirmButtonColor: "var(--verde-claro-medio)"
                     });
                     await renderizarListaDeVendedores();
                 }

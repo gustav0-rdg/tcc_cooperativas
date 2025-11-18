@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 title: 'Erro no Login!',
                 text: error.message, 
                 icon: 'error',
-                confirmButtonColor: '#d33' 
+        confirmButtonColor: 'var(--verde-claro-medio)'
             });
         }
     });

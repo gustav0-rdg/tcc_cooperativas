@@ -16,6 +16,6 @@ termos.addEventListener('click', () =>{
         `,
         
         confirmButtonText: 'Entendido',
-        confirmButtonColor: '#28a745' // Uma cor verde (opcional)
+        confirmButtonColor: 'var(--verde-claro-medio)'
     });
 })

@@ -11,7 +11,7 @@ def pagina_inicial():
 
 @pages.route("/cadastro", methods=["GET"])
 def pagina_cadastro():
-    return render_template("cadastro.html")
+    return render_template("cadastro-cooperativa.html")
 
 @pages.route("/registrar_cooperativa", methods=["POST"])
 def formulario_cadastro():
