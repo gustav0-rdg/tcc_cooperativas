@@ -40,8 +40,6 @@ async function carregarCompradores(filtros = {}) {
 
         const url = '/get/compradores' + (params.toString() ? '?' + params.toString() : '');
         
-        console.log('Buscando compradores com URL:', url);
-
         const response = await fetch(url, {
             headers: { 
                 'Authorization': token 
@@ -98,14 +96,26 @@ async function carregarCompradores(filtros = {}) {
     }
 }
 
+function safeFormatarCNPJ(cnpj) {
+    try {
+        const s = String(cnpj || '').replace(/\D/g, '');
+        if (s.length !== 14) return String(cnpj || '');
+        return s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    } catch { return String(cnpj || ''); }
+}
+
+function toCapitalize(s) {
+    if (!s) return '';
+    s = String(s);
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 /**
  * Cria o elemento HTML (card) para um comprador
  * @param {object} comprador - O objeto do comprador vindo da API
  * @returns {HTMLElement} O elemento <div> do card
  */
 function criarCardComprador(comprador) {
-
-    console.log(comprador);
 
     const col = document.createElement('div');
     col.className = 'col-12 col-md-6 col-lg-4';
@@ -126,23 +136,32 @@ function criarCardComprador(comprador) {
 
     // Formata o preço, se existir
     let precoHtml = '<p class="card-no-price">Nenhum preço registrado recentemente.</p>';
+
     if (comprador.preco_maximo && comprador.preco_minimo) 
     {
         const precoMin = parseFloat(comprador.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const precoMax = parseFloat(comprador.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const precoMedio = parseFloat(comprador.preco_medio).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
         let faixaPreco = `${precoMin} /Kg`;
         if (precoMin !== precoMax) {
             faixaPreco = `${precoMin} a ${precoMax} /Kg`;
         }
         precoHtml = `
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="material-icons">near_me</span>
-                    <span class="card-price-info">${precoMin}</span>
+            <div>
+                <div class="d-flex justify-content-between card-min-max-price">
+                    <div class="card-price-info card-max-price">
+                        <span class="material-icons">north</span>
+                        <span>${precoMin} /Kg</span>
+                    </div>
+                    <div class="card-price-info card-min-price">
+                        <span class="material-icons">south</span>
+                        <span>${precoMax} /Kg</span>
+                    </div>
                 </div>
-                <div>
-                    <span class="material-icons">near_me</span>
-                    <span class="card-price-info">${precoMax}</span>
+                <div class="d-flex flex-column text-center card-avg-price mt-3 card-price-info">
+                    <span class="avg-price-label">Preço Médio</span>
+                    <span>${precoMedio} /Kg</span>
                 </div>
             </div>
         `;
@@ -152,6 +171,7 @@ function criarCardComprador(comprador) {
         <div class="card-header">
             <div>
                 <h3 class="card-title">${comprador.razao_social}</h3>
+                <span class="card-cnpj">${safeFormatarCNPJ(comprador.cnpj)}</span>
                 <div class="card-location">
                     <span class="material-icons">place</span>
                     ${comprador.cidade || 'Não informado'}, ${comprador.estado || 'NI'}
@@ -202,7 +222,7 @@ function gerarEstrelas(score) {
             estrelas += vazia; // Estrela vazia
         }
     }
-    return `<span>${scoreNum.toFixed(1)}</span> ${estrelas}`;
+    return `<span class="nota-comprador">${scoreNum.toFixed(1)}</span> ${estrelas}`;
 }
 
 /**
@@ -279,8 +299,10 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
     let materiaisHtml = '';
     if (detalhes.materiais_comprados && detalhes.materiais_comprados.length > 0) {
         materiaisHtml = detalhes.materiais_comprados.map(mat => {
-            const precoMin = parseFloat(mat.preco_maximo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const precoMax = parseFloat(mat.preco_minimo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const precoMin = parseFloat(mat.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoMax = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
             let faixaPreco = `${precoMin} /Kg`;
             // Só mostra faixa (Ex: R$1,50 a R$2,00) se os preços forem diferentes
             if (precoMin !== precoMax) {
@@ -293,6 +315,7 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
                     <span class="material-price-range">${faixaPreco}</span>
                 </li>
             `;
+
         }).join('');
     } else {
         materiaisHtml = '<p>Este comprador ainda não registrou compras de materiais específicos.</p>';
@@ -423,105 +446,150 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
     `;
 }
 
+function configurarFiltros() {
+
+    const btnAplicarFiltros = document.getElementById('apply-filters');
+
+    // Botões de Ação
+    btnAplicarFiltros.addEventListener('click', async function () {
+
+        await aplicarFiltros();
+        buscarNomeCNPJ();
+
+    });
+
+    document.getElementById('clear-filters').addEventListener('click', limparFiltros);
+
+    const searchInput = document.getElementById('search-input');
+
+    function buscarNomeCNPJ ()
+    {
+        if (searchInput.value.trim() == '')
+        {
+            limparFiltros();
+            return
+        }
+
+        filtrarCompradoresLocal(searchInput.value);
+    }
+
+    // Input de Busca por Nome (Enter)
+    searchInput.addEventListener('keypress', function (e) {
+
+        if (e.key == 'Enter') buscarNomeCNPJ();
+
+    });
+
+    // --- Lógica do Slider de Raio (Mantida da sua versão anterior) ---
+    const enableRadius = document.getElementById('enable-radius-filter');
+    const radiusControls = document.getElementById('radius-controls');
+    const radiusInput = document.getElementById('radius-filter');
+    const radiusValue = document.getElementById('radius-value');
+
+    enableRadius.addEventListener('change', () => {
+        radiusControls.disabled = !enableRadius.checked;
+        radiusValue.textContent = enableRadius.checked ? `${radiusInput.value} km` : '...';
+    });
+
+    radiusInput.addEventListener('input', (e) => {
+        radiusValue.textContent = `${e.target.value} km`;
+    });
+
+    // --- NOVA LÓGICA: Cascata de Material -> Subtipo ---
+    const materialSelect = document.getElementById('material-filter');
+    
+    materialSelect.addEventListener('change', (e) => {
+        const idMaterialPai = e.target.value;
+        carregarSubtipos(idMaterialPai);
+    });
+}
+
 /**
- * Carrega materiais para o filtro de busca
+ * Carrega os Tipos de Materiais (Categorias Principais)
  */
 async function carregarMateriaisFiltro() {
-    const token = localStorage.getItem('session_token');
-    const materialFilter = document.getElementById('material-filter');
-
-    if (!token) return;
-
     try {
-        const response_materiais = await fetch('/get/materiais', {
-            headers: { 
-                'Authorization': token 
-            }
+        // Ajuste a rota se necessário para pegar apenas as categorias pais
+        const response = await fetch('/get/materiais'); 
+        const materiais = await response.json();
+
+        const select = document.getElementById('material-filter');
+        // Mantém a opção padrão
+        select.innerHTML = '<option value="">Todos os tipos</option>';
+
+        materiais.forEach(mat => {
+            const option = document.createElement('option');
+            option.value = mat.id_material_base;
+            option.textContent = mat.nome_padrao;
+            select.appendChild(option);
         });
-
-        const materiais = await response_materiais.json();
-
-        if (response_materiais.ok && materiais.length > 0) {
-            // Processar cada material
-            for (const material of materiais) {
-                // Criar optgroup para o material base
-                const optgroupMaterial = document.createElement('optgroup');
-                optgroupMaterial.setAttribute('label', material.nome);
-
-                // Adicionar opção "Todos de [Material]"
-                const optionTodos = document.createElement('option');
-                optionTodos.value = material.id_material_base;
-                optionTodos.textContent = `✓ Todos de ${material.nome}`;
-                optionTodos.className = 'material-all-option';
-                optgroupMaterial.appendChild(optionTodos);
-
-                // Buscar subtipos
-                const response_subtipos = await fetch(`/get/subtipos/${material.id_material_base}`, {
-                    headers: { 
-                        'Authorization': token 
-                    }
-                });
-
-                const subtipos = await response_subtipos.json();
-                
-                // Adicionar cada subtipo
-                subtipos.forEach(subtipo => {
-                    const optionSubtipo = document.createElement('option');
-                    optionSubtipo.value = material.id_material_base; // Usa o ID do material base
-                    optionSubtipo.textContent = `  ${subtipo.descricao}`;
-                    optionSubtipo.className = 'material-subtipo-option';
-                    optgroupMaterial.appendChild(optionSubtipo);
-                });
-
-                materialFilter.appendChild(optgroupMaterial);
-            }
-        }
-    } catch (err) {
-        console.error('Erro ao carregar materiais:', err);
+    } catch (error) {
+        console.error('Erro ao carregar materiais:', error);
     }
 }
 
 /**
- * Configura os eventos dos filtros
+ * Carrega os Subtipos baseado no Material Pai selecionado
+ * @param {string} idMaterialPai 
  */
-function configurarFiltros() {
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const searchInput = document.getElementById('search-input');
-    const radiusFilter = document.getElementById('radius-filter');
-    const radiusValue = document.getElementById('radius-value');
+async function carregarSubtipos(idMaterialPai) {
+    const subtipoSelect = document.getElementById('subtipo-filter');
+    
+    // Resetar o select de subtipos
+    subtipoSelect.innerHTML = '<option value="">Todos os subtipos</option>';
+    
+    if (!idMaterialPai) {
+        subtipoSelect.disabled = true;
+        subtipoSelect.innerHTML = '<option value="">Selecione um tipo primeiro</option>';
+        return;
+    }
 
-    applyFiltersBtn.addEventListener('click', aplicarFiltros);
-    clearFiltersBtn.addEventListener('click', limparFiltros);
+    try {
+        subtipoSelect.disabled = true; // Trava enquanto carrega
+        
+        const response = await fetch(`/get/subtipos/${idMaterialPai}`);
+        
+        if (!response.ok) throw new Error('Falha ao buscar subtipos');
+        
+        const subtipos = await response.json();
 
-    // Atualiza o valor do raio em tempo real
-    radiusFilter.addEventListener('input', (e) => {
-        radiusValue.textContent = e.target.value;
-    });
+        subtipos.forEach(sub => {
+            console.log(sub)
+            const option = document.createElement('option');
+            option.value = sub.id_material_catalogo; 
+            option.textContent = sub.nome_especifico;
+            subtipoSelect.appendChild(option);
+        });
 
-    // Busca em tempo real no campo de texto (filtro local)
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        filtrarCompradoresLocal(query);
-    });
+        subtipoSelect.disabled = false; // Destrava após carregar
+
+    } catch (error) {
+        console.error('Erro ao carregar subtipos:', error);
+        subtipoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+    }
 }
 
 /**
- * Aplica os filtros selecionados
+ * Aplica os filtros selecionados e chama a API
  */
 async function aplicarFiltros() {
     const material = document.getElementById('material-filter').value;
+    const subtipo = document.getElementById('subtipo-filter').value; // NOVO
     const estado = document.getElementById('estado-filter').value;
-    const raio = document.getElementById('radius-filter').value;
+    
+    // Lógica do Raio
+    const enableRadius = document.getElementById('enable-radius-filter');
+    const raio = enableRadius.checked ? document.getElementById('radius-filter').value : null;
 
     const filtros = {};
+    
+    // Se tiver subtipo, ele é mais específico, então ele que deve prevalecer ou ser enviado junto
     if (material) filtros.material = material;
+    if (subtipo) filtros.subtipo = subtipo; // Envia o subtipo para a API
     if (estado) filtros.estado = estado;
     if (raio) filtros.raio = parseFloat(raio);
 
-    console.log('Aplicando filtros:', filtros);
-
-    // Recarregar compradores com filtros aplicados
+    console.log("Filtros aplicados:", filtros); // Para debug
     await carregarCompradores(filtros);
 }
 
@@ -530,13 +598,28 @@ async function aplicarFiltros() {
  */
 function limparFiltros() {
     document.getElementById('material-filter').value = '';
+    
+    // Limpa e desabilita o subtipo
+    const subtipoSelect = document.getElementById('subtipo-filter');
+    subtipoSelect.value = '';
+    subtipoSelect.innerHTML = '<option value="">Selecione um tipo primeiro</option>';
+    subtipoSelect.disabled = true;
+
     document.getElementById('estado-filter').value = '';
     document.getElementById('search-input').value = '';
-    document.getElementById('radius-filter').value = '100';
-    document.getElementById('radius-value').textContent = '100';
+    
+    // Reseta o raio
+    document.getElementById('enable-radius-filter').checked = false;
+    document.getElementById('radius-controls').disabled = true;
+    document.getElementById('radius-value').textContent = '...';
 
-    // Recarrega todos os compradores
+    // Recarrega todos os compradores (sem filtros)
     carregarCompradores({});
+}
+
+function desformatarCNPJ(cnpj) 
+{
+    return cnpj.replace(/[^\d]+/g, '');
 }
 
 /**
@@ -548,7 +631,8 @@ function filtrarCompradoresLocal(query) {
 
     cards.forEach(card => {
         const nome = card.querySelector('.card-title').textContent.toLowerCase();
-        const shouldShow = nome.includes(query);
+        const cnpj = card.querySelector('.card-cnpj').textContent;
+        const shouldShow = nome.includes(query.toLowerCase()) || desformatarCNPJ(cnpj).includes(query) || cnpj.includes(query);
         card.closest('.col-12').style.display = shouldShow ? '' : 'none';
     });
 }

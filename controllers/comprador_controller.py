@@ -106,47 +106,87 @@ class Compradores:
         finally:
             cursor.close()
 
-    def get_all(self, user_lat:float, user_lon:float) -> dict:
+    def get_all(self, user_lat:float, user_lon:float, material_id=None, estado=None, raio_km=None) -> list:
 
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
 
-            cursor.execute(
-
-                """
+            query = """
                 SELECT
-                    id_comprador,
-                    razao_social, 
-                    cnpj, 
-                    email, 
-                    telefone, 
-                    endereco, 
-                    cidade, 
-                    estado, 
-                    score_confianca, 
-                    latitude, 
-                    longitude,
-                    score_confianca,
-                    numero_avaliacoes,
-                    data_cadastro                    
-                FROM compradores;
-                """
+                    c.id_comprador,
+                    c.razao_social, 
+                    c.cnpj, 
+                    c.email, 
+                    c.telefone, 
+                    c.endereco, 
+                    c.cidade, 
+                    c.estado, 
+                    c.score_confianca, 
+                    c.latitude, 
+                    c.longitude,
+                    c.numero_avaliacoes,
+                    c.data_cadastro,
+                    MAX(vi.preco_por_kg) AS `preco_maximo`,
+                    MIN(vi.preco_por_kg) AS `preco_minimo`,
+                    AVG(vi.preco_por_kg) AS `preco_medio`
+                FROM compradores c
+                LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
+                LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
+            """
 
-            )
+            params = []
+            where_clauses = []
 
-            dados = cursor.fetchall()
+            # Filtro por material (se comprou esse material)
+
+            if material_id:
+
+                where_clauses.append("LIKE vi.id_material_base = %s")
+                params.append(material_id)
+
+            # Filtro por estado
+
+            if estado:
+
+                where_clauses.append("c.estado = %s")
+                params.append(estado)
+
+            # Adiciona WHERE se houver filtros
+
+            if where_clauses:
+
+                query += " WHERE " + " AND ".join(where_clauses)
+
+            query += """
+                GROUP BY 
+                    c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
+                    c.endereco, c.cidade, c.estado, c.score_confianca, 
+                    c.latitude, c.longitude, c.numero_avaliacoes, c.data_cadastro
+            """
+
+            query += " ORDER BY c.score_confianca DESC;"
+
+            cursor.execute(query, params)
+
+            compradores = cursor.fetchall()
+            compradores_filtrados = []
 
             # Para cada comprador, calcular a distância até o usuário
             if user_lat != None and user_lon != None:
-                for comprador in dados:
+
+                for comprador in compradores:
 
                     # Calculando a distância usando a função Haversine
 
                     distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
-                    comprador['distancia'] = distancia
+                    comprador['distancia'] = round(distancia, 2)
 
-            return dados
+                    if raio_km is None or distancia <= raio_km:
+                        compradores_filtrados.append(comprador)
+
+            compradores_filtrados.sort(key=lambda x: x['distancia'])
+            return compradores_filtrados
 
         except Exception as e:
 

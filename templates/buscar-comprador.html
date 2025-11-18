@@ -23,25 +23,32 @@
     <main class="container my-4">
         
         <section class="page-header mb-4">
-            <h1 class="page-title">Compradores em Destaque</h1>
-            <p class="page-subtitle">Veja os compradores com as melhores avaliações da plataforma.</p>
+            <h1 class="page-title">Compradores</h1>
+            <p class="page-subtitle"></p>
         </section>
 
         <!-- Filtros de Busca -->
         <section class="filters-section mb-4">
             <div class="mb-4">
                 <label for="search-input" class="form-label">Buscar por nome ou CNPJ</label>
-                <input type="text" id="search-input" class="form-control" placeholder="Digite o nome do comprador">
+                <input type="text" id="search-input" class="form-control" placeholder="Nome do comprador ou CNPJ">
             </div>
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="material-filter" class="form-label">Material</label>
                     <select id="material-filter" class="form-select">
                         <option value="">Todos os materiais</option>
                         <!-- Opções serão carregadas dinamicamente -->
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label for="subtipo-filter" class="form-label">Subtipos</label>
+                    <select id="subtipo-filter" class="form-select">
+                        <option value="">Todos os subtipos</option>
+                        <!-- Opções serão carregadas dinamicamente -->
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label for="estado-filter" class="form-label">Estado</label>
                     <select id="estado-filter" class="form-select">
                         <option value="">Todos os estados</option>
@@ -74,22 +81,25 @@
                         <option value="TO">Tocantins</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label for="radius-filter" class="form-label">Raio de Busca</label>
-                    <input type="range" id="radius-filter" class="form-range" min="10" max="500" step="10" value="100">
-                    <div class="d-flex justify-content-between mt-1">
-                        <small class="text-muted">10 km</small>
-                        <small class="text-muted">500 km</small>
+                <div class="col-md-3">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="enable-radius-filter">
+                        <label class="form-check-label" for="enable-radius-filter">Filtrar por Raio</label>
                     </div>
-                    <div class="mt-2 text-center">
-                        <strong><span id="radius-value" class="text-success">100</span> km</strong>
-                    </div>
+                    <fieldset id="radius-controls" disabled>
+                        <input type="range" id="radius-filter" class="form-range" min="50" max="500" step="1" value="275">
+                        <div class="d-flex justify-content-between mt-1">
+                            <span class="small text-muted">50 km</span>
+                            <span id="radius-value" class="fw-bold text-success">275 km</span>
+                            <span class="small text-muted">500 km</span>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-12">
                     <button id="apply-filters" class="btn btn-primary me-2">Aplicar Filtros</button>
-                    <button id="clear-filters" class="btn btn-secondary">Limpar Filtros</button>
+                    <button id="clear-filters" class="btn">Limpar Filtros</button>
                 </div>
             </div>
         </section>

@@ -72,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const idCooperativa = data.id_cooperativa;
 
+                const formData = new FormData();
+                    formData.append('documento', documentoATA);
+                    formData.append('id_cooperativa', idCooperativa);
+
                 const fileResponse = await fetch('/api/cooperativas/enviar-documento', {
                     method: 'POST',
                     body: formData
