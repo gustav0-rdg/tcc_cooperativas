@@ -27,7 +27,6 @@ def arquivo_permitido(nome_arquivo):
     return '.' in nome_arquivo and \
            nome_arquivo.rsplit('.', 1)[1].lower() in EXTENSOES_PERMITIDAS # Verifica se a extensão do arquivo está na constante
 
-
 @api_cooperativas.route('/cadastrar', methods=['POST'])
 def cadastrar ():
 
@@ -35,7 +34,7 @@ def cadastrar ():
 
     try:
 
-        data_cadastro = request.get_json()
+        data_cadastro = request.form
         campos_obrigatorios = ['nome', 'email', 'senha', 'cnpj']
 
         # 400 - Campos obrigatórios incompletos
@@ -48,6 +47,21 @@ def cadastrar ():
         if len(data_cadastro['senha']) < 8:
             return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
         
+        #region Validação Arquivo ATA
+
+        if 'documento' not in request.files:
+             return jsonify({'error': 'O arquivo do documento ATA é obrigatório.'}), 400
+
+        arquivo = request.files['documento']
+
+        if arquivo.filename == '':
+            return jsonify({'error': 'Nome do arquivo vazio.'}), 400
+
+        if not arquivo.filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'Tipo de arquivo não permitido.'}), 400
+
+        #endregion
+
         # 400 - CNPJ Inválido
 
         if CNPJ.validar(data_cadastro['cnpj']):
@@ -140,6 +154,23 @@ def cadastrar ():
                 company = dados_cnpj.get('company', {})
                 phones = dados_cnpj.get('phones', [{}]) # Telefones (pode haver mais de 1 no JSON)
 
+                #region Upload Documento ATA
+
+                filename_base = secure_filename(f"doc_coop_{id_usuario_criado}")
+                extension = arquivo.filename.rsplit('.', 1)[1].lower()
+                filename = f"{filename_base}.{extension}"
+                
+                # Cria a pasta de uploads se ela não existir
+                os.makedirs(PASTA_UPLOAD, exist_ok=True)
+                
+                filepath = os.path.join(PASTA_UPLOAD, filename)
+                arquivo.save(filepath)
+                
+                # Salva o caminho no banco de dados
+                arquivo_url = f"uploads/documentos/{filename}"
+
+                #endregion
+
                 dados_criar_coop = {
                     "id_usuario": id_usuario_criado,
                     "cnpj": data_cadastro['cnpj'],
@@ -152,7 +183,8 @@ def cadastrar ():
                     "distrito": addr.get('district', ''),
                     "cidade": addr.get('city', ''),
                     "estado": addr.get('state', ''),
-                    "cep": addr.get('zip', '')
+                    "cep": addr.get('zip', ''),
+                    "arquivo_url": arquivo_url
                 }
 
                 id_cooperativa_criada = Cooperativa(conn.connection_db).create(**dados_criar_coop)

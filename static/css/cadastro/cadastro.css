@@ -1,18 +1,65 @@
-.card{
-    background-color: var(--branco);
+/* =========================
+   Estilos Gerais e Reset
+   ========================= */
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--verde-escuro, #1b4d3e); /* Fallback de cor caso a var falhe */
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden; /* Evita scroll horizontal indesejado */
+}
+
+body::before {
+    content: '';
+    position: fixed; /* Fixado para não rolar com a página */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../imgs/img-textura.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.1;
+    z-index: -1;
+    pointer-events: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* =========================
+   Componentes do Card
+   ========================= */
+.card {
+    background-color: var(--branco, #ffffff);
     border: none !important;
-    margin: 30px 0 !important;
+    border-radius: 10px !important; /* Arredondamento mais moderno */
 }
 
-.card h1{
+.card h1 {
+    font-size: 34px !important;
     font-weight: 700;
-    color: var(--verde-escuro);
-   
+    color: var(--verde-escuro-medio);
 }
 
+/* =========================
+   Formulário
+   ========================= */
 label {
     color: var(--verde-escuro-medio);
     font-weight: 700;
+    margin-bottom: 5px;
+}
+
+input.form-control {
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding-left: 15px;
 }
 
 input:focus {
@@ -21,52 +68,181 @@ input:focus {
     box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
 }
 
-input::placeholder{
+input::placeholder {
     color: var(--verde-escuro-medio) !important;
     opacity: 0.8 !important;
+    font-size: 0.9rem;
 }
 
-.btn {
+.descricao-ata {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: block;
+}
+
+button[type='submit']
+{
+    display: block; 
+    text-align: center; 
     background-color: var(--verde-escuro-medio) !important;
+    color: var(--verde-claro) !important; 
+    border: none !important;
+    text-transform: uppercase;
+    font-weight: 700  !important;
+    font-size: 1.1rem !important; 
+    padding: 10px 0; 
+    border-radius: 5px;
+    transition: background-color 0.3s !important;
+}
+
+button[type='submit']:hover {
+    background-color: var(--verde-escuro) !important; 
+    color: var(--verde-claro) !important; 
+    text-decoration: none !important; 
+}
+
+.form-check-input
+{
+    cursor: pointer !important;
+}
+
+input[type="file"].form-control 
+{
+    padding: 0 !important;
+    line-height: 50px; /* Alinha o texto do nome do arquivo verticalmente */
+    height: 50px;
+}
+
+/* Estiliza o botão "Escolher arquivo" interno */
+input[type="file"]::file-selector-button 
+{
+    border: none;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    height: 100%; /* Ocupa toda a altura do input */
+    padding: 0 20px !important;
+    margin-right: 15px; /* Espaço entre o botão e o nome do arquivo */
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+/* Efeito Hover no botão do arquivo */
+input[type="file"]::file-selector-button:hover 
+{
+    background-color: var(--verde-escuro, #1b4d3e);
+}
+
+/* Corrige a cor do texto do nome do arquivo (caso fique cinza demais) */
+input[type="file"] 
+{
+    color: var(--verde-escuro-medio);
+}
+
+
+/* =========================
+   Botões e Links
+   ========================= */
+.btn-primary {
+    background-color: var(--verde-escuro-medio, #2c7a62) !important;
     border: 0;
     text-transform: uppercase;
     font-weight: 700;
     height: 50px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-.btn:hover{
-    background-color: var(--verde-escuro) !important;
+.btn-primary:hover {
+    background-color: var(--verde-escuro, #1b4d3e) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-.link{
+.btn-voltar {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    color: var(--verde-escuro-medio, #2c7a62);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.btn-voltar:hover {
+    color: var(--verde-escuro, #1b4d3e);
+}
+
+.link {
+    border: 0;
+    background: none;
+    padding: 0;
+    text-decoration: underline;
+    color: var(--verde-escuro-medio);
+}
+
+.link:hover {
     color: var(--verde-escuro);
     text-decoration: underline;
 }
 
-p {
-    color: var(--verde-escuro-medio);
+.form-inputs 
+{
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Espaço entre o bloco pessoal e o bloco da coop */
 }
 
-.descricao-ata
+.form-inputs > section:first-child 
 {
-    font-size: 14px;
-    padding-bottom: 10px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid rgba(33, 37, 41, 0.1);
 }
 
-@media (min-width: 992px) 
+@media (max-width: 576px) {
+    .card {
+        margin: 0 10px !important; /* Margem lateral para telas muito pequenas */
+    }
+
+    .card h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Ajuste do botão voltar para mobile */
+    .btn-voltar {
+        font-size: 0.9rem;
+    }
+    
+    input {
+        font-size: 16px !important;
+    }
+
+    button[type='submit'] 
+    { 
+        width: 100% !important; 
+    }
+}
+
+@media (min-width: 972px) 
 {
-    .card 
+    .form-inputs 
     {
-        max-width: 400px !important;
+        flex-direction: row;
+        gap: 50px;
     }
 
-    .card 
-    {  
-        max-width: 600px !important;
+    .form-inputs > section 
+    {
+        flex: 1;
     }
 
-    .card 
+    .form-inputs > section:first-child 
     {
-        max-width: 750px !important;
+        padding-bottom: 0;
+        border-bottom: none;
+        
+        /* Adiciona a borda na direita para separar as colunas */
+        border-right: 2px solid rgba(33, 37, 41, 0.1);
+        padding-right: 50px; /* Espaço entre o texto e a linha */
     }
 }

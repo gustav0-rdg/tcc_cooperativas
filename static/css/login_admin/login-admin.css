@@ -64,3 +64,19 @@ input::placeholder{
 .link_a:hover {
     color: var(--verde-escuro);
 }
+
+.btn-voltar {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    color: var(--verde-escuro-medio, #2c7a62);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.btn-voltar:hover {
+    color: var(--verde-escuro, #1b4d3e);
+}
