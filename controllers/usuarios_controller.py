@@ -99,11 +99,8 @@ class Usuarios:
             cursor.execute(query, tuple(params))
             usuario_data = cursor.fetchone()
 
-            if not usuario_data:
+            if not usuario_data or usuario_data['senha_hash'] != senha_hash:
                 return (None, "IDENTIFICADOR_NAO_ENCONTRADO")
-
-            if usuario_data['senha_hash'] != senha_hash:
-                return (None, "SENHA_INVALIDA")
 
             if usuario_data['status'] != 'ativo':
                 return (None, f"USUARIO_{usuario_data['status'].upper()}")

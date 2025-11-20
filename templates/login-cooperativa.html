@@ -1,9 +1,10 @@
-<!DOCTYPE html> 
-<html lang="pt-br"> 
+<!DOCTYPE html>
+<html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title> RECOOPERA | Login Cooperativa</title> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> RECOOPERA | Login Cooperativa</title>
 
   <!-- Links para os estilos CSS personalizados -->
   <link rel="stylesheet" href="../static/css/root-de-cores.css"> <!-- Define as cores padrões do projeto -->
@@ -19,58 +20,62 @@
 
   <script src="../static/js/loginCooperativas.js" type="module" defer></script>
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 
 <body>
-  <section class="conteudo">
+  <section class="login-section d-flex justify-content-center align-items-center vh-100">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+          <div class="card shadow-lg login-card container__form">
 
-    <div class="container d-flex justify-content-center align-items-center vh-100 vw-100">
+            <header class="card-header pt-3 pb-3">
+              <button onclick="window.location.href='/';" class="btn-voltar">
+                <span class="material-symbols-outlined">
+                  arrow_back
+                </span>
+                <span>Voltar</span>
+              </button>
+            </header>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg">
-          <header class="card-header pt-3 pb-3">
-            <button onclick="window.location.href='/';" class="btn-voltar">
-              <span class="material-symbols-outlined">
-                arrow_back
-              </span>
-              <span>Voltar</span>
-            </button>
-          </header>
-          <div class="shadow-lg p-4">
-            <h1 class="d-flex align-items-center justify-content-center gap-2 mb-4 titulo">
-              <span class="material-symbols-outlined">
-                apartment
-              </span>
-              Cooperativa
-            </h1>
-            <form action="/api/usuarios/login" method="post" id="form-login-cooperativas">
-              <div class="mb-3 mt-3">
-                <div class="mb-4">
-                  <label for="cnpj" class="form-label">CNPJ</label>
-                  <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000.000/0000-00" class="form-control form-input" required>
+            <div class="shadow-lg p-4">
+              <h1 class="d-flex align-items-center justify-content-center gap-2 mb-4 titulo">
+                <span class="material-symbols-outlined">
+                  apartment
+                </span>
+                Cooperativa
+              </h1>
+
+              <form id="form-login">
+                <div class="mb-3 mt-3">
+                  <div class="mb-4">
+                    <label for="cnpj" class="form-label">CNPJ</label>
+                    <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000.000/0000-00"
+                      class="form-control form-input" required>
+                  </div>
+
+                  <div class="mb-5">
+                    <label for="senha" class="form-label">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="Insira sua senha"
+                      class="form-control mb-2" required>
+                    <a href="/recuperar-senha" class="link_a">Esqueceu sua senha?</a>
+                  </div>
                 </div>
-        
-                <div class="mb-5">
-                  <label for="senha" class="form-label">Senha</label>
-                  <input type="password" id="senha" name="senha" placeholder="Insira sua senha" class="form-control mb-2" required>
-                  <a href="/recuperar-senha" class="link_a">Esqueceu sua senha?</a>
+
+                <div class="w-100 d-flex justify-content-center">
+                  <button type="submit" class="btn-login w-75">Entrar</button>
                 </div>
-              </div>
-        
-              <div class="w-100 d-flex justify-content-center">
-                <button type="submit" class="btn-login w-75">Entrar</button>
-              </div>
-              <p class="text-center mt-4">
-                Não tem cadastro? <a href="/cadastro" class="link_a"> Clique aqui </a>
-              </p>
-            </form>
+                <p class="text-center mt-4">
+                  Não tem cadastro? <a href="/cadastro" class="link_a"> Clique aqui </a>
+                </p>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
   </section>
 </body>
 
-</html> 
+</html>
