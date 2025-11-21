@@ -470,12 +470,11 @@ class Cooperativa:
                 (id_cooperativa, arquivo_url)
             )
 
-            self.connection_db.commit()
             # Retorna o ID da cooperativa que acabou de ser inserida
             return id_cooperativa
 
         except Exception as e:
-            
+
             print(f'Erro - Cooperativa "create": {e}')
             return False
         

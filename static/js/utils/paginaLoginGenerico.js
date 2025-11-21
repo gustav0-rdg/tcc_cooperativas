@@ -13,7 +13,6 @@ export class PaginaLogin
         this.formLogin = formLogin;
         this.submitButton = formLogin.querySelector('button[type="submit"]');
         this.errorEl = document.getElementById('login-error-msg');
-
     }
 
     limparErros () 
