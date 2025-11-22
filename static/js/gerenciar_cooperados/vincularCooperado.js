@@ -19,7 +19,7 @@ btnVinculo.addEventListener('click', () => {
     showCancelButton: true,
     confirmButtonText: 'Cadastrar',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#2e7d32',
+        confirmButtonColor: 'var(--verde-claro-medio)',
     cancelButtonColor: '#d33',
     background: '#f9f9f9',
     customClass: {

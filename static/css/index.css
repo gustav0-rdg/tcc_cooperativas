@@ -1,59 +1,135 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* =========================================
+   Estilos do Card e Layout
+   ========================================= */
 
-* {
-    font-family: inter;
+/* Garante que o card tenha um fundo branco sólido e bordas modernas */
+.card-menu {
+    background-color: var(--branco, #ffffff);
+    border-radius: 16px !important; /* Mais arredondado = mais moderno */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important; /* Sombra difusa e elegante */
+    overflow: hidden; /* Garante que nada saia das bordas arredondadas */
 }
 
-.conteudo {
-    width: 100vw;
-    height: 100vh;
+/* Área do Logo */
+.logo-img {
+    width: 90px; /* Um pouco maior para dar presença */
+    height: auto;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.50)) !important;
 }
 
-.card__container {
-    background-color: var(--verde-claro-medio);
-    border: none !important;
-    border-radius: 10px;
-    max-width: 900px;
-    width: 80%;
-    height: 80%;
-    box-shadow: rgba(0, 54, 7, 0.25) 0px 54px 55px, rgba(0, 54, 7, 0.25) 0px -12px 30px, rgba(0, 54, 7, 0.25) 0px 4px 6px, rgba(0, 65, 9, 0.25) 0px 12px 13px, rgba(0, 75, 10, 0.25) 0px -3px 5px;    z-index: 0;
-    
+.card-menu:hover .logo-img {
+    transform: scale(1.05); /* Efeito sutil de zoom no logo ao passar o mouse no card */
 }
 
-.card__container>h3 {
-    font-size: 48px;
+/* Estilização do Slogan */
+.slogan {
+    color: var(--verde-escuro-medio, #3C671D);
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 400;
+    margin: 0;
+}
+
+.slogan strong {
     font-weight: 700;
-    color: var(--verde-escuro);
+    color: var(--verde-escuro, #1C360A);
 }
 
-.botao__container {
-    background-color: var(--verde-escuro-medio);
-    color: var(--branco);
-    border-radius: 15px;
-    height: 65px;
+/* =========================================
+   Botões do Menu
+   ========================================= */
+
+.btn-menu {
+    width: 75%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    height: 60px;
+    border-radius: 12px; /* Combina com o card */
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição suave */
+    position: relative;
+    overflow: hidden;
 }
 
-.botao__container:hover {
-    background-color: var(--verde-escuro);
-    color: var(--verde-claro);
+/* Ícones */
+.btn-menu .material-symbols-outlined 
+{
+    font-size: 1.6rem;
+    margin-right: 16px;
+    width: 32px;
+    text-align: center;
 }
 
-.botao__container:hover .botao__icone {
-    color: var(--verde-claro);
+/* --- Botão Padrão (Verde) --- */
+.btn-padrao {
+    background-color: var(--verde-escuro-medio, #3C671D);
+    color: var(--verde-claro, #F6FBF2);
+    border: 1px solid transparent;
 }
 
-.botao__icone {
-    color: var(--verde-claro);
+.btn-padrao:hover {
+    background-color: var(--verde-escuro, #1C360A);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(28, 54, 10, 0.3);
 }
 
-@media (min-width: 768px) {
-    .card__container>h3 {
-        width: 100%;
-        font-size: 64px;
+/* --- Botão Destaque (Amarelo - Cooperado) --- */
+.btn-destaque {
+    background-color: var(--amarelo) !important;
+    color: var(--preto, #000000) !important;
+    font-weight: 700; /* Extra bold para o destaque */
+    border: 1px solid transparent;
+}
+
+.btn-destaque:hover {
+    /* Escurece levemente o amarelo usando filtro para não precisar achar o hex */
+    filter: brightness(0.95); 
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(251, 255, 10, 0.4);
+}
+
+/* =========================================
+   Animação de Entrada
+   ========================================= */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 40px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.fade-in-up {
+    animation-name: fadeInUp;
+    animation-duration: 0.8s;
+    animation-fill-mode: both;
+}
+
+/* =========================================
+   Responsividade
+   ========================================= */
+@media (max-width: 576px) {
+    .logo-img {
+        width: 75px;
     }
 
-    .botao__container {
-        height: 100px;
-        font-size: 32px;
+    .slogan {
+        font-size: 0.9rem;
+    }
+    
+    .btn-menu {
+        height: 55px;
+        font-size: 1rem;
+        padding: 0 20px;
     }
 }

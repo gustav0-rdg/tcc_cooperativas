@@ -11,12 +11,12 @@ class Materiais:
 
     def get_all(self):
         """
-        Busca todos os materiais cadastrados no catálogo do banco de dados.
+        Busca todos os materiais base para o filtro de busca de compradores.
 
         Utiliza a classe 'Connection' para estabelecer a conexão.
 
         Retorna:
-            list: Uma lista de dicionários, onde cada dicionário representa um material.
+            list: Uma lista de dicionários, onde cada dicionário representa um material base com id_material_base e nome.
                 Retorna uma lista vazia em caso de erro ou se nenhum material for encontrado.
         """
         cursor = self.connection_db.cursor(dictionary=True)
@@ -24,12 +24,12 @@ class Materiais:
         try:
 
             # O argumento dictionary=True faz com que os resultados venham como dicionários
-            query = "SELECT id_material_base as id_material_catalogo, nome as nome_padrao, descricao FROM materiais_base"
+            query = "SELECT id_material_base, nome as nome_padrao FROM materiais_base"
             cursor.execute(query)
 
             # 4. Busca todos os resultados
             materiais = cursor.fetchall()
-            
+
             return materiais
 
         except mysql.connector.Error as e:
@@ -60,10 +60,10 @@ class Materiais:
 
     def post_cadastrar_sinonimo(self, nome_padrao, sinonimo, id_cooperativa):
         cursor = self.connection_db.cursor(dictionary=True)
-        
+
 
         try:
-            
+
 
             query = """
             INSERT INTO materiais_sinonimos (id_material_catalogo, nome_sinonimo, id_cooperativa)
@@ -73,6 +73,53 @@ class Materiais:
             self.connection_db.commit()
             return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
 
+
+        except mysql.connector.Error as error:
+            print("Erro MySQL:", error)
+            return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
+
+        finally:
+            cursor.close()
+
+    def post_cadastrar_sinonimo_base(self, id_material_base, sinonimo, id_cooperativa):
+        cursor = self.connection_db.cursor(dictionary=True)
+
+        try:
+            query = """
+            INSERT INTO materiais_sinonimos_base (id_material_base, nome_sinonimo, id_cooperativa)
+            VALUES (%s, %s, %s)
+            """
+            cursor.execute(query, (id_material_base, sinonimo, id_cooperativa))
+            self.connection_db.commit()
+            return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
+
+        except mysql.connector.Error as error:
+            print("Erro MySQL:", error)
+            return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
+
+        finally:
+            cursor.close()
+
+    def cadastrar_material_base(self, nome_material, id_cooperativa):
+        try:
+            with self.connection_db.cursor(dictionary=True) as cursor:
+                query = """
+                INSERT INTO materiais_base(nome)
+                VALUES(%s);
+                """
+                cursor.execute(query, (nome_material,))
+                id_novo = cursor.lastrowid
+                self.connection_db.commit()
+
+                # Cadastrar sinônimo para a cooperativa
+                query_sinonimo = """
+                INSERT INTO materiais_sinonimos_base(id_material_base, nome_sinonimo, id_cooperativa)
+                VALUES(%s, %s, %s);
+                """
+                cursor.execute(query_sinonimo, (id_novo, nome_material, id_cooperativa))
+                self.connection_db.commit()
+
+                return jsonify({'message': 'Material registrado com sucesso!', 'id_material_base': id_novo}), 200
 
         except mysql.connector.Error as error:
             print("Erro MySQL:", error)

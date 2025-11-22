@@ -24,11 +24,11 @@ async function getUsuarioInfo (session_token)
     return data;
 }
 
-async function loginGenerico (identificador, senha)
+async function loginGenerico (identificador, senha, tipoIdentificador)
 {
     if (!identificador)
     {
-        return ['IDENTIFICADOR_INVALIDO', 'O campo de identificação (CNPJ) é obrigatório.'];
+        return ['IDENTIFICADOR_INVALIDO', `O campo de ${tipoIdentificador} é obrigatório.`];
     }
 
     if (senha?.length < 8) 
@@ -73,7 +73,8 @@ async function loginGenerico (identificador, senha)
 
             'gestor': '/pagina-inicial/gestor',
             'root': '/pagina-inicial/gestor',
-            'cooperativa': '/pagina-inicial'
+            'cooperativa': '/pagina-inicial',
+            'cooperado': '/pagina-inicial'
 
         }
 

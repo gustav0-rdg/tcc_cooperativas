@@ -60,7 +60,9 @@ class Cooperativa:
                 c.id_usuario,
                 c.cnpj,
                 c.razao_social,
-                u.email
+                u.email,
+                c.latitude,
+                c.longitude
                 FROM cooperativas AS c
                 JOIN usuarios AS u ON c.id_usuario = u.id_usuario
                 WHERE c.id_usuario = %s;
@@ -385,19 +387,26 @@ class Cooperativa:
             cursor.close()
 
     def create (
+
         self, 
-        id_usuario: int, 
+        id_usuario: int,
+
         cnpj: str, 
         razao_social: str,
         nome_fantasia: str,
+
         email: str,
         telefone: str,
+
         rua: str,
         numero: str,
         distrito: str,
         cidade: str, 
         estado: str,
-        cep: str
+        cep: str,
+
+        arquivo_url: str
+
     ) -> int | bool | None:
         
         """
@@ -428,8 +437,6 @@ class Cooperativa:
             if not coordenadas is None:
                 latitude, longitude = coordenadas
 
-            # Insere a nova cooperativa com todos os campos
-            
             cursor.execute (
                 """
                 INSERT INTO cooperativas 
@@ -451,12 +458,25 @@ class Cooperativa:
                 )
             )
 
+            id_cooperativa = cursor.lastrowid
+
+            cursor.execute(
+
+                """
+                INSERT INTO documentos_cooperativa (id_cooperativa, arquivo_url, status)
+                VALUES (%s, %s, 'pendente');
+                """,
+
+                (id_cooperativa, arquivo_url)
+            )
+
             # Retorna o ID da cooperativa que acabou de ser inserida
-            return cursor.lastrowid
+            return id_cooperativa
 
         except Exception as e:
+
             print(f'Erro - Cooperativa "create": {e}')
-            return False # Retorna False (Erro)
+            return False
         
         finally:
             cursor.close()

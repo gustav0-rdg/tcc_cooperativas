@@ -117,8 +117,7 @@ def login_generico():
         else:
             # Falha na autenticação, traduz a mensagem
             erros = {
-                "IDENTIFICADOR_NAO_ENCONTRADO": "Usuário não encontrado.",
-                "SENHA_INVALIDA": "Senha inválida.",
+                "IDENTIFICADOR_NAO_ENCONTRADO": "Identificador e/ou senha inválidos.",
                 "USUARIO_PENDENTE": "Cadastro pendente de aprovação.",
                 "USUARIO_INATIVO": "Este usuário está inativo.",
                 "USUARIO_BLOQUEADO": "Este usuário foi bloqueado.",

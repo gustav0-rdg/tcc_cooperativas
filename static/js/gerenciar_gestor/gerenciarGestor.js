@@ -414,7 +414,7 @@ function showError(title, text) {
         icon: 'error',
         title: title,
         text: text,
-        confirmButtonColor: 'var(--verde-principal)',
+        confirmButtonColor: 'var(--verde-claro-medio)',
         customClass: { popup: 'swal-popup-custom' }
     });
 }

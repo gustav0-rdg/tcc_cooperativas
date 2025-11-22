@@ -4,25 +4,26 @@ body {
 
 
 .card {
-    max-width: 400px; 
-    width: 90%; 
-    background-color: var(--verde-claro-medio) !important;
+    background-color: var(--branco) !important;
     color: var(--verde-escuro-secundario);
     border-radius: 10px;
 }
 
-.card h1 {
-    font-weight: 700;
-    color: var(--verde-escuro);
-    font-size: 1.8rem; 
-}
-
-#form label {
+#form-login label {
     color: var(--verde-escuro-medio);
-    font-weight: 600;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
-#form input:focus {
+#form-login input
+{
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding-left: 15px; 
+}
+
+#form-login input:focus {
     border: 2px solid var(--verde-principal) !important;
     outline: none !important;
     box-shadow: 0 0 5px rgba(224, 243, 209, 0.5) !important;
@@ -30,10 +31,11 @@ body {
 
 input::placeholder{
     color: var(--verde-escuro-medio) !important;
-    opacity: 0.8 !important; 
+    opacity: 0.6 !important; 
+    font-size: 0.9rem;
 }
 
-.btn-login {
+#form-login button[type='submit'] {
     display: block; 
     text-align: center; 
     background-color: var(--verde-escuro-medio) !important;
@@ -44,30 +46,60 @@ input::placeholder{
     font-size: 1.1rem !important; 
     padding: 10px 0; 
     border-radius: 5px;
-    margin-top: 15px; 
     transition: background-color 0.3s !important;
 }
 
-.btn-login:hover {
+#form-login button[type='submit']:hover {
     background-color: var(--verde-escuro) !important; 
     color: var(--verde-claro) !important; 
     text-decoration: none !important; 
 }
 
-#form p {
+#form-login p {
     color: var(--verde-escuro) !important;
     font-size: 0.95rem;
 }
 
-#form a {
+#form-login a {
     transition: color 0.3s;
 }
 
 .link_a {
+    border: 0;
+    background: none;
+    padding: 0;
+    text-decoration: underline;
     color: var(--verde-escuro-medio);
 }
 
 .link_a:hover {
     color: var(--verde-escuro);
     text-decoration: underline;
+}
+
+.titulo{
+    font-size: 34px !important;
+    font-weight: 700;
+    color: var(--verde-escuro-medio);
+}
+
+.titulo .material-symbols-outlined
+{
+    font-size: 1em;
+}
+
+.btn-voltar {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    color: var(--verde-escuro-medio, #2c7a62);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.btn-voltar:hover {
+    color: var(--verde-escuro, #1b4d3e);
 }

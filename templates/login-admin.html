@@ -16,7 +16,7 @@
     <!-- Link CSS -->
     <link rel="stylesheet" href="../static/css/root-de-cores.css">
     <link rel="stylesheet" href="../static/css/estilizacao-padrao.css">
-    <link rel="stylesheet" href="../static/css/login_admin/login-admin.css">
+    <link rel="stylesheet" href="../static/css/login/login.css">
 
     <!-- Material icons google -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons">
@@ -29,6 +29,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
 
     <!-- Link para o favicon -->
     <link rel="icon" href="../static/img/favicon.png" type="image/png">
@@ -37,44 +39,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
     <!-- Link JavaScript -->
-    <script src="../static/js/login_admin/loginAdmin.js" defer></script>
+    <script src="../static/js/login_admin/loginAdmin.js" type="module" defer></script>
 </head>
 
 <body>
-    <button onclick="window.location.href='/';" class="btn position-absolute top-0 start-0 m-3" style="background-color: var(--verde-principal); color: white;">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
-    </button>
     <main>
         <section class="login-section d-flex justify-content-center align-items-center vh-100">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-6 col-lg-4">
-                        <div class="card shadow-lg p-4 login-card container__form">
-                            <h2 class="text-center mb-4 titulo">Login Administrador</h2>
+                        <div class="card shadow-lg login-card container__form">
 
-                            <form id="form-login-admin">
+                            <header class="card-header pt-3 pb-3">
+                                <button onclick="window.location.href='/';" class="btn-voltar">
+                                    <span class="material-symbols-outlined">
+                                    arrow_back
+                                    </span>
+                                    <span>Voltar</span>
+                                </button>
+                            </header>
 
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Digite seu email">
-                                </div>
+                            <div class="shadow-lg p-4">
+                                <h1 class="d-flex align-items-center justify-content-center gap-2 mb-4 titulo">
+                                    <span class="material-symbols-outlined botao__icone">shield_person</span> 
+                                    Administrador
+                                </h1>
 
-                                <div class="mb-3">
-                                    <label for="senha" class="form-label">Senha</label>
-                                    <input type="password" id="senha" name="senha" class="form-control"
-                                        placeholder="Digite sua senha">
-                                </div>
+                                <form id="form-login">
 
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary button__login">Entrar</button>
-                                </div>
+                                    <div class="mb-4">
+                                        <label for="email" class="form-label">E-mail</label>
+                                        <input type="email" id="email" name="email" class="form-control"
+                                            placeholder="Digite seu e-mail">
+                                    </div>
 
-                            </form>
+                                    <div class="mb-5">
+                                        <label for="senha" class="form-label">Senha</label>
+                                        <input type="password" id="senha" name="senha" class="form-control mb-2"
+                                            placeholder="Digite sua senha">
+                                        <a href="/recuperar-senha" class="link_a">Esqueceu sua senha?</a>
+                                    </div>
 
-                            <p class="text-center mt-3">
-                                <a href="/recuperar-senha" class="link_a">Esqueceu a senha?</a>
-                            </p>
+                                    <div class="w-100 d-flex justify-content-center mb-4">
+                                        <div class="d-grid w-75">
+                                            <button type="submit" class="button__login">Entrar</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -82,7 +95,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../static/js/login_admin/loginAdmin.js"></script>
 
 </body>
 
