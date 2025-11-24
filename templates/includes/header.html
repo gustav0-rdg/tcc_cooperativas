@@ -381,11 +381,17 @@
                         
                         <div class="card-details">
                             <div class="detail-item">
-                                <strong>Material:</strong><br> ${avaliacao.material_nome}
-                                <small style="color: #888">(${avaliacao.subtipo_nome})</small>
+                                <strong>Material:</strong><br> ${avaliacao.materiais_vendidos}
                             </div>
                             <div class="detail-item">
-                                <strong>Quantidade:</strong><br> ${avaliacao.quantidade_kg} kg
+                                <strong>Quantidade:</strong><br> ${((quantity) => {
+                                    let formattedQuantity = parseFloat(quantity).toFixed(2);
+                                    formattedQuantity = formattedQuantity.replace('.', ',');
+                                    if (formattedQuantity.endsWith(',00')) {
+                                        formattedQuantity = formattedQuantity.slice(0, -3);
+                                    }
+                                    return formattedQuantity;
+                                })(avaliacao.quantidade_total_kg)} kg
                             </div>
                             <div class="detail-item">
                                 <strong>Data:</strong><br> ${new Date(avaliacao.data_venda).toLocaleDateString('pt-BR')}
@@ -539,7 +545,12 @@
                 style: 'currency',
                 currency: 'BRL'
             });
-            const precoKgFormatado = parseFloat(avaliacao.preco_por_kg).toLocaleString('pt-BR', {
+
+            let precoKg = 0;
+            if (avaliacao.quantidade_total_kg && avaliacao.quantidade_total_kg > 0) { // Avoid division by zero and null/undefined
+                precoKg = avaliacao.valor_total / avaliacao.quantidade_total_kg;
+            }
+            const precoKgFormatado = parseFloat(precoKg).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
             });
@@ -567,11 +578,18 @@
                             <div class="resumo-grid">
                                 <div class="resumo-item">
                                     <span class="label">Material</span>
-                                    <span class="value">${avaliacao.material_nome} <small>(${avaliacao.subtipo_nome})</small></span>
+                                    <span class="value">${avaliacao.materiais_vendidos}</span>
                                 </div>
                                 <div class="resumo-item right">
                                     <span class="label">Peso</span>
-                                    <span class="value">${avaliacao.quantidade_kg} Kg</span>
+                                    <span class="value">${((quantity) => {
+                                        let formattedQuantity = parseFloat(quantity).toFixed(2);
+                                        formattedQuantity = formattedQuantity.replace('.', ',');
+                                        if (formattedQuantity.endsWith(',00')) {
+                                            formattedQuantity = formattedQuantity.slice(0, -3);
+                                        }
+                                        return formattedQuantity;
+                                    })(avaliacao.quantidade_total_kg)} Kg</span>
                                 </div>
                                 <div class="resumo-item">
                                     <span class="label">Valor Total</span>

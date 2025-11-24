@@ -60,7 +60,7 @@ async function carregarCompradores(filtros = {}) {
         // Renderiza os cards
         if (data.length === 0) {
             cardsContainer.innerHTML = '<div class="col-12"><p class="text-center fs-5 text-muted">Nenhum comprador encontrado com os filtros aplicados.</p></div>';
-            mostrarErro('oi', 'oi', 'warning')
+            errorMessage.classList.add('d-none'); // Hide any previous error message
             return;
         }
 
@@ -77,20 +77,20 @@ async function carregarCompradores(filtros = {}) {
     // Função interna de ajuda para mostrar erros
     function mostrarErro(mensagem, detalhe, type='alert') {
         loadingSpinner.classList.add('d-none');
-        errorMessage.classList.remove('d-none');
+        errorMessage.classList.remove('d-none'); // Show the error message container
         errorTitle.textContent = detalhe;
         errorDetail.textContent = mensagem; 
+
+        // Reset previous alert types and apply the new one
+        errorMessage.classList.remove('alert-danger', 'alert-warning');
 
         switch (type)
         {
             case 'alert':
-
-                errorMessage.className = 'alert alert-danger d-none text-center pt-5 pb-5';
+                errorMessage.classList.add('alert-danger');
                 break;
-
             case 'warning':
-
-                errorMessage.className = 'alert alert-warning d-none text-center pt-5 pb-5';
+                errorMessage.classList.add('alert-warning');
                 break;
         }
     }
@@ -395,40 +395,48 @@ function construirHtmlModal(detalhes) {
 }
 
 function configurarFiltros() {
-
     const btnAplicarFiltros = document.getElementById('apply-filters');
-
-    // Botões de Ação
-    btnAplicarFiltros.addEventListener('click', async function () {
-
-        await aplicarFiltros();
-        buscarNomeCNPJ();
-
-    });
-
-    document.getElementById('clear-filters').addEventListener('click', limparFiltros);
-
     const searchInput = document.getElementById('search-input');
 
-    function buscarNomeCNPJ ()
-    {
-        if (searchInput.value.trim() == '')
-        {
-            limparFiltros();
-            return
+    // Botão de Ação para Aplicar Filtros do Servidor
+    btnAplicarFiltros.addEventListener('click', async function () {
+        // 1. Pega os resultados filtrados do servidor
+        await aplicarFiltros();
+
+        // 2. Se houver um termo de busca, aplica o filtro local sobre os resultados
+        const query = searchInput.value.trim();
+        if (query) {
+            filtrarCompradoresLocal(query);
         }
-
-        filtrarCompradoresLocal(searchInput.value);
-    }
-
-    // Input de Busca por Nome (Enter)
-    searchInput.addEventListener('keypress', function (e) {
-
-        if (e.key == 'Enter') buscarNomeCNPJ();
-
     });
 
-    // --- Lógica do Slider de Raio (Mantida da sua versão anterior) ---
+    // Botão para Limpar Filtros
+    document.getElementById('clear-filters').addEventListener('click', limparFiltros);
+
+    // Função interna para a busca por Nome/CNPJ
+    function buscarNomeCNPJ() {
+        const query = searchInput.value.trim();
+        
+        // Se a busca for limpa, recarrega com os filtros de dropdown/raio
+        if (query === '') {
+            aplicarFiltros(); 
+        } else {
+            // Primeiro, garante que a lista está completa (ou já filtrada pelos selects)
+            // e então aplica o filtro local
+            aplicarFiltros().then(() => {
+                filtrarCompradoresLocal(query);
+            });
+        }
+    }
+
+    // Evento de 'Enter' no campo de busca
+    searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            buscarNomeCNPJ();
+        }
+    });
+
+    // Lógica do Slider de Raio
     const enableRadius = document.getElementById('enable-radius-filter');
     const radiusControls = document.getElementById('radius-controls');
     const radiusInput = document.getElementById('radius-filter');
@@ -443,9 +451,8 @@ function configurarFiltros() {
         radiusValue.textContent = `${e.target.value} km`;
     });
 
-    // --- NOVA LÓGICA: Cascata de Material -> Subtipo ---
+    // Cascata de Material -> Subtipo
     const materialSelect = document.getElementById('material-filter');
-    
     materialSelect.addEventListener('change', (e) => {
         const idMaterialPai = e.target.value;
         carregarSubtipos(idMaterialPai);

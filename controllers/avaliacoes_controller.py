@@ -2,12 +2,70 @@ from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 import datetime
 from typing import List, Dict, Any, Optional
+from controllers.config_controller import ConfigController # Importar ConfigController
+import math # Para funções matemáticas como exp
 
 class Avaliacoes:
     def __init__(self, connection_db: MySQLConnection):
         if not Connection.validar(connection_db):
             raise ValueError(f'Erro - Avaliacoes: valores inválidos para os parametros "connection_db"')
         self.connection_db = connection_db
+        self.config_controller = ConfigController(connection_db) # Instanciar ConfigController
+
+    def _calcular_score_bayesiano(self, id_comprador: int, cursor) -> float:
+        """
+        Calcula o score bayesiano de um comprador com base nas avaliações existentes e configurações do sistema.
+        """
+        # Obter configurações do sistema
+        peso_prior_bayesiano = self.config_controller.get_config_value('peso_prior_bayesiano') or 3.0
+        avaliacao_neutra_novato = self.config_controller.get_config_value('avaliacao_neutra_novato') or 2.5
+        decaimento_anual_score = self.config_controller.get_config_value('decaimento_anual_score') or 365
+        min_avaliacoes_confianca = self.config_controller.get_config_value('min_avaliacoes_confianca') or 10
+
+        # Obter todas as avaliações do comprador com suas datas
+        query_avaliacoes = "SELECT score, data_avaliacao FROM avaliacoes_compradores WHERE id_comprador = %s ORDER BY data_avaliacao ASC"
+        cursor.execute(query_avaliacoes, (id_comprador,))
+        avaliacoes = cursor.fetchall()
+
+        if not avaliacoes:
+            return avaliacao_neutra_novato # Retorna o score neutro se não houver avaliações
+
+        # Parâmetros iniciais para o cálculo bayesiano
+        total_score_ponderado = peso_prior_bayesiano * avaliacao_neutra_novato
+        total_peso = peso_prior_bayesiano
+
+        data_atual = datetime.datetime.now()
+
+        for avaliacao in avaliacoes:
+            score_avaliacao = avaliacao['score']
+            data_avaliacao = avaliacao['data_avaliacao']
+            
+            # Calcular o fator de decaimento (exponencial)
+            dias_desde_avaliacao = (data_atual - data_avaliacao).days
+            
+            # Usar uma função exponencial para o decaimento
+            # A constante de decaimento (lambda) é calculada de forma que em 'decaimento_anual_score' dias
+            # o peso caia para ~37% (1/e) do valor original.
+            # lambda = 1 / decaimento_anual_score
+            # peso_atual = exp(-lambda * dias_desde_avaliacao)
+            if decaimento_anual_score > 0:
+                fator_decaimento = math.exp(-dias_desde_avaliacao / decaimento_anual_score)
+            else:
+                fator_decaimento = 1.0 # Sem decaimento se o parâmetro for 0 ou negativo
+
+            peso_avaliacao = 1.0 * fator_decaimento # Cada avaliação tem peso inicial de 1, decaindo com o tempo
+
+            total_score_ponderado += score_avaliacao * peso_avaliacao
+            total_peso += peso_avaliacao
+        
+        # Calcular o score bayesiano final
+        if total_peso > 0:
+            score_final = total_score_ponderado / total_peso
+        else:
+            score_final = avaliacao_neutra_novato # Fallback
+
+        # Garantir que o score esteja entre 0 e 5
+        return round(max(0.0, min(5.0, score_final)), 2)
 
     def get_avaliacoes_pendentes(self, id_cooperativa: int) -> List[Dict[str, Any]]:
         """
@@ -135,10 +193,22 @@ class Avaliacoes:
                         cursor.executemany(query_insert_relacao, tags_para_inserir_tuplas)
 
                 # 4. Atualizar o contador de avaliações do comprador
-                query_update_comprador = "UPDATE compradores SET numero_avaliacoes = numero_avaliacoes + 1 WHERE id_comprador = %s"
-                cursor.execute(query_update_comprador, (dados_venda['id_comprador'],))
+                query_update_num_avaliacoes = "UPDATE compradores SET numero_avaliacoes = numero_avaliacoes + 1 WHERE id_comprador = %s"
+                cursor.execute(query_update_num_avaliacoes, (dados_venda['id_comprador'],))
 
-                # 5. Remover da tabela de pendentes
+                # 5. Calcular e atualizar o score bayesiano do comprador
+                novo_score_bayesiano = self._calcular_score_bayesiano(dados_venda['id_comprador'], cursor)
+                query_update_score = "UPDATE compradores SET score_confianca = %s WHERE id_comprador = %s"
+                cursor.execute(query_update_score, (novo_score_bayesiano, dados_venda['id_comprador']))
+
+                # 6. Registrar o histórico do score
+                query_historico_score = """
+                INSERT INTO historico_score (id_comprador, score_calculado, numero_avaliacoes, detalhe_json, data_calculo)
+                VALUES (%s, %s, (SELECT numero_avaliacoes FROM compradores WHERE id_comprador = %s), NULL, NOW())
+                """
+                cursor.execute(query_historico_score, (dados_venda['id_comprador'], novo_score_bayesiano, dados_venda['id_comprador']))
+
+                # 7. Remover da tabela de pendentes
                 cursor.execute("DELETE FROM avaliacoes_pendentes WHERE id_avaliacao_pendente = %s", (id_avaliacao_pendente,))
 
                 self.connection_db.commit()
