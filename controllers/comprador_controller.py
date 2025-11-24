@@ -139,6 +139,18 @@ class Compradores:
         finally:
             cursor.close()
 
+    def get(self):
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT * from compradores;
+            """)
+            compradores = cursor.fetchall()
+            return compradores
+        except Exception as e:
+            print(e)
+            return []
+
     def get_all(self, user_lat:float, user_lon:float, material_id=None, estado=None, raio_km=None) -> list:
 
         cursor = self.connection_db.cursor(dictionary=True)
