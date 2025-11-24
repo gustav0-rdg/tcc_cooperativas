@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <link rel="stylesheet" href="../static/css/root-de-cores.css">
+    <link rel="stylesheet" href="../static/css/telas_visualizacao.css">
     <link rel="stylesheet" href="../static/css/gerenciar_cadastros/gerenciar_cadastros.css">
     
     <link rel="icon" href="../static/img/favicon.png" type="image/png">
@@ -19,7 +20,7 @@
 <body>
     {% include 'includes/header.html' %}
     
-    <main class="container-fluid gerenciar-cadastros-main">
+    <main class="container-fluid main-container">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-11 col-xl-10">
                 
@@ -33,11 +34,30 @@
                     <p class="page-subtitle">Aprove ou rejeite as solicitações de cadastro pendentes.</p>
                 </section>
 
+                <section class="filters-section mb-4">
+                    <form id="searchForm" method="GET" action="{/} url_for('gestor.visualizar_cooperativas') }}">
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-6 col-lg-5">
+                                <div class="search-box">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="searchInput" 
+                                           name="q"
+                                           placeholder="Buscar por nome ou CNPJ...">
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </form>
+                </section>
+
                 <div class="results-counter mb-3">
                     <span id="resultsCount"></span>
                 </div>
 
-                <section class="solicitacoes-list mb-4">
+                <section class="cards-list mb-4">
                     <!-- Spinner de Carregamento -->
                     <div id="loading-spinner" class="text-center my-5">
                         <div class="spinner-border text-primary" role="status">
