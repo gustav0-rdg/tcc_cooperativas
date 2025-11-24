@@ -1,14 +1,33 @@
 export async function getCompradores() {
-    const response = await fetch("/get/compradores")
+    const response = await fetch(
+        `/get/compradores`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': session_token
+            }
+        }
+    )
     const data = await response.json()
     return data
 }
 
+const session_token = localStorage.getItem('session_token')
 // Função para buscar os compradores pelo NOME do material
 export async function getCompradoresPorMaterial(nome_material, subtipo) {
     try {
         console.log(nome_material, subtipo)
-        const response = await fetch(`/get/comprador/${nome_material}/${subtipo}`);            
+        const response = await fetch(
+            `/get/comprador/${nome_material}/${subtipo}`,
+            {
+                method: 'GET',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': session_token
+                }
+            }
+        );            
         const data = await response.json();
         return data;
     } catch (error) {
