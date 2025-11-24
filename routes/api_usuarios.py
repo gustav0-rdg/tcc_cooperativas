@@ -374,6 +374,12 @@ def get_usuario():
             dados_cooperado = Catadores(db).get_cooperado_e_cooperativa_by_user_id(id_usuario)
             if dados_cooperado:
                 usuario_info['dados_cooperado'] = dados_cooperado
+                # Adicionado para buscar os dados da cooperativa
+                id_cooperativa = dados_cooperado.get('id_cooperativa')
+                if id_cooperativa:
+                    dados_cooperativa = Cooperativa(db).get(id_cooperativa)
+                    if dados_cooperativa:
+                        usuario_info['dados_cooperativa'] = dados_cooperativa
 
         conn.close()
         return jsonify(usuario_info), 200

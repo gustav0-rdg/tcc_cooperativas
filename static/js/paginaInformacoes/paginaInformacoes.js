@@ -34,7 +34,7 @@ async function carregarInformacoesCooperativa() {
         }
         
         // Preenche os elementos com os dados
-        preencherInformacoes(user_data.dados_cooperativa || user_data.dados_cooperado);
+        preencherInformacoes(user_data.dados_cooperativa);
 
         loadingSpinner.classList.add('d-none');
         mainContent.classList.remove('d-none');
@@ -129,12 +129,19 @@ function configurarSPATabs() {
         });
     });
 
+
     // Configurar botão de editar informações
     const editBtn = document.getElementById('edit-info-btn');
-    if (editBtn) {
-        editBtn.addEventListener('click', () => {
-            preencherModalEdicao();
-        });
+    if (user_data.tipo === 'cooperado') {
+        if (editBtn) {
+            editBtn.classList.add('d-none');
+        }
+    } else {
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                preencherModalEdicao();
+            });
+        }
     }
 
     // Configurar botão de salvar alterações

@@ -326,8 +326,8 @@
                     contextoExibido = user_data.tipo.charAt(0).toUpperCase() + user_data.tipo.slice(1);
                 } else if (user_data.tipo === 'cooperativa' && user_data.dados_cooperativa) {
                     contextoExibido = user_data.dados_cooperativa.nome_fantasia;
-                } else if (user_data.tipo === 'cooperado' && user_data.dados_cooperado) {
-                    contextoExibido = user_data.dados_cooperado.nome_fantasia;
+                } else if (user_data.tipo === 'cooperado' && user_data.dados_cooperativa) {
+                    contextoExibido = user_data.dados_cooperativa.nome_fantasia;
                 }
 
                 usuarioNome.textContent = nomeExibido;
