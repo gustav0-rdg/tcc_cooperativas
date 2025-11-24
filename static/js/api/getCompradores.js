@@ -1,6 +1,6 @@
 export async function getCompradores() {
     const response = await fetch(
-        `/get/all-compradores`,
+        `/get/compradores`,
         {
             method: 'GET',
             headers: {
@@ -8,6 +8,14 @@ export async function getCompradores() {
                 'Authorization': session_token
             }
         }
+    )
+    const data = await response.json()
+    return data
+}
+
+export async function getAllCompradores() {
+    const response = await fetch(
+        `/get/all-compradores`,
     )
     const data = await response.json()
     return data
