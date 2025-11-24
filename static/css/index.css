@@ -44,7 +44,7 @@
     width: 75%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0 24px;
     height: 60px;
     border-radius: 12px; /* Combina com o card */
@@ -61,9 +61,10 @@
 .btn-menu .material-symbols-outlined 
 {
     font-size: 1.6rem;
-    margin-right: 16px;
+    margin-right: 8px;
     width: 32px;
     text-align: center;
+    
 }
 
 /* --- Botão Padrão (Verde) --- */
@@ -82,17 +83,17 @@
 
 /* --- Botão Destaque (Amarelo - Cooperado) --- */
 .btn-destaque {
-    background-color: var(--amarelo) !important;
+    background-color: var(--verde-claro-medio) !important;
     color: var(--preto, #000000) !important;
     font-weight: 700; /* Extra bold para o destaque */
     border: 1px solid transparent;
 }
 
 .btn-destaque:hover {
-    /* Escurece levemente o amarelo usando filtro para não precisar achar o hex */
-    filter: brightness(0.95); 
+    background-color: var(--verde-principal) !important;
+    color: var(--branco, #ffffff) !important;
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(251, 255, 10, 0.4);
+    box-shadow: 0 4px 12px rgba(106, 182, 51, 0.3);
 }
 
 /* =========================================
