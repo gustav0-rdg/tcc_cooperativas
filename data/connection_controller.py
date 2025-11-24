@@ -29,7 +29,7 @@ class Connection:
 
     def __init__(self, tipo_conexao: str = 'local'):
 
-        tipo_conexao = 'online'
+        tipo_conexao = 'local'
 
         if tipo_conexao not in info_conexoes:
             raise ValueError(f'Erro - Connection: Valor de "tipo_conexao" não é válido: {tipo_conexao}')
