@@ -1,1 +1,0 @@
-ALTER TABLE cooperados ADD COLUMN endereco VARCHAR(255), ADD COLUMN cidade VARCHAR(100), ADD COLUMN estado CHAR(2);

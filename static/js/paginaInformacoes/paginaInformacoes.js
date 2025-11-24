@@ -34,11 +34,7 @@ async function carregarInformacoesCooperativa() {
         }
         
         // Preenche os elementos com os dados
-        if (user_data && user_data.dados_cooperativa) {
-            preencherInformacoes(user_data.dados_cooperativa);
-        } else {
-            throw new Error('Dados da cooperativa não encontrados na sessão.');
-        }
+        preencherInformacoes(user_data.dados_cooperativa || user_data.dados_cooperado);
 
         loadingSpinner.classList.add('d-none');
         mainContent.classList.remove('d-none');
@@ -101,9 +97,30 @@ function mostrarErro(mensagem) {
  */
 function configurarSPATabs() {
     const tabs = document.querySelectorAll('#spa-tabs button');
+    const user_data = JSON.parse(sessionStorage.getItem('usuario'));
+
+    
     tabs.forEach(tab => {
+        const target = tab.getAttribute('data-bs-target');
+        if (user_data.tipo === 'cooperado' && 
+            (target === '#cooperados' || target === '#vendas')) {
+
+            tab.classList.add('disabled');
+            tab.style.pointerEvents = 'none';
+            tab.style.opacity = '0.5';
+        }
+
         tab.addEventListener('shown.bs.tab', (event) => {
             const target = event.target.getAttribute('data-bs-target');
+            if (user_data.tipo === 'cooperado') {
+                // Impede o carregamento de cooperados e histórico se for 'cooperado'
+                if (target === '#cooperados' || target === '#vendas') {
+                    event.preventDefault(); // Impede o evento
+                    alert('Acesso restrito para cooperados.');
+                    return;
+                }
+                return
+            }
             if (target === '#cooperados') {
                 carregarCooperados();
             } else if (target === '#vendas') {
@@ -186,9 +203,6 @@ function exibirCooperados(listaCooperados) {
             <div class="card-body">
                 <h5 class="card-title">${cooperado.nome}</h5>
                 <p class="card-text"><strong>CPF:</strong> ${cooperado.cpf}</p>
-                <p class="card-text"><strong>Telefone:</strong> ${cooperado.telefone}</p>
-                <p class="card-text"><strong>Endereço:</strong> ${cooperado.endereco}</p>
-                <p class="card-text"><strong>Cidade/UF:</strong> ${cooperado.cidade} - ${cooperado.estado}</p>
                 <p class="card-text"><strong>Data de vínculo:</strong> ${new Date(cooperado.data_vinculo).toLocaleString('pt-BR')}</p>
                 <button class="btn btn-danger btn-sm remover-cooperado" data-id="${cooperado.id_cooperado}">Remover</button>
             </div>
@@ -276,20 +290,30 @@ function configurarVincularCooperado() {
             // O HTML agora usa a estrutura de Grid e as classes modern-input
             html: `
                 <div class="swal-form-grid">
-                    <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="nome">Nome Completo</label>
+                        <input id="nome" class="modern-input" placeholder="Insira o nome completo" required>
+                    </div>
+
+                    <div class="swal-form-group swal-full-width">
+                        <label for="email">Email</label>
+                        <input id="email" class="modern-input" placeholder="exemplo@email.com" type="email" required>
+                    </div>
                     
-                    <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
-                    
-                    <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
-                    <input id="telefone" class="modern-input" placeholder="Telefone" maxlength="15" required>
-                    
-                    <input id="endereco" class="modern-input swal-full-width" placeholder="Endereço completo" required>
-                    
-                    <input id="cidade" class="modern-input" placeholder="Cidade" required>
-                    <input id="estado" class="modern-input" placeholder="UF" maxlength="2" style="text-transform:uppercase" required>
-                    
-                    <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
-                    <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="cpf">CPF</label>
+                        <input id="cpf" class="modern-input" placeholder="000.000.000-00" maxlength="14" required>
+                    </div>
+
+                    <div class="swal-form-group">
+                        <label for="senha">Senha</label>
+                        <input id="senha" class="modern-input" placeholder="Mínimo 8 caracteres" type="password" required>
+                    </div>
+
+                    <div class="swal-form-group">
+                        <label for="confirmar-senha">Confirmar Senha</label>
+                        <input id="confirmar-senha" class="modern-input" placeholder="Repita a senha" type="password" required>
+                    </div>
                 </div>
             `,
             showCancelButton: true,
@@ -312,10 +336,6 @@ function configurarVincularCooperado() {
                 const nome = document.getElementById('nome').value.trim();
                 const cpf = document.getElementById('cpf').value.trim().replace(/\D/g, '');
                 const email = document.getElementById('email').value.trim();
-                const endereco = document.getElementById('endereco').value.trim();
-                const cidade = document.getElementById('cidade').value.trim();
-                const estado = document.getElementById('estado').value.trim();
-                const telefone = document.getElementById('telefone').value.trim();
                 const senha = document.getElementById('senha').value.trim();
                 const confirmarSenha = document.getElementById('confirmar-senha').value.trim();
 
@@ -339,7 +359,7 @@ function configurarVincularCooperado() {
                     return false;
                 }
 
-                return { nome, cpf, senha, endereco, cidade, email, estado, telefone };
+                return { nome, cpf, senha, email };
             }
         }).then(async (result) => {
             if (!result.isConfirmed) return;

@@ -340,3 +340,21 @@ main {
     color: var(--verde-principal);
 }
 
+.swal-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between label and input */
+    text-align: left;
+}
+
+.swal-form-group label {
+    font-weight: 600;
+    color: var(--verde-escuro);
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+
+.swal2-html-container {
+    overflow: visible !important;
+}
+

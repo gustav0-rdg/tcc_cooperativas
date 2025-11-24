@@ -28,7 +28,13 @@
         </a>
     </section>
 </header>
-
+<script>
+    const user = JSON.parse(sessionStorage.getItem('usuario'));
+    if (user.tipo == 'cooperado'){
+        const notification = document.querySelector('#notifications-link');
+        notification.style.display = 'none';
+    }
+</script>
 <style>
     :root {
         /* Cores Principais */

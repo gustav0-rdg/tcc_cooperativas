@@ -28,7 +28,7 @@ async function carregarSolicitacoes(token) {
         const response = await fetch('/get/cooperativas-pendentes', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `${token}`
             }
         });
 
