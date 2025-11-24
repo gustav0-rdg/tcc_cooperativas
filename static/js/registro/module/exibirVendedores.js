@@ -1,7 +1,7 @@
 import { registrarNovoVendedor } from "../registrar_vendedores.js";
 import { validarCNPJ } from "./validarCnpj.js";
 import buscarVendedores from "../obterVendedor.js";
-import { getCompradores } from "../../api/getCompradores.js";
+import { getAllCompradores } from "../../api/getCompradores.js";
 
 import { exibirValoresDeVenda } from "./exibirValoresDeVenda.js";
 import { vendaAtual } from "../registrar_venda.js";
@@ -109,7 +109,7 @@ async function renderizarListaDeVendedores() {
     opcoesSection.innerHTML = '';
 
     // 2. Busca a lista ATUALIZADA de compradores no seu backend
-    const vendedores = await getCompradores();
+    const vendedores = await getAllCompradores();
     console.log(vendedores);
     // 3. Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
