@@ -1,3 +1,5 @@
+import { getUsuarioInfo } from '../utils/loginGenerico.js';
+
 // Aguarda o DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
     carregarInformacoesCooperativa();
@@ -5,14 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Carrega as informações da cooperativa via API
+ * Carrega as informações da cooperativa, buscando-as da API se não estiverem no sessionStorage.
  */
 async function carregarInformacoesCooperativa() {
     const token = localStorage.getItem('session_token');
-    const user_data = JSON.parse(sessionStorage.getItem('usuario'));
     const loadingSpinner = document.getElementById('loading-spinner-info');
     const errorMessage = document.getElementById('error-message-info');
     const mainContent = document.getElementById('main-content-info');
+    
+    let user_data = JSON.parse(sessionStorage.getItem('usuario'));
 
     if (!token) {
         mostrarErro('Sessão inválida. Faça o login novamente.');
@@ -23,8 +26,19 @@ async function carregarInformacoesCooperativa() {
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         mainContent.classList.add('d-none');
+
+        // Se os dados do usuário não estiverem no sessionStorage, busca na API
+        if (!user_data) {
+            user_data = await getUsuarioInfo(token);
+            sessionStorage.setItem('usuario', JSON.stringify(user_data)); // Armazena os dados frescos
+        }
+        
         // Preenche os elementos com os dados
-        preencherInformacoes(user_data.dados_cooperativa);
+        if (user_data && user_data.dados_cooperativa) {
+            preencherInformacoes(user_data.dados_cooperativa);
+        } else {
+            throw new Error('Dados da cooperativa não encontrados na sessão.');
+        }
 
         loadingSpinner.classList.add('d-none');
         mainContent.classList.remove('d-none');
@@ -34,6 +48,7 @@ async function carregarInformacoesCooperativa() {
         mostrarErro('Não foi possível carregar as informações da cooperativa.');
     }
 }
+
 
 /**
  * Preenche os elementos da página com os dados da cooperativa
@@ -117,34 +132,17 @@ function configurarSPATabs() {
  */
 async function carregarCooperados() {
     const token = localStorage.getItem('session_token');
-    if (!token) {
-        Swal.fire('Erro', 'Sessão inválida. Faça o login novamente.', 'error');
+    const userData = JSON.parse(sessionStorage.getItem('usuario'));
+
+    if (!token || !userData || !userData.dados_cooperativa) {
+        Swal.fire('Erro', 'Sessão inválida ou dados da cooperativa não encontrados. Faça o login novamente.', 'error');
         return;
     }
 
     try {
-        // Obter ID da cooperativa
-        const userResponse = await fetch('/api/usuarios/get', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            }
-        });
-        const userData = await userResponse.json();
-        if (!userResponse.ok) throw new Error(userData.error);
+        const idCooperativa = userData.dados_cooperativa.id_cooperativa;
 
-        const coopResponse = await fetch(`/api/cooperativas/get/${userData.id_usuario}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            }
-        });
-        const coopData = await coopResponse.json();
-        if (!coopResponse.ok) throw new Error(coopData.error);
-
-        const cooperadosResponse = await fetch(`/api/cooperados/get/${coopData.dados_cooperativa.id_cooperativa}`, {
+        const cooperadosResponse = await fetch(`/api/cooperados/get/${idCooperativa}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +155,7 @@ async function carregarCooperados() {
         exibirCooperados(cooperados);
 
         // Configurar busca
-        configurarBuscaCooperados(coopData.dados_cooperativa.id_cooperativa);
+        configurarBuscaCooperados(idCooperativa);
 
         // Configurar botão de vincular
         configurarVincularCooperado();

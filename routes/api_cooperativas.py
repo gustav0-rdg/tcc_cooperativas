@@ -263,7 +263,7 @@ def get (identificador:int|str):
         elif user['tipo'] == 'cooperativa':
             
             # Pega os dados da cooperativa VINCULADA AO TOKEN
-            dados_cooperativa_logada = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(user['id_usuario'])
+            dados_cooperativa_logada = Cooperativa(conn.connection_db).get_by_user_id(user['id_usuario'])
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada.'}), 404
 
@@ -360,7 +360,7 @@ def alterar_aprovacao():
 
     db = conn.connection_db
     try:
-        token = token_header.split(' ')[1]
+        token = token_header.split(" ")[1] if " " in token_header else token_header
         data_token = Tokens(db).validar(token)
         if not data_token:
             conn.close()
@@ -394,10 +394,8 @@ def alterar_aprovacao():
         db.start_transaction()
 
         sucesso_coop = coop_ctrl.alterar_aprovacao(int(id_cooperativa), bool(aprovacao))
-        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'ativo' if aprovacao else 'inativo')
 
-
-        if sucesso_coop and sucesso_user:
+        if sucesso_coop:
             # Commit primeiro para garantir que a alteração seja salva
             db.commit()
             
@@ -427,7 +425,7 @@ def alterar_aprovacao():
             return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
         else:
             db.rollback()
-            return jsonify({'error': 'Erro ao atualizar status (coop ou user).'}), 500
+            return jsonify({'error': 'Erro ao atualizar status da cooperativa.'}), 500
 
     except Exception as e:
         try:
@@ -474,7 +472,7 @@ def vincular_cooperado ():
         if not data_adm_cooperativa or data_adm_cooperativa['tipo'] != 'cooperativa':
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
         
-        data_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(data_adm_cooperativa['id_usuario'])
+        data_cooperativa = Cooperativa(conn.connection_db).get_by_user_id(data_adm_cooperativa['id_usuario'])
         print(data_cooperativa)
         id_cooperado = Cooperativa(conn.connection_db).vincular_cooperado(
 
