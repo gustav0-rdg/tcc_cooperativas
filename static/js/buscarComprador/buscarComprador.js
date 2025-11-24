@@ -249,7 +249,7 @@ async function abrirModalDetalhes(comprador) {
                 headers: { 'Authorization': `Bearer ${token}` }
             }),
             fetch(`/get/feedback-tags/${comprador.cnpj}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': token }
             }),
             fetch(`/get/comentarios-livres/${comprador.cnpj}`, {
                 headers: { 'Authorization': `Bearer ${token}` }

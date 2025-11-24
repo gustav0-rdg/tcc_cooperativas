@@ -29,5 +29,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loginCooperativa.fazerLogin(cnpj, senha, 'CNPJ');
 
+            if (status === 'SUCCESS_LOGIN') 
+            {
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Login realizado. Redirecionando...',
+                    icon: 'success',
+                    timer: 1500, 
+                    showConfirmButton: false,
+                    allowOutsideClick: false 
+                });
+    
+                setTimeout(() => {
+                    window.location.href = data; // Redireciona para a URL retornada
+                }, 1500);
+            }
+
+            else 
+            {
+                showLoginError(data);
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+
+        } catch (error) {
+            // Pega erros inesperados do próprio JavaScript
+            console.error("Erro inesperado no processo de login:", error);
+            showLoginError('Um erro inesperado ocorreu. Tente novamente mais tarde.');
+            // Reativa o botão
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        }
     });
 });

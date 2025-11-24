@@ -24,7 +24,7 @@ async function carregarInformacoesCooperativa() {
         errorMessage.classList.add('d-none');
         mainContent.classList.add('d-none');
         // Preenche os elementos com os dados
-        preencherInformacoes(user_data.dados_cooperativa);
+        preencherInformacoes(user_data.dados_cooperativa || user_data.dados_cooperado);
 
         loadingSpinner.classList.add('d-none');
         mainContent.classList.remove('d-none');
@@ -86,9 +86,30 @@ function mostrarErro(mensagem) {
  */
 function configurarSPATabs() {
     const tabs = document.querySelectorAll('#spa-tabs button');
+    const user_data = JSON.parse(sessionStorage.getItem('usuario'));
+
+    
     tabs.forEach(tab => {
+        const target = tab.getAttribute('data-bs-target');
+        if (user_data.tipo === 'cooperado' && 
+            (target === '#cooperados' || target === '#vendas')) {
+
+            tab.classList.add('disabled');
+            tab.style.pointerEvents = 'none';
+            tab.style.opacity = '0.5';
+        }
+
         tab.addEventListener('shown.bs.tab', (event) => {
             const target = event.target.getAttribute('data-bs-target');
+            if (user_data.tipo === 'cooperado') {
+                // Impede o carregamento de cooperados e histórico se for 'cooperado'
+                if (target === '#cooperados' || target === '#vendas') {
+                    event.preventDefault(); // Impede o evento
+                    alert('Acesso restrito para cooperados.');
+                    return;
+                }
+                return
+            }
             if (target === '#cooperados') {
                 carregarCooperados();
             } else if (target === '#vendas') {
@@ -618,7 +639,7 @@ async function buscarDadosOriginais() {
     try {
         const response = await fetch('/get/cooperativa-info', {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': token
             }
         });
 
@@ -660,7 +681,7 @@ async function salvarAlteracoes() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': token
             },
             body: JSON.stringify({
                 nome,

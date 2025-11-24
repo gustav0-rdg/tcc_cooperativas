@@ -66,6 +66,8 @@ async function loginGenerico (identificador, senha, tipoIdentificador)
         localStorage.setItem('session_token', data.token);
         document.cookie = `session_token=${data.token}; path=/; max-age=2592000`; // 30 dias
 
+        console.log(data)
+
         const user_info = await getUsuarioInfo(data.token);
         sessionStorage.setItem('usuario', JSON.stringify(user_info));
 

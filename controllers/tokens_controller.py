@@ -1,3 +1,5 @@
+import os
+import binascii
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.connection import MySQLConnection
 from data.connection_controller import Connection
@@ -33,7 +35,7 @@ class Tokens:
 
             raise TypeError ('Tokens - "tipo" deve ser do tipo String')
 
-        tipos_validos = ['cadastro', 'recuperacao_senha', 'sessao']
+        tipos_validos = ['validacao_email', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
 
@@ -62,32 +64,19 @@ class Tokens:
 
             )
 
-            cursor.execute (
-
-                """
-                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao)
-                VALUES (%s, %s, %s);
-                """,
-
-                (id_usuario, tipo, data_expiracao)
-
-            )
+            token = binascii.hexlify(os.urandom(32)).decode()
 
             cursor.execute (
 
                 """
-                SELECT
-                    tokens_validacao.token
-                FROM tokens_validacao
-                WHERE tokens_validacao.id_token = %s;
+                INSERT INTO tokens_validacao (id_usuario, tipo, data_expiracao, token)
+                VALUES (%s, %s, %s, %s);
                 """,
 
-                (cursor.lastrowid, )
+                (id_usuario, tipo, data_expiracao, token)
 
             )
 
-            token = cursor.fetchone()['token']
-            
             self.connection_db.commit()
             if cursor.rowcount > 0 and token:
 
@@ -107,18 +96,20 @@ class Tokens:
 
             cursor.close() 
 
-    def validar (self, token:str) -> bool:
+    def validar (self, token:str) -> dict | None:
 
         #region Exceções
 
         if not isinstance(token, str):
 
-            raise TypeError ('Tokens - "token" deve ser do tipo String')
-        
+            return None
+
+
+
         if len(token) != 64:
 
-            raise ValueError ('Tokens - "token" deve ter 64 caractéres')
-        
+            return None
+
         #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
@@ -135,7 +126,9 @@ class Tokens:
                     tipo,
                     usado
                 FROM tokens_validacao
-                WHERE tokens_validacao.token = %s;
+                WHERE tokens_validacao.token = %s
+                AND usado = FALSE
+                AND data_expiracao > NOW();
                 """,
 
                 (token, )
@@ -143,13 +136,13 @@ class Tokens:
             )
 
             return cursor.fetchone()
-        
+
         except Exception as e:
 
             print(f'Erro - Tokens "validar": {e}')
 
-            return False
-        
+            return None
+
         finally:
 
             cursor.close()

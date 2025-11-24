@@ -83,18 +83,30 @@ class Materiais:
 
     def post_cadastrar_sinonimo_base(self, id_material_base, sinonimo, id_cooperativa):
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
+            # Primeiro, encontrar um id_material_catalogo associado ao id_material_base
+            cursor.execute(
+                "SELECT id_material_catalogo FROM materiais_catalogo WHERE id_material_base = %s LIMIT 1",
+                (id_material_base,)
+            )
+            material_catalogo = cursor.fetchone()
+
+            if not material_catalogo:
+                return jsonify({'message': 'Nenhum material de catálogo encontrado para a base fornecida.'}), 404
+
+            id_material_catalogo = material_catalogo['id_material_catalogo']
+
             query = """
-            INSERT INTO materiais_sinonimos_base (id_material_base, nome_sinonimo, id_cooperativa)
+            INSERT INTO materiais_sinonimos (id_material_catalogo, nome_sinonimo, id_cooperativa)
             VALUES (%s, %s, %s)
             """
-            cursor.execute(query, (id_material_base, sinonimo, id_cooperativa))
+            cursor.execute(query, (id_material_catalogo, sinonimo, id_cooperativa))
             self.connection_db.commit()
             return jsonify({'message': 'Sinônimo registrado com sucesso!'}), 200
 
         except mysql.connector.Error as error:
             print("Erro MySQL:", error)
+            self.connection_db.rollback()
             return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
 
         finally:
@@ -103,26 +115,37 @@ class Materiais:
     def cadastrar_material_base(self, nome_material, id_cooperativa):
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
-                query = """
-                INSERT INTO materiais_base(nome)
-                VALUES(%s);
-                """
-                cursor.execute(query, (nome_material,))
-                id_novo = cursor.lastrowid
-                self.connection_db.commit()
+                # Inicia a transação
+                self.connection_db.start_transaction()
 
-                # Cadastrar sinônimo para a cooperativa
+                # 1. Insere na tabela 'materiais_base'
+                query_base = "INSERT INTO materiais_base(nome) VALUES(%s);"
+                cursor.execute(query_base, (nome_material,))
+                id_material_base = cursor.lastrowid
+
+                # 2. Cria uma entrada correspondente no catálogo global
+                query_catalogo = """
+                INSERT INTO materiais_catalogo(id_material_base, nome_especifico, status, data_aprovacao)
+                VALUES(%s, %s, 'aprovado', NOW());
+                """
+                cursor.execute(query_catalogo, (id_material_base, nome_material))
+                id_material_catalogo = cursor.lastrowid
+
+                # 3. Cadastra o nome original como um sinônimo para a cooperativa
                 query_sinonimo = """
-                INSERT INTO materiais_sinonimos_base(id_material_base, nome_sinonimo, id_cooperativa)
+                INSERT INTO materiais_sinonimos(id_material_catalogo, id_cooperativa, nome_sinonimo)
                 VALUES(%s, %s, %s);
                 """
-                cursor.execute(query_sinonimo, (id_novo, nome_material, id_cooperativa))
+                cursor.execute(query_sinonimo, (id_material_catalogo, id_cooperativa, nome_material))
+                
+                # Confirma a transação
                 self.connection_db.commit()
 
-                return jsonify({'message': 'Material registrado com sucesso!', 'id_material_base': id_novo}), 200
+                return jsonify({'message': 'Material registrado com sucesso!', 'id_material_base': id_material_base}), 200
 
         except mysql.connector.Error as error:
             print("Erro MySQL:", error)
+            self.connection_db.rollback() # Desfaz a transação em caso de erro
             return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
 
         finally:
@@ -148,12 +171,7 @@ class Materiais:
                     mc.descricao
                 FROM materiais_catalogo AS mc
                 WHERE 
-                    mc.id_material_base = %s
-                GROUP BY 
-                    -- Agrupa os resultados por material
-                    mc.id_material_catalogo, 
-                    mc.nome_especifico, 
-                    mc.descricao;
+                    mc.id_material_base = %s;
                 """
                 cursor.execute(query, (id_material_base,))
                 results = cursor.fetchall()

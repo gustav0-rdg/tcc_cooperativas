@@ -51,13 +51,11 @@ class Catadores:
                 raise Exception("Falha ao obter o ID do usuário criado.")
 
             query_catador = """
-            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, 
-                                   endereco, cidade, estado)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone)
+            VALUES (%s, %s, %s, %s)
             """
             cursor.execute(query_catador, (
-                id_usuario_criado, id_cooperativa, cpf, telefone,
-                endereco, cidade, estado
+                id_usuario_criado, id_cooperativa, cpf, telefone
             ))
             
             id_catador_criado = cursor.lastrowid
@@ -81,27 +79,32 @@ class Catadores:
     def get_by_id_catador(self, id_catador: int) -> Optional[Dict[str, Any]]:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
-            query = """ 
-            SELECT 
-                cat.*, 
-                u.nome, 
-                u.email, 
-                u.status
-            FROM cooperados cat
-            JOIN usuarios u ON cat.id_usuario = u.id_usuario
-            WHERE cat.id_cooperado = %s
+            query = """
+            SELECT
+                id_cooperado,
+                id_usuario,
+                cpf,
+                telefone,
+                endereco,
+                cidade,
+                estado,
+                data_vinculo,
+                deletado_em,
+                id_cooperativa,
+                cooperativa_nome,
+                usuario_nome AS nome,
+                usuario_email AS email,
+                usuario_status AS status
+            FROM v_cooperados_detalhados
+            WHERE id_cooperado = %s
             """
             cursor.execute(query, (id_catador,))
             resultado = cursor.fetchone()
-            
-            self.connection_db.commit() 
             
             return resultado
         
         except Exception as e:
             print(f"Erro - Catadores 'get_by_id_catador': {e}")
-            
-            self.connection_db.rollback() 
             
             return None
         
@@ -112,26 +115,31 @@ class Catadores:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             query = """
-            SELECT 
-                cat.*, 
-                u.nome, 
-                u.email, 
-                u.status
-            FROM cooperados cat
-            JOIN usuarios u ON cat.id_usuario = u.id_usuario
-            WHERE cat.id_usuario = %s
+            SELECT
+                id_cooperado,
+                id_usuario,
+                cpf,
+                telefone,
+                endereco,
+                cidade,
+                estado,
+                data_vinculo,
+                deletado_em,
+                id_cooperativa,
+                cooperativa_nome,
+                usuario_nome AS nome,
+                usuario_email AS email,
+                usuario_status AS status
+            FROM v_cooperados_detalhados
+            WHERE id_usuario = %s
             """
             cursor.execute(query, (id_usuario,))
             resultado = cursor.fetchone()
-            
-            self.connection_db.commit()
             
             return resultado
         
         except Exception as e:
             print(f"Erro - Catadores 'get_by_id_usuario': {e}")
-            
-            self.connection_db.rollback()
             
             return None
         
@@ -143,31 +151,30 @@ class Catadores:
         try:
             params = [id_cooperativa]
             query = """
-            SELECT 
-                cat.id_catador, cat.id_usuario, cat.cpf, cat.telefone, 
-                cat.cidade, cat.ativo, cat.data_vinculo,
-                u.nome, u.email
-            FROM cooperados cat
-            JOIN usuarios u ON cat.id_usuario = u.id_usuario
-            WHERE cat.id_cooperativa = %s
+            SELECT
+                id_cooperado,
+                id_usuario,
+                cpf,
+                telefone,
+                data_vinculo,
+                usuario_nome AS nome,
+                usuario_email AS email  
+            FROM v_cooperados_detalhados
+            WHERE id_cooperativa = %s
             """
             
             if apenas_ativos:
-                query += " AND cat.ativo = TRUE"
+                query += " AND deletado_em IS NULL"
             
-            query += " ORDER BY u.nome ASC"
+            query += " ORDER BY nome ASC"
 
             cursor.execute(query, tuple(params))
             resultados = cursor.fetchall()
-            
-            self.connection_db.commit()
             
             return resultados
         
         except Exception as e:
             print(f"Erro - Catadores 'get_by_cooperativa': {e}")
-            
-            self.connection_db.rollback()
             
             return []
         
@@ -176,11 +183,8 @@ class Catadores:
             
     def update_perfil(
         self, 
-        id_catador: int,
-        telefone: Optional[str] = None,
-        endereco: Optional[str] = None,
-        cidade: Optional[str] = None,
-        estado: Optional[str] = None
+        id_cooperado: int,
+        telefone: Optional[str] = None
     ) -> bool:
         cursor = self.connection_db.cursor()
         
@@ -190,23 +194,14 @@ class Catadores:
         if telefone is not None:
             updates.append("telefone = %s")
             params.append(telefone)
-        if endereco is not None:
-            updates.append("endereco = %s")
-            params.append(endereco)
-        if cidade is not None:
-            updates.append("cidade = %s")
-            params.append(cidade)
-        if estado is not None:
-            updates.append("estado = %s")
-            params.append(estado)
 
         if not updates:
-            print("Aviso - Catadores 'update_perfil': Nenhum dado fornecido para atualização.")
+            print("Aviso - Catadores 'update_perfil': Nenhum dado fornecido for atualização.")
             return True 
 
         try:
-            query = f"UPDATE cooperados SET {', '.join(updates)} WHERE id_catador = %s"
-            params.append(id_catador)
+            query = f"UPDATE cooperados SET {', '.join(updates)} WHERE id_cooperado = %s"
+            params.append(id_cooperado)
             
             cursor.execute(query, tuple(params))
             self.connection_db.commit()
@@ -221,7 +216,7 @@ class Catadores:
         finally:
             cursor.close()
 
-    def _set_status_catador(self, id_catador: int, novo_status: bool) -> bool:
+    def _set_status_catador(self, id_cooperado: int, novo_status: bool) -> bool:
         cursor = self.connection_db.cursor(dictionary=True)
         
         status_usuario = 'ativo' if novo_status else 'inativo'
@@ -230,11 +225,11 @@ class Catadores:
         try:
             self.connection_db.start_transaction() 
 
-            cursor.execute("SELECT id_usuario FROM cooperados WHERE id_cooperado = %s", (id_catador,))
+            cursor.execute("SELECT id_usuario FROM cooperados WHERE id_cooperado = %s", (id_cooperado,))
             catador_data = cursor.fetchone()
             
             if not catador_data:
-                print(f"Erro: Catador {id_catador} não encontrado.")
+                print(f"Erro: Cooperado {id_cooperado} não encontrado.")
                 self.connection_db.rollback() 
                 return False
                 
@@ -242,10 +237,10 @@ class Catadores:
 
             query_catador = """
             UPDATE cooperados
-            SET ativo = %s, data_desvinculo = %s
+            SET data_desvinculo = %s
             WHERE id_cooperado = %s
             """
-            cursor.execute(query_catador, (novo_status, data_desvinculo, id_catador))
+            cursor.execute(query_catador, (data_desvinculo, id_cooperado))
 
             query_usuario = "UPDATE usuarios SET status = %s WHERE id_usuario = %s"
             cursor.execute(query_usuario, (status_usuario, id_usuario))
@@ -261,58 +256,30 @@ class Catadores:
         finally:
             cursor.close()
 
-    def desativar(self, id_catador: int) -> bool:
-        print(f"Tentando desativar catador {id_catador}...")
-        return self._set_status_catador(id_catador, novo_status=False)
+    def desativar(self, id_cooperado: int) -> bool:
+        print(f"Tentando desativar cooperado {id_cooperado}...")
+        return self._set_status_catador(id_cooperado, novo_status=False)
 
-    def reativar(self, id_catador: int) -> bool:
-        print(f"Tentando reativar catador {id_catador}...")
-        return self._set_status_catador(id_catador, novo_status=True)
+    def reativar(self, id_cooperado: int) -> bool:
+        print(f"Tentando reativar cooperado {id_cooperado}...")
+        return self._set_status_catador(id_cooperado, novo_status=True)
     
-    def get_all(self, id_cooperativa):
-        try:
-            query = """
-                SELECT 
-                    co.id_usuario,
-                    co.id_cooperado,
-                    co.cpf, 
-                    co.telefone,
-                    co.endereco,
-                    co.cidade,
-                    co.estado,
-                    co.data_vinculo,
-                    usuario.nome
-                FROM cooperados co
-                JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
-                WHERE id_cooperativa = %s;
-            """
-            with self.connection_db.cursor(dictionary=True) as cursor:
-                cursor.execute(query, (id_cooperativa,))
-                results = cursor.fetchall()
-                return results
-        except Exception as e:
-            print(e)
-        finally:
-            cursor.close()
+
 
     def search_cooperado(self, id_cooperativa, nome_cooperado):
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
                 termo_buscado = f"%{nome_cooperado}%"
                 query = """
-                    SELECT 
-                        co.id_usuario,
-                        co.id_cooperado,
-                        co.cpf, 
-                        co.telefone,
-                        co.endereco,
-                        co.cidade,
-                        co.estado,
-                        co.data_vinculo,
-                        usuario.nome
-                    FROM cooperados co
-                    JOIN usuarios usuario ON co.id_usuario = usuario.id_usuario
-                    WHERE co.id_cooperativa = %s AND usuario.nome LIKE %s;
+                    SELECT
+                        id_usuario,
+                        id_cooperado,
+                        cpf,
+                        telefone,
+                        data_vinculo,
+                        usuario_nome AS nome
+                    FROM v_cooperados_detalhados
+                    WHERE id_cooperativa = %s AND usuario_nome LIKE %s;
                 """
                 cursor.execute(query, (id_cooperativa, termo_buscado))
                 results = cursor.fetchall()
@@ -325,12 +292,12 @@ class Catadores:
             
     def get_cooperado_e_cooperativa_by_user_id(self, id_usuario: int) -> Optional[dict]:
         """
-        Busca um cooperado e o nome da sua cooperativa pelo id_usuario usando v_cooperados_cooperativa.
+        Busca um cooperado e o nome da sua cooperativa pelo id_usuario usando v_cooperados_detalhados.
         """
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT * FROM v_cooperados_cooperativa WHERE id_usuario = %s;
+                SELECT * FROM v_cooperados_detalhados WHERE id_usuario = %s;
             """, (id_usuario,))
             return cursor.fetchone()
 

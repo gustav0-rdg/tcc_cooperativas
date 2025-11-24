@@ -35,6 +35,7 @@ def cadastrar ():
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
     
     conn = Connection('local')
+    status_usuario = 'pendente'
 
     try:
 
@@ -46,10 +47,15 @@ def cadastrar ():
                 return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
             
             data_token = Tokens(conn.connection_db).validar(token)
+
+            if not data_token:
+                return jsonify({ 'error': 'Token inválido ou expirado' }), 401
+
             if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
             
-            status_usuario = 'ativo' if data_cadastro['tipo'] == 'gestor' else 'pendente'
+            if data_cadastro['tipo'] == 'gestor':
+                status_usuario = 'ativo'
 
         #endregion
 
@@ -59,8 +65,7 @@ def cadastrar ():
             data_cadastro['email'],
             data_cadastro['senha'],
             data_cadastro['tipo'],
-            # Se for cooperativa, o status default 'pendente' será usado.
-            status=status_usuario if data_cadastro['tipo'] != 'cooperativa' else 'pendente'
+            status=status_usuario
 
         )
 
@@ -108,8 +113,8 @@ def login_generico():
         usuario_controller = Usuarios(conn.connection_db)
         
         token, status_msg = usuario_controller.autenticar(identificador, senha)
-        
-        conn.close() 
+
+        conn.close()
 
         if status_msg == "LOGIN_SUCESSO" and token:
             # Envia o token para o JavaScript
