@@ -803,7 +803,6 @@ WHERE c.deletado_em IS NULL
 GROUP BY c.id_comprador;
 
 
-drop view  v_cooperados_detalhados;
 CREATE VIEW v_cooperados_detalhados AS
 SELECT 
     u.id_usuario,
