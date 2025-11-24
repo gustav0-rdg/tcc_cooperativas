@@ -366,7 +366,7 @@ def get_usuario():
         
 
         if usuario_info['tipo'] == 'cooperativa':
-            dados_cooperativa = Cooperativa(db).get_cooperativa_by_user_id(id_usuario)
+            dados_cooperativa = Cooperativa(db).get_by_user_id(id_usuario)
             if dados_cooperativa:
                 usuario_info['dados_cooperativa'] = dados_cooperativa
         

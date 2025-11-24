@@ -102,6 +102,9 @@ CREATE TABLE cooperados (
   id_cooperativa BIGINT UNSIGNED NOT NULL,
   cpf CHAR(11) NOT NULL UNIQUE,
   telefone VARCHAR(20),
+  endereco VARCHAR(255),
+  cidade VARCHAR(100),
+  estado CHAR(2),
   data_nascimento DATE NULL,
   funcao VARCHAR(100) NULL COMMENT 'Função dentro da cooperativa',
   data_vinculo DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -731,6 +734,26 @@ JOIN usuarios u ON c.id_usuario = u.id_usuario
 LEFT JOIN documentos_cooperativas doc ON c.id_cooperativa = doc.id_cooperativa AND doc.status = 'pendente'
 WHERE u.status = 'pendente' AND c.deletado_em IS NULL
 GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_criacao;
+
+CREATE OR REPLACE VIEW v_cooperados_detalhados AS
+SELECT
+    c.id_cooperado,
+    c.id_usuario,
+    c.cpf,
+    c.telefone,
+    coop.logradouro AS endereco,
+    coop.cidade AS cidade,
+    coop.estado AS estado,
+    c.data_vinculo,
+    c.deletado_em,
+    c.id_cooperativa,
+    coop.nome_fantasia AS cooperativa_nome,
+    u.nome AS usuario_nome,
+    u.email AS usuario_email,
+    u.status AS usuario_status
+FROM cooperados AS c
+JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+JOIN cooperativas AS coop ON c.id_cooperativa = coop.id_cooperativa;
 
 CREATE OR REPLACE VIEW v_materiais_visiveis AS
 SELECT

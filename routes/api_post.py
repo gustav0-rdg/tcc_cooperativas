@@ -6,6 +6,8 @@ from controllers.materiais_controller import Materiais
 from controllers.cooperados_controller import Catadores
 from controllers.tokens_controller import Tokens
 from controllers.avaliacoes_controller import Avaliacoes
+from controllers.cooperativa_controller import Cooperativa
+from controllers.usuarios_controller import Usuarios
 
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
@@ -206,3 +208,50 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
     except Exception as e:
         if conn: conn.close()
         return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_post.route('/salvar-informacoes', methods=['POST'])
+def salvar_informacoes():
+    """
+    Rota para salvar as informações atualizadas da cooperativa.
+    """
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token é obrigatório'}), 401
+
+    dados = request.get_json()
+    if not dados:
+        return jsonify({'error': 'Dados não fornecidos'}), 400
+
+    conn = None
+    try:
+        conn = Connection('local')
+        db = conn.connection_db
+
+        # Validar token
+        data_token = Tokens(db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        
+        # Obter o id_cooperativa a partir do id_usuario
+        coop_info = Cooperativa(db).get_by_user_id(id_usuario)
+        if not coop_info or 'id_cooperativa' not in coop_info:
+            return jsonify({'error': 'Cooperativa não encontrada'}), 404
+        
+        id_cooperativa = coop_info['id_cooperativa']
+
+        # Chamar o controller para atualizar os dados
+        sucesso = Cooperativa(db).update_info(id_cooperativa, dados)
+
+        if sucesso:
+            return jsonify({'status': 'sucesso', 'mensagem': 'Informações salvas com sucesso!'}), 200
+        else:
+            return jsonify({'error': 'Nenhuma informação foi alterada ou ocorreu um erro'}), 400
+
+    except Exception as e:
+        print(f"Erro em /post/salvar-informacoes: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+    finally:
+        if conn:
+            conn.close()

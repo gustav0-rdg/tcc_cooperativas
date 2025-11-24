@@ -190,7 +190,9 @@ def get_cooperativas_pendentes():
     try:
         # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
         db = conn.connection_db
-        data_token = Tokens(db).validar(token_header)
+        # Remove o prefixo "Bearer " se ele existir
+        token = token_header.split(" ")[1] if " " in token_header else token_header
+        data_token = Tokens(db).validar(token)
         if data_token is None:
             conn.close()
             return jsonify({'error': 'Token inválido ou expirado'}), 401
@@ -337,3 +339,43 @@ def get_comprador_detalhes(id_comprador):
         if conn: conn.close()
         print(f"Erro em /comprador-detalhes: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_get.route('/cooperativa-info', methods=['GET'])
+def get_cooperativa_info():
+    """
+    Retorna as informações detalhadas da cooperativa logada.
+    """
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token é obrigatório'}), 401
+
+    conn = None
+    try:
+        conn = Connection('local')
+        db = conn.connection_db
+
+        # Validar token
+        data_token = Tokens(db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        
+        # Verificar se o usuário é uma cooperativa
+        usuario_info = Usuarios(db).get(id_usuario)
+        if not usuario_info or usuario_info['tipo'] != 'cooperativa':
+            return jsonify({'error': 'Usuário não é uma cooperativa'}), 403
+
+        # Buscar dados da cooperativa usando o método já corrigido
+        dados_cooperativa = Cooperativa(db).get_by_user_id(id_usuario)
+        if not dados_cooperativa:
+            return jsonify({'error': 'Dados da cooperativa não encontrados'}), 404
+
+        return jsonify(dados_cooperativa), 200
+
+    except Exception as e:
+        print(f"Erro em /get/cooperativa-info: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+    finally:
+        if conn:
+            conn.close()

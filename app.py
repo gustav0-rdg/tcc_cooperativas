@@ -14,6 +14,7 @@ from routes.api_cooperativas import api_cooperativas
 from routes.api_cooperados import api_cooperados
 from data.connection_controller import Connection
 from controllers.tokens_controller import Tokens
+from controllers.usuarios_controller import Usuarios
 
 app = Flask(__name__)
 
@@ -38,6 +39,15 @@ ROTAS_PUBLICAS = {
     '/Termos-de-Uso'
 }
 
+# Rotas que exigem um usuário do tipo 'gestor' ou 'root'
+ROTAS_GESTOR = {
+    '/pagina-inicial/gestor',
+    '/visualizar-cooperativas',
+    '/gerenciar-cadastros',
+    '/gerenciar-gestores'
+}
+
+
 @app.before_request
 def verificar_autenticacao():
     # Permite rotas públicas
@@ -48,7 +58,7 @@ def verificar_autenticacao():
     if request.path.startswith('/static/'):
         return
 
-    # Permite rotas de API (elas fazem verificação interna)
+    # Rotas de API (fazem verificação interna)
     if request.path.startswith('/api/') or \
        request.path.startswith('/get/') or \
        request.path.startswith('/post/'):
@@ -58,22 +68,40 @@ def verificar_autenticacao():
     if request.endpoint is None:
         return
 
-    # Para outras rotas, verifica se há token válido (header ou cookie)
     token = request.headers.get('Authorization') or request.cookies.get('session_token')
 
+    # Se não há token, redireciona para a página apropriada
     if not token:
+        if request.path in ROTAS_GESTOR:
+            return redirect('/login-admin')
         return redirect('/')
 
     conn = Connection('local')
     try:
-        if not request.headers.get('Authorization') and request.cookies.get('session_token'):
-            data_token = Tokens(conn.connection_db).validar(request.cookies.get('session_token'))
-            if not data_token:
-                conn.close()
-                return redirect('/')
+        # Valida o token
+        data_token = Tokens(conn.connection_db).validar(token)
+        
+        # Se o token for inválido ou não for de sessão
+        if not data_token or data_token.get('tipo') != 'sessao':
+            conn.close()
+            if request.path in ROTAS_GESTOR:
+                return redirect('/login-admin')
+            return redirect('/')
 
+        # Se for uma rota de gestor, verifica a permissão do usuário
+        if request.path in ROTAS_GESTOR:
+            usuario = Usuarios(conn.connection_db).get(data_token['id_usuario'])
+            conn.close() # Fecha a conexão após o uso
+            
+            if not usuario or usuario.get('tipo') not in ['gestor', 'root']:
+                return redirect('/login-admin') # Não tem permissão
+            
+            # Usuário é gestor/root e tem token válido, permite o acesso
+            return
+
+        # Para outras rotas protegidas (não-gestor)
         conn.close()
-        return
+        return # Permite o acesso
 
     except Exception as e:
         print(f"Erro no middleware: {e}")

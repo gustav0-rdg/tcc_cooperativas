@@ -79,21 +79,27 @@ class Cooperativa:
         if not isinstance(id_usuario, int):
             raise TypeError('Cooperativa - "id_usuario" (get_by_user_id) deve ser um int')
 
-
         cursor = self.connection_db.cursor(dictionary=True)
         try:
+            # Query expandida para buscar todos os dados necessários
             cursor.execute(
                 """
                 SELECT
-                    id_cooperativa,
-                    id_usuario,
-                    cnpj,
-                    razao_social,
-                    email,
-                    latitude,
-                    longitude
-                FROM v_cooperativas_list
-                WHERE id_usuario = %s;
+                    c.id_cooperativa,
+                    c.id_usuario,
+                    c.cnpj,
+                    c.razao_social,
+                    c.nome_fantasia,
+                    c.email_contato AS email,
+                    c.telefone AS telefone_fixo,
+                    c.whatsapp,
+                    c.site,
+                    CONCAT_WS(', ', c.logradouro, c.numero, c.bairro) AS endereco,
+                    CONCAT_WS(' - ', c.cidade, c.estado) AS cidade_estado,
+                    c.latitude,
+                    c.longitude
+                FROM cooperativas c
+                WHERE c.id_usuario = %s;
                 """,
                 (id_usuario,)
             )
@@ -461,6 +467,62 @@ class Cooperativa:
         
         except Exception as e:
             print(f'Erro - Cooperativa "rejeitar_documento": {e}')
+            self.connection_db.rollback()
+            return False
+        
+        finally:
+            cursor.close()
+
+    def update_info(self, id_cooperativa: int, dados: dict) -> bool:
+        """
+        Atualiza as informações de uma cooperativa de forma dinâmica.
+        """
+        if not isinstance(id_cooperativa, int):
+            raise TypeError('Cooperativa - "id_cooperativa" (update_info) deve ser um int')
+        if not isinstance(dados, dict):
+            raise TypeError('Cooperativa - "dados" (update_info) deve ser um dict')
+
+        cursor = self.connection_db.cursor()
+        
+        # Mapeia as chaves do frontend para as colunas do banco
+        mapeamento_campos = {
+            'nome': 'nome_fantasia',
+            'rua': 'logradouro',
+            'bairro': 'bairro',
+            'cidade': 'cidade',
+            'estado': 'estado',
+            'telefone_fixo': 'telefone',
+            'whatsapp': 'whatsapp',
+            'email': 'email_contato',
+            'site': 'site'
+        }
+
+        # Constrói a query dinamicamente
+        set_parts = []
+        valores = []
+
+        for chave, valor in dados.items():
+            if chave in mapeamento_campos:
+                coluna = mapeamento_campos[chave]
+                set_parts.append(f"{coluna} = %s")
+                valores.append(valor.strip() if isinstance(valor, str) else valor)
+
+        if not set_parts:
+            # Nenhum campo válido para atualizar
+            return False
+
+        # Adiciona o id_cooperativa ao final da lista de valores
+        valores.append(id_cooperativa)
+
+        query = f"UPDATE cooperativas SET {', '.join(set_parts)} WHERE id_cooperativa = %s"
+
+        try:
+            cursor.execute(query, tuple(valores))
+            self.connection_db.commit()
+            return cursor.rowcount > 0  # Retorna True se alguma linha foi afetada
+
+        except Exception as e:
+            print(f'Erro - Cooperativa "update_info": {e}')
             self.connection_db.rollback()
             return False
         
