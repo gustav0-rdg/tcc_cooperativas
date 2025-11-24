@@ -153,7 +153,7 @@ class Catadores:
                 cpf,
                 data_vinculo,
                 usuario_nome AS nome,
-                usuario_email AS email
+                usuario_email AS email  
             FROM v_cooperados_detalhados
             WHERE id_cooperativa = %s
             """
