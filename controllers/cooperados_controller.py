@@ -51,11 +51,11 @@ class Catadores:
                 raise Exception("Falha ao obter o ID do usuário criado.")
 
             query_catador = """
-            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf)
+            VALUES (%s, %s, %s)
             """
             cursor.execute(query_catador, (
-                id_usuario_criado, id_cooperativa, cpf, telefone
+                id_usuario_criado, id_cooperativa, cpf
             ))
             
             id_catador_criado = cursor.lastrowid
@@ -155,7 +155,6 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                telefone,
                 data_vinculo,
                 usuario_nome AS nome,
                 usuario_email AS email
@@ -275,7 +274,6 @@ class Catadores:
                         id_usuario,
                         id_cooperado,
                         cpf,
-                        telefone,
                         data_vinculo,
                         usuario_nome AS nome
                     FROM v_cooperados_detalhados

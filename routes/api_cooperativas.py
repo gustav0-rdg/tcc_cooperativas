@@ -443,9 +443,9 @@ def vincular_cooperado ():
 
     data_cooperado = request.get_json()
 
-    if not data_cooperado or not all(key in data_cooperado for key in ['nome', 'email', 'senha', 'cpf', 'telefone', 'endereco', 'cidade', 'estado']):
+    if not data_cooperado or not all(key in data_cooperado for key in ['nome', 'email', 'senha', 'cpf']):
         
-        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, senha, email, cpf, telefone, endereco, cidade e estado' }), 400
+        return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, senha, email, cpf' }), 400
     
     if len(data_cooperado['senha']) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
@@ -481,12 +481,8 @@ def vincular_cooperado ():
             data_cooperado['nome'],
             data_cooperado['email'],
             data_cooperado['senha'],
-            
-            data_cooperado['cpf'],
-            data_cooperado['telefone'],
-            data_cooperado['endereco'],
-            data_cooperado['cidade'],
-            data_cooperado['estado']
+
+            data_cooperado['cpf']
 
         )
         print(id_cooperado)

@@ -128,21 +128,17 @@ class Cooperativa:
             cursor.close()
 
     def vincular_cooperado(
-            
-        self, 
 
-        id_cooperativa:int, 
-        
+        self,
+
+        id_cooperativa:int,
+
         nome:str,
         email:str,
         senha:str,
 
-        cpf:str,
-        telefone:str,
-        endereco:str,
-        cidade:str,
-        estado:str
-            
+        cpf:str
+
     ) -> bool:
         """
         Relaciona o usuário fornecido com a
@@ -154,42 +150,26 @@ class Cooperativa:
         if not isinstance(id_cooperativa, int):
 
             raise TypeError ('Cooperativa - "id_cooperativa" deve ser do tipo Int')
-        
+
         if not isinstance(nome, str):
 
             raise TypeError ('Cooperativa - "nome" deve ser do tipo String')
-        
+
         if not isinstance(email, str):
 
             raise TypeError ('Cooperativa - "email" deve ser do tipo String')
-        
+
         if not isinstance(senha, str):
 
             raise TypeError ('Cooperativa - "senha" deve ser do tipo String')
-        
+
         if not isinstance(cpf, str):
 
             raise TypeError ('Cooperativa - "cpf" deve ser do tipo String')
-        
+
         if not CPF.validar(cpf):
 
             raise ValueError ('Cooperativa - "cpf" fornecido é inválido')
-        
-        if not isinstance(telefone, str):
-
-            raise TypeError ('Cooperativa - "telefone" deve ser do tipo String')
-        
-        if not isinstance(endereco, str):
-
-            raise TypeError ('Cooperativa - "endereco" deve ser do tipo String')
-        
-        if not isinstance(cidade, str):
-
-            raise TypeError ('Cooperativa - "cidade" deve ser do tipo String')
-        
-        if not isinstance(estado, str):
-
-            raise TypeError ('Cooperativa - "estado" deve ser do tipo String')
 
         #endregion
 
@@ -202,11 +182,11 @@ class Cooperativa:
                 cursor.execute (
 
                     """
-                    INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone, endereco, cidade, estado)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                    INSERT INTO cooperados (id_usuario, id_cooperativa, cpf)
+                    VALUES (%s, %s, %s);
                     """,
 
-                    (id_cooperado, id_cooperativa, cpf, telefone, endereco, cidade, estado)
+                    (id_cooperado, id_cooperativa, cpf)
 
                 )
 

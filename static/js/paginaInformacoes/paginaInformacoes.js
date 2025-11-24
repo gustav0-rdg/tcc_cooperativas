@@ -186,9 +186,6 @@ function exibirCooperados(listaCooperados) {
             <div class="card-body">
                 <h5 class="card-title">${cooperado.nome}</h5>
                 <p class="card-text"><strong>CPF:</strong> ${cooperado.cpf}</p>
-                <p class="card-text"><strong>Telefone:</strong> ${cooperado.telefone}</p>
-                <p class="card-text"><strong>Endereço:</strong> ${cooperado.endereco}</p>
-                <p class="card-text"><strong>Cidade/UF:</strong> ${cooperado.cidade} - ${cooperado.estado}</p>
                 <p class="card-text"><strong>Data de vínculo:</strong> ${new Date(cooperado.data_vinculo).toLocaleString('pt-BR')}</p>
                 <button class="btn btn-danger btn-sm remover-cooperado" data-id="${cooperado.id_cooperado}">Remover</button>
             </div>
@@ -277,17 +274,11 @@ function configurarVincularCooperado() {
             html: `
                 <div class="swal-form-grid">
                     <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
-                    
+
                     <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
-                    
+
                     <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
-                    <input id="telefone" class="modern-input" placeholder="Telefone" maxlength="15" required>
-                    
-                    <input id="endereco" class="modern-input swal-full-width" placeholder="Endereço completo" required>
-                    
-                    <input id="cidade" class="modern-input" placeholder="Cidade" required>
-                    <input id="estado" class="modern-input" placeholder="UF" maxlength="2" style="text-transform:uppercase" required>
-                    
+
                     <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
                     <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
                 </div>
@@ -312,10 +303,6 @@ function configurarVincularCooperado() {
                 const nome = document.getElementById('nome').value.trim();
                 const cpf = document.getElementById('cpf').value.trim().replace(/\D/g, '');
                 const email = document.getElementById('email').value.trim();
-                const endereco = document.getElementById('endereco').value.trim();
-                const cidade = document.getElementById('cidade').value.trim();
-                const estado = document.getElementById('estado').value.trim();
-                const telefone = document.getElementById('telefone').value.trim();
                 const senha = document.getElementById('senha').value.trim();
                 const confirmarSenha = document.getElementById('confirmar-senha').value.trim();
 
@@ -339,7 +326,7 @@ function configurarVincularCooperado() {
                     return false;
                 }
 
-                return { nome, cpf, senha, endereco, cidade, email, estado, telefone };
+                return { nome, cpf, senha, email };
             }
         }).then(async (result) => {
             if (!result.isConfirmed) return;
