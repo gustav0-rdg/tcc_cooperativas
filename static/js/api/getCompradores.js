@@ -1,6 +1,6 @@
 export async function getCompradores() {
     const response = await fetch(
-        `/get/compradores`,
+        `/get/all-compradores`,
         {
             method: 'GET',
             headers: {
