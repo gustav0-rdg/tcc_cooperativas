@@ -119,8 +119,6 @@ def cadastrar_subtipo():
     finally:
         conn.close()
 
-
-
 @api_post.route("/cadastrar-sinonimo-base", methods=["POST"])
 def cadastrar_sinonimo_base():
     try:
@@ -161,6 +159,7 @@ def cadastrar_sinonimo_base():
     finally:
         if 'conn' in locals():
             conn.close()
+    
 @api_post.route("/finalizar-avaliacao-pendente/<int:id_avaliacao_pendente>", methods=["POST"])
 def finalizar_avaliacao_pendente(id_avaliacao_pendente):
     token = request.headers.get('Authorization')

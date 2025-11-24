@@ -67,48 +67,48 @@ class Usuarios:
 		cursor = self.connection_db.cursor(dictionary=True)
 		senha_hash = Usuarios.criptografar(senha)
 
-        # Determina qual coluna usar para a busca
-        params = [identificador]
-        
-        if "@" in identificador: # Parece um e-mail
-            join_conditions = ""
-            where_clause = "u.email = %s"
-        elif len(identificador) == 14 and identificador.isdigit(): # Parece um CNPJ
-            join_conditions = "LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario"
-            where_clause = "c.cnpj = %s"
-        elif len(identificador) == 11 and identificador.isdigit(): # Parece um CPF
-            join_conditions = "LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario"
-            where_clause = "co.cpf = %s"
-        else:
-            return (None, "IDENTIFICADOR_INVALIDO")
+		# Determina qual coluna usar para a busca
+		params = [identificador]
+		
+		if "@" in identificador: # Parece um e-mail
+			join_conditions = ""
+			where_clause = "u.email = %s"
+		elif len(identificador) == 14 and identificador.isdigit(): # Parece um CNPJ
+			join_conditions = "LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario"
+			where_clause = "c.cnpj = %s"
+		elif len(identificador) == 11 and identificador.isdigit(): # Parece um CPF
+			join_conditions = "LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario"
+			where_clause = "co.cpf = %s"
+		else:
+			return (None, "IDENTIFICADOR_INVALIDO")
 
-        query = f"""
-            SELECT 
-                u.id_usuario, u.senha_hash, u.tipo, u.status
-            FROM usuarios AS u
-            {join_conditions}
-            WHERE {where_clause}
-            LIMIT 1;
-        """
-        try:
-            cursor.execute(query, tuple(params))
-            usuario_data = cursor.fetchone()
+		query = f"""
+			SELECT 
+				u.id_usuario, u.senha_hash, u.tipo, u.status
+			FROM usuarios AS u
+			{join_conditions}
+			WHERE {where_clause}
+			LIMIT 1;
+		"""
+		try:
+			cursor.execute(query, tuple(params))
+			usuario_data = cursor.fetchone()
 
 			if not usuario_data or usuario_data['senha_hash'] != senha_hash:
 				return (None, "IDENTIFICADOR_NAO_ENCONTRADO")
 
-            status = usuario_data['status']
-            if status != 'ativo':
-                # Retorna o status exato para o front-end (ex: PENDENTE, INATIVO, BLOQUEADO)
-                return (None, f"USUARIO_{status.upper()}")
+			status = usuario_data['status']
+			if status != 'ativo':
+				# Retorna o status exato para o front-end (ex: PENDENTE, INATIVO, BLOQUEADO)
+				return (None, f"USUARIO_{status.upper()}")
 
 			id_usuario = usuario_data['id_usuario']
 			token_controller = Tokens(self.connection_db)
 
 			data_expiracao = datetime.now() + timedelta(days=30)
 
-            if token_controller.create(id_usuario=id_usuario, tipo='sessao', data_expiracao=data_expiracao):
-                token = token_controller.get_ultimo_token_por_usuario(id_usuario, 'sessao')
+			if token_controller.create(id_usuario=id_usuario, tipo='sessao', data_expiracao=data_expiracao):
+				token = token_controller.get_ultimo_token_por_usuario(id_usuario, 'sessao')
 				return (token, "LOGIN_SUCESSO") if token else (None, "ERRO_GERAR_TOKEN")
 			else:
 				return (None, "ERRO_CRIAR_TOKEN")
@@ -163,6 +163,7 @@ class Usuarios:
 				VALUES (%s, %s, %s, %s, %s);
 			""", (nome, email, senha_hash, tipo, status))
 
+			self.connection_db.commit()
 			return cursor.lastrowid
 		
 		except Exception as e:
