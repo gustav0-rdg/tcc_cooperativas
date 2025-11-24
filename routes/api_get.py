@@ -11,6 +11,15 @@ from controllers.avaliacoes_controller import Avaliacoes
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
+@api_get.route("/all-compradores", methods=["GET"])
+def get_all_compradores():
+    conn = Connection('local')
+    compradores = Compradores(conn.connection_db).get()
+    conn.close()
+    return jsonify(compradores)
+    
+
+
 @api_get.route("/compradores", methods=["GET"])
 def get_compradores():
     """
