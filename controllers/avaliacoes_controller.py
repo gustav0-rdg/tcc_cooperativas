@@ -37,9 +37,9 @@ class Avaliacoes:
             print(f"Erro em get_avaliacoes_pendentes: {e}")
             return []
 
-    def inserir_avaliacao_pendente(self, id_venda: int, id_cooperativa: int) -> bool:
+    def inserir_avaliacao_pendente(self, id_venda: int, id_cooperativa: int) -> Optional[int]:
         """
-        Insere uma avaliação pendente para uma venda específica.
+        Insere uma avaliação pendente para uma venda específica e retorna o ID da avaliação pendente.
         Esta função NÃO gerencia a transação (commit/rollback). Isso deve ser feito pelo chamador.
 
         Args:
@@ -47,7 +47,7 @@ class Avaliacoes:
             id_cooperativa (int): ID da cooperativa.
 
         Returns:
-            bool: True se inserido com sucesso.
+            Optional[int]: O ID da avaliação pendente inserida, ou None se a inserção falhar.
         
         Raises:
             Exception: Em caso de erro de banco de dados, a exceção será propagada.
@@ -58,7 +58,9 @@ class Avaliacoes:
             VALUES (%s, %s, 'pendente', %s);
             """
             cursor.execute(query, (id_venda, id_cooperativa, datetime.datetime.now()))
-            return cursor.rowcount > 0
+            if cursor.rowcount > 0:
+                return cursor.lastrowid
+            return None
 
     def _get_feedback_tag_ids(self, cursor, tags_recebidas: List[Any]) -> List[int]:
         """
@@ -132,7 +134,11 @@ class Avaliacoes:
                         tags_para_inserir_tuplas = [(id_avaliacao, tag_id) for tag_id in ids_tags_para_inserir]
                         cursor.executemany(query_insert_relacao, tags_para_inserir_tuplas)
 
-                # 4. Remover da tabela de pendentes
+                # 4. Atualizar o contador de avaliações do comprador
+                query_update_comprador = "UPDATE compradores SET numero_avaliacoes = numero_avaliacoes + 1 WHERE id_comprador = %s"
+                cursor.execute(query_update_comprador, (dados_venda['id_comprador'],))
+
+                # 5. Remover da tabela de pendentes
                 cursor.execute("DELETE FROM avaliacoes_pendentes WHERE id_avaliacao_pendente = %s", (id_avaliacao_pendente,))
 
                 self.connection_db.commit()
@@ -169,3 +175,24 @@ class Avaliacoes:
         except Exception as e:
             print(f"Erro em get_avaliacao_pendente_por_id: {e}")
             return None
+
+    def remover_avaliacao_pendente(self, id_avaliacao_pendente: int) -> bool:
+        """
+        Remove uma avaliação pendente da tabela `avaliacoes_pendentes`.
+
+        Args:
+            id_avaliacao_pendente (int): O ID da avaliação pendente a ser removida.
+
+        Returns:
+            bool: True se a avaliação pendente foi removida com sucesso, False caso contrário.
+        """
+        try:
+            with self.connection_db.cursor() as cursor:
+                query = "DELETE FROM avaliacoes_pendentes WHERE id_avaliacao_pendente = %s"
+                cursor.execute(query, (id_avaliacao_pendente,))
+                self.connection_db.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Erro ao remover avaliação pendente: {e}")
+            self.connection_db.rollback()
+            return False

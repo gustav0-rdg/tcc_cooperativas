@@ -108,8 +108,6 @@ class Vendas:
         cursor = self.connection_db.cursor()
 
         try:
-            self.connection_db.start_transaction()
-
             # 1. INSERIR NA TABELA `vendas`
             query_venda = """
                 INSERT INTO vendas (id_cooperativa, id_comprador, data_venda, valor_total)
@@ -141,21 +139,33 @@ class Vendas:
             cursor.execute(query_item, item_data)
             print(f"Item da venda inserido para a venda ID: {id_venda}")
 
-            # 3. INSERIR AVALIAÇÃO PENDENTE
-            # A inserção da avaliação pendente agora faz parte da transação principal.
-            # Se falhar, toda a transação será revertida.
+            # 3. INSERIR AVALIAÇÃO PENDENTE E FINALIZAR IMEDIATAMENTE
             avaliacoes_controller = Avaliacoes(self.connection_db)
-            avaliacoes_controller.inserir_avaliacao_pendente(id_venda, id_cooperativa)
-            print(f"Avaliação pendente para a venda {id_venda} inserida com sucesso.")
+            
+            # Primeiro, insere a avaliação como "pendente" para obter um ID
+            id_avaliacao_pendente = avaliacoes_controller.inserir_avaliacao_pendente(id_venda, id_cooperativa)
+            if not id_avaliacao_pendente:
+                raise Exception("Falha ao criar o registro de avaliação pendente.")
+            print(f"Registro de avaliação pendente criado com ID: {id_avaliacao_pendente}")
+
+            # Agora, finaliza a avaliação imediatamente usando os dados do frontend
+            dados_avaliacao = dados_frontend.get('avaliacao')
+            if dados_avaliacao:
+                sucesso_finalizacao = avaliacoes_controller.finalizar_avaliacao_pendente(id_avaliacao_pendente, dados_avaliacao)
+                if not sucesso_finalizacao:
+                    raise Exception("Falha ao finalizar a avaliação da venda.")
+                print(f"Avaliação para a venda {id_venda} finalizada imediatamente.")
+            else:
+                print("Nenhum dado de avaliação fornecido com a venda.")
 
             self.connection_db.commit()
             print("\n SUCESSO! Transação concluída e dados salvos no banco.")
-            return True
+            return {"sucesso": True, "id_avaliacao_pendente": None} # Não há mais pendência
 
         except Exception as err:
             print(f"\n ERRO DE BANCO DE DADOS! A transação será revertida. Erro: {err}")
             self.connection_db.rollback()
-            return False
+            return {"sucesso": False, "id_avaliacao_pendente": None}
         finally:
             cursor.close()
 

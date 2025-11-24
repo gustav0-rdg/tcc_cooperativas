@@ -18,13 +18,17 @@ def postar_dados_de_venda():
         dados_recebidos = request.get_json()
         conn = Connection('local')
         
-        sucesso = Vendas(conn.connection_db).registrar_nova_venda(
+        resultado_venda = Vendas(conn.connection_db).registrar_nova_venda(
             dados_recebidos["id_cooperativa"], 
             dados_recebidos
         )
         
-        if sucesso:
-            return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos e processados!"}), 200
+        if resultado_venda["sucesso"]:
+            return jsonify({
+                "status": "sucesso", 
+                "mensagem": "Dados da venda recebidos e processados!",
+                "id_avaliacao_pendente": resultado_venda["id_avaliacao_pendente"]
+            }), 200
         else:
             return jsonify({"erro": "Falha ao registrar a venda"}), 500
             
@@ -281,3 +285,44 @@ def salvar_informacoes():
     finally:
         if conn:
             conn.close()
+
+@api_post.route("/pular-avaliacao/<int:id_avaliacao_pendente>", methods=["POST"])
+def pular_avaliacao(id_avaliacao_pendente):
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    conn = Connection('local')
+
+    try:
+        db = conn.connection_db
+        # 1. Validar o Token e Permissão
+        from controllers.tokens_controller import Tokens
+        from controllers.usuarios_controller import Usuarios
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Remover avaliação pendente
+        avaliacoes_controller = Avaliacoes(db)
+        sucesso = avaliacoes_controller.remover_avaliacao_pendente(id_avaliacao_pendente)
+
+        if sucesso:
+            conn.close()
+            return jsonify({'status': 'sucesso', 'mensagem': 'Avaliação pendente pulada com sucesso!'}), 200
+        else:
+            conn.close()
+            return jsonify({'error': 'Erro ao pular avaliação pendente'}), 500
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /post/pular-avaliacao: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500

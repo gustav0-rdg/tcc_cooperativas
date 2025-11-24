@@ -42,8 +42,6 @@ class Compradores:
             
             if complemento:
                 partes_endereco.append(complemento)
-            
-            endereco = ' - '.join(partes_endereco) if partes_endereco else None
 
             cidade = endereco_info.get('city')
             estado = endereco_info.get('state')
@@ -88,12 +86,21 @@ class Compradores:
                 email_info = emails_list[0]
                 email = email_info.get('address', '').strip() if email_info else None
             
+            latitude = 0
+            longitude = 0
+            
+            coordenadas = Endereco.get_coordenadas(f'{rua}, {cidade}, {estado}, Brasil')
+            
+            if not coordenadas is None:
+                latitude, longitude = coordenadas
+
             # ===== INSERÇÃO NO BANCO =====
             query = """
                 INSERT INTO compradores(
                     cnpj, razao_social, nome_fantasia, email, telefone, whatsapp, 
-                    cep, logradouro, numero, complemento, bairro, cidade, estado
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    cep, logradouro, numero, complemento, bairro, cidade, estado,
+                    latitude, longitude
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
                     razao_social = VALUES(razao_social),
                     nome_fantasia = VALUES(nome_fantasia),
@@ -122,7 +129,9 @@ class Compradores:
                 complemento,
                 bairro,
                 cidade,
-                estado
+                estado,
+                latitude,
+                longitude
             )
             cursor.execute(query, params)
             self.connection_db.commit()
@@ -334,15 +343,29 @@ class Compradores:
 
     def get_detalhes_comprador(self, id_comprador: int) -> dict:
         """
-        Busca detalhes de um comprador, incluindo materiais já comprados
-        e a faixa de preço (min/max) por material, utilizando a view v_vendas_detalhadas.
+        Busca todos os detalhes de um comprador para o modal, incluindo
+        informações de contato, materiais, avaliações e tags de feedback.
         """
         cursor = self.connection_db.cursor(dictionary=True)
-        detalhes = {
-            "materiais_comprados": [],
-            "avaliacoes_recentes": []
-        }
+        detalhes = {}
+
         try:
+            # 1. Buscar informações primárias do comprador (contato, cnpj)
+            query_comprador = """
+            SELECT razao_social, cnpj, email, telefone, whatsapp,
+                   logradouro, numero, complemento, bairro, cidade, estado
+            FROM compradores
+            WHERE id_comprador = %s;
+            """
+            cursor.execute(query_comprador, (id_comprador,))
+            comprador_info = cursor.fetchone()
+
+            if not comprador_info:
+                return None  # Retorna None se o comprador não for encontrado
+            
+            detalhes.update(comprador_info)
+
+            # 2. Buscar materiais já comprados
             query_materiais = """
             SELECT
                 material_nome,
@@ -357,6 +380,7 @@ class Compradores:
             cursor.execute(query_materiais, (id_comprador,))
             detalhes["materiais_comprados"] = cursor.fetchall()
 
+            # 3. Buscar avaliações recentes
             query_avaliacoes = """
             SELECT
                 avaliacao_score AS score,
@@ -369,11 +393,28 @@ class Compradores:
             cursor.execute(query_avaliacoes, (id_comprador,))
             detalhes["avaliacoes_recentes"] = cursor.fetchall()
 
+            # 4. Buscar tags de feedback agregadas usando o CNPJ
+            comprador_cnpj = comprador_info.get('cnpj')
+            if comprador_cnpj:
+                query_tags = """
+                SELECT
+                    feedback_texto AS texto,
+                    feedback_tipo AS tipo,
+                    quantidade_mencoes AS quantidade
+                FROM v_feedback_comprador_agregado
+                WHERE cnpj = %s
+                ORDER BY quantidade_mencoes DESC;
+                """
+                cursor.execute(query_tags, (comprador_cnpj,))
+                detalhes["feedback_tags"] = cursor.fetchall()
+            else:
+                detalhes["feedback_tags"] = []
+
             return detalhes
 
         except Exception as e:
             print(f"Erro em 'get_detalhes_comprador': {e}")
-            return detalhes
+            return None
 
         finally:
             cursor.close()

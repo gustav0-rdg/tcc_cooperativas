@@ -235,7 +235,7 @@ async function abrirModalDetalhes(comprador) {
     // Feedback imediato de carregamento
     Swal.fire({
         title: `Carregando ${comprador.razao_social}...`,
-        html: 'Buscando detalhes, materiais e avaliações.',
+        html: 'Buscando todos os detalhes do comprador.',
         allowOutsideClick: false,
         didOpen: () => {
             Swal.showLoading();
@@ -243,38 +243,28 @@ async function abrirModalDetalhes(comprador) {
     });
 
     try {
-        // 1. Busca os dados em paralelo (muito mais rápido)
-        const [detalhesRes, tagsRes, comentariosRes] = await Promise.all([
-            fetch(`/get/comprador-detalhes/${comprador.id_comprador}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }),
-            fetch(`/get/feedback-tags/${comprador.cnpj}`, {
-                headers: { 'Authorization': token }
-            }),
-            fetch(`/get/comentarios-livres/${comprador.cnpj}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-        ]);
+        // 1. Busca todos os dados de um único endpoint
+        const response = await fetch(`/get/comprador-detalhes/${comprador.id_comprador}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-        // 2. Processa os JSON
-        const detalhes = await detalhesRes.json();
-        const tags = await tagsRes.json();
-        const comentarios = await comentariosRes.json();
+        const detalhes = await response.json();
 
-        // 3. Valida se alguma API falhou
-        if (!detalhesRes.ok) throw new Error(detalhes.erro || 'Falha ao buscar detalhes');
-        if (!tagsRes.ok) throw new Error(tags.erro || 'Falha ao buscar tags');
-        if (!comentariosRes.ok) throw new Error(comentarios.erro || 'Falha ao buscar comentários');
+        // Valida se a API falhou
+        if (!response.ok) {
+            throw new Error(detalhes.error || 'Falha ao buscar detalhes do comprador');
+        }
 
-        // 4. Constrói o HTML do modal
-        const modalHtml = construirHtmlModal(comprador, detalhes, tags, comentarios);
+        // 2. Constrói o HTML do modal com os dados consolidados
+        const modalHtml = construirHtmlModal(detalhes);
 
-        // 5. Exibe o SweetAlert completo
+        // 3. Exibe o SweetAlert completo
         Swal.fire({
             html: modalHtml,
-            width: '800px', // Modal mais largo
+            width: '800px',
+            showCloseButton: true,
             confirmButtonText: 'Fechar',
-        confirmButtonColor: 'var(--verde-claro-medio)'
+            confirmButtonColor: 'var(--verde-claro-medio)'
         });
 
     } catch (err) {
@@ -286,14 +276,24 @@ async function abrirModalDetalhes(comprador) {
 /**
  * Constrói o HTML final para o pop-up SweetAlert
  */
-function construirHtmlModal(comprador, detalhes, tags, comentarios) {
+function construirHtmlModal(detalhes) {
+
+    // --- Endereço ---
+    const enderecoFormatado = [
+        detalhes.logradouro,
+        detalhes.numero,
+        detalhes.complemento,
+        detalhes.bairro
+    ].filter(Boolean).join(', ') + ` - ${detalhes.cidade}, ${detalhes.estado}`;
 
     // --- Contatos ---
     let contatosHtml = '';
-    if (comprador.email) contatosHtml += `<li><span class="material-icons">email</span> ${comprador.email}</li>`;
-    if (comprador.telefone) contatosHtml += `<li><span class="material-icons">phone</span> ${comprador.telefone}</li>`;
-    if (comprador.whatsapp) contatosHtml += `<li><span class="material-icons">whatsapp</span> ${comprador.whatsapp}</li>`;
-    if (!contatosHtml) contatosHtml = '<p>Nenhum contato direto informado.</p>';
+    if (detalhes.email) contatosHtml += `<li><span class="material-icons">email</span> ${detalhes.email}</li>`;
+    if (detalhes.telefone) contatosHtml += `<li><span class="material-icons">phone</span> ${detalhes.telefone}</li>`;
+    if (detalhes.whatsapp) contatosHtml += `<li><span class="material-icons">whatsapp</span> ${detalhes.whatsapp}</li>`;
+    // Adiciona o endereço completo à lista de contatos
+    contatosHtml += `<li><span class="material-icons">place</span> ${enderecoFormatado}</li>`;
+
 
     // --- Materiais e Preços ---
     let materiaisHtml = '';
@@ -304,7 +304,6 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
             const precoMax = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             let faixaPreco = `${precoMin} /Kg`;
-            // Só mostra faixa (Ex: R$1,50 a R$2,00) se os preços forem diferentes
             if (precoMin !== precoMax) {
                 faixaPreco = `${precoMin} a ${precoMax} /Kg`;
             }
@@ -323,9 +322,9 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
 
     // --- Tags de Feedback (Positivas e Negativas) ---
     let tagsHtml = '';
-    if (tags && tags.length > 0) {
+    const tags = detalhes.feedback_tags || [];
+    if (tags.length > 0) {
         tagsHtml = tags.map(tag => {
-            // O seu comentarios_controller já retorna o 'tipo'
             const tagClass = tag.tipo === 'positivo' ? 'positivo' : 'negativo';
             return `
                 <div class="feedback-tag ${tagClass}">
@@ -338,85 +337,39 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
         tagsHtml = '<p>Ainda não há avaliações rápidas para este comprador.</p>';
     }
 
-    // --- Avaliações Recentes ---
+    // --- Avaliações Recentes (NOVA VERSÃO) ---
     let avaliacoesHtml = '';
     if (detalhes.avaliacoes_recentes && detalhes.avaliacoes_recentes.length > 0) {
-        // Agrupar avaliações por data (mais recentes primeiro)
-        const avaliacoesAgrupadas = {};
-        detalhes.avaliacoes_recentes.forEach(aval => {
+        // Limita para no máximo 5 avaliações para não poluir o modal
+        const avaliacoesLimitadas = detalhes.avaliacoes_recentes.slice(0, 5);
+
+        avaliacoesHtml = avaliacoesLimitadas.map(aval => {
             const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
-            if (!avaliacoesAgrupadas[dataFormatada]) {
-                avaliacoesAgrupadas[dataFormatada] = [];
+            const estrelasHtml = gerarEstrelas(aval.score); // Usando o campo 'score'
+            
+            let comentarioHtml = '';
+            if (aval.comentario_livre && aval.comentario_livre.trim() !== '') {
+                comentarioHtml = `<p class="avaliacao-comentario">“${aval.comentario_livre}”</p>`;
             }
-            avaliacoesAgrupadas[dataFormatada].push(aval);
-        });
-
-        // Mostrar apenas as 3 datas mais recentes
-        const datasRecentes = Object.keys(avaliacoesAgrupadas).sort((a, b) => new Date(b) - new Date(a)).slice(0, 3);
-
-        avaliacoesHtml = datasRecentes.map(data => {
-            const avaliacoesDia = avaliacoesAgrupadas[data];
-            const mediaPontualidade = avaliacoesDia.reduce((sum, aval) => sum + aval.pontualidade_pagamento, 0) / avaliacoesDia.length;
-            const mediaLogistica = avaliacoesDia.reduce((sum, aval) => sum + aval.logistica_entrega, 0) / avaliacoesDia.length;
-            const mediaNegociacao = avaliacoesDia.reduce((sum, aval) => sum + aval.qualidade_negociacao, 0) / avaliacoesDia.length;
-
-            const estrelasPontualidade = gerarEstrelas(mediaPontualidade);
-            const estrelasLogistica = gerarEstrelas(mediaLogistica);
-            const estrelasNegociacao = gerarEstrelas(mediaNegociacao);
-
-            const comentariosDia = avaliacoesDia.filter(aval => aval.comentario_livre).map(aval => aval.comentario_livre);
 
             return `
                 <li class="avaliacao-item">
                     <div class="avaliacao-header">
-                        <span class="avaliacao-data">${data}</span>
-                        <span class="avaliacao-count">(${avaliacoesDia.length} avaliação${avaliacoesDia.length > 1 ? 'ões' : ''})</span>
+                        <div class="avaliacao-estrelas">${estrelasHtml}</div>
+                        <span class="avaliacao-data">${dataFormatada}</span>
                     </div>
-                    <div class="avaliacao-scores">
-                        <div class="score-item">
-                            <span class="score-label">Pontualidade:</span>
-                            ${estrelasPontualidade}
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Logística:</span>
-                            ${estrelasLogistica}
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Negociação:</span>
-                            ${estrelasNegociacao}
-                        </div>
-                    </div>
-                    ${comentariosDia.length > 0 ? `<div class="avaliacao-comentarios">${comentariosDia.map(com => `<p class="avaliacao-comentario">"${com}"</p>`).join('')}</div>` : ''}
+                    ${comentarioHtml}
                 </li>
             `;
         }).join('');
     } else {
         avaliacoesHtml = '<p>Nenhuma avaliação recente registrada.</p>';
     }
-
-    // --- Comentários Livres (ANÔNIMOS) ---
-    let comentariosHtml = '';
-    if (comentarios && comentarios.length > 0) {
-        comentariosHtml = comentarios.map(com => {
-            return `
-                <li class="comment-item">
-                    <p class="comment-text">"${com.comentario_livre}"</p>
-                    <p class="comment-anon">- Avaliação feita por uma Cooperativa</p>
-                </li>
-            `;
-        }).join('');
-    } else {
-        comentariosHtml = '<p>Nenhum comentário adicional registrado.</p>';
-    }
-
+    
     // --- Montagem Final ---
     return `
         <div class="swal-modal-container">
-            <h2 class="swal-modal-title">${comprador.razao_social}</h2>
-            <p class="swal-modal-location">
-                <span class="material-icons">place</span>
-                ${comprador.endereco || 'Endereço não informado'} - ${comprador.cidade}, ${comprador.estado}
-            </p>
+            <h2 class="swal-modal-title">${detalhes.razao_social}</h2>
 
             <section class="swal-modal-section">
                 <h3 class="swal-modal-subtitle"><span class="material-icons">contacts</span> Contato</h3>
@@ -436,11 +389,6 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
             <section class="swal-modal-section">
                 <h3 class="swal-modal-subtitle"><span class="material-icons">thumb_up_alt</span> Avaliações Rápidas</h3>
                 <div class="feedback-tags-container">${tagsHtml}</div>
-            </section>
-
-            <section class="swal-modal-section">
-                <h3 class="swal-modal-subtitle"><span class="material-icons">chat</span> Comentários (Anônimos)</h3>
-                <ul class="comment-list">${comentariosHtml}</ul>
             </section>
         </div>
     `;

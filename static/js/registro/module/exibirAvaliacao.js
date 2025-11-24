@@ -112,76 +112,168 @@ export function exibirAvaliacao() {
     const finalizarBtn = finalizar.querySelector('.finalizar__btn');
     const pularBtn = finalizar.querySelector('.pular-avaliacao');
 
-    finalizarBtn.addEventListener('click', () => {
-        vendaAtual.avaliacao.nota = notaAtual;
-        vendaAtual.avaliacao.analise = comentarioOpcional;
+    finalizarBtn.addEventListener('click', async () => {
+        try {
+            vendaAtual.avaliacao.nota = notaAtual;
+            vendaAtual.avaliacao.analise = comentarioOpcional;
+            
+            // Adicionar comentários rápidos à avaliação, se existirem
+            if (!vendaAtual.avaliacao.comentarios_rapidos) {
+                vendaAtual.avaliacao.comentarios_rapidos = [];
+            }
 
-        enviarValores(vendaAtual);
+            const id_avaliacao_pendente = await enviarValores(vendaAtual);
 
-        Swal.fire({
-            icon: "success",
-            title: "Venda registrada!",
-            html: `
-            <div class="relatorio_de_venda">
-                <h3> R$${vendaAtual.total}</h3>
-                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.subtipo} para ${vendaAtual.vendedor.razao_social}</p>
-            </div>
-            <div class="finalizacao_sw">
-                <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
-                <a href="/registrar-venda">Registrar nova venda</a>
-                <a href="/pagina-inicial">Voltar ao ínicio</a>
-            </div>
-                `,
-            color: "var(--verde-escuro)",
-            background: "var(--branco)",
-            showConfirmButton: false,
-            showCancelButton: false,
-        })
-    })
+            if (id_avaliacao_pendente) {
+                // Agora, enviar a avaliação finalizada
+                const token = localStorage.getItem('session_token');
+                const response = await fetch(`/post/finalizar-avaliacao-pendente/${id_avaliacao_pendente}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify(vendaAtual.avaliacao)
+                });
 
-    pularBtn.addEventListener('click', () => {
-        // Remove a avaliação do objeto vendaAtual
-        delete vendaAtual.avaliacao;
+                const data = await response.json();
 
-        enviarValores(vendaAtual);
+                if (!response.ok) {
+                    console.error('Erro ao finalizar avaliação:', data.erro || data.error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro ao finalizar avaliação",
+                        text: data.erro || data.error || "Ocorreu um erro ao finalizar a avaliação.",
+                        color: "var(--vermelho)",
+                        background: "var(--branco)",
+                        confirmButtonColor: "var(--vermelho)"
+                    });
+                    return;
+                }
+                console.log('Avaliação finalizada com sucesso:', data);
+            }
 
-        Swal.fire({
-            icon: "success",
-            title: "Venda registrada!",
-            html: `
-            <div class="relatorio_de_venda">
-                <h3> R$${vendaAtual.total}</h3>
-                <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.subtipo} para ${vendaAtual.vendedor.razao_social}</p>
-            </div>
-            <div class="finalizacao_sw">
-                <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
-                <a href="/registrar-venda">Registrar nova venda</a>
-                <a href="/pagina-inicial">Voltar ao ínicio</a>
-            </div>
-                `,
-            color: "var(--verde-escuro)",
-            background: "var(--branco)",
-            showConfirmButton: false,
-            showCancelButton: false,
-        })
-    })
+            Swal.fire({
+                icon: "success",
+                title: "Venda registrada!",
+                html: `
+                <div class="relatorio_de_venda">
+                    <h3> R$${vendaAtual.total}</h3>
+                    <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.subtipo} para ${vendaAtual.vendedor.razao_social}</p>
+                </div>
+                <div class="finalizacao_sw">
+                    <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
+                    <a href="/registrar-venda">Registrar nova venda</a>
+                    <a href="/pagina-inicial">Voltar ao ínicio</a>
+                </div>
+                    `,
+                color: "var(--verde-escuro)",
+                background: "var(--branco)",
+                showConfirmButton: false,
+                showCancelButton: false,
+            });
+        } catch (error) {
+            console.error('Erro no processo de registro/avaliação:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Erro no Registro da Venda",
+                text: error.message || "Ocorreu um erro ao registrar a venda ou finalizar a avaliação.",
+                color: "var(--vermelho)",
+                background: "var(--branco)",
+                confirmButtonColor: "var(--vermelho)"
+            });
+        }
+    });
+
+    pularBtn.addEventListener('click', async () => {
+        try {
+            // Remove a avaliação do objeto vendaAtual antes de registrar a venda para não enviar dados de avaliação incompletos
+            // A avaliação será criada como pendente e depois explicitamente pulada/removida.
+            delete vendaAtual.avaliacao; 
+
+            const id_avaliacao_pendente = await enviarValores(vendaAtual);
+
+            if (id_avaliacao_pendente) {
+                // Agora, chamar o endpoint para pular/remover a avaliação pendente
+                const token = localStorage.getItem('session_token');
+                const response = await fetch(`/post/pular-avaliacao/${id_avaliacao_pendente}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json',
+                        'Authorization': token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('Erro ao pular avaliação:', data.erro || data.error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro ao pular avaliação",
+                        text: data.erro || data.error || "Ocorreu um erro ao pular a avaliação.",
+                        color: "var(--vermelho)",
+                        background: "var(--branco)",
+                        confirmButtonColor: "var(--vermelho)"
+                    });
+                    return;
+                }
+                console.log('Avaliação pulada com sucesso:', data);
+            }
+
+            Swal.fire({
+                icon: "success",
+                title: "Venda registrada!",
+                html: `
+                <div class="relatorio_de_venda">
+                    <h3> R$${vendaAtual.total}</h3>
+                    <p>${vendaAtual.quantidade}Kg de ${vendaAtual.material.subtipo} para ${vendaAtual.vendedor.razao_social}</p>
+                </div>
+                <div class="finalizacao_sw">
+                    <p>Obrigado por registrar sua venda!<br>Isso ajuda toda a comunidade. </p>
+                    <a href="/registrar-venda">Registrar nova venda</a>
+                    <a href="/pagina-inicial">Voltar ao ínicio</a>
+                </div>
+                    `,
+                color: "var(--verde-escuro)",
+                background: "var(--branco)",
+                showConfirmButton: false,
+                showCancelButton: false,
+            });
+        } catch (error) {
+            console.error('Erro no processo de registro/pular avaliação:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Erro no Registro da Venda",
+                text: error.message || "Ocorreu um erro ao registrar a venda ou pular a avaliação.",
+                color: "var(--vermelho)",
+                background: "var(--branco)",
+                confirmButtonColor: "var(--vermelho)"
+            });
+        }
+    });
 }
 
 const enviarValores = async (dados) =>{
     await getCoop();
     console.log('dados', JSON.stringify(dados))
-    fetch('/post/dados-venda', {
+    const response = await fetch('/post/dados-venda', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json',
         },
         body: JSON.stringify(dados)
-    }).then(response => response.json())
-    .then(data =>{
-        console.log('Sucesso:', data);
-    }).catch((error) =>{
-        console.error('erro:', error)
-    })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error('Erro:', data.erro || 'Falha ao registrar a venda');
+        throw new Error(data.erro || 'Falha ao registrar a venda');
+    }
+
+    console.log('Sucesso:', data);
+    return data.id_avaliacao_pendente; // Retorna o ID da avaliação pendente
 }
 
 function mudarTipo(nota){
