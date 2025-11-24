@@ -89,13 +89,46 @@ class Compradores:
                 email = email_info.get('address', '').strip() if email_info else None
             
             # ===== INSERÇÃO NO BANCO =====
-            cursor.execute("""
-                    INSERT INTO compradores(cnpj, razao_social, endereco, cidade, estado, telefone, email) VALUES (%s,%s,%s,%s,%s,%s,%s);
-            """, (cnpj, razao_social, endereco,cidade, estado, telefone, email))
+            query = """
+                INSERT INTO compradores(
+                    cnpj, razao_social, nome_fantasia, email, telefone, whatsapp, 
+                    cep, logradouro, numero, complemento, bairro, cidade, estado
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    razao_social = VALUES(razao_social),
+                    nome_fantasia = VALUES(nome_fantasia),
+                    email = VALUES(email),
+                    telefone = VALUES(telefone),
+                    whatsapp = VALUES(whatsapp),
+                    cep = VALUES(cep),
+                    logradouro = VALUES(logradouro),
+                    numero = VALUES(numero),
+                    complemento = VALUES(complemento),
+                    bairro = VALUES(bairro),
+                    cidade = VALUES(cidade),
+                    estado = VALUES(estado),
+                    ultima_atualizacao = NOW();
+            """
+            params = (
+                data.get('taxId'),
+                data.get('company', {}).get('name'),
+                data.get('company', {}).get('alias'),
+                email,
+                telefone,
+                whatsapp,
+                endereco_info.get('zip'),
+                rua,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                estado
+            )
+            cursor.execute(query, params)
             self.connection_db.commit()
             
-            print(f"✅ Comprador cadastrado: {razao_social}")
-            print(f"   Endereço: {endereco}")
+            print(f"✅ Comprador cadastrado/atualizado: {razao_social}")
+            print(f"   Endereço: {rua}, {numero} - {bairro}")
             print(f"   Telefone: {telefone}")
             print(f"   WhatsApp: {whatsapp}")
             print(f"   Email: {email}")
@@ -126,13 +159,14 @@ class Compradores:
                     c.latitude, 
                     c.longitude,
                     c.numero_avaliacoes,
-                    c.data_cadastro,
+                    c.data_criacao,
                     MAX(vi.preco_por_kg) AS `preco_maximo`,
                     MIN(vi.preco_por_kg) AS `preco_minimo`,
                     AVG(vi.preco_por_kg) AS `preco_medio`
                 FROM compradores c
                 LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
                 LEFT JOIN vendas_itens vi ON v.id_venda = vi.id_venda
+                LEFT JOIN materiais_catalogo mc ON vi.id_material_catalogo = mc.id_material_catalogo
             """
 
             params = []
@@ -142,7 +176,7 @@ class Compradores:
 
             if material_id:
 
-                where_clauses.append("LIKE vi.id_material_base = %s")
+                where_clauses.append("mc.id_material_base = %s")
                 params.append(material_id)
 
             # Filtro por estado
@@ -161,8 +195,8 @@ class Compradores:
             query += """
                 GROUP BY 
                     c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
-                    c.endereco, c.cidade, c.estado, c.score_confianca, 
-                    c.latitude, c.longitude, c.numero_avaliacoes, c.data_cadastro
+                    c.logradouro, c.numero, c.bairro, c.cidade, c.estado, c.score_confianca, 
+                    c.latitude, c.longitude, c.numero_avaliacoes, c.data_criacao
             """
 
             query += " ORDER BY c.score_confianca DESC;"
@@ -178,14 +212,16 @@ class Compradores:
                 for comprador in compradores:
 
                     # Calculando a distância usando a função Haversine
+                    if comprador['latitude'] and comprador['longitude']:
+                        distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
+                        comprador['distancia'] = round(distancia, 2)
+                    else:
+                        comprador['distancia'] = float('inf') # Se não houver coordenadas, vai para o fim da lista
 
-                    distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
-                    comprador['distancia'] = round(distancia, 2)
-
-                    if raio_km is None or distancia <= raio_km:
+                    if raio_km is None or (comprador['distancia'] != float('inf') and comprador['distancia'] <= raio_km):
                         compradores_filtrados.append(comprador)
 
-            compradores_filtrados.sort(key=lambda x: x['distancia'])
+            compradores_filtrados.sort(key=lambda x: x.get('distancia', float('inf')))
             return compradores_filtrados
 
         except Exception as e:
@@ -205,19 +241,18 @@ class Compradores:
                 mb.nome AS material_base,
                 c.razao_social,
                 SUM(vi.quantidade_kg) AS quantidade_kg,
-                SUM(v.valor_total) AS valor_total,
+                SUM(vi.total_item) AS valor_total,
                 AVG(c.score_confianca) AS score_confianca,
-                SUM(c.numero_avaliacoes) AS numero_avaliacoes
-            FROM v_compradores_publico AS c
+                c.numero_avaliacoes
+            FROM compradores AS c
             INNER JOIN vendas AS v ON c.id_comprador = v.id_comprador
             INNER JOIN vendas_itens AS vi ON v.id_venda = vi.id_venda
             INNER JOIN materiais_catalogo AS mc ON vi.id_material_catalogo = mc.id_material_catalogo
-            INNER JOIN materiais_base AS mb ON vi.id_material_base = mb.id_material_base
+            INNER JOIN materiais_base AS mb ON mc.id_material_base = mb.id_material_base
             WHERE mb.id_material_base = %s
             AND mc.id_material_catalogo = %s
             GROUP BY mb.nome, c.id_comprador, c.razao_social
             ORDER BY quantidade_kg DESC;
-
         """
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
@@ -244,8 +279,15 @@ class Compradores:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             query = """
-            SELECT * FROM v_compradores_destaque
-            WHERE 1=1
+            SELECT 
+                c.id_comprador,
+                c.razao_social,
+                c.cidade,
+                c.estado,
+                c.score_confianca,
+                c.numero_avaliacoes
+            FROM compradores c
+            WHERE c.deletado_em IS NULL
             """
             params = []
 
@@ -254,21 +296,22 @@ class Compradores:
                 AND EXISTS (
                     SELECT 1 FROM vendas v
                     JOIN vendas_itens vi ON v.id_venda = vi.id_venda
-                    WHERE v.id_comprador = v_compradores_destaque.id_comprador
-                    AND vi.id_material_base = %s
+                    JOIN materiais_catalogo mc ON vi.id_material_catalogo = mc.id_material_catalogo
+                    WHERE v.id_comprador = c.id_comprador
+                    AND mc.id_material_base = %s
                 )
                 """
                 params.append(material_id)
 
             if estado:
-                query += " AND estado = %s"
+                query += " AND c.estado = %s"
                 params.append(estado)
 
             if score_min:
-                query += " AND score_confianca >= %s"
+                query += " AND c.score_confianca >= %s"
                 params.append(float(score_min))
 
-            query += " ORDER BY score_confianca DESC LIMIT 20;"
+            query += " ORDER BY c.score_confianca DESC, c.numero_avaliacoes DESC LIMIT 20;"
 
             cursor.execute(query, params)
             resultados = cursor.fetchall()
@@ -284,7 +327,7 @@ class Compradores:
     def get_detalhes_comprador(self, id_comprador: int) -> dict:
         """
         Busca detalhes de um comprador, incluindo materiais já comprados
-        e a faixa de preço (min/max) por material.
+        e a faixa de preço (min/max) por material, utilizando a view v_vendas_detalhadas.
         """
         cursor = self.connection_db.cursor(dictionary=True)
         detalhes = {
@@ -294,15 +337,13 @@ class Compradores:
         try:
             query_materiais = """
             SELECT
-                mc.nome_especifico AS material_nome,
-                COUNT(v.id_venda) AS total_vendas,
-                MIN(v.valor_total / vi.quantidade_kg) AS preco_min_kg,
-                MAX(v.valor_total / vi.quantidade_kg) AS preco_max_kg
-            FROM vendas v
-            JOIN vendas_itens vi ON v.id_venda = vi.id_venda
-            JOIN materiais_catalogo mc ON vi.id_material_catalogo = mc.id_material_catalogo
-            WHERE v.id_comprador = %s AND vi.quantidade_kg > 0
-            GROUP BY mc.nome_especifico
+                material_nome,
+                COUNT(DISTINCT id_venda) AS total_vendas,
+                MIN(preco_por_kg) AS preco_min_kg,
+                MAX(preco_por_kg) AS preco_max_kg
+            FROM v_vendas_detalhadas
+            WHERE id_comprador = %s AND quantidade_kg > 0
+            GROUP BY material_nome
             ORDER BY total_vendas DESC;
             """
             cursor.execute(query_materiais, (id_comprador,))
@@ -310,15 +351,12 @@ class Compradores:
 
             query_avaliacoes = """
             SELECT
-                ac.pontualidade_pagamento,
-                ac.logistica_entrega,
-                ac.qualidade_negociacao,
-                ac.comentario_livre,
-                ac.data_avaliacao
-            FROM avaliacoes_compradores ac
-            JOIN vendas v ON ac.id_venda = v.id_venda
-            WHERE v.id_comprador = %s
-            ORDER BY ac.data_avaliacao DESC;
+                avaliacao_score AS score,
+                avaliacao_comentario AS comentario_livre,
+                data_venda AS data_avaliacao
+            FROM v_vendas_detalhadas
+            WHERE id_comprador = %s AND avaliacao_score IS NOT NULL
+            ORDER BY data_venda DESC;
             """
             cursor.execute(query_avaliacoes, (id_comprador,))
             detalhes["avaliacoes_recentes"] = cursor.fetchall()

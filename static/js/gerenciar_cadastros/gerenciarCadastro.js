@@ -35,6 +35,13 @@ async function carregarSolicitacoes(token) {
         // Esconde o spinner de qualquer forma
         loadingSpinner.style.display = 'none';
 
+        if (response.status === 401) {
+            // Token inválido ou expirado, redireciona para login
+            localStorage.removeItem('session_token');
+            window.location.href = '/login-admin';
+            return;
+        }
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -143,7 +150,7 @@ function handleAprovar(id, token, cardElement) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': token
                     },
                     body: JSON.stringify({ 
                         id_cooperativa: id,
@@ -209,8 +216,8 @@ async function handleRejeitar(id, email, token, cardElement) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                        'Authorization': token
+                    },
                 body: JSON.stringify({
                     id_cooperativa: id,
                     email: email,

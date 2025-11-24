@@ -185,18 +185,13 @@ def get_cooperativas_pendentes():
     if not token_header:
         return jsonify({'error': 'Token não fornecido'}), 401
 
-    try:
-        token = token_header.split(" ")[1]
-    except IndexError:
-        return jsonify({'error': 'Token mal formatado'}), 401
-
     conn = Connection('local')
-    
+
     try:
         # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
         db = conn.connection_db
-        data_token = Tokens(db).validar(token)
-        if not data_token:
+        data_token = Tokens(db).validar(token_header)
+        if data_token is None:
             conn.close()
             return jsonify({'error': 'Token inválido ou expirado'}), 401
         
@@ -238,7 +233,7 @@ def get_avaliacoes_pendentes(id_cooperativa):
         # 1. Validar o Token e Permissão
         db = conn.connection_db
         data_token = Tokens(db).validar(token_header)
-        if not data_token:
+        if data_token is None:
             conn.close()
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
@@ -299,4 +294,46 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
     except Exception as e:
         if conn: conn.close()
         print(f"Erro em /avaliacao-pendente: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_get.route('/comprador-detalhes/<int:id_comprador>', methods=['GET'])
+def get_comprador_detalhes(id_comprador):
+    """
+    Rota para obter os detalhes de um comprador específico.
+    """
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    conn = Connection('local')
+
+    try:
+        # 1. Validar o Token e Permissão
+        db = conn.connection_db
+        token = token_header.split(" ")[1] if " " in token_header else token_header
+        data_token = Tokens(db).validar(token)
+        if data_token is None:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado', 'gestor', 'root']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        # 2. Buscar os detalhes do comprador
+        detalhes = Compradores(db).get_detalhes_comprador(id_comprador)
+
+        if not detalhes:
+            conn.close()
+            return jsonify({'error': 'Detalhes do comprador não encontrados'}), 404
+
+        conn.close()
+        return jsonify(detalhes), 200
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /comprador-detalhes: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500

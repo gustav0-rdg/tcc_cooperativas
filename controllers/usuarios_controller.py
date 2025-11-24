@@ -68,31 +68,26 @@ class Usuarios:
         senha_hash = Usuarios.criptografar(senha)
 
         # Determina qual coluna usar para a busca
-        where_clause = ""
-        params = []
-
+        params = [identificador]
+        
         if "@" in identificador: # Parece um e-mail
+            join_conditions = ""
             where_clause = "u.email = %s"
-            params.append(identificador)
         elif len(identificador) == 14 and identificador.isdigit(): # Parece um CNPJ
+            join_conditions = "LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario"
             where_clause = "c.cnpj = %s"
-            params.append(identificador)
         elif len(identificador) == 11 and identificador.isdigit(): # Parece um CPF
+            join_conditions = "LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario"
             where_clause = "co.cpf = %s"
-            params.append(identificador)
         else:
             return (None, "IDENTIFICADOR_INVALIDO")
 
         query = f"""
             SELECT 
-                u.id_usuario, u.senha_hash, u.tipo, u.status,
-                c.aprovado AS cooperativa_aprovada,
-                co.ativo AS cooperado_ativo
+                u.id_usuario, u.senha_hash, u.tipo, u.status
             FROM usuarios AS u
-            LEFT JOIN cooperativas AS c ON u.id_usuario = c.id_usuario
-            LEFT JOIN cooperados AS co ON u.id_usuario = co.id_usuario
-            WHERE 
-                {where_clause}
+            {join_conditions}
+            WHERE {where_clause}
             LIMIT 1;
         """
         try:
@@ -102,25 +97,18 @@ class Usuarios:
             if not usuario_data or usuario_data['senha_hash'] != senha_hash:
                 return (None, "IDENTIFICADOR_NAO_ENCONTRADO")
 
-            if usuario_data['status'] != 'ativo':
-                return (None, f"USUARIO_{usuario_data['status'].upper()}")
-
-            if usuario_data['tipo'] == 'cooperativa' and not usuario_data['cooperativa_aprovada']:
-                return (None, "COOPERATIVA_NAO_APROVADA")
-
-            if usuario_data['tipo'] == 'cooperado' and not usuario_data['cooperado_ativo']:
-                return (None, "COOPERADO_INATIVO")
+            status = usuario_data['status']
+            if status != 'ativo':
+                # Retorna o status exato para o front-end (ex: PENDENTE, INATIVO, BLOQUEADO)
+                return (None, f"USUARIO_{status.upper()}")
 
             id_usuario = usuario_data['id_usuario']
             token_controller = Tokens(self.connection_db)
 
             data_expiracao = datetime.now() + timedelta(days=30)
 
-            if token_controller.create(id_usuario=id_usuario, tipo='sessao', data_expiracao=data_expiracao):
-                token = token_controller.get_ultimo_token_por_usuario(id_usuario, 'sessao')
-                return (token, "LOGIN_SUCESSO") if token else (None, "ERRO_GERAR_TOKEN")
-            else:
-                return (None, "ERRO_CRIAR_TOKEN")
+            token = token_controller.create(id_usuario=id_usuario, tipo='sessao', data_expiracao=data_expiracao)
+            return (token, "LOGIN_SUCESSO") if token else (None, "ERRO_GERAR_TOKEN")
 
         except Exception as e:
             print(f"Erro - Usuarios 'autenticar' genérico: {e}")

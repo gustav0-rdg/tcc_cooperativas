@@ -17,6 +17,36 @@ class Cooperativa:
         
         self.connection_db = connection_db
 
+    def get(self, identificador: Union[int, str]) -> Optional[dict]:
+        """
+        Busca uma cooperativa por seu ID de cooperativa ou ID de usuário.
+        """
+        if not isinstance(identificador, (int, str)):
+            raise TypeError('Cooperativa "get" - identificador deve ser int ou str')
+
+        # Converte para int se for uma string de dígitos
+        if isinstance(identificador, str) and identificador.isdigit():
+            identificador = int(identificador)
+
+        cursor = self.connection_db.cursor(dictionary=True)
+        try:
+            # A query agora busca em ambas as colunas
+            cursor.execute(
+                """
+                SELECT *
+                FROM v_cooperativas_list
+                WHERE id_cooperativa = %s OR id_usuario = %s;
+                """,
+                (identificador, identificador)
+            )
+            return cursor.fetchone()
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "get": {e}')
+            return None
+        finally:
+            cursor.close()
+
     def get_by_id(self, id_cooperativa: int) -> Optional[dict]:
         if not isinstance(id_cooperativa, int):
             raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
@@ -27,14 +57,13 @@ class Cooperativa:
             cursor.execute(
                 """
                 SELECT
-                c.id_cooperativa,
-                c.id_usuario,
-                c.cnpj,
-                c.razao_social,
-                u.email
-                FROM cooperativas AS c
-                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
-                WHERE c.id_cooperativa = %s;
+                    id_cooperativa,
+                    id_usuario,
+                    cnpj,
+                    razao_social,
+                    email
+                FROM v_cooperativas_list
+                WHERE id_cooperativa = %s;
                 """,
                 (id_cooperativa,)
             )
@@ -48,7 +77,7 @@ class Cooperativa:
 
     def get_by_user_id(self, id_usuario: int) -> Optional[dict]:
         if not isinstance(id_usuario, int):
-            raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
+            raise TypeError('Cooperativa - "id_usuario" (get_by_user_id) deve ser um int')
 
 
         cursor = self.connection_db.cursor(dictionary=True)
@@ -56,16 +85,15 @@ class Cooperativa:
             cursor.execute(
                 """
                 SELECT
-                c.id_cooperativa,
-                c.id_usuario,
-                c.cnpj,
-                c.razao_social,
-                u.email,
-                c.latitude,
-                c.longitude
-                FROM cooperativas AS c
-                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
-                WHERE c.id_usuario = %s;
+                    id_cooperativa,
+                    id_usuario,
+                    cnpj,
+                    razao_social,
+                    email,
+                    latitude,
+                    longitude
+                FROM v_cooperativas_list
+                WHERE id_usuario = %s;
                 """,
                 (id_usuario,)
             )
@@ -77,134 +105,20 @@ class Cooperativa:
         finally:
             cursor.close()
 
-    def get_cooperativa_by_user_id (self, id_usuario) -> list:
-
-        """
-        Consulta todas as cooperativas
-        cadastradas no sistema
-        """
-
-        cursor = self.connection_db.cursor(dictionary=True)
-        print(id_usuario)
-        try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cooperativas.id_cooperativa,
-                    cooperativas.cnpj,
-                    cooperativas.razao_social,
-                    cooperativas.endereco,
-                    cooperativas.cidade,
-                    cooperativas.estado,
-                    cooperativas.latitude,
-                    cooperativas.longitude,
-                    cooperativas.aprovado,
-                    cooperativas.id_usuario,
-                    cooperativas.telefone,
-                    cooperativas.email,
-                    cooperativas.nome_fantasia,
-                    usuarios.status,
-                    cooperativas.ultima_atualizacao,
-                    cooperativas.data_cadastro,
-                    COUNT(vendas.id_venda) AS `total_vendas`,
-                    COALESCE(
-                        GROUP_CONCAT(
-                            DISTINCT materiais_catalogo.nome_especifico ORDER BY materiais_catalogo.nome_especifico SEPARATOR '|'
-                        ), NULL
-                    ) AS `materiais_vendidos`
-                FROM cooperativas
-                INNER JOIN
-                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
-                LEFT JOIN
-                    vendas ON vendas.id_cooperativa = cooperativas.id_cooperativa
-                LEFT JOIN
-                    vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
-                LEFT JOIN materiais_catalogo
-                    ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
-                WHERE cooperativas.id_usuario = %s
-                GROUP BY
-                    cooperativas.id_cooperativa;
-                
-                """, (id_usuario, )
-
-            )
-
-            return cursor.fetchone()
-
-        except Exception as e:
-
-            print(f'Erro - Cooperativa "get_coopeariva_by_user_id": {e}')
-
-            return False
-
-        finally:
-
-            cursor.close()
-
     def get_all (self) -> list:
-
         """
-        Consulta todas as cooperativas
-        cadastradas no sistema
+        Consulta todas as cooperativas cadastradas no sistema usando a view otimizada.
         """
-
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
-
-            cursor.execute (
-
-                """
-                SELECT
-                    cooperativas.id_cooperativa,
-                    cooperativas.cnpj,
-                    cooperativas.razao_social,
-                    cooperativas.endereco,
-                    cooperativas.cidade,
-                    cooperativas.estado,
-                    cooperativas.latitude,
-                    cooperativas.longitude,
-                    cooperativas.aprovado,
-                    cooperativas.id_usuario,
-                    cooperativas.telefone,
-                    cooperativas.email,
-                    cooperativas.nome_fantasia,
-                    usuarios.status,
-                    cooperativas.ultima_atualizacao,
-                    cooperativas.data_cadastro,
-                    COUNT(vendas.id_venda) AS `total_vendas`,
-                    COALESCE(
-                        GROUP_CONCAT(
-                            DISTINCT materiais_catalogo.nome_especifico ORDER BY materiais_catalogo.nome_especifico SEPARATOR '|'
-                        ), NULL
-                    ) AS `materiais_vendidos`
-                FROM cooperativas
-                INNER JOIN
-                    usuarios ON usuarios.id_usuario = cooperativas.id_usuario
-                LEFT JOIN
-                    vendas ON vendas.id_cooperativa = cooperativas.id_cooperativa
-                LEFT JOIN
-                    vendas_itens ON vendas_itens.id_venda = vendas.id_venda  
-                LEFT JOIN materiais_catalogo
-                    ON materiais_catalogo.id_material_catalogo = vendas_itens.id_material_catalogo
-                GROUP BY
-                    cooperativas.id_cooperativa;
-                """
-
-            )
-
+            cursor.execute ("""
+                SELECT * FROM v_cooperativas_list ORDER BY razao_social;
+            """)
             return cursor.fetchall()
-
         except Exception as e:
-
             print(f'Erro - Cooperativa "get_all": {e}')
-
-            return False
-
+            return []
         finally:
-
             cursor.close()
 
     def vincular_cooperado(
@@ -360,27 +274,40 @@ class Cooperativa:
             cursor.close()
 
     def alterar_aprovacao(self, id_cooperativa: int, aprovado: bool) -> bool:
-
         if not isinstance(id_cooperativa, int):
             raise TypeError('Cooperativa - "id_cooperativa" deve ser int')
         if not isinstance(aprovado, bool):
             raise TypeError('Cooperativa - "aprovado" deve ser boolean')
 
-
         cursor = self.connection_db.cursor()
         try:
+            novo_status = 'ativo' if aprovado else 'reprovado'
+            
+            # Primeiro, pegamos o id_usuario da cooperativa
+            cursor.execute("SELECT id_usuario FROM cooperativas WHERE id_cooperativa = %s", (id_cooperativa,))
+            resultado = cursor.fetchone()
+            
+            if not resultado:
+                print(f"Erro: Cooperativa com ID {id_cooperativa} não encontrada.")
+                return False
+            
+            id_usuario = resultado[0]
+
+            # Agora, atualizamos o status do usuário correspondente
             cursor.execute(
                 """
-                UPDATE cooperativas
-                SET aprovado = %s
-                WHERE id_cooperativa = %s;
+                UPDATE usuarios
+                SET status = %s
+                WHERE id_usuario = %s;
                 """,
-                (aprovado, id_cooperativa)
+                (novo_status, id_usuario)
             )
+            self.connection_db.commit()
             return cursor.rowcount > 0
         
         except Exception as e:
             print(f'Erro - Cooperativa "alterar_aprovacao": {e}')
+            self.connection_db.rollback()
             return False
         
         finally:
@@ -437,37 +364,31 @@ class Cooperativa:
             if not coordenadas is None:
                 latitude, longitude = coordenadas
 
+        # Extrai o nome do arquivo da URL para usar como nome original
+            nome_arquivo_original = arquivo_url.split('/')[-1]
+
             cursor.execute (
                 """
                 INSERT INTO cooperativas 
-                    (id_usuario, cnpj, razao_social, nome_fantasia, email, telefone, endereco, cidade, estado, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    (id_usuario, cnpj, razao_social, nome_fantasia, email_contato, telefone, 
+                     logradouro, numero, complemento, bairro, cidade, estado, cep, latitude, longitude)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
                 (
-                    id_usuario, 
-                    cnpj,
-                    razao_social,
-                    nome_fantasia,
-                    email,
-                    telefone,
-                    f'{rua}, {numero} - {distrito}',
-                    cidade,
-                    estado,
-                    latitude,
-                    longitude
+                    id_usuario, cnpj, razao_social, nome_fantasia, email, telefone,
+                    rua, numero, None, distrito, cidade, estado, cep, latitude, longitude
                 )
             )
 
             id_cooperativa = cursor.lastrowid
 
             cursor.execute(
-
                 """
-                INSERT INTO documentos_cooperativa (id_cooperativa, arquivo_url, status)
-                VALUES (%s, %s, 'pendente');
+                INSERT INTO documentos_cooperativas 
+                (id_cooperativa, tipo_documento, nome_arquivo_original, nome_arquivo_armazenado, caminho_completo, tamanho_bytes, status)
+                VALUES (%s, %s, %s, %s, %s, %s, 'pendente');
                 """,
-
-                (id_cooperativa, arquivo_url)
+                (id_cooperativa, 'estatuto', nome_arquivo_original, nome_arquivo_original, arquivo_url, 0) # Tamanho 0 como placeholder
             )
 
             self.connection_db.commit()
@@ -484,19 +405,22 @@ class Cooperativa:
 
     def adicionar_documento(self, id_cooperativa: int, arquivo_url: str) -> Optional[int]:
         cursor = self.connection_db.cursor()
-
         try:
+            nome_arquivo = arquivo_url.split('/')[-1]
             cursor.execute(
                 """
-                INSERT INTO documentos_cooperativa (id_cooperativa, arquivo_url, status)
-                VALUES (%s, %s, 'pendente');
+                INSERT INTO documentos_cooperativas 
+                (id_cooperativa, tipo_documento, nome_arquivo_original, nome_arquivo_armazenado, caminho_completo, tamanho_bytes, status)
+                VALUES (%s, %s, %s, %s, %s, %s, 'pendente');
                 """,
-                (id_cooperativa, arquivo_url)
+                (id_cooperativa, 'documento_adicional', nome_arquivo, nome_arquivo, arquivo_url, 0)
             )
+            self.connection_db.commit()
             return cursor.lastrowid
         
         except Exception as e:
             print(f'Erro - Cooperativa "adicionar_documento": {e}')
+            self.connection_db.rollback()
             return None
         
         finally:
@@ -505,24 +429,7 @@ class Cooperativa:
     def get_pendentes_com_documentos(self) -> list | bool:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
-            query = """
-                SELECT
-                    u.email,
-                    c.id_cooperativa,
-                    c.razao_social,
-                    c.cnpj,
-                    c.data_cadastro,
-                    GROUP_CONCAT(DISTINCT doc.arquivo_url SEPARATOR ',') AS arquivo_url
-                FROM cooperativas AS c
-                JOIN usuarios AS u ON c.id_usuario = u.id_usuario
-                LEFT JOIN documentos_cooperativa AS doc ON c.id_cooperativa = doc.id_cooperativa
-                    AND doc.status = 'pendente'
-                WHERE
-                    c.aprovado = FALSE
-                    AND u.status = 'pendente'
-                GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_cadastro;
-                """
-            
+            query = "SELECT * FROM v_cooperativas_pendentes;"
             cursor.execute(query)
             return cursor.fetchall()
         
@@ -535,27 +442,27 @@ class Cooperativa:
 
     def rejeitar_documento(self, id_cooperativa: int, id_gestor_avaliador: int, motivo: str, justificativa: str) -> bool:
         cursor = self.connection_db.cursor()
-
         try:
             motivo_completo = f"Motivo: {motivo}. Justificativa: {justificativa}"
             cursor.execute(
                 """
-                UPDATE documentos_cooperativa
+                UPDATE documentos_cooperativas
                 SET
-                status = 'negado',
-                motivo_rejeicao = %s,
-                data_avaliacao = NOW(),
-                id_gestor_avaliador = %s
+                    status = 'negado',
+                    motivo_rejeicao = %s,
+                    data_avaliacao = NOW(),
+                    avaliado_por = %s
                 WHERE
-                id_cooperativa = %s AND status = 'pendente';
+                    id_cooperativa = %s AND status = 'pendente';
                 """,
                 (motivo_completo, id_gestor_avaliador, id_cooperativa)
-                )
-            
+            )
+            self.connection_db.commit()
             return cursor.rowcount > 0
         
         except Exception as e:
             print(f'Erro - Cooperativa "rejeitar_documento": {e}')
+            self.connection_db.rollback()
             return False
         
         finally:

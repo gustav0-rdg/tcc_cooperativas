@@ -618,7 +618,7 @@ async function buscarDadosOriginais() {
     try {
         const response = await fetch('/get/cooperativa-info', {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': token
             }
         });
 
@@ -660,7 +660,7 @@ async function salvarAlteracoes() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': token
             },
             body: JSON.stringify({
                 nome,

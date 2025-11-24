@@ -267,12 +267,12 @@ def get (identificador:int|str):
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada.'}), 404
 
-            # Compara se o 'identificador' da URL bate com algum dos IDs
-            # da cooperativa que está logada.
-            if (identificador != dados_cooperativa_logada['id_usuario']):
-                # Se o ID da URL não bate com NENHUM, é uma tentativa de acesso indevido.
+            # Se o ID da URL não bate com NENHUM, é uma tentativa de acesso indevido.
+            if (str(identificador) != str(dados_cooperativa_logada['id_usuario']) and str(identificador) != str(dados_cooperativa_logada['id_cooperativa'])):
                 return jsonify({'error': 'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}), 403
-        dados_cooperativa = Cooperativa(conn.connection_db).get_cooperativa_by_user_id(identificador)
+        
+        # A lógica principal de busca usa o identificador da URL, mas apenas após as checagens de segurança acima.
+        dados_cooperativa = Cooperativa(conn.connection_db).get(identificador)
 
         match dados_cooperativa:
 

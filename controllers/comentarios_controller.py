@@ -9,17 +9,12 @@ class Comentarios:
     def get_feedback_tags(self, cnpj):
         query_sql = """
         SELECT
-            f.texto,
-            f.tipo,
-            COUNT(f.texto) AS quantidade
-        FROM compradores AS c
-        INNER JOIN vendas AS v ON c.id_comprador = v.id_comprador
-        INNER JOIN avaliacoes_compradores AS ac ON v.id_venda = ac.id_venda
-        INNER JOIN avaliacao_feedback_selecionado AS afs ON ac.id_avaliacao = afs.id_avaliacao
-        INNER JOIN feedback_tags AS f ON afs.id_feedback_tag = f.id_feedback_tag
-        WHERE c.cnpj = %s
-        GROUP BY f.texto, f.tipo
-        ORDER BY quantidade DESC;
+            feedback_texto AS texto,
+            feedback_tipo AS tipo,
+            quantidade_mencoes AS quantidade
+        FROM v_feedback_comprador_agregado
+        WHERE cnpj = %s
+        ORDER BY quantidade_mencoes DESC;
         """
         results = []
         try:

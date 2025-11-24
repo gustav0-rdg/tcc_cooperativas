@@ -6,7 +6,6 @@ from controllers.materiais_controller import Materiais
 from controllers.cooperados_controller import Catadores
 from controllers.tokens_controller import Tokens
 from controllers.avaliacoes_controller import Avaliacoes
-import json
 
 api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
@@ -19,7 +18,7 @@ def postar_dados_de_venda():
         processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
         return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
     except Exception as e:
-        print(e)
+        return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
         if conn:
             conn.close()
@@ -32,11 +31,11 @@ def postar_dados_comprador():
         Compradores(conn.connection_db).create(str(dados_recebidos))
         return({"status":"sucesso", "mensagem":"Dados do comprador recebidos"})
     except Exception as e:
-        print(e)
+        return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
         conn.close()
 
-# eu que fiz samuel corrija
+# Corrigido: Agora obtém id_cooperativa corretamente do token
 
 @api_post.route("/cadastrar-sinonimo", methods=["POST"])
 def registrar_sinonimo():
@@ -44,42 +43,28 @@ def registrar_sinonimo():
 
     nome_padrao = data.get('nome_padrao')
     sinonimo = data.get('sinonimo')
-    # GRANDE AVISOOOO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    # TEM QUE COLOCAR O ID QUANDO FOR USAR USER
-    id_cooperativa = 1
 
+    # Obter id_cooperativa do token
+    token_header = request.headers.get('Authorization')
+    if not token_header:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    try:
+        token = token_header.split(" ")[1] if " " in token_header else token_header
+    except IndexError:
+        return jsonify({'error': 'Token mal formatado'}), 401
+
+    conn = Connection('local')
+    data_token = Tokens(conn.connection_db).validar(token)
+    if not data_token or data_token['tipo'] != 'sessao':
+        return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+    id_cooperativa = data_token['id_usuario']  # Assumindo que id_usuario é id_cooperativa para cooperativas
 
     if not all([nome_padrao, sinonimo]):
         return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
-
-    conn = Connection('local')
 
     resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
-    return resposta
-
-@api_post.route("/cadastrar-sinonimo-base", methods=["POST"])
-def registrar_sinonimo_base():
-    data = request.get_json()
-
-    nome_padrao = data.get('nome_padrao')
-    sinonimo = data.get('sinonimo')
-    id_cooperativa = 1
-
-    if not all([nome_padrao, sinonimo]):
-        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
-
-    conn = Connection('local')
-
-    resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo_base(nome_padrao, sinonimo, id_cooperativa)
     return resposta
 
 @api_post.route("/cadastrar-material-base", methods=["POST"])
@@ -92,7 +77,28 @@ def cadastrar_material_base():
         if not nome_material:
             return jsonify({'message': 'Nome do material é obrigatório.'}), 400
 
+        # Obter id_cooperativa do token
+        token_header = request.headers.get('Authorization')
+        if not token_header:
+            return jsonify({'error': 'Token não fornecido'}), 401
+
+        try:
+            token = token_header.split(" ")[1] if " " in token_header else token_header
+        except IndexError:
+            return jsonify({'error': 'Token mal formatado'}), 401
+
         conn = Connection('local')
+        data_token = Tokens(conn.connection_db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        # Obter id_cooperativa do usuário logado
+        from controllers.cooperativa_controller import Cooperativa
+        coop_info = Cooperativa(conn.connection_db).get_by_user_id(data_token['id_usuario'])
+        if not coop_info:
+            return jsonify({'error': 'Cooperativa não encontrada para o usuário'}), 404
+        id_cooperativa = coop_info['id_cooperativa']
+
         resposta = Materiais(conn.connection_db).cadastrar_material_base(nome_material, id_cooperativa)
         return resposta
     except Exception as e:
@@ -109,8 +115,7 @@ def cadastrar_subtipo():
         resposta = Materiais(conn.connection_db).cadastrar_subtipo(data["nome_especifico"], data["id_material_base"])
         return jsonify({'sucesso':'cadastro'})
     except Exception as e:
-        print(e)
-        return jsonify({'erro':e})
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
     finally:
         conn.close()
 
@@ -141,13 +146,17 @@ def cadastrar_sinonimo_base():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
-        id_cooperativa = data_token['id_usuario']  # Assumindo que id_usuario é id_cooperativa para cooperativas
+        # Obter id_cooperativa do usuário logado
+        from controllers.cooperativa_controller import Cooperativa
+        coop_info = Cooperativa(conn.connection_db).get_by_user_id(data_token['id_usuario'])
+        if not coop_info:
+            return jsonify({'error': 'Cooperativa não encontrada para o usuário'}), 404
+        id_cooperativa = coop_info['id_cooperativa']
 
         resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo_base(id_material_base, sinonimo, id_cooperativa)
         return resposta
 
     except Exception as e:
-        print(f"Erro ao cadastrar sinônimo base: {e}")
         return jsonify({'message': 'Erro interno do servidor.'}), 500
     finally:
         if 'conn' in locals():
@@ -197,5 +206,4 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
 
     except Exception as e:
         if conn: conn.close()
-        print(f"Erro em /finalizar-avaliacao-pendente: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500

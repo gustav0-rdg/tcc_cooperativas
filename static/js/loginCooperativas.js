@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
     
                 setTimeout(() => {
-                    window.location.href = '/pagina-inicial';
+                    window.location.href = data; // Redireciona para a URL retornada
                 }, 1500);
             }
 

@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, render_template
 from dotenv import load_dotenv
 from os import getenv
 
@@ -54,9 +54,13 @@ def verificar_autenticacao():
        request.path.startswith('/post/'):
         return
 
+    # Se a rota não existe, deixa o Flask lidar com 404
+    if request.endpoint is None:
+        return
+
     # Para outras rotas, verifica se há token válido (header ou cookie)
     token = request.headers.get('Authorization') or request.cookies.get('session_token')
-    
+
     if not token:
         return redirect('/')
 
@@ -67,15 +71,27 @@ def verificar_autenticacao():
             if not data_token:
                 conn.close()
                 return redirect('/')
-        
+
         conn.close()
-        return 
+        return
 
     except Exception as e:
         print(f"Erro no middleware: {e}")
         if conn:
             conn.close()
         return redirect('/')
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('500.html'), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

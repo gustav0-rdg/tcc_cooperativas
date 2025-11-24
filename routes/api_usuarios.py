@@ -108,8 +108,8 @@ def login_generico():
         usuario_controller = Usuarios(conn.connection_db)
         
         token, status_msg = usuario_controller.autenticar(identificador, senha)
-        
-        conn.close() 
+
+        conn.close()
 
         if status_msg == "LOGIN_SUCESSO" and token:
             # Envia o token para o JavaScript
