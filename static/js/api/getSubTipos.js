@@ -6,24 +6,27 @@
  */
 export async function getSubtipos(id_material) {
     try {
-        // Faz a requisição para a rota que criamos no backend
-        const response = await fetch(`/get/subtipos/${id_material}`);
+        const token = localStorage.getItem('session_token');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
 
-        // Verifica se a resposta do servidor foi um sucesso (status 200-299)
-        if (!response.ok) {
-            console.error("Erro do servidor:", response.status, response.statusText);
-            return []; // Retorna uma lista vazia para não quebrar a interface
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // Converte a resposta em JSON
+        const response = await fetch(`/get/subtipos/${id_material}`, { headers });
+
+        if (!response.ok) {
+            console.error("Erro do servidor:", response.status, response.statusText);
+            return [];
+        }
+
         const data = await response.json();
         return data;
 
     } catch (error) {
-        // Captura erros de rede (ex: servidor offline) ou outros problemas
-        console.error("Falha ao buscar materiais:", error);
-        
-        // Retorna uma lista vazia para que a interface continue funcionando
+        console.error("Falha ao buscar subtipos:", error);
         return [];
     }
 }

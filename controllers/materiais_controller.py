@@ -9,32 +9,40 @@ class Materiais:
             raise ValueError(f'Erro - Tokens: valores inválidos para os parametros "connection_db"')
         self.connection_db = connection_db
 
-    def get_all(self):
+    def get_all(self, id_cooperativa: int = None):
         """
-        Busca todos os materiais base para o filtro de busca de compradores.
-
-        Utiliza a classe 'Connection' para estabelecer a conexão.
-
-        Retorna:
-            list: Uma lista de dicionários, onde cada dicionário representa um material base com id_material_base e nome.
-                Retorna uma lista vazia em caso de erro ou se nenhum material for encontrado.
+        Busca todos os materiais base. Se um id_cooperativa for fornecido,
+        substitui os nomes dos materiais pelos sinônimos da cooperativa, se existirem.
         """
         cursor = self.connection_db.cursor(dictionary=True)
-
         try:
+            if id_cooperativa:
+                # A query utiliza a view v_materiais_visiveis que já possui a lógica de sinônimos
+                query = """
+                    SELECT DISTINCT
+                        id_material_base,
+                        categoria AS nome_padrao
+                    FROM v_materiais_visiveis
+                    WHERE id_cooperativa = %s
+                    ORDER BY categoria;
+                """
+                cursor.execute(query, (id_cooperativa,))
+            else:
+                # Query original para usuários não logados ou sem cooperativa
+                query = """
+                    SELECT id_material_base, nome as nome_padrao 
+                    FROM materiais_base 
+                    WHERE ativo = TRUE
+                    ORDER BY ordem_exibicao, nome;
+                """
+                cursor.execute(query)
 
-            # O argumento dictionary=True faz com que os resultados venham como dicionários
-            query = "SELECT id_material_base, nome as nome_padrao FROM materiais_base"
-            cursor.execute(query)
-
-            # 4. Busca todos os resultados
             materiais = cursor.fetchall()
-
             return materiais
 
         except mysql.connector.Error as e:
             print(f"Erro ao buscar os materiais: {e}")
-            return [] # Retorna uma lista vazia em caso de erro
+            return []
 
         finally:
             cursor.close()
@@ -151,32 +159,44 @@ class Materiais:
         finally:
             cursor.close()
 
-    def get_subtipos(self, id_material_base):
+    def get_subtipos(self, id_material_base: int, id_cooperativa: int = None):
         """
-        Busca todos os materiais cadastrados no catálogo do banco de dados.
-
-        Utiliza a classe 'Connection' para estabelecer a conexão.
-
-        Retorna:
-            list: Uma lista de dicionários, onde cada dicionário representa um subtipo de um determinado material.
-                Retorna uma lista vazia em caso de erro ou se nenhum material for encontrado.
+        Busca todos os subtipos de um material. Se um id_cooperativa for fornecido,
+        substitui os nomes dos subtipos pelos sinônimos da cooperativa, se existirem.
         """
+        cursor = self.connection_db.cursor(dictionary=True)
         try:
-            with self.connection_db.cursor(dictionary=True) as cursor:
+            if id_cooperativa:
+                # Query que busca o nome do sinônimo ou o nome original
                 query = """
-                SELECT 
-                    mc.id_material_base,
-                    mc.id_material_catalogo, 
-                    mc.nome_especifico, 
-                    mc.descricao
-                FROM materiais_catalogo AS mc
-                WHERE 
-                    mc.id_material_base = %s;
+                    SELECT
+                        v.id_material_base,
+                        v.id_material_catalogo,
+                        v.nome_material AS nome_especifico,
+                        v.nome_original,
+                        v.descricao
+                    FROM v_materiais_visiveis v
+                    WHERE v.id_material_base = %s AND v.id_cooperativa = %s;
+                """
+                cursor.execute(query, (id_material_base, id_cooperativa))
+            else:
+                # Query original para usuários não logados
+                query = """
+                    SELECT 
+                        mc.id_material_base,
+                        mc.id_material_catalogo, 
+                        mc.nome_especifico,
+                        mc.nome_especifico AS nome_original,
+                        mc.descricao
+                    FROM materiais_catalogo AS mc
+                    WHERE mc.id_material_base = %s AND mc.status = 'aprovado' AND mc.deletado_em IS NULL;
                 """
                 cursor.execute(query, (id_material_base,))
-                results = cursor.fetchall()
-                return results
+            
+            results = cursor.fetchall()
+            return results
         except Exception as e:
-            print(e)
+            print(f"Erro ao buscar subtipos: {e}")
             return []
-    
+        finally:
+            cursor.close()

@@ -41,33 +41,48 @@ def postar_dados_comprador():
 
 @api_post.route("/cadastrar-sinonimo", methods=["POST"])
 def registrar_sinonimo():
-    data = request.get_json()
-
-    nome_padrao = data.get('nome_padrao')
-    sinonimo = data.get('sinonimo')
-
-    # Obter id_cooperativa do token
-    token_header = request.headers.get('Authorization')
-    if not token_header:
-        return jsonify({'error': 'Token não fornecido'}), 401
-
+    conn = None
     try:
-        token = token_header.split(" ")[1] if " " in token_header else token_header
-    except IndexError:
-        return jsonify({'error': 'Token mal formatado'}), 401
+        data = request.get_json()
+        nome_padrao = data.get('nome_padrao')
+        sinonimo = data.get('sinonimo')
 
-    conn = Connection('local')
-    data_token = Tokens(conn.connection_db).validar(token)
-    if not data_token or data_token['tipo'] != 'sessao':
-        return jsonify({'error': 'Token inválido ou expirado'}), 401
+        token_header = request.headers.get('Authorization')
+        if not token_header:
+            return jsonify({'error': 'Token não fornecido'}), 401
 
-    id_cooperativa = data_token['id_usuario']  # Assumindo que id_usuario é id_cooperativa para cooperativas
+        try:
+            token = token_header.split(" ")[1] if " " in token_header else token_header
+        except IndexError:
+            return jsonify({'error': 'Token mal formatado'}), 401
 
-    if not all([nome_padrao, sinonimo]):
-        return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+        conn = Connection('local')
+        db = conn.connection_db
+        data_token = Tokens(db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
 
-    resposta = Materiais(conn.connection_db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
-    return resposta
+        id_usuario = data_token['id_usuario']
+        
+        # Corrigido: Buscar id_cooperativa a partir do id_usuario
+        coop_info = Cooperativa(db).get_by_user_id(id_usuario)
+        if not coop_info or 'id_cooperativa' not in coop_info:
+            return jsonify({'error': 'Cooperativa não encontrada para este usuário'}), 404
+            
+        id_cooperativa = coop_info['id_cooperativa']
+
+        if not all([nome_padrao, sinonimo]):
+            return jsonify({'message': 'Faltam dados para registrar o sinônimo.'}), 400
+
+        resposta = Materiais(db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
+        return resposta
+    except Exception as e:
+        # Log do erro para depuração
+        print(f"Erro em /post/cadastrar-sinonimo: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+    finally:
+        if conn:
+            conn.close()
 
 @api_post.route("/cadastrar-material-base", methods=["POST"])
 def cadastrar_material_base():

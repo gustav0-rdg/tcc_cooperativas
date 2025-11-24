@@ -273,14 +273,30 @@ function configurarVincularCooperado() {
             // O HTML agora usa a estrutura de Grid e as classes modern-input
             html: `
                 <div class="swal-form-grid">
-                    <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="nome">Nome Completo</label>
+                        <input id="nome" class="modern-input" placeholder="Insira o nome completo" required>
+                    </div>
 
-                    <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="email">Email</label>
+                        <input id="email" class="modern-input" placeholder="exemplo@email.com" type="email" required>
+                    </div>
+                    
+                    <div class="swal-form-group swal-full-width">
+                        <label for="cpf">CPF</label>
+                        <input id="cpf" class="modern-input" placeholder="000.000.000-00" maxlength="14" required>
+                    </div>
 
-                    <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
+                    <div class="swal-form-group">
+                        <label for="senha">Senha</label>
+                        <input id="senha" class="modern-input" placeholder="Mínimo 8 caracteres" type="password" required>
+                    </div>
 
-                    <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
-                    <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
+                    <div class="swal-form-group">
+                        <label for="confirmar-senha">Confirmar Senha</label>
+                        <input id="confirmar-senha" class="modern-input" placeholder="Repita a senha" type="password" required>
+                    </div>
                 </div>
             `,
             showCancelButton: true,

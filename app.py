@@ -58,13 +58,12 @@ def verificar_autenticacao():
     if request.path.startswith('/static/'):
         return
 
-    # Rotas de API (fazem verificação interna)
+    # Rotas de API
     if request.path.startswith('/api/') or \
        request.path.startswith('/get/') or \
        request.path.startswith('/post/'):
         return
 
-    # Se a rota não existe, deixa o Flask lidar com 404
     if request.endpoint is None:
         return
 
@@ -88,20 +87,17 @@ def verificar_autenticacao():
                 return redirect('/login-admin')
             return redirect('/')
 
-        # Se for uma rota de gestor, verifica a permissão do usuário
         if request.path in ROTAS_GESTOR:
             usuario = Usuarios(conn.connection_db).get(data_token['id_usuario'])
-            conn.close() # Fecha a conexão após o uso
+            conn.close() 
             
             if not usuario or usuario.get('tipo') not in ['gestor', 'root']:
-                return redirect('/login-admin') # Não tem permissão
-            
-            # Usuário é gestor/root e tem token válido, permite o acesso
+                return redirect('/login-admin')
             return
 
         # Para outras rotas protegidas (não-gestor)
         conn.close()
-        return # Permite o acesso
+        return 
 
     except Exception as e:
         print(f"Erro no middleware: {e}")
