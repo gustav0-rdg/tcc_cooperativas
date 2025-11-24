@@ -152,7 +152,7 @@ class Compradores:
                     c.cnpj, 
                     c.email, 
                     c.telefone, 
-                    c.endereco, 
+                    CONCAT_WS(', ', c.logradouro, c.numero, c.bairro) AS endereco,
                     c.cidade, 
                     c.estado, 
                     c.score_confianca, 
@@ -195,7 +195,7 @@ class Compradores:
             query += """
                 GROUP BY 
                     c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
-                    c.logradouro, c.numero, c.bairro, c.cidade, c.estado, c.score_confianca, 
+                    endereco, c.cidade, c.estado, c.score_confianca, 
                     c.latitude, c.longitude, c.numero_avaliacoes, c.data_criacao
             """
 
@@ -207,21 +207,29 @@ class Compradores:
             compradores_filtrados = []
 
             # Para cada comprador, calcular a distância até o usuário
-            if user_lat != None and user_lon != None:
-
+            if user_lat is not None and user_lon is not None:
                 for comprador in compradores:
-
                     # Calculando a distância usando a função Haversine
-                    if comprador['latitude'] and comprador['longitude']:
+                    if comprador.get('latitude') and comprador.get('longitude'):
                         distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
                         comprador['distancia'] = round(distancia, 2)
                     else:
-                        comprador['distancia'] = float('inf') # Se não houver coordenadas, vai para o fim da lista
+                        comprador['distancia'] = None  # Usar None em vez de float('inf')
 
-                    if raio_km is None or (comprador['distancia'] != float('inf') and comprador['distancia'] <= raio_km):
+                    # Adicionar à lista se o raio não for um filtro ou se a distância for válida
+                    if raio_km is None or (comprador['distancia'] is not None and comprador['distancia'] <= raio_km):
                         compradores_filtrados.append(comprador)
+            else:
+                # Se o usuário não tem lat/lon, não podemos calcular distâncias
+                for comprador in compradores:
+                    comprador['distancia'] = None
+                compradores_filtrados = compradores
 
-            compradores_filtrados.sort(key=lambda x: x.get('distancia', float('inf')))
+
+            # Ordena a lista: compradores com distância aparecem primeiro, ordenados pela distância.
+            # Os sem distância (None) vão para o final.
+            compradores_filtrados.sort(key=lambda x: (x.get('distancia') is None, x.get('distancia')))
+            
             return compradores_filtrados
 
         except Exception as e:

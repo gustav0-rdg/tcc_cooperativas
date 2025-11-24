@@ -66,106 +66,51 @@ class Vendas:
         else:
             raise ValueError(f"Nenhum material ativo chamado '{nome_material}' foi encontrado no catálogo.")
         
-    def _buscar_subtipo(self, nome_subtipo):
-        """
-        Busca o ID de um material ativo na tabela `materiais_catalogo`.
-        Args:
-            nome_material (str): O nome exato do subtipo do material.
-        Returns:
-            int: O ID do material encontrado.
-        Raises:
-            MaterialNaoEncontradoError: Se nenhum material ativo for encontrado com o nome fornecido.
-        """
-        with self.connection_db.cursor() as cursor:
-            # Buscamos pelo nome e garantimos que o material esteja 'ativo'.
-            query = "SELECT id_material_catalogo FROM materiais_catalogo WHERE nome_especifico = %s"
-            cursor.execute(query, (nome_subtipo,))
-            result = cursor.fetchone()
-
-        if result:
-            id_subtipo = result[0]
-            print(f"Material encontrado: '{nome_subtipo}' corresponde ao ID {id_subtipo}.")
-            return id_subtipo
-        else:
-            raise ValueError(f"Nenhum material ativo chamado '{nome_subtipo}' foi encontrado no catálogo.")
-
-    def _buscar_ids_feedback_tags(self, lista_tags: list[str]) -> list[int]:
-        """
-        Busca os IDs de uma lista de tags de feedback.
-
-        Args:
-            lista_tags (list[str]): Uma lista com os textos das tags.
-
-        Returns:
-            list[int]: Uma lista com os IDs correspondentes.
-        """
-        # Se a lista de comentários estiver vazia, não há nada a fazer.
-        if not lista_tags:
-            print("ℹ️ Nenhuma tag de feedback rápido fornecida.")
-            return []
-
-        with self.connection_db.cursor() as cursor:
-            placeholders = ', '.join(['%s'] * len(lista_tags))
-            query = f"SELECT id_feedback_tag, texto FROM feedback_tags WHERE texto IN ({placeholders})"
-            
-            cursor.execute(query, tuple(lista_tags))
-            results = cursor.fetchall() 
-
-        # Validação: Verificamos se o número de tags encontradas é o mesmo que o número de tags solicitadas.
-        if len(results) != len(lista_tags):
-            tags_encontradas = {result[1] for result in results}
-            tags_faltantes = set(lista_tags) - tags_encontradas
-            raise ValueError(f"As seguintes tags de feedback não foram encontradas ou estão inativas: {list(tags_faltantes)}")
-
-        # Extrai apenas os IDs da lista de tuplas [(id1, texto1), (id2, texto2), ...]
-        ids_encontrados = [result[0] for result in results]
-        print(f"Tags de Feedback encontradas: {lista_tags} correspondem aos IDs {ids_encontrados}.")
-        return ids_encontrados
-    
     def _buscar_ids(self, dados_frontend: dict):
         """
-        Método principal que orquestra o processamento dos dados da venda.
-        Por enquanto, ele apenas executa o passo 1.
+        Busca e valida os IDs necessários para registrar a venda a partir dos dados do frontend.
         """
         try:
-
+            # Valida e busca o ID do comprador pelo CNPJ
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
-            nome_material = dados_frontend['material']['categoria']
-            nome_subtipo = dados_frontend['material']['subtipo']
-            id_material = self._buscar_id_material(nome_material)
-            id_subtipo = self._buscar_subtipo(nome_subtipo)
-            ids_tags = []
-            if 'avaliacao' in dados_frontend and 'comentarios_rapidos' in dados_frontend['avaliacao']:
-                ids_tags = self._buscar_ids_feedback_tags(dados_frontend['avaliacao']['comentarios_rapidos'])
+
+            # Valida e busca o ID da categoria do material
+            nome_material_categoria = dados_frontend['material']['categoria']
+            id_material_categoria = self._buscar_id_material(nome_material_categoria)
+
+            # USA DIRETAMENTE O ID DO MATERIAL DO CATÁLOGO ENVIADO PELO FRONTEND
+            id_subtipo = dados_frontend['material']['id_material_catalogo']
+            if not isinstance(id_subtipo, int):
+                raise ValueError("O 'id_material_catalogo' é inválido ou não foi fornecido.")
+            
+            print(f"Material (Subtipo) ID fornecido diretamente: {id_subtipo}.")
+            
             return {
                 "id_comprador": id_comprador,
-                "id_material": id_material,
-                "ids_tags_feedback": ids_tags,
+                "id_material": id_material_categoria,
                 "id_subtipo": id_subtipo
             }
 
         except Exception as e:
-            print(f"Erro de negócio: {e}")
+            print(f"Erro de negócio ao validar IDs: {e}")
             return None
         
     def registrar_nova_venda(self, id_cooperativa, dados_frontend):
         """
         Orquestra a criação completa de uma venda, seus itens e avaliação dentro de uma transação.
-
-        Args:
-            id_cooperativa (int): O ID da cooperativa que está realizando a venda.
-            dados_frontend (dict): O dicionário de dados vindo do front-end.
         """
         print('dados frontedn', dados_frontend)
-        # Buscar e validar todos os IDs antes de iniciar a transação.
         ids = self._buscar_ids(dados_frontend)
+        if not ids:
+            return False 
 
-        # Inicia o cursor que será usado em toda a transação.
         cursor = self.connection_db.cursor()
 
         try:
-            # INSERIR NA TABELA `vendas`
+            self.connection_db.start_transaction()
+
+            # 1. INSERIR NA TABELA `vendas`
             query_venda = """
                 INSERT INTO vendas (id_cooperativa, id_comprador, data_venda, valor_total)
                 VALUES (%s, %s, %s, %s)
@@ -173,78 +118,45 @@ class Vendas:
             venda_data = (
                 id_cooperativa,
                 ids['id_comprador'],
-                datetime.datetime.now(), # Ou a data vinda do front-end
+                datetime.datetime.now(),
                 dados_frontend['total']
             )
             cursor.execute(query_venda, venda_data)
-            id_venda = cursor.lastrowid # Pega o ID da venda que acabou de ser criada.
+            id_venda = cursor.lastrowid
             print(f"ID da Venda: {id_venda}")
 
-            # INSERIR NA TABELA `vendas_itens`
+            # 2. INSERIR NA TABELA `vendas_itens`
+            total_item = float(dados_frontend['quantidade']) * float(dados_frontend['preco_por_kg'])
             query_item = """
-                INSERT INTO vendas_itens (id_venda, id_material_base, id_material_catalogo, quantidade_kg, preco_por_kg)
+                INSERT INTO vendas_itens (id_venda, id_material_catalogo, quantidade_kg, preco_por_kg, total_item)
                 VALUES (%s, %s, %s, %s, %s)
             """
             item_data = (
                 id_venda,
-                ids['id_material'],
                 ids['id_subtipo'],
                 dados_frontend['quantidade'],
-                dados_frontend['preco_por_kg']
+                dados_frontend['preco_por_kg'],
+                total_item
             )
             cursor.execute(query_item, item_data)
+            print(f"Item da venda inserido para a venda ID: {id_venda}")
 
-            # 3. INSERIR NA TABELA `avaliacoes_compradores` (apenas se avaliação foi fornecida)
-            if 'avaliacao' in dados_frontend:
-                query_avaliacao = """
-                    INSERT INTO avaliacoes_compradores
-                    (id_venda, pontualidade_pagamento, logistica_entrega, qualidade_negociacao, comentario_livre)
-                    VALUES (%s, %s, %s, %s, %s)
-                """
-                nota = dados_frontend['avaliacao']['nota']
-                avaliacao_data = (
-                    id_venda,
-                    nota, # Usando a mesma nota para as três colunas
-                    nota,
-                    nota,
-                    dados_frontend['avaliacao']['analise']
-                )
-                cursor.execute(query_avaliacao, avaliacao_data)
-                id_avaliacao = cursor.lastrowid # Pega o ID da avaliação criada.
-                print(f"ID da Avaliação: {id_avaliacao}")
+            # 3. INSERIR AVALIAÇÃO PENDENTE
+            # A inserção da avaliação pendente agora faz parte da transação principal.
+            # Se falhar, toda a transação será revertida.
+            avaliacoes_controller = Avaliacoes(self.connection_db)
+            avaliacoes_controller.inserir_avaliacao_pendente(id_venda, id_cooperativa)
+            print(f"Avaliação pendente para a venda {id_venda} inserida com sucesso.")
 
-                # 4. INSERIR NA TABELA `avaliacao_feedback_selecionado` (se houver tags)
-                if ids['ids_tags_feedback']:
-                    query_tags = """
-                        INSERT INTO avaliacao_feedback_selecionado (id_avaliacao, id_feedback_tag)
-                        VALUES (%s, %s)
-                    """
-                    # Prepara uma lista de tuplas para inserção em lote
-                    tags_data = [(id_avaliacao, id_tag) for id_tag in ids['ids_tags_feedback']]
-                    cursor.executemany(query_tags, tags_data) # executemany é eficiente para múltiplas inserções.
-                    print("Tags de feedback selecionadas inseridas com sucesso.")
-            else:
-                # Inserir avaliação pendente se não houver avaliação
-                avaliacoes_controller = Avaliacoes(self.connection_db)
-                sucesso = avaliacoes_controller.inserir_avaliacao_pendente(id_venda, id_cooperativa)
-                if sucesso:
-                    print("Avaliação pendente inserida com sucesso.")
-                else:
-                    print("Erro ao inserir avaliação pendente.")
-                print("Avaliação pulada, inserindo apenas venda e itens.")
-
-            # Se todas as operações foram bem-sucedidas, confirma a transação.
             self.connection_db.commit()
             print("\n SUCESSO! Transação concluída e dados salvos no banco.")
             return True
 
         except Exception as err:
-            # Se qualquer erro ocorrer, desfaz todas as operações.
             print(f"\n ERRO DE BANCO DE DADOS! A transação será revertida. Erro: {err}")
             self.connection_db.rollback()
             return False
         finally:
-            # Garante que o cursor seja fechado, independentemente de sucesso ou falha.
             cursor.close()
 
     def get_by_coop(self, id_cooperativa):

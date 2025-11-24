@@ -40,27 +40,25 @@ class Avaliacoes:
     def inserir_avaliacao_pendente(self, id_venda: int, id_cooperativa: int) -> bool:
         """
         Insere uma avaliação pendente para uma venda específica.
+        Esta função NÃO gerencia a transação (commit/rollback). Isso deve ser feito pelo chamador.
 
         Args:
             id_venda (int): ID da venda.
             id_cooperativa (int): ID da cooperativa.
 
         Returns:
-            bool: True se inserido com sucesso, False caso contrário.
+            bool: True se inserido com sucesso.
+        
+        Raises:
+            Exception: Em caso de erro de banco de dados, a exceção será propagada.
         """
-        try:
-            with self.connection_db.cursor() as cursor:
-                query = """
-                INSERT INTO avaliacoes_pendentes (id_venda, id_cooperativa, status_avaliacao, data_criacao)
-                VALUES (%s, %s, 'pendente', %s);
-                """
-                cursor.execute(query, (id_venda, id_cooperativa, datetime.datetime.now()))
-                self.connection_db.commit()
-                return cursor.rowcount > 0
-        except Exception as e:
-            print(f"Erro em inserir_avaliacao_pendente: {e}")
-            self.connection_db.rollback()
-            return False
+        with self.connection_db.cursor() as cursor:
+            query = """
+            INSERT INTO avaliacoes_pendentes (id_venda, id_cooperativa, status_avaliacao, data_criacao)
+            VALUES (%s, %s, 'pendente', %s);
+            """
+            cursor.execute(query, (id_venda, id_cooperativa, datetime.datetime.now()))
+            return cursor.rowcount > 0
 
     def _get_feedback_tag_ids(self, cursor, tags_recebidas: List[Any]) -> List[int]:
         """

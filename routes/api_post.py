@@ -13,13 +13,24 @@ api_post = Blueprint('api_post', __name__, url_prefix="/post")
 
 @api_post.route("/dados-venda", methods=["POST"])
 def postar_dados_de_venda():
-
+    conn = None
     try:
         dados_recebidos = request.get_json()
         conn = Connection('local')
-        processar_venda = Vendas(conn.connection_db).registrar_nova_venda(dados_recebidos["id_cooperativa"], dados_recebidos)
-        return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos!"}), 200
+        
+        sucesso = Vendas(conn.connection_db).registrar_nova_venda(
+            dados_recebidos["id_cooperativa"], 
+            dados_recebidos
+        )
+        
+        if sucesso:
+            return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos e processados!"}), 200
+        else:
+            return jsonify({"erro": "Falha ao registrar a venda"}), 500
+            
     except Exception as e:
+        # Adiciona log do erro para facilitar a depuração
+        print(f"Erro na rota /dados-venda: {e}")
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
         if conn:
