@@ -101,15 +101,12 @@ CREATE TABLE cooperados (
   id_usuario BIGINT UNSIGNED NOT NULL UNIQUE,
   id_cooperativa BIGINT UNSIGNED NOT NULL,
   cpf CHAR(11) NOT NULL UNIQUE,
-  telefone VARCHAR(20),
-  data_nascimento DATE NULL,
-  funcao VARCHAR(100) NULL COMMENT 'Função dentro da cooperativa',
+  endereco VARCHAR(255),
+  cidade VARCHAR(100),
+  estado CHAR(2),
   data_vinculo DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  data_desvinculo DATETIME NULL,
-  deletado_em DATETIME NULL,
   INDEX idx_cooperativa (id_cooperativa),
   INDEX idx_cpf (cpf),
-  INDEX idx_vinculo_ativo (id_cooperativa, data_desvinculo),
   FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
   FOREIGN KEY (id_cooperativa) REFERENCES cooperativas(id_cooperativa) ON DELETE CASCADE
 ) ENGINE=InnoDB COMMENT='Cooperados vinculados às cooperativas';
@@ -732,6 +729,24 @@ LEFT JOIN documentos_cooperativas doc ON c.id_cooperativa = doc.id_cooperativa A
 WHERE u.status = 'pendente' AND c.deletado_em IS NULL
 GROUP BY c.id_cooperativa, u.email, c.razao_social, c.cnpj, c.data_criacao;
 
+CREATE OR REPLACE VIEW v_cooperados_detalhados AS
+SELECT
+    c.id_cooperado,
+    c.id_usuario,
+    c.cpf,
+    coop.logradouro AS endereco,
+    coop.cidade AS cidade,
+    coop.estado AS estado,
+    c.data_vinculo,
+    c.id_cooperativa,
+    coop.nome_fantasia AS cooperativa_nome,
+    u.nome AS usuario_nome,
+    u.email AS usuario_email,
+    u.status AS usuario_status
+FROM cooperados AS c
+JOIN usuarios AS u ON c.id_usuario = u.id_usuario
+JOIN cooperativas AS coop ON c.id_cooperativa = coop.id_cooperativa;
+
 CREATE OR REPLACE VIEW v_materiais_visiveis AS
 SELECT
   c.id_cooperativa,
@@ -786,6 +801,40 @@ LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
 LEFT JOIN avaliacoes_compradores ac ON v.id_venda = ac.id_venda
 WHERE c.deletado_em IS NULL
 GROUP BY c.id_comprador;
+
+
+drop view  v_cooperados_detalhados;
+CREATE VIEW v_cooperados_detalhados AS
+SELECT 
+    u.id_usuario,
+    coop.id_cooperado,
+    coop.cpf,
+    coop.data_vinculo,
+    u.nome AS usuario_nome,
+    u.email AS usuario_email,
+    u.tipo AS cooperado_tipo,
+    u.status AS cooperado_status,
+    
+    c.cnpj,
+	c.razao_social,
+	c.nome_fantasia,
+	c.email_contato AS email,
+	c.telefone AS telefone_fixo,
+	c.whatsapp,
+    c.cidade,
+	c.site,
+    CONCAT_WS(', ', c.logradouro, c.numero, c.bairro) AS endereco
+FROM 
+    usuarios u
+JOIN 
+    cooperados coop ON u.id_usuario = coop.id_usuario
+JOIN 
+    cooperativas c ON coop.id_cooperativa = c.id_cooperativa
+WHERE 
+    u.tipo = 'cooperado';
+    
+SELECT * FROM v_cooperados_detalhados WHERE id_usuario = 4;   
+
 
 -- ====================================================
 -- Lista de cooperativas otimizada para frontend

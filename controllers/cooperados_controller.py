@@ -51,11 +51,11 @@ class Catadores:
                 raise Exception("Falha ao obter o ID do usuário criado.")
 
             query_catador = """
-            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf, telefone)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO cooperados (id_usuario, id_cooperativa, cpf)
+            VALUES (%s, %s, %s)
             """
             cursor.execute(query_catador, (
-                id_usuario_criado, id_cooperativa, cpf, telefone
+                id_usuario_criado, id_cooperativa, cpf
             ))
             
             id_catador_criado = cursor.lastrowid
@@ -84,12 +84,10 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                telefone,
                 endereco,
                 cidade,
                 estado,
                 data_vinculo,
-                deletado_em,
                 id_cooperativa,
                 cooperativa_nome,
                 usuario_nome AS nome,
@@ -119,12 +117,10 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                telefone,
                 endereco,
                 cidade,
                 estado,
                 data_vinculo,
-                deletado_em,
                 id_cooperativa,
                 cooperativa_nome,
                 usuario_nome AS nome,
@@ -155,16 +151,12 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                telefone,
                 data_vinculo,
                 usuario_nome AS nome,
                 usuario_email AS email  
             FROM v_cooperados_detalhados
             WHERE id_cooperativa = %s
             """
-            
-            if apenas_ativos:
-                query += " AND deletado_em IS NULL"
             
             query += " ORDER BY nome ASC"
 
@@ -182,37 +174,51 @@ class Catadores:
             cursor.close()
             
     def update_perfil(
-        self, 
+        self,
         id_cooperado: int,
-        telefone: Optional[str] = None
+        telefone: Optional[str] = None,
+        endereco: Optional[str] = None,
+        cidade: Optional[str] = None,
+        estado: Optional[str] = None
     ) -> bool:
         cursor = self.connection_db.cursor()
-        
+
         updates = []
         params = []
-        
+
         if telefone is not None:
-            updates.append("telefone = %s")
-            params.append(telefone)
+            print("Aviso - Catadores 'update_perfil': O campo 'telefone' não é suportado e será ignorado.")
+
+        if endereco is not None:
+            updates.append("endereco = %s")
+            params.append(endereco)
+
+        if cidade is not None:
+            updates.append("cidade = %s")
+            params.append(cidade)
+
+        if estado is not None:
+            updates.append("estado = %s")
+            params.append(estado)
 
         if not updates:
-            print("Aviso - Catadores 'update_perfil': Nenhum dado fornecido for atualização.")
-            return True 
+            print("Aviso - Catadores 'update_perfil': Nenhum dado fornecido para atualização.")
+            return True
 
         try:
             query = f"UPDATE cooperados SET {', '.join(updates)} WHERE id_cooperado = %s"
             params.append(id_cooperado)
-            
+
             cursor.execute(query, tuple(params))
             self.connection_db.commit()
-            
+
             return cursor.rowcount > 0
 
         except Exception as e:
             print(f"Erro - Catadores 'update_perfil': {e}")
             self.connection_db.rollback()
             return False
-        
+
         finally:
             cursor.close()
 
@@ -235,12 +241,12 @@ class Catadores:
                 
             id_usuario = catador_data['id_usuario']
 
-            query_catador = """
-            UPDATE cooperados
-            SET data_desvinculo = %s
-            WHERE id_cooperado = %s
-            """
-            cursor.execute(query_catador, (data_desvinculo, id_cooperado))
+            # query_catador = """
+            # UPDATE cooperados
+            # SET data_desvinculo = %s
+            # WHERE id_cooperado = %s
+            # """
+            # cursor.execute(query_catador, (data_desvinculo, id_cooperado))
 
             query_usuario = "UPDATE usuarios SET status = %s WHERE id_usuario = %s"
             cursor.execute(query_usuario, (status_usuario, id_usuario))
@@ -275,7 +281,6 @@ class Catadores:
                         id_usuario,
                         id_cooperado,
                         cpf,
-                        telefone,
                         data_vinculo,
                         usuario_nome AS nome
                     FROM v_cooperados_detalhados

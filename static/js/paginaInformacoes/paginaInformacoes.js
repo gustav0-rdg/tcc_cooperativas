@@ -1,3 +1,5 @@
+import { getUsuarioInfo } from '../utils/loginGenerico.js';
+
 // Aguarda o DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
     carregarInformacoesCooperativa();
@@ -5,14 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Carrega as informações da cooperativa via API
+ * Carrega as informações da cooperativa, buscando-as da API se não estiverem no sessionStorage.
  */
 async function carregarInformacoesCooperativa() {
     const token = localStorage.getItem('session_token');
-    const user_data = JSON.parse(sessionStorage.getItem('usuario'));
     const loadingSpinner = document.getElementById('loading-spinner-info');
     const errorMessage = document.getElementById('error-message-info');
     const mainContent = document.getElementById('main-content-info');
+    
+    let user_data = JSON.parse(sessionStorage.getItem('usuario'));
 
     if (!token) {
         mostrarErro('Sessão inválida. Faça o login novamente.');
@@ -23,6 +26,13 @@ async function carregarInformacoesCooperativa() {
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         mainContent.classList.add('d-none');
+
+        // Se os dados do usuário não estiverem no sessionStorage, busca na API
+        if (!user_data) {
+            user_data = await getUsuarioInfo(token);
+            sessionStorage.setItem('usuario', JSON.stringify(user_data)); // Armazena os dados frescos
+        }
+        
         // Preenche os elementos com os dados
         preencherInformacoes(user_data.dados_cooperativa || user_data.dados_cooperado);
 
@@ -35,11 +45,13 @@ async function carregarInformacoesCooperativa() {
     }
 }
 
+
 /**
  * Preenche os elementos da página com os dados da cooperativa
  */
 function preencherInformacoes(data) {
     // Sobre a Cooperativa
+    console.log(data);
     document.getElementById('cooperativa-nome').textContent = data.nome_fantasia || 'Não informado';
     document.getElementById('cooperativa-cnpj').textContent = data.cnpj || 'Não informado';
     document.getElementById('cooperativa-endereco').textContent = data.endereco || 'Não informado';
@@ -138,34 +150,17 @@ function configurarSPATabs() {
  */
 async function carregarCooperados() {
     const token = localStorage.getItem('session_token');
-    if (!token) {
-        Swal.fire('Erro', 'Sessão inválida. Faça o login novamente.', 'error');
+    const userData = JSON.parse(sessionStorage.getItem('usuario'));
+
+    if (!token || !userData || !userData.dados_cooperativa) {
+        Swal.fire('Erro', 'Sessão inválida ou dados da cooperativa não encontrados. Faça o login novamente.', 'error');
         return;
     }
 
     try {
-        // Obter ID da cooperativa
-        const userResponse = await fetch('/api/usuarios/get', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            }
-        });
-        const userData = await userResponse.json();
-        if (!userResponse.ok) throw new Error(userData.error);
+        const idCooperativa = userData.dados_cooperativa.id_cooperativa;
 
-        const coopResponse = await fetch(`/api/cooperativas/get/${userData.id_usuario}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            }
-        });
-        const coopData = await coopResponse.json();
-        if (!coopResponse.ok) throw new Error(coopData.error);
-
-        const cooperadosResponse = await fetch(`/api/cooperados/get/${coopData.dados_cooperativa.id_cooperativa}`, {
+        const cooperadosResponse = await fetch(`/api/cooperados/get/${idCooperativa}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -178,7 +173,7 @@ async function carregarCooperados() {
         exibirCooperados(cooperados);
 
         // Configurar busca
-        configurarBuscaCooperados(coopData.dados_cooperativa.id_cooperativa);
+        configurarBuscaCooperados(idCooperativa);
 
         // Configurar botão de vincular
         configurarVincularCooperado();
@@ -209,9 +204,6 @@ function exibirCooperados(listaCooperados) {
             <div class="card-body">
                 <h5 class="card-title">${cooperado.nome}</h5>
                 <p class="card-text"><strong>CPF:</strong> ${cooperado.cpf}</p>
-                <p class="card-text"><strong>Telefone:</strong> ${cooperado.telefone}</p>
-                <p class="card-text"><strong>Endereço:</strong> ${cooperado.endereco}</p>
-                <p class="card-text"><strong>Cidade/UF:</strong> ${cooperado.cidade} - ${cooperado.estado}</p>
                 <p class="card-text"><strong>Data de vínculo:</strong> ${new Date(cooperado.data_vinculo).toLocaleString('pt-BR')}</p>
                 <button class="btn btn-danger btn-sm remover-cooperado" data-id="${cooperado.id_cooperado}">Remover</button>
             </div>
@@ -299,20 +291,30 @@ function configurarVincularCooperado() {
             // O HTML agora usa a estrutura de Grid e as classes modern-input
             html: `
                 <div class="swal-form-grid">
-                    <input id="nome" class="modern-input swal-full-width" placeholder="Nome completo" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="nome">Nome Completo</label>
+                        <input id="nome" class="modern-input" placeholder="Insira o nome completo" required>
+                    </div>
+
+                    <div class="swal-form-group swal-full-width">
+                        <label for="email">Email</label>
+                        <input id="email" class="modern-input" placeholder="exemplo@email.com" type="email" required>
+                    </div>
                     
-                    <input id="email" class="modern-input swal-full-width" placeholder="Email" type="email" required>
-                    
-                    <input id="cpf" class="modern-input" placeholder="CPF" maxlength="14" required>
-                    <input id="telefone" class="modern-input" placeholder="Telefone" maxlength="15" required>
-                    
-                    <input id="endereco" class="modern-input swal-full-width" placeholder="Endereço completo" required>
-                    
-                    <input id="cidade" class="modern-input" placeholder="Cidade" required>
-                    <input id="estado" class="modern-input" placeholder="UF" maxlength="2" style="text-transform:uppercase" required>
-                    
-                    <input id="senha" class="modern-input" placeholder="Senha" type="password" required>
-                    <input id="confirmar-senha" class="modern-input" placeholder="Confirmar Senha" type="password" required>
+                    <div class="swal-form-group swal-full-width">
+                        <label for="cpf">CPF</label>
+                        <input id="cpf" class="modern-input" placeholder="000.000.000-00" maxlength="14" required>
+                    </div>
+
+                    <div class="swal-form-group">
+                        <label for="senha">Senha</label>
+                        <input id="senha" class="modern-input" placeholder="Mínimo 8 caracteres" type="password" required>
+                    </div>
+
+                    <div class="swal-form-group">
+                        <label for="confirmar-senha">Confirmar Senha</label>
+                        <input id="confirmar-senha" class="modern-input" placeholder="Repita a senha" type="password" required>
+                    </div>
                 </div>
             `,
             showCancelButton: true,
@@ -335,10 +337,6 @@ function configurarVincularCooperado() {
                 const nome = document.getElementById('nome').value.trim();
                 const cpf = document.getElementById('cpf').value.trim().replace(/\D/g, '');
                 const email = document.getElementById('email').value.trim();
-                const endereco = document.getElementById('endereco').value.trim();
-                const cidade = document.getElementById('cidade').value.trim();
-                const estado = document.getElementById('estado').value.trim();
-                const telefone = document.getElementById('telefone').value.trim();
                 const senha = document.getElementById('senha').value.trim();
                 const confirmarSenha = document.getElementById('confirmar-senha').value.trim();
 
@@ -362,7 +360,7 @@ function configurarVincularCooperado() {
                     return false;
                 }
 
-                return { nome, cpf, senha, endereco, cidade, email, estado, telefone };
+                return { nome, cpf, senha, email };
             }
         }).then(async (result) => {
             if (!result.isConfirmed) return;

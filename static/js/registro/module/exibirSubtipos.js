@@ -277,10 +277,18 @@ export async function exibirSubtipos() {
 
 async function cadastrarSinonimo(valoresCadastro) {
     try {
+        const token = localStorage.getItem('session_token');
+        if (!token) {
+            Swal.fire('Erro!', 'Sua sessão expirou, faça o login novamente.', 'error');
+            return;
+        }
+
         const resposta = await fetch('/post/cadastrar-sinonimo', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            // O objeto valoresCadastro agora contém (nome_padrao, sinonimo, id_material_catalogo)
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(valoresCadastro) 
         });
 
@@ -294,14 +302,12 @@ async function cadastrarSinonimo(valoresCadastro) {
             background: "var(--verde-claro)",
             color: "var(--verde-escuro)",
             confirmButtonText: 'Fechar',
-            // --- CORREÇÃO 2: REMOVIDO 'html: successButtonStyle' ---
-            // html: successButtonStyle, // <--- REMOVIDO
             customClass: {
-              confirmButton: 'swal-confirm-custom-style' // A classe agora existe globalmente
+              confirmButton: 'swal-confirm-custom-style'
             }
           });
         } else {
-          await Swal.fire('❌ Erro!', data.message, 'error');
+          await Swal.fire('❌ Erro!', data.error || 'Ocorreu um erro', 'error');
         }
       }
     catch (error) {

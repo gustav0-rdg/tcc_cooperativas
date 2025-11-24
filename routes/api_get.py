@@ -5,6 +5,7 @@ from controllers.feedback_controller import Feedbacks
 from controllers.usuarios_controller import Usuarios
 from controllers.tokens_controller import Tokens
 from controllers.cooperativa_controller import Cooperativa
+from controllers.cooperados_controller import Catadores
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
 from controllers.avaliacoes_controller import Avaliacoes
@@ -103,33 +104,88 @@ def get_feedbacks():
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
     """
-    Rota para obter a lista completa de materiais do catálogo.
+    Rota para obter a lista de materiais.
+    Se um token de autenticação for fornecido, a lista pode incluir sinônimos.
     """
+    conn = None
     try:
         conn = Connection('local')
-        materiais = Materiais(conn.connection_db).get_all()
-        conn.close()
+        db = conn.connection_db
+        id_cooperativa = None
+
+        token_header = request.headers.get('Authorization')
+        if token_header:
+            try:
+                token = token_header.split(" ")[1] if " " in token_header else token_header
+                data_token = Tokens(db).validar(token)
+
+                if data_token:
+                    id_usuario = data_token['id_usuario']
+                    usuario_info = Usuarios(db).get(id_usuario)
+
+                    if usuario_info:
+                        if usuario_info['tipo'] == 'cooperativa':
+                            coop_info = Cooperativa(db).get_by_user_id(id_usuario)
+                            if coop_info:
+                                id_cooperativa = coop_info.get('id_cooperativa')
+                        elif usuario_info['tipo'] == 'cooperado':
+                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
+                            if catador_info:
+                                id_cooperativa = catador_info.get('id_cooperativa')
+            except Exception as e:
+                print(f"Erro ao processar token em /materiais: {e}")
+                # Continua sem id_cooperativa, não retorna erro
+
+        materiais = Materiais(db).get_all(id_cooperativa=id_cooperativa)
         return jsonify(materiais), 200
+
     except Exception as e:
         print(f"Erro ao buscar materiais: {e}")
-        return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
+        return jsonify({"error": "Ocorreu um erro interno no servidor"}), 500
     finally:
         if conn:
             conn.close()
 
-@api_get.route("/subtipos/<material_id>", methods=["GET"])
+@api_get.route("/subtipos/<int:material_id>", methods=["GET"])
 def get_subtipos_materiais(material_id):
     """
-    Rota para obter a lista completa de materiais do catálogo.
+    Rota para obter a lista de subtipos de um material.
+    Se um token for fornecido, pode retornar nomes de sinônimos.
     """
+    conn = None
     try:
         conn = Connection('local')
-        materiais = Materiais(conn.connection_db).get_subtipos(material_id)
-        conn.close()
+        db = conn.connection_db
+        id_cooperativa = None
+
+        token_header = request.headers.get('Authorization')
+        if token_header:
+            try:
+                token = token_header.split(" ")[1] if " " in token_header else token_header
+                data_token = Tokens(db).validar(token)
+
+                if data_token:
+                    id_usuario = data_token['id_usuario']
+                    usuario_info = Usuarios(db).get(id_usuario)
+
+                    if usuario_info:
+                        if usuario_info['tipo'] == 'cooperativa':
+                            coop_info = Cooperativa(db).get_by_user_id(id_usuario)
+                            if coop_info:
+                                id_cooperativa = coop_info.get('id_cooperativa')
+                        elif usuario_info['tipo'] == 'cooperado':
+                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
+                            if catador_info:
+                                id_cooperativa = catador_info.get('id_cooperativa')
+            except Exception as e:
+                print(f"Erro ao processar token em /subtipos: {e}")
+
+        materiais = Materiais(db).get_subtipos(material_id, id_cooperativa=id_cooperativa)
         return jsonify(materiais), 200
+
     except Exception as e:
-        print(f"Erro ao buscar materiais: {e}")
-        return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
+        print(f"Erro ao buscar subtipos de materiais: {e}")
+        return jsonify({"error": "Ocorreu um erro interno no servidor"}), 500
     finally:
         if conn:
             conn.close()
@@ -197,7 +253,9 @@ def get_cooperativas_pendentes():
     try:
         # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
         db = conn.connection_db
-        data_token = Tokens(db).validar(token_header)
+        # Remove o prefixo "Bearer " se ele existir
+        token = token_header.split(" ")[1] if " " in token_header else token_header
+        data_token = Tokens(db).validar(token)
         if data_token is None:
             conn.close()
             return jsonify({'error': 'Token inválido ou expirado'}), 401
@@ -344,3 +402,43 @@ def get_comprador_detalhes(id_comprador):
         if conn: conn.close()
         print(f"Erro em /comprador-detalhes: {e}")
         return jsonify({'error': 'Erro interno no servidor'}), 500
+
+@api_get.route('/cooperativa-info', methods=['GET'])
+def get_cooperativa_info():
+    """
+    Retorna as informações detalhadas da cooperativa logada.
+    """
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token é obrigatório'}), 401
+
+    conn = None
+    try:
+        conn = Connection('local')
+        db = conn.connection_db
+
+        # Validar token
+        data_token = Tokens(db).validar(token)
+        if not data_token or data_token['tipo'] != 'sessao':
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        
+        # Verificar se o usuário é uma cooperativa
+        usuario_info = Usuarios(db).get(id_usuario)
+        if not usuario_info or usuario_info['tipo'] != 'cooperativa':
+            return jsonify({'error': 'Usuário não é uma cooperativa'}), 403
+
+        # Buscar dados da cooperativa usando o método já corrigido
+        dados_cooperativa = Cooperativa(db).get_by_user_id(id_usuario)
+        if not dados_cooperativa:
+            return jsonify({'error': 'Dados da cooperativa não encontrados'}), 404
+
+        return jsonify(dados_cooperativa), 200
+
+    except Exception as e:
+        print(f"Erro em /get/cooperativa-info: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500
+    finally:
+        if conn:
+            conn.close()
