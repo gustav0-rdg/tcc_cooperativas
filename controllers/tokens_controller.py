@@ -88,7 +88,7 @@ class Tokens:
         if len(token) != 64:
             return None
 
-        cursor = self.connection_db.cursor(dictionary=True)
+        cursor = self.connection_db.cursor(dictionary=True, buffered=True)
 
         try:
             cursor.execute (

@@ -51,7 +51,6 @@ async function carregarInformacoesCooperativa() {
  */
 function preencherInformacoes(data) {
     // Sobre a Cooperativa
-    console.log(data);
     document.getElementById('cooperativa-nome').textContent = data.nome_fantasia || 'Não informado';
     document.getElementById('cooperativa-cnpj').textContent = data.cnpj || 'Não informado';
     document.getElementById('cooperativa-endereco').textContent = data.endereco || 'Não informado';
