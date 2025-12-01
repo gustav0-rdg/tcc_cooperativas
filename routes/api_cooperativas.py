@@ -555,7 +555,7 @@ def enviar_documento():
 @api_cooperativas.route('/rejeitar', methods=['POST'])
 def rejeitar_cooperativa():
 
-    token_header = request.headers.get('Authorization')
+    token = request.headers.get('Authorization')
     data = request.get_json()
     id_cooperativa = data.get('id_cooperativa')
     email_cooperativa = data.get('email')
@@ -563,7 +563,7 @@ def rejeitar_cooperativa():
     justificativa = data.get('justificativa')
 
 
-    if not all([token_header, id_cooperativa, email_cooperativa, motivo, justificativa]):
+    if not all([token, id_cooperativa, email_cooperativa, motivo, justificativa]):
         return jsonify({'error': 'Dados incompletos'}), 400
 
 
@@ -573,7 +573,6 @@ def rejeitar_cooperativa():
 
     db = conn.connection_db
     try:
-        token = token_header.split(' ')[1]
         data_token = Tokens(db).validar(token)
         if not data_token:
             conn.close()
