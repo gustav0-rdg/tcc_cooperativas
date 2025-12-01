@@ -1,6 +1,6 @@
 # ♻️ TCC - RECOOPERA
 
-> "Conectando tecnologia e sustentabilidade para apoiar o trabalho dos catadores de materiais recicláveis em Araraquara e região."
+> "Redes que reciclam, cooperação que transforma "
 
 ## 🛠️ Tecnologias Utilizadas
 
