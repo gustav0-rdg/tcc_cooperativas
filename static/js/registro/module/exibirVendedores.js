@@ -13,7 +13,6 @@ const compradorSection = document.querySelector('.registros__comprador');
 
 // Função para mostrar a etapa de vendedores
 export async function exibirVendedores() {
-    // --- Essa parte inicial continua a mesma ---
     etapaSection.innerHTML = `
     <div class="etapa__progresso">
         <h1>Venda de ${vendaAtual.material.subtipo}</h1>
@@ -104,11 +103,9 @@ export async function exibirVendedores() {
 }
 
 async function renderizarListaDeVendedores() {
-    // Limpa a seção de opções para não duplicar a lista
     opcoesSection.innerHTML = '';
 
-    // Busca a lista ATUALIZADA de compradores no seu backend
-    const vendedores = await getCompradores();
+    const vendedores = await getAllCompradores();
     // Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
