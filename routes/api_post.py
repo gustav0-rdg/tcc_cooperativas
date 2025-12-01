@@ -33,7 +33,7 @@ def postar_dados_de_venda():
             return jsonify({"erro": "Falha ao registrar a venda"}), 500
             
     except Exception as e:
-        # Adiciona log do erro para facilitar a depuração
+        # Log do erro
         print(f"Erro na rota /dados-venda: {e}")
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
@@ -92,7 +92,7 @@ def registrar_sinonimo():
         resposta = Materiais(db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
         return resposta
     except Exception as e:
-        # Log do erro para depuração
+        # Log do erro
         print(f"Erro em /post/cadastrar-sinonimo: {e}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
     finally:
@@ -203,7 +203,7 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
+        # Validar o Token e Permissão
         db = conn.connection_db
         from controllers.tokens_controller import Tokens
         from controllers.usuarios_controller import Usuarios
@@ -219,12 +219,12 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Receber dados da avaliação
+        # Receber dados da avaliação
         dados_avaliacao = request.get_json()
         if not dados_avaliacao:
             return jsonify({'error': 'Dados da avaliação não fornecidos'}), 400
 
-        # 3. Finalizar avaliação pendente
+        # Finalizar avaliação pendente
         avaliacoes_controller = Avaliacoes(db)
         sucesso = avaliacoes_controller.finalizar_avaliacao_pendente(id_avaliacao_pendente, dados_avaliacao)
 
@@ -296,7 +296,7 @@ def pular_avaliacao(id_avaliacao_pendente):
 
     try:
         db = conn.connection_db
-        # 1. Validar o Token e Permissão
+        # Validar o Token e Permissão
         from controllers.tokens_controller import Tokens
         from controllers.usuarios_controller import Usuarios
         data_token = Tokens(db).validar(token)
@@ -311,7 +311,7 @@ def pular_avaliacao(id_avaliacao_pendente):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Remover avaliação pendente
+        # Remover avaliação pendente
         avaliacoes_controller = Avaliacoes(db)
         sucesso = avaliacoes_controller.remover_avaliacao_pendente(id_avaliacao_pendente)
 

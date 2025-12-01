@@ -30,7 +30,6 @@ def get_cooperados(identificador: int):
             dados_cooperativa_logada = Cooperativa(conn.connection_db).get_by_user_id(user['id_usuario'])
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada'}), 404
-            # Verifica se o identificador é da cooperativa logada
             if str(identificador) != str(dados_cooperativa_logada['id_cooperativa']):
                 return jsonify({'error':'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}),403
         cooperados = Cooperados(conn.connection_db).get_by_cooperativa(dados_cooperativa_logada['id_cooperativa'])

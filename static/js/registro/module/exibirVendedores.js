@@ -1,7 +1,7 @@
 import { registrarNovoVendedor } from "../registrar_vendedores.js";
 import { validarCNPJ } from "./validarCnpj.js";
 import buscarVendedores from "../obterVendedor.js";
-import { getCompradores } from "../../api/getCompradores.js";
+import { getAllCompradores } from "../../api/getCompradores.js";
 
 import { exibirValoresDeVenda } from "./exibirValoresDeVenda.js";
 import { vendaAtual } from "../registrar_venda.js";
@@ -100,17 +100,16 @@ export async function exibirVendedores() {
     });
     
     compradorSection.appendChild(novoComprador);
-    // Agora, para exibir a lista pela primeira vez, basta chamar sua nova função.
     await renderizarListaDeVendedores();
 }
 
 async function renderizarListaDeVendedores() {
-    // 1. Limpa a seção de opções para não duplicar a lista
+    // Limpa a seção de opções para não duplicar a lista
     opcoesSection.innerHTML = '';
 
-    // 2. Busca a lista ATUALIZADA de compradores no seu backend
+    // Busca a lista ATUALIZADA de compradores no seu backend
     const vendedores = await getCompradores();
-    // 3. Cria e adiciona o botão de cada vendedor na tela
+    // Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";

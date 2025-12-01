@@ -96,7 +96,7 @@ class Vendas:
         cursor = self.connection_db.cursor()
 
         try:
-            # 1. INSERIR NA TABELA `vendas`
+            # INSERIR NA TABELA `vendas`
             query_venda = """
                 INSERT INTO vendas (id_cooperativa, id_comprador, data_venda, valor_total)
                 VALUES (%s, %s, %s, %s)
@@ -111,7 +111,7 @@ class Vendas:
             id_venda = cursor.lastrowid
             print(f"ID da Venda: {id_venda}")
 
-            # 2. INSERIR NA TABELA `vendas_itens`
+            # INSERIR NA TABELA `vendas_itens`
             total_item = float(dados_frontend['quantidade']) * float(dados_frontend['preco_por_kg'])
             query_item = """
                 INSERT INTO vendas_itens (id_venda, id_material_catalogo, quantidade_kg, preco_por_kg, total_item)

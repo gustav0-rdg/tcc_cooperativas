@@ -365,7 +365,7 @@ def alterar_aprovacao():
         id_usuario_cooperativa = cooperativa['id_usuario']
 
 
-        # Garante que não há transação pendente na conexão antes de iniciar
+        # Garante que não há transação pendente
         try:
             if db.in_transaction:
                 db.rollback()
@@ -380,7 +380,7 @@ def alterar_aprovacao():
             # Commit primeiro para garantir que a alteração seja salva
             db.commit()
             
-            # Envia email de aprovação ou reprovação (não bloqueia se falhar)
+            # Envia email de aprovação ou reprovação
             try:
                 usuario_coop = Usuarios(db).get(int(id_usuario_cooperativa))
                 if usuario_coop and usuario_coop.get('email'):
@@ -400,7 +400,7 @@ def alterar_aprovacao():
                         )
                         Email.enviar(usuario_coop['email'], assunto, corpo_html)
             except Exception as email_error:
-                # Log do erro mas não bloqueia a resposta de sucesso
+                # Log do erro mas não bloqueia a resposta
                 print(f"Erro ao enviar email (não crítico): {email_error}")
             
             return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
@@ -516,7 +516,7 @@ def enviar_documento():
             
         conn = Connection('local')
         
-        # Criação de um nome de arquivo seguro e único | EX: doc_coop_5.pdf
+        # Criação de um nome de arquivo seguro e único
         filename_base = secure_filename(f"doc_coop_{id_cooperativa}")
         extension = arquivo.filename.rsplit('.', 1)[1].lower()
         filename = f"{filename_base}.{extension}"
@@ -614,7 +614,7 @@ def rejeitar_cooperativa():
         # Commit primeiro para garantir que a alteração seja salva
         db.commit()
 
-        # Envia email de rejeição com template HTML bonito (não bloqueia se falhar)
+        # Envia email de rejeição
         try:
             assunto = "Cadastro no Recoopera Rejeitado"
             razao_social = cooperativa_data.get('razao_social', 'Cooperativa')

@@ -1,9 +1,6 @@
 const sessionToken = localStorage.getItem('session_token');
 
 window.CooperativasApp = (function () {
-    /* -------------------------
-       Configurações / Estado
-       ------------------------- */
     const API_GET_ALL = '/api/cooperativas/get-all';
     const ITEMS_PER_PAGE = 10;
 
@@ -27,9 +24,6 @@ window.CooperativasApp = (function () {
         modalEl: null
     };
 
-    /* -------------------------
-       Utilitários de Formatação
-       ------------------------- */
     function safeFormatarCNPJ(cnpj) {
         try {
             const s = String(cnpj || '').replace(/\D/g, '');
@@ -71,9 +65,6 @@ window.CooperativasApp = (function () {
         return `${dataFormatada} ${tempo}`;
     }
 
-    /* -------------------------
-       Fetch API (com proteção)
-       ------------------------- */
     async function fetchCooperativas() {
         const headers = { 'Content-Type': 'application/json' };
         if (sessionToken) headers['Authorization'] = sessionToken;
@@ -91,14 +82,10 @@ window.CooperativasApp = (function () {
 
         if (Array.isArray(data)) return data;
         if (Array.isArray(data.dados_cooperativas)) return data.dados_cooperativas;
-        // Array sem nome
         if (Array.isArray(data)) return data;
         return [];
     }
 
-    /* -------------------------
-       Filtragem (no cliente)
-       ------------------------- */
     function aplicarFiltros(resetPage = true) {
         const q = state.filtros.q;
         const status = state.filtros.status;
@@ -157,9 +144,6 @@ window.CooperativasApp = (function () {
         if (resetPage) state.page = 1;
     }
 
-    /* -------------------------
-       Renderização
-       ------------------------- */
     function renderCards(sliceArr, append = false) {
         const html = sliceArr.map(coop => {
             const ultimoAcesso = coop.ultima_atualizacao || coop.data_cadastro || '';
@@ -258,9 +242,6 @@ window.CooperativasApp = (function () {
         }
     }
 
-    /* -------------------------
-       UI: Active filter tags
-       ------------------------- */
     function updateActiveFiltersUI() {
         const container = el.activeFilters;
         container.innerHTML = '';
@@ -291,10 +272,7 @@ window.CooperativasApp = (function () {
         });
     }
 
-    /* -------------------------
-       Mutators de filtros / URL
-       ------------------------- */
-    function setFilter(key, value) 
+    function setFilter(key, value)
     {
         if (key === 'q') {
           value = (typeof value === 'string' && value.trim().length > 0) ? value.trim() : null;
@@ -333,9 +311,6 @@ window.CooperativasApp = (function () {
         state.filtros.aprovacao = params.get('aprovacao') || null;
     }
 
-    /* -------------------------
-       Ações: carregar mais, toggle status, preencher modal
-       ------------------------- */
     function carregarMais()
     {
         const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.itemsPerPage));
@@ -535,9 +510,6 @@ window.CooperativasApp = (function () {
         }
     }
 
-    /* -------------------------
-       Inicialização / Eventos
-       ------------------------- */
     function attachDom() {
         el.container = document.getElementById('cooperativasContainer');
         el.mostrandoLabel = document.getElementById('mostrandoCooperativas');
@@ -595,9 +567,6 @@ window.CooperativasApp = (function () {
         }
     }
 
-    /* -------------------------
-       Load & Boot
-       ------------------------- */
     async function loadAndRender() {
         try {
             state.all = await fetchCooperativas();

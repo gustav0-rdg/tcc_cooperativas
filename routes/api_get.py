@@ -12,12 +12,17 @@ from controllers.avaliacoes_controller import Avaliacoes
 from data.connection_controller import Connection
 api_get = Blueprint('api_get', __name__, url_prefix='/get')
 
+@api_get.route("/all-compradores", methods=["GET"])
+def get_all_compradores():
+    conn = Connection('local')
+    compradores = Compradores(conn.connection_db).get()
+    conn.close()
+    return jsonify(compradores)
+
 @api_get.route("/compradores", methods=["GET"])
 def get_compradores():
     """
     Busca compradores com filtros opcionais.
-    Acessível por cooperativa e cooperado.
-    Parâmetros: material (ID), estado (sigla), raio (km).
     """
     token = request.headers.get('Authorization')
 
@@ -62,8 +67,6 @@ def get_compradores():
         estado = request.args.get('estado', type=str)
         raio_km = request.args.get('raio', type=float)
 
-        print(f"Filtros aplicados - Material: {material_id}, Estado: {estado}, Raio: {raio_km} km")
-
         # Buscar compradores com filtros
         compradores = Compradores(db).get_all(
             user_lat=coop_info['latitude'],
@@ -107,7 +110,7 @@ def get_feedbacks():
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
     """
-    Lista materiais. Com token, inclui sinônimos.
+    Lista materiais.
     """
     conn = None
     try:
@@ -136,7 +139,7 @@ def get_materiais():
                                 id_cooperativa = cooperado_info.get('id_cooperativa')
             except Exception as e:
                 print(f"Erro ao processar token em /materiais: {e}")
-                # Continua sem id_cooperativa, não retorna erro
+                # Continua sem id_cooperativa
 
         materiais = Materiais(db).get_all(id_cooperativa=id_cooperativa)
         return jsonify(materiais), 200
@@ -152,7 +155,6 @@ def get_materiais():
 def get_subtipos_materiais(material_id):
     """
     Rota para obter a lista de subtipos de um material.
-    Se um token for fornecido, pode retornar nomes de sinônimos.
     """
     conn = None
     try:
@@ -253,7 +255,7 @@ def get_cooperativas_pendentes():
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
+        # Validar o Token e Permissão
         db = conn.connection_db
         # Remove o prefixo "Bearer " se ele existir
         token = token_header.split(" ")[1] if " " in token_header else token_header
@@ -269,7 +271,7 @@ def get_cooperativas_pendentes():
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar os dados (usando o método novo)
+        # Buscar os dados
         cooperativas_pendentes = Cooperativa(db).get_pendentes_com_documentos()
         
         if cooperativas_pendentes is False:
@@ -297,7 +299,7 @@ def get_avaliacoes_pendentes(id_cooperativa):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
+        # Validar o Token e Permissão
         db = conn.connection_db
         data_token = Tokens(db).validar(token_header)
         if data_token is None:
@@ -311,7 +313,7 @@ def get_avaliacoes_pendentes(id_cooperativa):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar as avaliações pendentes
+        # Buscar as avaliações pendentes
         avaliacoes_pendentes = Avaliacoes(db).get_avaliacoes_pendentes(int(id_cooperativa))
 
         conn.close()
@@ -334,7 +336,7 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
+        # Validar o Token e Permissão
         db = conn.connection_db
         data_token = Tokens(db).validar(token_header)
         if not data_token:
@@ -348,7 +350,7 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar a avaliação pendente
+        # Buscar a avaliação pendente
         avaliacao = Avaliacoes(db).get_avaliacao_pendente_por_id(int(id_avaliacao_pendente))
 
         if not avaliacao:
@@ -375,7 +377,7 @@ def get_comprador_detalhes(id_comprador):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
+        # Validar o Token e Permissão
         db = conn.connection_db
         token = token_header.split(" ")[1] if " " in token_header else token_header
         data_token = Tokens(db).validar(token)
@@ -390,7 +392,7 @@ def get_comprador_detalhes(id_comprador):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar os detalhes do comprador
+        # Buscar os detalhes do comprador
         detalhes = Compradores(db).get_detalhes_comprador(id_comprador)
 
         if not detalhes:
@@ -431,7 +433,7 @@ def get_cooperativa_info():
         if not usuario_info or usuario_info['tipo'] != 'cooperativa':
             return jsonify({'error': 'Usuário não é uma cooperativa'}), 403
 
-        # Buscar dados da cooperativa usando o método já corrigido
+        # Buscar dados da cooperativa
         dados_cooperativa = Cooperativa(db).get_by_user_id(id_usuario)
         if not dados_cooperativa:
             return jsonify({'error': 'Dados da cooperativa não encontrados'}), 404

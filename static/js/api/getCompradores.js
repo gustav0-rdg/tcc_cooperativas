@@ -13,6 +13,14 @@ export async function getCompradores() {
     return data
 }
 
+export async function getAllCompradores() {
+    const response = await fetch(
+        `/get/all-compradores`,
+    )
+    const data = await response.json()
+    return data
+}
+
 const session_token = localStorage.getItem('session_token')
 // Função para buscar os compradores pelo NOME do material
 export async function getCompradoresPorMaterial(nome_material, subtipo) {

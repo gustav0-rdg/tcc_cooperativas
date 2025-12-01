@@ -35,13 +35,13 @@ def cadastrar ():
 
     try:
 
-        #region Cadastro de pessoas com permissões especiais
+        # Cadastro de pessoas com permissões especiais
 
         if data_cadastro['tipo'] != 'cooperativa':
 
             if not token:
                 return jsonify({ 'error': 'Para este tipo de ação é necessário token de autorização' }), 400
-            
+
             data_token = Tokens(conn.connection_db).validar(token)
 
             if not data_token:
@@ -49,11 +49,9 @@ def cadastrar ():
 
             if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
                 return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-            
+
             if data_cadastro['tipo'] == 'gestor':
                 status_usuario = 'ativo'
-
-        #endregion
 
         novo_usuario = Usuarios(conn.connection_db).create(
 
@@ -67,18 +65,14 @@ def cadastrar ():
 
         match novo_usuario:
 
-            # 200 - Usuário criado
-
             case _ if isinstance(novo_usuario, int):
 
-                return jsonify({ 
+                return jsonify({
 
                     'texto': 'Usuário cadastrado',
                     'id_usuario': novo_usuario
 
                 }), 200
-
-            # 500 - Erro ao criar usuário
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
@@ -167,19 +161,13 @@ def alterar_senha ():
 
         ):
 
-            # 404 - Usuário não encontrado
-
             case None:
                 return jsonify({ 'error': 'Usuário não encontrado' }), 404
-
-            # 200 - Senha do usuário alterada
 
             case True:
 
                 Tokens(conn.connection_db).set_state(data_token['id_token'])
                 return jsonify({ 'texto': 'Senha alterada com sucesso' }), 200
-
-            # 500 - Erro ao alterar a senha do usuário
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
@@ -203,7 +191,7 @@ def solicitar_recuperacao_senha (email:str):
         match data_usuario:
 
             # Usuário não encontrado ou usuário validado
-            # Mesmo retorno para não gerar para não vazar informações
+            # Mesmo retorno para não vazar informações
 
             case None | _ if isinstance(data_usuario, dict):
 
@@ -213,15 +201,13 @@ def solicitar_recuperacao_senha (email:str):
 
                         data_usuario['id_usuario'],
                         'recuperacao_senha',
-                        
+
                         # Tempo de expiração em 2 horas
                         data_expiracao=datetime.now() + timedelta(hours=2)
 
                     )
 
                     match token_alterar_senha:
-
-                        # Token Criado
 
                         case _ if isinstance(token_alterar_senha, str):
 
@@ -241,8 +227,6 @@ def solicitar_recuperacao_senha (email:str):
 
                             )
 
-                            # 500 - Erro ao enviar e-mail
-
                             if not Email.enviar(
 
                                 destinatario=email,
@@ -252,17 +236,11 @@ def solicitar_recuperacao_senha (email:str):
                             ):
 
                                 return jsonify({ 'error': 'Erro ao enviar e-mail' }), 500
-                            
-                        # 500 - Erro ao criar token
 
                         case False | _:
-                            return jsonify({ 'error': 'Erro ao criar token' }), 500    
+                            return jsonify({ 'error': 'Erro ao criar token' }), 500
 
-                # 200 - Email de recuperação de senha enviado
-
-                return jsonify({ 'texto': 'Se o email for válido, email enviado' }), 200      
-
-            # 500 - Erro ao validar usuário
+                return jsonify({ 'texto': 'Se o email for válido, email enviado' }), 200
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
@@ -309,17 +287,11 @@ def delete (id_usuario:int=None):
         
         match Usuarios(conn.connection_db).delete(id_usuario):
 
-            # 404 - Usuário não encontrado
-
             case None:
                 return jsonify({ 'error': 'Usuário não encontrado' }), 404
 
-            # 200 - Usuário Excluído
-
             case True:
                 return jsonify({ 'texto': 'Usuário excluído' }), 200
-
-            # 500 - Erro ao excluir usuário
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
@@ -366,7 +338,7 @@ def get_usuario():
             dados_cooperado = Cooperados(db).get_cooperado_e_cooperativa_by_user_id(id_usuario)
             if dados_cooperado:
                 usuario_info['dados_cooperado'] = dados_cooperado
-                # Adicionado para buscar os dados da cooperativa
+                # Busca dados da cooperativa
                 id_cooperativa = dados_cooperado.get('id_cooperativa')
                 if id_cooperativa:
                     dados_cooperativa = Cooperativa(db).get(id_cooperativa)
@@ -422,7 +394,7 @@ def alterar_status (id_usuario:int=None):
                 if not (data_token['tipo'] == 'cadastro' or (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root'])):
 
                     return jsonify({ 'error': 'Você não tem permissão para tal ação' }), 403
-                
+
             case 'inativo' | 'bloqueado':
 
                 if not (data_token['tipo'] == 'sessao' and Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']):
@@ -439,17 +411,11 @@ def alterar_status (id_usuario:int=None):
 
         match Usuarios(conn.connection_db).alterar_status(id_usuario, novo_status):
 
-            # 404 - Usuário não encontrado
-
             case None:
                 return jsonify({ 'error': 'Usuário não encontrado' }), 404
 
-            # 200 - Status do usuário alterado
-
             case True:
                 return jsonify({ 'texto': 'Status do usuário alterado' }), 200
-
-            # 500 - Erro ao alterar o status
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
@@ -465,8 +431,6 @@ def alterar_status (id_usuario:int=None):
 @api_usuarios.route('/get-all-gestores', methods=['GET', 'POST'])
 def get_all_gestores ():
 
-    # 400 - Token Obrigatório
-
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
@@ -476,31 +440,21 @@ def get_all_gestores ():
 
         conn = Connection('local')
 
-        # 400 - Token Inválido
-
         data_token = Tokens(conn.connection_db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({ 'error': '"token" é um parâmetro obrigatório' }), 400
 
-        # 403 - Sem permissão
-
         if not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-        
+
         data_gestores = Usuarios(conn.connection_db).get_all_gestores()
         match data_gestores:
-
-            # 404 - Gestores não encontrados
 
             case None:
                 return jsonify({ 'error': 'Gestores não encontrados' }), 404
 
-            # 200 - Informações dos gestores consultadas
-
             case _ if isinstance(data_gestores, list):
                 return jsonify(data_gestores), 200
-
-            # 500 - Erro ao consultar gestores
 
             case False | _:
                 return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
