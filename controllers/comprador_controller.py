@@ -11,93 +11,95 @@ class Compradores:
         self.connection_db = connection_db
 
     def create(self, cnpj):
+        """
+        Cria ou atualiza comprador via CNPJ.
+        """
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
             validar_cnpj = CNPJ.validar(cnpj)
             data = CNPJ.consultar(cnpj)
             print(data)
-            
+
             cnpj = data.get('taxId')
             razao_social = data.get('company', {}).get('name')
 
-            # ===== ENDEREÇO - Formatação correta sem "None" =====
+            # Formata endereço
             endereco_info = data.get('address', {})
             partes_endereco = []
-            
+
             rua = endereco_info.get('street', '').strip()
             numero = endereco_info.get('number', '').strip()
             bairro = endereco_info.get('district', '').strip()
             complemento = endereco_info.get('details', '').strip()
-            
-            # Monta o endereço apenas com partes não vazias
+
+            # Monta endereço com partes não vazias
             if rua:
                 if numero:
                     partes_endereco.append(f"{rua}, {numero}")
                 else:
                     partes_endereco.append(rua)
-            
+
             if bairro:
                 partes_endereco.append(bairro)
-            
+
             if complemento:
                 partes_endereco.append(complemento)
 
             cidade = endereco_info.get('city')
             estado = endereco_info.get('state')
 
-            # ===== TELEFONES - Separar fixo e WhatsApp =====
+            # Separa telefones fixo e WhatsApp
             phones_list = data.get('phones', [])
             telefone = None
             whatsapp = None
-            
+
             for phone in phones_list:
                 phone_type = phone.get('type', '').upper()
                 area = phone.get('area', '').strip()
                 number = phone.get('number', '').strip()
-                
+
                 if not number:
                     continue
-                
-                # Formata o telefone
+
+                # Formata telefone
                 if area:
                     phone_formatted = f"({area}) {number}"
                 else:
                     phone_formatted = number
-                
-                # Identifica se é celular/WhatsApp ou fixo
-                # Celular geralmente tem type='MOBILE' ou número começa com 9
+
+                # Identifica celular/WhatsApp ou fixo
                 if phone_type == 'MOBILE' or (len(number) >= 9 and number[0] == '9'):
-                    if not whatsapp:  # Pega o primeiro celular como WhatsApp
+                    if not whatsapp:  # Primeiro celular como WhatsApp
                         whatsapp = phone_formatted
                 elif phone_type == 'LANDLINE' or not whatsapp:
-                    if not telefone:  # Pega o primeiro fixo
+                    if not telefone:  # Primeiro fixo
                         telefone = phone_formatted
-            
-            # Se não encontrou WhatsApp mas tem telefone, usa o telefone como WhatsApp também
+
+            # Usa telefone como WhatsApp se não encontrou
             if not whatsapp and telefone:
                 whatsapp = telefone
 
-            # ===== EMAIL =====
+            # Busca email
             emails_list = data.get('emails', [])
             email = None
-            
+
             if emails_list:
                 email_info = emails_list[0]
                 email = email_info.get('address', '').strip() if email_info else None
-            
+
             latitude = 0
             longitude = 0
-            
+
             coordenadas = Endereco.get_coordenadas(f'{rua}, {cidade}, {estado}, Brasil')
-            
+
             if not coordenadas is None:
                 latitude, longitude = coordenadas
 
-            # ===== INSERÇÃO NO BANCO =====
+            # Insere no banco
             query = """
                 INSERT INTO compradores(
-                    cnpj, razao_social, nome_fantasia, email, telefone, whatsapp, 
+                    cnpj, razao_social, nome_fantasia, email, telefone, whatsapp,
                     cep, logradouro, numero, complemento, bairro, cidade, estado,
                     latitude, longitude
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -135,7 +137,7 @@ class Compradores:
             )
             cursor.execute(query, params)
             self.connection_db.commit()
-            
+
             print(f"✅ Comprador cadastrado/atualizado: {razao_social}")
             print(f"   Endereço: {rua}, {numero} - {bairro}")
             print(f"   Telefone: {telefone}")
@@ -149,23 +151,24 @@ class Compradores:
             cursor.close()
 
     def get_all(self, user_lat:float, user_lon:float, material_id=None, estado=None, raio_km=None) -> list:
-
+        """
+        Busca compradores com filtros opcionais.
+        """
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
             query = """
                 SELECT
                     c.id_comprador,
-                    c.razao_social, 
-                    c.cnpj, 
-                    c.email, 
-                    c.telefone, 
+                    c.razao_social,
+                    c.cnpj,
+                    c.email,
+                    c.telefone,
                     CONCAT_WS(', ', c.logradouro, c.numero, c.bairro) AS endereco,
-                    c.cidade, 
-                    c.estado, 
-                    c.score_confianca, 
-                    c.latitude, 
+                    c.cidade,
+                    c.estado,
+                    c.score_confianca,
+                    c.latitude,
                     c.longitude,
                     c.numero_avaliacoes,
                     c.data_criacao,
@@ -181,30 +184,21 @@ class Compradores:
             params = []
             where_clauses = []
 
-            # Filtro por material (se comprou esse material)
-
             if material_id:
-
                 where_clauses.append("mc.id_material_base = %s")
                 params.append(material_id)
 
-            # Filtro por estado
-
             if estado:
-
                 where_clauses.append("c.estado = %s")
                 params.append(estado)
 
-            # Adiciona WHERE se houver filtros
-
             if where_clauses:
-
                 query += " WHERE " + " AND ".join(where_clauses)
 
             query += """
-                GROUP BY 
-                    c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone, 
-                    endereco, c.cidade, c.estado, c.score_confianca, 
+                GROUP BY
+                    c.id_comprador, c.razao_social, c.cnpj, c.email, c.telefone,
+                    endereco, c.cidade, c.estado, c.score_confianca,
                     c.latitude, c.longitude, c.numero_avaliacoes, c.data_criacao
             """
 
@@ -215,39 +209,31 @@ class Compradores:
             compradores = cursor.fetchall()
             compradores_filtrados = []
 
-            # Para cada comprador, calcular a distância até o usuário
             if user_lat is not None and user_lon is not None:
                 for comprador in compradores:
-                    # Calculando a distância usando a função Haversine
                     if comprador.get('latitude') and comprador.get('longitude'):
                         distancia = Endereco.haversine(user_lat, user_lon, comprador['latitude'], comprador['longitude'])
                         comprador['distancia'] = round(distancia, 2)
                     else:
-                        comprador['distancia'] = None  # Usar None em vez de float('inf')
+                        comprador['distancia'] = None
 
-                    # Adicionar à lista se o raio não for um filtro ou se a distância for válida
                     if raio_km is None or (comprador['distancia'] is not None and comprador['distancia'] <= raio_km):
                         compradores_filtrados.append(comprador)
             else:
-                # Se o usuário não tem lat/lon, não podemos calcular distâncias
                 for comprador in compradores:
                     comprador['distancia'] = None
                 compradores_filtrados = compradores
 
-
-            # Ordena a lista: compradores com distância aparecem primeiro, ordenados pela distância.
-            # Os sem distância (None) vão para o final.
+            # Ordena por distância
             compradores_filtrados.sort(key=lambda x: (x.get('distancia') is None, x.get('distancia')))
-            
+
             return compradores_filtrados
 
         except Exception as e:
-
             print(f"Erro ao buscar compradores: {e}")
             return []
-        
-        finally:
 
+        finally:
             cursor.close()
     def get_by_materials(self, material, subtipo):
         """
@@ -343,14 +329,13 @@ class Compradores:
 
     def get_detalhes_comprador(self, id_comprador: int) -> dict:
         """
-        Busca todos os detalhes de um comprador para o modal, incluindo
-        informações de contato, materiais, avaliações e tags de feedback.
+        Busca detalhes do comprador: contato, materiais, avaliações, feedback.
         """
         cursor = self.connection_db.cursor(dictionary=True)
         detalhes = {}
 
         try:
-            # 1. Buscar informações primárias do comprador (contato, cnpj)
+            # Busca informações primárias
             query_comprador = """
             SELECT razao_social, cnpj, email, telefone, whatsapp,
                    logradouro, numero, complemento, bairro, cidade, estado
@@ -361,11 +346,11 @@ class Compradores:
             comprador_info = cursor.fetchone()
 
             if not comprador_info:
-                return None  # Retorna None se o comprador não for encontrado
-            
+                return None
+
             detalhes.update(comprador_info)
 
-            # 2. Buscar materiais já comprados
+            # Busca materiais comprados
             query_materiais = """
             SELECT
                 material_nome,
@@ -380,7 +365,7 @@ class Compradores:
             cursor.execute(query_materiais, (id_comprador,))
             detalhes["materiais_comprados"] = cursor.fetchall()
 
-            # 3. Buscar avaliações recentes
+            # Busca avaliações recentes
             query_avaliacoes = """
             SELECT
                 avaliacao_score AS score,
@@ -393,7 +378,7 @@ class Compradores:
             cursor.execute(query_avaliacoes, (id_comprador,))
             detalhes["avaliacoes_recentes"] = cursor.fetchall()
 
-            # 4. Buscar tags de feedback agregadas usando o CNPJ
+            # Busca tags de feedback
             comprador_cnpj = comprador_info.get('cnpj')
             if comprador_cnpj:
                 query_tags = """

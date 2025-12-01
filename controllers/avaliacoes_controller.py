@@ -2,35 +2,35 @@ from data.connection_controller import Connection
 from mysql.connector.connection import MySQLConnection
 import datetime
 from typing import List, Dict, Any, Optional
-from controllers.config_controller import ConfigController # Importar ConfigController
-import math # Para funções matemáticas como exp
+from controllers.config_controller import ConfigController
+import math
 
 class Avaliacoes:
     def __init__(self, connection_db: MySQLConnection):
         if not Connection.validar(connection_db):
             raise ValueError(f'Erro - Avaliacoes: valores inválidos para os parametros "connection_db"')
         self.connection_db = connection_db
-        self.config_controller = ConfigController(connection_db) # Instanciar ConfigController
+        self.config_controller = ConfigController(connection_db)
 
     def _calcular_score_bayesiano(self, id_comprador: int, cursor) -> float:
         """
-        Calcula o score bayesiano de um comprador com base nas avaliações existentes e configurações do sistema.
+        Calcula score bayesiano do comprador baseado em avaliações e configurações.
         """
-        # Obter configurações do sistema
+        # Busca configurações
         peso_prior_bayesiano = self.config_controller.get_config_value('peso_prior_bayesiano') or 3.0
         avaliacao_neutra_novato = self.config_controller.get_config_value('avaliacao_neutra_novato') or 2.5
         decaimento_anual_score = self.config_controller.get_config_value('decaimento_anual_score') or 365
         min_avaliacoes_confianca = self.config_controller.get_config_value('min_avaliacoes_confianca') or 10
 
-        # Obter todas as avaliações do comprador com suas datas
+        # Busca avaliações do comprador
         query_avaliacoes = "SELECT score, data_avaliacao FROM avaliacoes_compradores WHERE id_comprador = %s ORDER BY data_avaliacao ASC"
         cursor.execute(query_avaliacoes, (id_comprador,))
         avaliacoes = cursor.fetchall()
 
         if not avaliacoes:
-            return avaliacao_neutra_novato # Retorna o score neutro se não houver avaliações
+            return avaliacao_neutra_novato  # Retorna score neutro sem avaliações
 
-        # Parâmetros iniciais para o cálculo bayesiano
+        # Inicia parâmetros bayesianos
         total_score_ponderado = peso_prior_bayesiano * avaliacao_neutra_novato
         total_peso = peso_prior_bayesiano
 
@@ -39,32 +39,28 @@ class Avaliacoes:
         for avaliacao in avaliacoes:
             score_avaliacao = avaliacao['score']
             data_avaliacao = avaliacao['data_avaliacao']
-            
-            # Calcular o fator de decaimento (exponencial)
+
+            # Calcula decaimento exponencial
             dias_desde_avaliacao = (data_atual - data_avaliacao).days
-            
-            # Usar uma função exponencial para o decaimento
-            # A constante de decaimento (lambda) é calculada de forma que em 'decaimento_anual_score' dias
-            # o peso caia para ~37% (1/e) do valor original.
-            # lambda = 1 / decaimento_anual_score
-            # peso_atual = exp(-lambda * dias_desde_avaliacao)
+
+            # Decaimento baseado em dias
             if decaimento_anual_score > 0:
                 fator_decaimento = math.exp(-dias_desde_avaliacao / decaimento_anual_score)
             else:
-                fator_decaimento = 1.0 # Sem decaimento se o parâmetro for 0 ou negativo
+                fator_decaimento = 1.0  # Sem decaimento se parâmetro <=0
 
-            peso_avaliacao = 1.0 * fator_decaimento # Cada avaliação tem peso inicial de 1, decaindo com o tempo
+            peso_avaliacao = 1.0 * fator_decaimento  # Peso inicial 1, decaindo no tempo
 
             total_score_ponderado += score_avaliacao * peso_avaliacao
             total_peso += peso_avaliacao
-        
-        # Calcular o score bayesiano final
+
+        # Calcula score final
         if total_peso > 0:
             score_final = total_score_ponderado / total_peso
         else:
-            score_final = avaliacao_neutra_novato # Fallback
+            score_final = avaliacao_neutra_novato  # Caso alternativo
 
-        # Garantir que o score esteja entre 0 e 5
+        # Limita score entre 0 e 5
         return round(max(0.0, min(5.0, score_final)), 2)
 
     def get_avaliacoes_pendentes(self, id_cooperativa: int) -> List[Dict[str, Any]]:
@@ -122,38 +118,36 @@ class Avaliacoes:
 
     def _get_feedback_tag_ids(self, cursor, tags_recebidas: List[Any]) -> List[int]:
         """
-        Método auxiliar para converter uma lista de nomes de tags ou IDs em uma lista de IDs de inteiros.
+        Converte lista de nomes ou IDs de tags em lista de IDs inteiros.
         """
         if not tags_recebidas:
             return []
 
-        # Se o primeiro item for um inteiro, assume-se que todos são IDs.
+        # Se primeiro item é int, assume todos são IDs
         if isinstance(tags_recebidas[0], int):
             return tags_recebidas
 
-        # Se forem strings, busca os IDs no banco.
+        # Se strings, busca IDs no banco
         if isinstance(tags_recebidas[0], str):
             placeholders = ', '.join(['%s'] * len(tags_recebidas))
             query_busca_id = f"SELECT id_feedback_tag FROM feedback_tags WHERE texto IN ({placeholders})"
             cursor.execute(query_busca_id, tuple(tags_recebidas))
             resultados = cursor.fetchall()
-            
+
             if len(resultados) != len(tags_recebidas):
-                print(f"AVISO: Algumas tags não foram encontradas. Recebidas: {tags_recebidas}, Encontradas: {resultados}")
+                print(f"Aviso: Algumas tags não encontradas. Recebidas: {tags_recebidas}, Encontradas: {resultados}")
 
             return [item['id_feedback_tag'] for item in resultados]
-        
+
         return []
 
     def finalizar_avaliacao_pendente(self, id_avaliacao_pendente: int, dados_avaliacao: dict) -> bool:
         """
-        Finaliza uma avaliação pendente.
-        Esta operação é transacional: insere na tabela de avaliações, associa as tags de feedback
-        e remove o registro da tabela de pendentes. Se qualquer passo falhar, tudo é revertido.
+        Finaliza avaliação pendente transacionalmente: insere avaliação, associa tags, remove pendente.
         """
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
-                # 1. Buscar dados da venda associada à avaliação pendente
+                # Busca dados da venda
                 query_dados = """
                 SELECT ap.id_venda, ap.id_cooperativa, v.id_comprador
                 FROM avaliacoes_pendentes ap
@@ -162,15 +156,15 @@ class Avaliacoes:
                 """
                 cursor.execute(query_dados, (id_avaliacao_pendente,))
                 dados_venda = cursor.fetchone()
-                
+
                 if not dados_venda:
-                    print(f"Aviso: Avaliação pendente com ID {id_avaliacao_pendente} não encontrada.")
+                    print(f"Aviso: Avaliação pendente ID {id_avaliacao_pendente} não encontrada.")
                     return False
 
-                # 2. Inserir na tabela principal de avaliações
+                # Insere na tabela de avaliações
                 score = int(dados_avaliacao.get('nota', 0))
                 if not (0 <= score <= 5):
-                    raise ValueError("O score da avaliação deve estar entre 0 e 5.")
+                    raise ValueError("Score deve ser entre 0 e 5.")
 
                 query_avaliacao = """
                 INSERT INTO avaliacoes_compradores (id_venda, id_comprador, id_cooperativa, score, comentario_livre, data_avaliacao)
@@ -182,33 +176,33 @@ class Avaliacoes:
                 ))
                 id_avaliacao = cursor.lastrowid
 
-                # 3. Processar e inserir tags de feedback
+                # Processa e insere tags de feedback
                 tags_recebidas = dados_avaliacao.get('comentarios_rapidos', [])
                 if tags_recebidas:
                     ids_tags_para_inserir = self._get_feedback_tag_ids(cursor, tags_recebidas)
-                    
+
                     if ids_tags_para_inserir:
                         query_insert_relacao = "INSERT INTO avaliacao_feedback_selecionado (id_avaliacao, id_feedback_tag) VALUES (%s, %s)"
                         tags_para_inserir_tuplas = [(id_avaliacao, tag_id) for tag_id in ids_tags_para_inserir]
                         cursor.executemany(query_insert_relacao, tags_para_inserir_tuplas)
 
-                # 4. Atualizar o contador de avaliações do comprador
+                # Atualiza contador de avaliações
                 query_update_num_avaliacoes = "UPDATE compradores SET numero_avaliacoes = numero_avaliacoes + 1 WHERE id_comprador = %s"
                 cursor.execute(query_update_num_avaliacoes, (dados_venda['id_comprador'],))
 
-                # 5. Calcular e atualizar o score bayesiano do comprador
+                # Calcula e atualiza score bayesiano
                 novo_score_bayesiano = self._calcular_score_bayesiano(dados_venda['id_comprador'], cursor)
                 query_update_score = "UPDATE compradores SET score_confianca = %s WHERE id_comprador = %s"
                 cursor.execute(query_update_score, (novo_score_bayesiano, dados_venda['id_comprador']))
 
-                # 6. Registrar o histórico do score
+                # Registra histórico do score
                 query_historico_score = """
                 INSERT INTO historico_score (id_comprador, score_calculado, numero_avaliacoes, detalhe_json, data_calculo)
                 VALUES (%s, %s, (SELECT numero_avaliacoes FROM compradores WHERE id_comprador = %s), NULL, NOW())
                 """
                 cursor.execute(query_historico_score, (dados_venda['id_comprador'], novo_score_bayesiano, dados_venda['id_comprador']))
 
-                # 7. Remover da tabela de pendentes
+                # Remove da tabela de pendentes
                 cursor.execute("DELETE FROM avaliacoes_pendentes WHERE id_avaliacao_pendente = %s", (id_avaliacao_pendente,))
 
                 self.connection_db.commit()

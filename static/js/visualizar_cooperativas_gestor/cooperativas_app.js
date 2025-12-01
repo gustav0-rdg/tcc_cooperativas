@@ -8,14 +8,14 @@ window.CooperativasApp = (function () {
     const ITEMS_PER_PAGE = 10;
 
     let state = {
-        all: [],             // todos os registros retornados pela API
-        filtered: [],        // resultado após filtros/Busca
+        all: [],             // Registros da API
+        filtered: [],        // Após filtros
         page: 1,
         itemsPerPage: ITEMS_PER_PAGE,
         filtros: { q: null, status: null, atividade: null, aprovacao: null }
     };
 
-    // DOM (inicializados no init)
+    // Elementos DOM
     let el = {
         container: null,
         mostrandoLabel: null,
@@ -56,7 +56,7 @@ window.CooperativasApp = (function () {
         if (!input) return 'Não registrado';
         const d = new Date(input);
         if (isNaN(d.getTime())) {
-            // se veio como timestamp em segundos
+            // Timestamp em segundos
             const num = Number(input);
             if (!isNaN(num)) return formatarData(new Date(num * 1000).toString());
             return 'Data inválida';
@@ -91,7 +91,7 @@ window.CooperativasApp = (function () {
 
         if (Array.isArray(data)) return data;
         if (Array.isArray(data.dados_cooperativas)) return data.dados_cooperativas;
-        // se o objeto principal contém a array sem nome:
+        // Array sem nome
         if (Array.isArray(data)) return data;
         return [];
     }
@@ -222,16 +222,16 @@ window.CooperativasApp = (function () {
         const page = Math.max(1, state.page);
       
         if (append) {
-            // calcular somente os itens novos desta página (não reapendar itens já mostrados)
+            // Itens novos da página
             const start = (page - 1) * perPage;
             const end = Math.min(page * perPage, state.filtered.length);
             const newSlice = state.filtered.slice(start, end);
-            // se não houver novos itens, nada a fazer
+            // Sem novos itens
             if (newSlice.length > 0) {
                 renderCards(newSlice, true); // append
             }
         } else {
-            // comportamento "mostrar até a página X
+            // Até página X
             const end = Math.min(page * perPage, state.filtered.length);
             const slice = state.filtered.slice(0, end);
             renderCards(slice, false); // replace
@@ -282,7 +282,7 @@ window.CooperativasApp = (function () {
         `);
         });
 
-        // attach remove handlers
+        // Anexa handlers de remoção
         container.querySelectorAll('.remove-filter').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const k = e.currentTarget.dataset.remove;
@@ -303,17 +303,17 @@ window.CooperativasApp = (function () {
         }
       
         state.filtros[key] = value;
-        aplicarFiltros(true); // reset de página ao alterar filtros via UI
+        aplicarFiltros(true); // Reseta página
         renderPage();
         updateUrlParams();
     }
 
-    function removeFilter(key) 
-    { 
-        setFilter(key, null); 
+    function removeFilter(key)
+    {
+        setFilter(key, null);
     }
 
-    // atualiza URL (sem recarregar) para refletir filtros atuais
+    // Atualiza URL sem recarregar
     function updateUrlParams() {
         const params = new URLSearchParams();
         const f = state.filtros;
@@ -336,14 +336,13 @@ window.CooperativasApp = (function () {
     /* -------------------------
        Ações: carregar mais, toggle status, preencher modal
        ------------------------- */
-    function carregarMais() 
+    function carregarMais()
     {
-        // Math.ceil() -> Retorna o menor inteiro maior ou igual ao número fornecido
         const maxPage = Math.max(1, Math.ceil(state.filtered.length / state.itemsPerPage));
 
-        if (state.page >= maxPage) 
+        if (state.page >= maxPage)
         {
-            // Já está na última página -> esconde botão
+            // Última página, esconde botão
             if (el.loadMoreBtn) el.loadMoreBtn.style.display = 'none';
             return;
         }
@@ -392,21 +391,21 @@ window.CooperativasApp = (function () {
                 throw new Error(data?.error || data?.texto || 'Erro ao alterar status');
             }
 
-            // Atualiza state.all (status real)
+            // Atualiza status
             const idxAll = state.all.findIndex(x => String(x.id_usuario) === String(userId));
-            if (idxAll !== -1) state.all[idxAll].status = novoStatus;            
-            else 
+            if (idxAll !== -1) state.all[idxAll].status = novoStatus;
+            else
             {
-                // fallback: procurar por id_cooperativa no card dataset (se existir)
+                // Fallback por id_cooperativa
                 const possibleIdCoop = button.closest('.coop-card')?.dataset?.id;
                 const idxC = state.all.findIndex(x => String(x.id_cooperativa) === String(possibleIdCoop));
                 if (idxC !== -1) state.all[idxC].status = novoStatus;
             }
 
-            // Reaplica filtros sem resetar a página (mantém contexto)
+            // Reaplica filtros sem reset
             aplicarFiltros(false);
 
-            // Encontra índice no array filtrado para calcular em qual página ele está
+            // Índice no array filtrado
             const idxFiltered = state.filtered.findIndex(x =>
             String(x.id_usuario) === String(userId) || String(x.id_cooperativa) === String(button.closest('.coop-card')?.dataset?.id)
             );
@@ -415,10 +414,10 @@ window.CooperativasApp = (function () {
                 const itemsPerPage = state.itemsPerPage || ITEMS_PER_PAGE;
                 const requiredPage = Math.ceil((idxFiltered + 1) / itemsPerPage) || 1;
 
-                if (requiredPage > state.page) state.page = requiredPage; // só sobe de página, não baixa
+                if (requiredPage > state.page) state.page = requiredPage; // Só sobe página
             }
 
-            // Re-renderiza já com page ajustada
+            // Re-renderiza com página ajustada
             renderPage();
 
             await Swal.fire({ title: 'Sucesso', text: data?.texto || data?.message || 'Status atualizado', icon: 'success' });
@@ -437,15 +436,13 @@ window.CooperativasApp = (function () {
         const modalTitle = document.getElementById('modalTitle');
         const modalBody = document.getElementById('modalBody');
 
-        console.log(ds)
-
         modalTitle.textContent = ds.nome || 'Detalhes';
         modalBody.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
 
         const statusText = toCapitalize(ds.status || 'Indefinido');
         const statusClass = `status-${ds.status}`;
 
-        // preencher com dados do dataset
+        // Preenche com dataset
         const html = `
         <div class="detail-section">
             <h6 class="detail-title">Informações Gerais</h6>
@@ -530,7 +527,7 @@ window.CooperativasApp = (function () {
       `;
         modalBody.innerHTML = html;
 
-        // mostra modal (Bootstrap)
+        // Mostra modal
         const modalEl = document.getElementById('cooperativaModal');
         if (modalEl) {
             const instance = new bootstrap.Modal(modalEl);
@@ -555,7 +552,7 @@ window.CooperativasApp = (function () {
     }
 
     function bindEvents() {
-        // Delegação de cliques no container (abrir modal / botão bloquear)
+        // Delegação de cliques
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-block');
             if (btn) {
@@ -569,7 +566,7 @@ window.CooperativasApp = (function () {
             }
         });
 
-        // filtros dropdown (elementos com classe .filter-item)
+        // Filtros dropdown
         document.querySelectorAll('.filter-item').forEach(elm => {
             elm.addEventListener('click', (ev) => {
                 ev.preventDefault();
@@ -580,7 +577,7 @@ window.CooperativasApp = (function () {
             });
         });
 
-        // search
+        // Busca
         if (el.searchForm) {
             el.searchForm.addEventListener('submit', (ev) => {
                 ev.preventDefault();
@@ -589,7 +586,7 @@ window.CooperativasApp = (function () {
             });
         }
 
-        // load more
+        // Carregar mais
         if (el.loadMoreBtn) {
             el.loadMoreBtn.addEventListener('click', (ev) => {
                 ev.preventDefault();
@@ -619,11 +616,11 @@ window.CooperativasApp = (function () {
         await loadAndRender();
     }
 
-    // expõe apenas init e manipuladores úteis
+    // Expõe init e handlers
     return { init, setFilter, removeFilter };
 })();
 
-// auto init no DOMContentLoaded (se o script for carregado com defer, isso é redundante mas seguro)
+// Init automático
 document.addEventListener('DOMContentLoaded', () => {
 
     if (!sessionToken)

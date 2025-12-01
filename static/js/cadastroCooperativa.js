@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formCadastro.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Pega os dados do formulário
+            // Dados do formulário
             const nome = document.getElementById('nomeCompleto').value.trim();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
@@ -108,9 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                console.log(data);
-                console.log(response);
-
                 if (!response.ok) {
                     throw new Error(data.error || `Erro ${response.status}`);
                 }
@@ -142,20 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Mascara CNPJ
+// Máscara CNPJ
 if (cnpjInput) {
     cnpjInput.addEventListener('input', function () {
-        let value = this.value.replace(/\D/g, ""); // remove tudo que não é número
-
-        // limita a 14 números
+        let value = this.value.replace(/\D/g, "");
         if (value.length > 14) value = value.slice(0, 14);
-
-        // aplica a máscara
         value = value.replace(/^(\d{2})(\d)/, "$1.$2");
         value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
         value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
         value = value.replace(/(\d{4})(\d)/, "$1-$2");
-
         this.value = value;
     });
 }

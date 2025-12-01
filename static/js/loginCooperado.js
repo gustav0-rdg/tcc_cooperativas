@@ -40,16 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    // Adiciona o listener de evento "submit" ao formulário
     loginForm.addEventListener('submit', async (e) => {
 
         e.preventDefault();
 
-        // Pega os valores dos campos
+        // Valores dos campos
         const cpf = limparCPF(cpfInput.value);
         const senha = senhaInput.value;
 
         paginaLoginCooperado.fazerLogin(cpf, senha, 'CPF');
-        
+
     });
 });

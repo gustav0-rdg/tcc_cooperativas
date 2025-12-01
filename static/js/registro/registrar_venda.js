@@ -22,7 +22,6 @@ export const vendaAtual = {
 };
 
 
-// Função para mostrar a etapa de materiais
 function exibirMateriais() {
     etapaSection.innerHTML = `
     <h1>Registrar Venda</h1>
@@ -36,7 +35,6 @@ function exibirMateriais() {
 
     opcoesSection.innerHTML = ''; // Limpar as opções anteriores
     material.forEach(item => {
-        console.log(item)
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
         div.setAttribute('data-value', `${item.nome_padrao}`);
@@ -45,15 +43,11 @@ function exibirMateriais() {
         `;
         opcoesSection.appendChild(div);
 
-        // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
             vendaAtual.material.categoria = item.nome_padrao;
-            vendaAtual.material.id_categoria = item.id_material_base // Atualiza o material no objeto vendaAtual
-            etapaAtual = "subtipos"; // Muda para a etapa de vendedores
-            // TROCAR ESTE PARA EXIBIR SUBTIPOS
-            // exibirVendedores(); // Exibe os vendedores
+            vendaAtual.material.id_categoria = item.id_material_base 
+            etapaAtual = "subtipos"; 
             exibirSubtipos();
-            console.log(vendaAtual); // Apenas para visualização
         });
     });
 }

@@ -5,7 +5,6 @@ from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
 from controllers.cnpj_controller import CNPJ
 from controllers.email_controller import Email
-# imports para garantir a funcionalidade de uploads de documentos
 import os
 from werkzeug.utils import secure_filename
 
@@ -47,8 +46,6 @@ def cadastrar ():
         if len(data_cadastro['senha']) < 8:
             return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
         
-        #region Validação Arquivo ATA
-
         if 'documento' not in request.files:
              return jsonify({'error': 'O arquivo do documento ATA é obrigatório.'}), 400
 
@@ -60,11 +57,7 @@ def cadastrar ():
         if not arquivo.filename.lower().endswith('.pdf'):
             return jsonify({'error': 'Tipo de arquivo não permitido.'}), 400
 
-        #endregion
-
-        # 400 - CNPJ Inválido
-
-        if CNPJ.validar(data_cadastro['cnpj']):
+        if not CNPJ.validar(data_cadastro['cnpj']):
             return jsonify({ 'error': 'CNPJ inválido. Revise e tente novamente' }), 400
 
         dados_cnpj = CNPJ.consultar(data_cadastro['cnpj'])
@@ -82,10 +75,6 @@ def cadastrar ():
 
         if not natureza_cooperativa in NATUREZAS_JURIDICAS_PERMITIDAS:
             return jsonify({'error': 'O CNPJ informado não pertence a uma Cooperativa ou Associação.'}), 400
-        
-        #endregion
-
-        #region Verificação de CNAE
 
         cnae_principal_id = dados_cnpj.get('mainActivity', {}).get('id')
         cnaes_secundarios_ids = [act.get('id') for act in dados_cnpj.get('sideActivities', [])]
@@ -103,12 +92,8 @@ def cadastrar ():
                     cnae_valido = True
                     break
 
-        # 400 - CNAE Inválido
-
         if not cnae_valido:
             return jsonify({'error': 'O CNPJ informado não possui CNAE compatível com cooperativas de reciclagem.'}), 400
-
-        #endregion
 
         id_status_atividade_cooperativa = dados_cnpj.get('status', {}).get('id')
 
@@ -154,22 +139,18 @@ def cadastrar ():
                 company = dados_cnpj.get('company', {})
                 phones = dados_cnpj.get('phones', [{}]) # Telefones (pode haver mais de 1 no JSON)
 
-                #region Upload Documento ATA
-
                 filename_base = secure_filename(f"doc_coop_{id_usuario_criado}")
                 extension = arquivo.filename.rsplit('.', 1)[1].lower()
                 filename = f"{filename_base}.{extension}"
-                
+
                 # Cria a pasta de uploads se ela não existir
                 os.makedirs(PASTA_UPLOAD, exist_ok=True)
-                
+
                 filepath = os.path.join(PASTA_UPLOAD, filename)
                 arquivo.save(filepath)
-                
+
                 # Salva o caminho no banco de dados
                 arquivo_url = f"uploads/documentos/{filename}"
-
-                #endregion
 
                 dados_criar_coop = {
                     "id_usuario": id_usuario_criado,

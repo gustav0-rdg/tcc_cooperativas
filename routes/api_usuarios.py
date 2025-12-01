@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, url_for
 from controllers.usuarios_controller import Usuarios
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 from controllers.cooperativa_controller import Cooperativa
 from data.connection_controller import Connection
 from controllers.tokens_controller import Tokens
@@ -24,12 +24,8 @@ def cadastrar ():
     data_cadastro = request.get_json()
     campos_obrigatorios =  ['nome', 'email', 'senha', 'tipo']
 
-    # 400 - Campos obrigatórios incompletos
-
     if not data_cadastro or not all(key in data_cadastro for key in campos_obrigatorios):
         return jsonify({ 'error': 'Dados de cadastro inválidos, todos os campos são obrigatórios: nome, email e senha' }), 400
-
-    # 400 - Senha com menos de 8 caractéres
 
     if len(data_cadastro['senha']) < 8:
         return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
@@ -307,13 +303,9 @@ def delete (id_usuario:int=None):
 
             id_usuario = data_token['id_usuario']
 
-        #region Excluindo a conta de terceiros
-
         if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
 
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-            
-        #endregion
         
         match Usuarios(conn.connection_db).delete(id_usuario):
 
@@ -371,7 +363,7 @@ def get_usuario():
                 usuario_info['dados_cooperativa'] = dados_cooperativa
         
         elif usuario_info['tipo'] == 'cooperado':
-            dados_cooperado = Catadores(db).get_cooperado_e_cooperativa_by_user_id(id_usuario)
+            dados_cooperado = Cooperados(db).get_cooperado_e_cooperativa_by_user_id(id_usuario)
             if dados_cooperado:
                 usuario_info['dados_cooperado'] = dados_cooperado
                 # Adicionado para buscar os dados da cooperativa
@@ -441,13 +433,9 @@ def alterar_status (id_usuario:int=None):
 
                 return jsonify({ 'error': '"novo-status" inválido' }), 400
 
-        #region Alterando o status de terceiros
-
         if data_token['id_usuario'] != id_usuario and not Usuarios(conn.connection_db).get(data_token['id_usuario'])['tipo'] in ['gestor', 'root']:
 
             return jsonify({ 'error': 'Você não tem permissão para realizar tal ação' }), 403
-
-        #endregion
 
         match Usuarios(conn.connection_db).alterar_status(id_usuario, novo_status):
 

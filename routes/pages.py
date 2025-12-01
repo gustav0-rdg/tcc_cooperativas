@@ -4,7 +4,6 @@ from data.connection_controller import Connection
 
 pages = Blueprint('pages', __name__)
 
-# Selecionar se é cooperado ou cooperativa
 @pages.route("/", methods=["GET"])
 def pagina_inicial():
     return render_template("index.html")

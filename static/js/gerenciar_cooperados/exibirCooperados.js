@@ -157,7 +157,6 @@ function exibirCooperados(listaCooperados) {
   
       // Exemplo: ação de clique no card
       card.addEventListener("click", () => {
-        console.log(`Card do cooperado ${cooperado.nome} clicado!`);
       });
   
       container.appendChild(card);

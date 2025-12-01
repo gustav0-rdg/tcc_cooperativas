@@ -11,7 +11,6 @@ export const registrarNovoVendedor = async (dados) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            // IMPORTANTE: Envie o objeto 'dados' completo, não apenas o taxId
             body: JSON.stringify(dados.taxId) 
         });
 
@@ -22,12 +21,10 @@ export const registrarNovoVendedor = async (dados) => {
         }
 
         const data = await response.json();
-        console.log('Sucesso:', data);
         return true; // Retorna true em caso de sucesso
 
     } catch (error) {
         console.error('Erro ao registrar vendedor:', error);
-        // Aqui você poderia adicionar o SweetAlert de erro
         Swal.fire({
             icon: 'error',
             title: 'Erro no Cadastro',

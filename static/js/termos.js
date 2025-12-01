@@ -3,10 +3,8 @@ const termos = document.querySelector('#termosDeUso');
 termos.addEventListener('click', () =>{
     Swal.fire({
         title: 'Termo de Uso',
-        icon: 'info', // Ícone de informação
-        width: 500,   // Define uma largura maior para o texto caber bem
-        
-        // Usamos 'html' para inserir nosso texto formatado
+        icon: 'info',
+        width: 500,
         html: `
             <div style="text-align: left; text-align-last: left;">
                 <p>Este é o termo de uso do site <strong>Recoopera</strong>. Ao utilizar este site, você concorda com os seguintes termos e condições:</p>

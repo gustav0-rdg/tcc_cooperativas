@@ -123,15 +123,12 @@ class Materiais:
     def cadastrar_material_base(self, nome_material, id_cooperativa):
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
-                # Inicia a transação
                 self.connection_db.start_transaction()
 
-                # 1. Insere na tabela 'materiais_base'
                 query_base = "INSERT INTO materiais_base(nome) VALUES(%s);"
                 cursor.execute(query_base, (nome_material,))
                 id_material_base = cursor.lastrowid
 
-                # 2. Cria uma entrada correspondente no catálogo global
                 query_catalogo = """
                 INSERT INTO materiais_catalogo(id_material_base, nome_especifico, status, data_aprovacao)
                 VALUES(%s, %s, 'aprovado', NOW());
@@ -139,21 +136,19 @@ class Materiais:
                 cursor.execute(query_catalogo, (id_material_base, nome_material))
                 id_material_catalogo = cursor.lastrowid
 
-                # 3. Cadastra o nome original como um sinônimo para a cooperativa
                 query_sinonimo = """
                 INSERT INTO materiais_sinonimos(id_material_catalogo, id_cooperativa, nome_sinonimo)
                 VALUES(%s, %s, %s);
                 """
                 cursor.execute(query_sinonimo, (id_material_catalogo, id_cooperativa, nome_material))
-                
-                # Confirma a transação
+
                 self.connection_db.commit()
 
                 return jsonify({'message': 'Material registrado com sucesso!', 'id_material_base': id_material_base}), 200
 
         except mysql.connector.Error as error:
             print("Erro MySQL:", error)
-            self.connection_db.rollback() # Desfaz a transação em caso de erro
+            self.connection_db.rollback()
             return jsonify({'message': 'Erro ao salvar no banco de dados.'}), 500
 
         finally:

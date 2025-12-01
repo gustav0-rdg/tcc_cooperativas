@@ -11,28 +11,16 @@ class Vendas:
 
     def _buscar_id_comprador(self, cnpj: str) -> int:
         """
-        Busca o ID de um comprador ativo na tabela `compradores` a partir do seu CNPJ.
-
-        Args:
-            cnpj (str): O CNPJ do comprador a ser buscado.
-
-        Returns:
-            int: O ID do comprador encontrado.
-
-        Raises:
-            CompradorNaoEncontradoError: Se nenhum comprador ativo for encontrado com o CNPJ fornecido.
-            Exception: Para outros erros de banco de dados.
+        Busca ID do comprador ativo pelo CNPJ.
         """
-        # Removemos qualquer máscara do CNPJ (pontos, barras, etc.)
+        # Remove máscara do CNPJ
         cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
-        
-        # O uso de 'with' garante que o cursor será fechado automaticamente
+
         with self.connection_db.cursor() as cursor:
-            # Query SQL para buscar o ID.
             query = "SELECT id_comprador FROM compradores WHERE cnpj = %s AND deletado_em IS NULL"
             cursor.execute(query, (cnpj_limpo,))
-            result = cursor.fetchone() 
-        
+            result = cursor.fetchone()
+
         if result:
             id_comprador = result[0]
             print(f"Comprador encontrado: CNPJ {cnpj} corresponde ao ID {id_comprador}.")
@@ -68,24 +56,24 @@ class Vendas:
         
     def _buscar_ids(self, dados_frontend: dict):
         """
-        Busca e valida os IDs necessários para registrar a venda a partir dos dados do frontend.
+        Busca e valida IDs para registrar venda.
         """
         try:
-            # Valida e busca o ID do comprador pelo CNPJ
+            # Busca ID do comprador pelo CNPJ
             cnpj_comprador = dados_frontend['vendedor']['cnpj']
             id_comprador = self._buscar_id_comprador(cnpj_comprador)
 
-            # Valida e busca o ID da categoria do material
+            # Busca ID da categoria do material
             nome_material_categoria = dados_frontend['material']['categoria']
             id_material_categoria = self._buscar_id_material(nome_material_categoria)
 
-            # USA DIRETAMENTE O ID DO MATERIAL DO CATÁLOGO ENVIADO PELO FRONTEND
+            # Usa ID do material do catálogo enviado pelo frontend
             id_subtipo = dados_frontend['material']['id_material_catalogo']
             if not isinstance(id_subtipo, int):
                 raise ValueError("O 'id_material_catalogo' é inválido ou não foi fornecido.")
-            
+
             print(f"Material (Subtipo) ID fornecido diretamente: {id_subtipo}.")
-            
+
             return {
                 "id_comprador": id_comprador,
                 "id_material": id_material_categoria,
@@ -171,11 +159,7 @@ class Vendas:
 
     def get_by_coop(self, id_cooperativa):
         """
-        Busca as vendas de uma respectiva cooperativa usando a view v_vendas_detalhadas.
-
-        param: id_cooperativa -> da respectiva cooperativa em que está sendo buscada
-        
-        return: [] -> contendo todas as vendas já feitas pela cooperativa
+        Busca vendas da cooperativa usando view v_vendas_detalhadas.
         """
         try:
             with self.connection_db.cursor(dictionary=True) as cursor:
@@ -194,9 +178,9 @@ class Vendas:
                 cursor.execute(query, (id_cooperativa,))
                 results = cursor.fetchall()
                 return results
-            
+
         except Exception as e:
             print(e)
-            
+
         finally:
             cursor.close()

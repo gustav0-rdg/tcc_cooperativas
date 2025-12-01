@@ -150,7 +150,6 @@ export function exibirAvaliacao() {
                     });
                     return;
                 }
-                console.log('Avaliação finalizada com sucesso:', data);
             }
 
             Swal.fire({
@@ -218,7 +217,6 @@ export function exibirAvaliacao() {
                     });
                     return;
                 }
-                console.log('Avaliação pulada com sucesso:', data);
             }
 
             Swal.fire({
@@ -256,7 +254,6 @@ export function exibirAvaliacao() {
 
 const enviarValores = async (dados) =>{
     await getCoop();
-    console.log('dados', JSON.stringify(dados))
     const response = await fetch('/post/dados-venda', {
         method: 'POST',
         headers: {
@@ -271,8 +268,6 @@ const enviarValores = async (dados) =>{
         console.error('Erro:', data.erro || 'Falha ao registrar a venda');
         throw new Error(data.erro || 'Falha ao registrar a venda');
     }
-
-    console.log('Sucesso:', data);
     return data.id_avaliacao_pendente; // Retorna o ID da avaliação pendente
 }
 

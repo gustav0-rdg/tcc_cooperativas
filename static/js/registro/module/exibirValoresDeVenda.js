@@ -52,8 +52,6 @@ export function exibirValoresDeVenda() {
         vendaAtual.preco_por_kg = precoPorKg;
         vendaAtual.total = quantidade * precoPorKg;
 
-        console.log('Venda registrada:', vendaAtual);
         exibirAvaliacao()
-        // Aqui você pode seguir para outra etapa ou resetar, conforme seu fluxo
     });
 }

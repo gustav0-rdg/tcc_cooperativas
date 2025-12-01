@@ -2,7 +2,7 @@ import { PaginaLogin } from './utils/paginaLoginGenerico.js';
 
 function limparCNPJ (cnpj) 
 {
-    return cnpj.replace(/[^\d]/g, '');  // Remove tudo que não for número
+    return cnpj.replace(/[^\d]/g, '');  // Remove não números
 }
 
 // Aguarda o conteúdo da página carregar

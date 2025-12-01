@@ -1,12 +1,8 @@
-// Aguarda o DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Carrega materiais para o filtro
     carregarMateriaisFiltro();
 
-    // 2. Inicia o carregamento dos compradores
     carregarCompradores();
 
-    // 3. Configura eventos dos filtros
     configurarFiltros();
 });
 
@@ -27,40 +23,34 @@ async function carregarCompradores(filtros = {}) {
     }
 
     try {
-        // Mostrar loading
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         cardsContainer.innerHTML = '';
 
-        // Construir URL com parâmetros de filtro
         const params = new URLSearchParams();
         if (filtros.material) params.append('material', filtros.material);
         if (filtros.estado) params.append('estado', filtros.estado);
         if (filtros.raio) params.append('raio', filtros.raio);
 
         const url = '/get/compradores' + (params.toString() ? '?' + params.toString() : '');
-        
+
         const response = await fetch(url, {
-            headers: { 
-                'Authorization': token 
+            headers: {
+                'Authorization': token
             }
         });
 
         const data = await response.json();
 
-        console.log(data)
-
         if (!response.ok) {
             throw new Error(data.error || 'Erro ao buscar dados.');
         }
 
-        // Esconde o loading
         loadingSpinner.classList.add('d-none');
 
-        // Renderiza os cards
         if (data.length === 0) {
             cardsContainer.innerHTML = '<div class="col-12"><p class="text-center fs-5 text-muted">Nenhum comprador encontrado com os filtros aplicados.</p></div>';
-            errorMessage.classList.add('d-none'); // Hide any previous error message
+            errorMessage.classList.add('d-none');
             return;
         }
 
@@ -74,14 +64,12 @@ async function carregarCompradores(filtros = {}) {
         mostrarErro('Não foi possível carregar os compradores.', err.message, );
     }
 
-    // Função interna de ajuda para mostrar erros
     function mostrarErro(mensagem, detalhe, type='alert') {
         loadingSpinner.classList.add('d-none');
-        errorMessage.classList.remove('d-none'); // Show the error message container
+        errorMessage.classList.remove('d-none'); 
         errorTitle.textContent = detalhe;
         errorDetail.textContent = mensagem; 
 
-        // Reset previous alert types and apply the new one
         errorMessage.classList.remove('alert-danger', 'alert-warning');
 
         switch (type)
@@ -243,7 +231,6 @@ async function abrirModalDetalhes(comprador) {
     });
 
     try {
-        // 1. Busca todos os dados de um único endpoint
         const response = await fetch(`/get/comprador-detalhes/${comprador.id_comprador}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -255,16 +242,13 @@ async function abrirModalDetalhes(comprador) {
             throw new Error(detalhes.error || 'Falha ao buscar detalhes do comprador');
         }
 
-        // 2. Constrói o HTML do modal com os dados consolidados
         const modalHtml = construirHtmlModal(detalhes);
 
-        // 3. Exibe o SweetAlert completo
         Swal.fire({
             html: modalHtml,
             width: '800px',
             showCloseButton: true,
-            confirmButtonText: 'Fechar',
-            confirmButtonColor: 'var(--verde-claro-medio)'
+            showConfirmButton: false
         });
 
     } catch (err) {
@@ -277,99 +261,103 @@ async function abrirModalDetalhes(comprador) {
  * Constrói o HTML final para o pop-up SweetAlert
  */
 function construirHtmlModal(detalhes) {
+    const { logradouro, numero, complemento, bairro, cidade, estado, email } = detalhes;
+    const { phones } = detalhes.api_externa || {};
 
-    // --- Endereço ---
-    const enderecoFormatado = [
-        detalhes.logradouro,
-        detalhes.numero,
-        detalhes.complemento,
-        detalhes.bairro
-    ].filter(Boolean).join(', ') + ` - ${detalhes.cidade}, ${detalhes.estado}`;
+    const enderecoFormatado = [logradouro, numero, complemento, bairro]
+        .filter(Boolean)
+        .join(', ') + ` - ${cidade}, ${estado}`;
 
-    // --- Contatos ---
+    let phoneList = [];
+    if (phones && phones.length > 0) {
+        const uniquePhones = new Set();
+        phones.forEach(phone => {
+            const numeroCompleto = `(${phone.area}) ${phone.number}`;
+            if (!uniquePhones.has(numeroCompleto)) {
+                uniquePhones.add(numeroCompleto);
+                phoneList.push({ numero: numeroCompleto, type: phone.type });
+            }
+        });
+    } else {
+        const uniquePhones = new Set();
+        if (detalhes.telefone) {
+            uniquePhones.add(detalhes.telefone);
+            phoneList.push({ numero: detalhes.telefone, type: 'LANDLINE' });
+        }
+        if (detalhes.whatsapp && !uniquePhones.has(detalhes.whatsapp)) {
+            uniquePhones.add(detalhes.whatsapp);
+            phoneList.push({ numero: detalhes.whatsapp, type: 'MOBILE' });
+        }
+    }
+
+    if (phoneList.length > 2) {
+        phoneList = phoneList.slice(0, 2);
+    }
+
     let contatosHtml = '';
-    if (detalhes.email) contatosHtml += `<li><span class="material-icons">email</span> ${detalhes.email}</li>`;
-    if (detalhes.telefone) contatosHtml += `<li><span class="material-icons">phone</span> ${detalhes.telefone}</li>`;
-    if (detalhes.whatsapp) contatosHtml += `<li><span class="material-icons">whatsapp</span> ${detalhes.whatsapp}</li>`;
-    // Adiciona o endereço completo à lista de contatos
+    if (email) {
+        contatosHtml += `<li><span class="material-icons">email</span> ${email}</li>`;
+    }
+
+    phoneList.forEach(phone => {
+        const icon = phone.type === 'MOBILE' ? 'smartphone' : 'phone';
+        contatosHtml += `<li><span class="material-icons">${icon}</span> ${phone.numero}</li>`;
+    });
+
     contatosHtml += `<li><span class="material-icons">place</span> ${enderecoFormatado}</li>`;
 
-
-    // --- Materiais e Preços ---
     let materiaisHtml = '';
     if (detalhes.materiais_comprados && detalhes.materiais_comprados.length > 0) {
         materiaisHtml = detalhes.materiais_comprados.map(mat => {
-
             const precoMin = parseFloat(mat.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const precoMax = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            let faixaPreco = `${precoMin} /Kg`;
-            if (precoMin !== precoMax) {
-                faixaPreco = `${precoMin} a ${precoMax} /Kg`;
-            }
+            const faixaPreco = precoMin !== precoMax ? `${precoMin} a ${precoMax} /Kg` : `${precoMin} /Kg`;
 
             return `
                 <li class="material-price-item">
                     <span class="material-name">${mat.material_nome} (x${mat.total_vendas} vendas)</span>
                     <span class="material-price-range">${faixaPreco}</span>
-                </li>
-            `;
-
+                </li>`;
         }).join('');
     } else {
         materiaisHtml = '<p>Este comprador ainda não registrou compras de materiais específicos.</p>';
     }
 
-    // --- Tags de Feedback (Positivas e Negativas) ---
-    let tagsHtml = '';
     const tags = detalhes.feedback_tags || [];
-    if (tags.length > 0) {
-        tagsHtml = tags.map(tag => {
-            const tagClass = tag.tipo === 'positivo' ? 'positivo' : 'negativo';
-            return `
-                <div class="feedback-tag ${tagClass}">
-                    ${tag.texto}
-                    <span class="tag-count">${tag.quantidade}x</span>
+    const tagsHtml = tags.length > 0 ? tags.map(tag => `
+        <div class="feedback-tag ${tag.tipo === 'positivo' ? 'positivo' : 'negativo'}">
+            ${tag.texto}
+            <span class="tag-count">${tag.quantidade}x</span>
+        </div>`
+    ).join('') : '<p>Ainda não há avaliações rápidas para este comprador.</p>';
+
+    const avaliacoesLimitadas = (detalhes.avaliacoes_recentes || []).slice(0, 5);
+    const avaliacoesHtml = avaliacoesLimitadas.length > 0 ? avaliacoesLimitadas.map(aval => {
+        const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
+        const estrelasHtml = gerarEstrelas(aval.score);
+        const comentarioHtml = aval.comentario_livre ? `<p class="avaliacao-comentario">“${aval.comentario_livre}”</p>` : '';
+
+        return `
+            <li class="avaliacao-item">
+                <div class="avaliacao-header">
+                    <div class="avaliacao-estrelas">${estrelasHtml}</div>
+                    <span class="avaliacao-data">${dataFormatada}</span>
                 </div>
-            `;
-        }).join('');
-    } else {
-        tagsHtml = '<p>Ainda não há avaliações rápidas para este comprador.</p>';
-    }
-
-    // --- Avaliações Recentes (NOVA VERSÃO) ---
-    let avaliacoesHtml = '';
-    if (detalhes.avaliacoes_recentes && detalhes.avaliacoes_recentes.length > 0) {
-        // Limita para no máximo 5 avaliações para não poluir o modal
-        const avaliacoesLimitadas = detalhes.avaliacoes_recentes.slice(0, 5);
-
-        avaliacoesHtml = avaliacoesLimitadas.map(aval => {
-            const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
-            const estrelasHtml = gerarEstrelas(aval.score); // Usando o campo 'score'
-            
-            let comentarioHtml = '';
-            if (aval.comentario_livre && aval.comentario_livre.trim() !== '') {
-                comentarioHtml = `<p class="avaliacao-comentario">“${aval.comentario_livre}”</p>`;
-            }
-
-            return `
-                <li class="avaliacao-item">
-                    <div class="avaliacao-header">
-                        <div class="avaliacao-estrelas">${estrelasHtml}</div>
-                        <span class="avaliacao-data">${dataFormatada}</span>
-                    </div>
-                    ${comentarioHtml}
-                </li>
-            `;
-        }).join('');
-    } else {
-        avaliacoesHtml = '<p>Nenhuma avaliação recente registrada.</p>';
-    }
+                ${comentarioHtml}
+            </li>`;
+    }).join('') : '<p>Nenhuma avaliação recente registrada.</p>';
     
-    // --- Montagem Final ---
+    const whatsAppNumber = phoneList.find(p => p.type === 'MOBILE');
+    const whatsAppButton = whatsAppNumber ? `
+        <a href="https://wa.me/55${whatsAppNumber.numero.replace(/\D/g, '')}" target="_blank" class="btn btn-success ms-2">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>` : '';
+
     return `
         <div class="swal-modal-container">
-            <h2 class="swal-modal-title">${detalhes.razao_social}</h2>
+            <div class="swal-modal-header">
+                <h2 class="swal-modal-title">${detalhes.razao_social}</h2>
+            </div>
 
             <section class="swal-modal-section">
                 <h3 class="swal-modal-subtitle"><span class="material-icons">contacts</span> Contato</h3>
@@ -390,6 +378,11 @@ function construirHtmlModal(detalhes) {
                 <h3 class="swal-modal-subtitle"><span class="material-icons">thumb_up_alt</span> Avaliações Rápidas</h3>
                 <div class="feedback-tags-container">${tagsHtml}</div>
             </section>
+
+            <section class="swal-modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary" onclick="Swal.close()">Fechar</button>
+                ${whatsAppButton}
+            </section>
         </div>
     `;
 }
@@ -400,10 +393,8 @@ function configurarFiltros() {
 
     // Botão de Ação para Aplicar Filtros do Servidor
     btnAplicarFiltros.addEventListener('click', async function () {
-        // 1. Pega os resultados filtrados do servidor
         await aplicarFiltros();
 
-        // 2. Se houver um termo de busca, aplica o filtro local sobre os resultados
         const query = searchInput.value.trim();
         if (query) {
             filtrarCompradoresLocal(query);
@@ -416,20 +407,16 @@ function configurarFiltros() {
     // Função interna para a busca por Nome/CNPJ
     function buscarNomeCNPJ() {
         const query = searchInput.value.trim();
-        
-        // Se a busca for limpa, recarrega com os filtros de dropdown/raio
+
         if (query === '') {
             aplicarFiltros(); 
         } else {
-            // Primeiro, garante que a lista está completa (ou já filtrada pelos selects)
-            // e então aplica o filtro local
             aplicarFiltros().then(() => {
                 filtrarCompradoresLocal(query);
             });
         }
     }
 
-    // Evento de 'Enter' no campo de busca
     searchInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             buscarNomeCNPJ();
@@ -451,7 +438,6 @@ function configurarFiltros() {
         radiusValue.textContent = `${e.target.value} km`;
     });
 
-    // Cascata de Material -> Subtipo
     const materialSelect = document.getElementById('material-filter');
     materialSelect.addEventListener('change', (e) => {
         const idMaterialPai = e.target.value;
@@ -509,7 +495,6 @@ async function carregarSubtipos(idMaterialPai) {
         const subtipos = await response.json();
 
         subtipos.forEach(sub => {
-            console.log(sub)
             const option = document.createElement('option');
             option.value = sub.id_material_catalogo; 
             option.textContent = sub.nome_especifico;
@@ -537,14 +522,12 @@ async function aplicarFiltros() {
     const raio = enableRadius.checked ? document.getElementById('radius-filter').value : null;
 
     const filtros = {};
-    
-    // Se tiver subtipo, ele é mais específico, então ele que deve prevalecer ou ser enviado junto
+
     if (material) filtros.material = material;
-    if (subtipo) filtros.subtipo = subtipo; // Envia o subtipo para a API
+    if (subtipo) filtros.subtipo = subtipo; 
     if (estado) filtros.estado = estado;
     if (raio) filtros.raio = parseFloat(raio);
 
-    console.log("Filtros aplicados:", filtros); // Para debug
     await carregarCompradores(filtros);
 }
 

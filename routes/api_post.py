@@ -3,7 +3,7 @@ from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 from controllers.tokens_controller import Tokens
 from controllers.avaliacoes_controller import Avaliacoes
 from controllers.cooperativa_controller import Cooperativa

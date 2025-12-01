@@ -5,7 +5,7 @@ from controllers.feedback_controller import Feedbacks
 from controllers.usuarios_controller import Usuarios
 from controllers.tokens_controller import Tokens
 from controllers.cooperativa_controller import Cooperativa
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
 from controllers.avaliacoes_controller import Avaliacoes
@@ -15,12 +15,9 @@ api_get = Blueprint('api_get', __name__, url_prefix='/get')
 @api_get.route("/compradores", methods=["GET"])
 def get_compradores():
     """
-    Rota para buscar compradores com filtros opcionais.
-    Acessível por 'cooperativa' e 'cooperado'.
-    Query params:
-        - material: ID do material base (opcional)
-        - estado: Sigla do estado (opcional)
-        - raio: Raio em km (opcional)
+    Busca compradores com filtros opcionais.
+    Acessível por cooperativa e cooperado.
+    Parâmetros: material (ID), estado (sigla), raio (km).
     """
     token = request.headers.get('Authorization')
 
@@ -48,9 +45,9 @@ def get_compradores():
         if user_type == 'cooperativa':
             coop_info = Cooperativa(db).get_by_user_id(id_usuario)
         elif user_type == 'cooperado':
-            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
-            if catador_info and 'id_cooperativa' in catador_info:
-                id_cooperativa = catador_info['id_cooperativa']
+            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+            if cooperado_info and 'id_cooperativa' in cooperado_info:
+                id_cooperativa = cooperado_info['id_cooperativa']
                 coop_info = Cooperativa(db).get_by_id(id_cooperativa)
             else:
                 return jsonify({'error': 'Cooperado não está vinculado a uma cooperativa'}), 404
@@ -110,8 +107,7 @@ def get_feedbacks():
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
     """
-    Rota para obter a lista de materiais.
-    Se um token de autenticação for fornecido, a lista pode incluir sinônimos.
+    Lista materiais. Com token, inclui sinônimos.
     """
     conn = None
     try:
@@ -135,9 +131,9 @@ def get_materiais():
                             if coop_info:
                                 id_cooperativa = coop_info.get('id_cooperativa')
                         elif usuario_info['tipo'] == 'cooperado':
-                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
-                            if catador_info:
-                                id_cooperativa = catador_info.get('id_cooperativa')
+                            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+                            if cooperado_info:
+                                id_cooperativa = cooperado_info.get('id_cooperativa')
             except Exception as e:
                 print(f"Erro ao processar token em /materiais: {e}")
                 # Continua sem id_cooperativa, não retorna erro
@@ -180,9 +176,9 @@ def get_subtipos_materiais(material_id):
                             if coop_info:
                                 id_cooperativa = coop_info.get('id_cooperativa')
                         elif usuario_info['tipo'] == 'cooperado':
-                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
-                            if catador_info:
-                                id_cooperativa = catador_info.get('id_cooperativa')
+                            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+                            if cooperado_info:
+                                id_cooperativa = cooperado_info.get('id_cooperativa')
             except Exception as e:
                 print(f"Erro ao processar token em /subtipos: {e}")
 

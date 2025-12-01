@@ -4,11 +4,11 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 from controllers.usuarios_controller import Usuarios
-class Catadores:
+class Cooperados:
 
     def __init__(self, connection_db: MySQLConnection):
         if not Connection.validar(connection_db):
-            raise ValueError("Erro - Catadores: Conexão com o banco de dados inválida.")
+            raise ValueError("Erro - Cooperados: Conexão com o banco de dados inválida.")
         
         self.connection_db = connection_db
 
@@ -20,10 +20,7 @@ class Catadores:
         
         id_cooperativa: int,
         cpf: str,
-        telefone: Optional[str] = None,
-        endereco: Optional[str] = None,
-        cidade: Optional[str] = None,
-        estado: Optional[str] = None
+        telefone: Optional[str] = None
     ) -> Optional[int]:
         
         cursor = self.connection_db.cursor()
@@ -50,33 +47,33 @@ class Catadores:
             if not id_usuario_criado:
                 raise Exception("Falha ao obter o ID do usuário criado.")
 
-            query_catador = """
+            query_cooperado = """
             INSERT INTO cooperados (id_usuario, id_cooperativa, cpf)
             VALUES (%s, %s, %s)
             """
-            cursor.execute(query_catador, (
+            cursor.execute(query_cooperado, (
                 id_usuario_criado, id_cooperativa, cpf
             ))
             
-            id_catador_criado = cursor.lastrowid
+            id_cooperado_criado = cursor.lastrowid
             
-            if not id_catador_criado:
-                raise Exception("Falha ao obter o ID do catador criado.")
+            if not id_cooperado_criado:
+                raise Exception("Falha ao obter o ID do cooperado criado.")
 
             self.connection_db.commit()
             
-            print(f"Sucesso: Catador {id_catador_criado} e Usuário {id_usuario_criado} criados.")
-            return id_catador_criado
+            print(f"Sucesso: Cooperado {id_cooperado_criado} e Usuário {id_usuario_criado} criados.")
+            return id_cooperado_criado
 
         except Exception as e:
-            print(f"Erro - Catadores 'create': {e}")
+            print(f"Erro - Cooperados 'create': {e}")
             self.connection_db.rollback()
             return None
         
         finally:
             cursor.close()
 
-    def get_by_id_catador(self, id_catador: int) -> Optional[Dict[str, Any]]:
+    def get_by_id_cooperado(self, id_cooperado: int) -> Optional[Dict[str, Any]]:
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             query = """
@@ -84,9 +81,6 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                endereco,
-                cidade,
-                estado,
                 data_vinculo,
                 id_cooperativa,
                 cooperativa_nome,
@@ -96,13 +90,13 @@ class Catadores:
             FROM v_cooperados_detalhados
             WHERE id_cooperado = %s
             """
-            cursor.execute(query, (id_catador,))
+            cursor.execute(query, (id_cooperado,))
             resultado = cursor.fetchone()
             
             return resultado
         
         except Exception as e:
-            print(f"Erro - Catadores 'get_by_id_catador': {e}")
+            print(f"Erro - Cooperados 'get_by_id_cooperado': {e}")
             
             return None
         
@@ -117,9 +111,6 @@ class Catadores:
                 id_cooperado,
                 id_usuario,
                 cpf,
-                endereco,
-                cidade,
-                estado,
                 data_vinculo,
                 id_cooperativa,
                 cooperativa_nome,
@@ -135,7 +126,7 @@ class Catadores:
             return resultado
         
         except Exception as e:
-            print(f"Erro - Catadores 'get_by_id_usuario': {e}")
+            print(f"Erro - Cooperados 'get_by_id_usuario': {e}")
             
             return None
         
@@ -166,7 +157,7 @@ class Catadores:
             return resultados
         
         except Exception as e:
-            print(f"Erro - Catadores 'get_by_cooperativa': {e}")
+            print(f"Erro - Cooperados 'get_by_cooperativa': {e}")
             
             return []
         
@@ -176,10 +167,7 @@ class Catadores:
     def update_perfil(
         self,
         id_cooperado: int,
-        telefone: Optional[str] = None,
-        endereco: Optional[str] = None,
-        cidade: Optional[str] = None,
-        estado: Optional[str] = None
+        telefone: Optional[str] = None
     ) -> bool:
         cursor = self.connection_db.cursor()
 
@@ -187,22 +175,10 @@ class Catadores:
         params = []
 
         if telefone is not None:
-            print("Aviso - Catadores 'update_perfil': O campo 'telefone' não é suportado e será ignorado.")
-
-        if endereco is not None:
-            updates.append("endereco = %s")
-            params.append(endereco)
-
-        if cidade is not None:
-            updates.append("cidade = %s")
-            params.append(cidade)
-
-        if estado is not None:
-            updates.append("estado = %s")
-            params.append(estado)
+            print("Aviso - Cooperados 'update_perfil': O campo 'telefone' não é suportado e será ignorado.")
 
         if not updates:
-            print("Aviso - Catadores 'update_perfil': Nenhum dado fornecido para atualização.")
+            print("Aviso - Cooperados 'update_perfil': Nenhum dado fornecido para atualização.")
             return True
 
         try:
@@ -215,14 +191,14 @@ class Catadores:
             return cursor.rowcount > 0
 
         except Exception as e:
-            print(f"Erro - Catadores 'update_perfil': {e}")
+            print(f"Erro - Cooperados 'update_perfil': {e}")
             self.connection_db.rollback()
             return False
 
         finally:
             cursor.close()
 
-    def _set_status_catador(self, id_cooperado: int, novo_status: bool) -> bool:
+    def _set_status_cooperado(self, id_cooperado: int, novo_status: bool) -> bool:
         cursor = self.connection_db.cursor(dictionary=True)
         
         status_usuario = 'ativo' if novo_status else 'inativo'
@@ -232,21 +208,21 @@ class Catadores:
             self.connection_db.start_transaction() 
 
             cursor.execute("SELECT id_usuario FROM cooperados WHERE id_cooperado = %s", (id_cooperado,))
-            catador_data = cursor.fetchone()
+            cooperado_data = cursor.fetchone()
             
-            if not catador_data:
+            if not cooperado_data:
                 print(f"Erro: Cooperado {id_cooperado} não encontrado.")
                 self.connection_db.rollback() 
                 return False
                 
-            id_usuario = catador_data['id_usuario']
+            id_usuario = cooperado_data['id_usuario']
 
-            # query_catador = """
+            # query_cooperado = """
             # UPDATE cooperados
             # SET data_desvinculo = %s
             # WHERE id_cooperado = %s
             # """
-            # cursor.execute(query_catador, (data_desvinculo, id_cooperado))
+            # cursor.execute(query_cooperado, (data_desvinculo, id_cooperado))
 
             query_usuario = "UPDATE usuarios SET status = %s WHERE id_usuario = %s"
             cursor.execute(query_usuario, (status_usuario, id_usuario))
@@ -255,7 +231,7 @@ class Catadores:
             return True
 
         except Exception as e:
-            print(f"Erro - Catadores '_set_status_catador': {e}")
+            print(f"Erro - Cooperados '_set_status_cooperado': {e}")
             self.connection_db.rollback()
             return False
         
@@ -264,11 +240,11 @@ class Catadores:
 
     def desativar(self, id_cooperado: int) -> bool:
         print(f"Tentando desativar cooperado {id_cooperado}...")
-        return self._set_status_catador(id_cooperado, novo_status=False)
+        return self._set_status_cooperado(id_cooperado, novo_status=False)
 
     def reativar(self, id_cooperado: int) -> bool:
         print(f"Tentando reativar cooperado {id_cooperado}...")
-        return self._set_status_catador(id_cooperado, novo_status=True)
+        return self._set_status_cooperado(id_cooperado, novo_status=True)
     
 
 
@@ -329,6 +305,6 @@ class Catadores:
             return True
 
         except Exception as e:
-            self.connection_db.rollback() # Retornando os dados pro banco de dados caso algum erro aconteça
+            self.connection_db.rollback()
             print(f"Erro ao deletar cooperado/usuário: {e}")
             return False

@@ -220,23 +220,38 @@ main {
     padding-right: 10px; /* Espaço para a barra de rolagem */
 }
 
+.swal-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.whatsapp-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    transform: scale(1.1);
+    color: white;
+}
+
 .swal-modal-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--verde-escuro);
-    margin-bottom: 5px;
-}
-
-.swal-modal-location {
-    font-size: 1rem;
-    color: var(--verde-escuro-medio);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-.swal-modal-location .material-icons {
-    font-size: 1.1rem;
+    margin: 0;
 }
 
 .swal-modal-section {
@@ -693,23 +708,38 @@ main {
     padding-right: 10px; /* Espaço para a barra de rolagem */
 }
 
+.swal-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.whatsapp-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    transform: scale(1.1);
+    color: white;
+}
+
 .swal-modal-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--verde-escuro);
-    margin-bottom: 5px;
-}
-
-.swal-modal-location {
-    font-size: 1rem;
-    color: var(--verde-escuro-medio);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-.swal-modal-location .material-icons {
-    font-size: 1.1rem;
+    margin: 0;
 }
 
 .swal-modal-section {

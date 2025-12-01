@@ -205,7 +205,6 @@ function exibirCooperados(listaCooperados) {
     listaCooperados.forEach(cooperado => {
         const card = document.createElement('div');
         card.classList.add('card', 'cooperado-card-clickable', 'mb-3');
-        console.log(cooperado)
         card.innerHTML = `
             <div class="card-body">
                 <h5 class="card-title">${cooperado.nome}</h5>

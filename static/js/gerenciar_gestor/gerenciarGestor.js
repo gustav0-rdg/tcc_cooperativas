@@ -1,25 +1,18 @@
-// /static/js/gerenciar_gestor/gerenciarGestor.js
-
-// --- CONSTANTES GLOBAIS ---
 const session_token = localStorage.getItem('session_token');
-const cardsContainer = document.getElementById('gestoresCards');
+const cardsContainer = document.getElementById('gestoresContainer');
 const addGestorBtn = document.getElementById('addGestorBtn');
 const barraPesquisa = document.getElementById('searchInput');
+const resultsCount = document.getElementById('resultsCount');
 
-// URLs da API (para fácil manutenção)
 const API_ENDPOINTS = {
     GET_ALL: '/api/usuarios/get-all-gestores',
     CREATE: '/api/usuarios/cadastrar',
     UPDATE: (id) => `/api/usuarios/update/${id}`,
-    // Usando GET para delete, como no seu código original que funcionava
-    DELETE: (id) => `/api/usuarios/delete/${id}` 
-};  
+    DELETE: (id) => `/api/usuarios/delete/${id}`
+};
 
-// --- ESTADO GLOBAL ---
-// Armazena a lista de gestores para evitar chamadas de API na pesquisa
 let todosGestores = [];
 
-// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', init);
 
 /**
@@ -27,13 +20,12 @@ document.addEventListener('DOMContentLoaded', init);
  */
 async function init() {
     if (!session_token) {
-        // Assume que URL_LOGIN_ADMIN está definida globalmente
-        window.location.href = URL_LOGIN_ADMIN || '/admin/login'; 
+        window.location.href = URL_LOGIN_ADMIN || '/admin/login';
         return;
     }
 
     setupEventListeners();
-    await carregarEExibirGestores(true); // Faz o carregamento inicial
+    await carregarEExibirGestores(true);
 }
 
 /**
@@ -42,27 +34,23 @@ async function init() {
 function setupEventListeners() {
     addGestorBtn.addEventListener('click', () => openAddGestorModal());
     barraPesquisa.addEventListener('input', filtrarEExibirGestores);
-    
-    // Delegação de eventos para os botões de ação nos cards
+
     cardsContainer.addEventListener('click', (e) => {
         const button = e.target.closest('button');
         if (!button) return;
 
         e.preventDefault();
         const card = button.closest('.gestor-card');
-        // Pega o ID do card (fonte única da verdade)
         const id = parseInt(card.dataset.id, 10); 
 
         if (button.classList.contains('btn-excluir')) {
-            const nome = button.dataset.gestorNome; // Pega o nome do botão
+            const nome = button.dataset.gestorNome;
             openDeleteModal(id, nome, card);
         } else if (button.classList.contains('btn-editar')) {
             handleEditClick(id);
         }
     });
 }
-
-// --- LÓGICA PRINCIPAL (CARREGAR E RENDERIZAR) ---
 
 /**
  * Carrega os gestores da API, atualiza o estado global e renderiza os cards.
@@ -75,7 +63,7 @@ async function carregarEExibirGestores(showLoading = false) {
 
     try {
         const gestores = await apiFetch(API_ENDPOINTS.GET_ALL);
-        todosGestores = gestores; // Atualiza o estado global
+        todosGestores = gestores; 
         renderizarCards(todosGestores);
     } catch (error) {
         showError('Erro ao Carregar Gestores', error.message);
@@ -88,9 +76,11 @@ async function carregarEExibirGestores(showLoading = false) {
  * @param {Array} listaGestores - A lista de gestores a ser renderizada.
  */
 function renderizarCards(listaGestores) {
+    resultsCount.innerHTML = `Mostrando ${listaGestores.length} de ${todosGestores.length} gestores`;
+
     if (listaGestores.length === 0) {
         const termo = barraPesquisa.value;
-        const mensagem = termo 
+        const mensagem = termo
             ? `Nenhum gestor encontrado para "<strong>${termo}</strong>".`
             : 'Nenhum gestor cadastrado no momento.';
         cardsContainer.innerHTML = `<p class="text-center text-white-50 fs-5 mt-4">${mensagem}</p>`;
@@ -98,30 +88,34 @@ function renderizarCards(listaGestores) {
     }
 
     const cardsHtml = listaGestores.map(gestor => {
+        const status = gestor.ultimo_acesso ? 'ativo' : 'inativo';
         return `
-            <div class="card mb-3 gestor-card" data-id="${gestor.id_usuario}">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <span class="material-icons-outlined">person</span>
-                        ${gestor.nome}
-                    </h5>
-                    <p class="card-text"><strong>Email:</strong> ${gestor.email}</p>
-                    <p class="card-text"><strong>Criado em:</strong> ${formatarData(gestor.data_criacao)}</p>
-                    <p class="card-text"><strong>Último acesso:</strong> ${formatarData(gestor.ultimo_acesso)}</p>
-                    
-                    <div class="card-actions">
-                        <button 
-                            class="btn btn-danger btn-sm btn-excluir"
-                            data-gestor-nome="${gestor.nome}" 
-                        >
-                            <span class="material-icons-outlined">delete_outline</span> Excluir
-                        </button>
-                        <button 
-                            class="btn btn-secondary btn-sm btn-editar"
-                        >
-                            <span class="material-icons-outlined">edit</span> Editar
-                        </button>
+            <div class="gestor-card" data-id="${gestor.id_usuario}">
+                <div class="gestor-card-header">
+                    <div class="gestor-name">${gestor.nome}</div>
+                    <div class="status-badge status-${status}">${status === 'ativo' ? 'Ativo' : 'Inativo'}</div>
+                </div>
+                <div class="gestor-card-body">
+                    <div class="gestor-info-item">
+                        <i class="fas fa-envelope"></i>
+                        ${gestor.email}
                     </div>
+                    <div class="gestor-info-item">
+                        <i class="fas fa-calendar-plus"></i>
+                        Criado em: ${formatarData(gestor.data_criacao)}
+                    </div>
+                    <div class="gestor-info-item">
+                        <i class="fas fa-clock"></i>
+                        Último acesso: ${formatarData(gestor.ultimo_acesso)}
+                    </div>
+                </div>
+                <div class="gestor-card-footer">
+                    <button class="btn-action btn-editar" data-gestor-nome="${gestor.nome}">
+                        <span class="material-icons-outlined">edit</span> Editar
+                    </button>
+                    <button class="btn-action btn-excluir" data-gestor-nome="${gestor.nome}">
+                        <span class="material-icons-outlined">delete_outline</span> Excluir
+                    </button>
                 </div>
             </div>
         `;
@@ -146,8 +140,6 @@ function filtrarEExibirGestores() {
     );
     renderizarCards(gestoresFiltrados);
 }
-
-// --- HANDLERS DE AÇÃO E MODAIS (CRUD) ---
 
 /**
  * Abre o modal para ADICIONAR um novo gestor.
@@ -297,16 +289,14 @@ function openDeleteModal(id, nome, cardElement) {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                // Usando 'GET' conforme o seu backend parece esperar
                 await apiFetch(API_ENDPOINTS.DELETE(id), 'GET'); 
                 
                 showSuccess('Gestor removido!');
-                
-                // Remove localmente para feedback instantâneo
+
                 cardElement.remove();
                 todosGestores = todosGestores.filter(g => g.id_usuario !== id);
                 if (todosGestores.length === 0) {
-                    renderizarCards([]); // Mostra mensagem de "vazio"
+                    renderizarCards([]);
                 }
 
             } catch (error) {
@@ -315,9 +305,6 @@ function openDeleteModal(id, nome, cardElement) {
         }
     });
 }
-
-
-// --- FUNÇÃO WRAPPER DE API (Centralizada) ---
 
 /**
  * Wrapper centralizado para todas as chamadas 'fetch'.
@@ -342,8 +329,7 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
 
     try {
         const response = await fetch(endpoint, options);
-        
-        // Verifica se a resposta é um HTML (provável redirect de login)
+
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             // Se o status não for OK, é um erro (ex: 401, 302)
@@ -361,7 +347,7 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
             throw new Error(data.error || 'Ocorreu um erro desconhecido na API.');
         }
 
-        return data; // Sucesso
+        return data; 
 
     } catch (error) {
         // Pega o erro 'Unexpected token <' que acontece se o 'try' falhar
@@ -372,9 +358,6 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
         throw error;
     }
 }
-
-
-// --- FUNÇÕES UTILITÁRIAS ---
 
 /**
  * Retorna as classes CSS customizadas para os modais SweetAlert.
