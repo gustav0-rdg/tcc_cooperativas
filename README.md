@@ -99,7 +99,7 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
       <a href="https://github.com/vitor-henri">
         <img src="https://github.com/vitor-henri.png" width="100px;" alt="Foto do Vitor"/><br>
         <sub>
-          <b>Vitor Henrique</b>
+          <b>Vitor Henrique Fonseca</b>
         </sub>
       </a>
     </td>
