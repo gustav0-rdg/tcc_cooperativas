@@ -46,7 +46,7 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
     * `database/`: Scripts e conexão com o banco.
     * `templates/`: Telas da aplicação (HTML).
     * `static/`: Arquivos de estilo e scripts (CSS/JS).
-
+    * `data/`: Conexão com o banco de dados
 ---
 
 ## 📦 Como rodar o projeto
@@ -89,7 +89,7 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
 
 ## 🤝 Agradecimentos
 
-###Um agradecimento especial à **Cooperativa Acácia** e aos professores orientadores que forneceram a direção e o contexto social necessários para este desenvolvimento.
+Um agradecimento especial à **Cooperativa Acácia** e aos professores orientadores que forneceram a direção e o contexto social necessários para este desenvolvimento.
 
 ## 💜 Desenvolvedores
 
@@ -97,7 +97,7 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
   <tr>
     <td align="center">
       <a href="https://github.com/vitor-henri">
-        <img src="https://github.com/vitor-henri.png" width="100px;" alt="Foto do Vitor"/><br>
+        <img src="https://github.com/vitor-henri.png" min-width="100px;" alt="Foto do Vitor"/><br>
         <sub>
           <b>Vitor Henrique Fonseca</b>
         </sub>
@@ -105,31 +105,31 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
     </td>
     <td align="center">
       <a href="https://github.com/gustav0-rdg">
-        <img src="https://github.com/gustav0-rdg.png" width="100px;" alt="Foto do Gustavo"/><br>
+        <img src="https://github.com/gustav0-rdg.png" min-width="100px;" alt="Foto do Gustavo"/><br>
         <sub>
-          <b>Gustavo Rodrigues</b>
+          <b>Gustavo Rodrigues Lourenço</b>
         </sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/SamuelMoreiraFerreira">
-        <img src="https://github.com/SamuelMoreiraFerreira.png" width="100px;" alt="Foto do Samuel"/><br>
+        <img src="https://github.com/SamuelMoreiraFerreira.png" min-width="100px;" alt="Foto do Samuel"/><br>
         <sub>
-          <b>Samuel Moreira</b>
+          <b>Samuel Moreira Ferreira</b>
         </sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/ZenonPB">
-        <img src="https://github.com/ZenonPB.png" width="100px;" alt="Foto do Zenon"/><br>
+        <img src="https://github.com/ZenonPB.png" min-width="100px;" alt="Foto do Zenon"/><br>
         <sub>
-          <b>Zenon Parelli</b>
+          <b>Zenon Parelli Bergamo</b>
         </sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/AliciaPavao">
-        <img src="https://github.com/AliciaPavao.png" width="100px;" alt="Foto da Alicia"/><br>
+        <img src="https://github.com/AliciaPavao.png" min-width="100px;" alt="Foto da Alicia"/><br>
         <sub>
           <b>Alícia Luíza Pavão</b>
         </sub>
@@ -137,15 +137,15 @@ O projeto foi estruturado utilizando a arquitetura MVC (Model-View-Controller) p
     </td>
     <td align="center">
       <a href="https://github.com/LuisBessa01">
-        <img src="https://github.com/LuisBessa01.png" width="100px;" alt="Foto do Luis"/><br>
+        <img src="https://github.com/LuisBessa01.png" min-width="100px;" alt="Foto do Luis"/><br>
         <sub>
-          <b>Felipe Luis Masalskas</b>
+          <b>Luis Felipe Masalskas Bessa</b>
         </sub>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/matheusfagnani">
-        <img src="https://github.com/matheusfagnani.png" width="100px;" alt="Foto do Fagnani"/><br>
+        <img src="https://github.com/matheusfagnani.png" min-width="100px;" alt="Foto do Fagnani"/><br>
         <sub>
           <b>Matheus Fagnani</b>
         </sub>
