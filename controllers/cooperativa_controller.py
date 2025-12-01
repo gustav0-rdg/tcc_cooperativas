@@ -28,7 +28,7 @@ class Cooperativa:
         if isinstance(identificador, str) and identificador.isdigit():
             identificador = int(identificador)
 
-        cursor = self.connection_db.cursor(dictionary=True)
+        cursor = self.connection_db.cursor(dictionary=True, buffered=True)
         try:
             # A query agora busca em ambas as colunas
             cursor.execute(
@@ -82,7 +82,7 @@ class Cooperativa:
         if not isinstance(id_usuario, int):
             raise TypeError('Cooperativa - "id_usuario" (get_by_user_id) deve ser um int')
 
-        cursor = self.connection_db.cursor(dictionary=True)
+        cursor = self.connection_db.cursor(dictionary=True, buffered=True)
         try:
             # Query expandida para buscar todos os dados necessários
             cursor.execute(
@@ -451,6 +451,30 @@ class Cooperativa:
         except Exception as e:
             print(f'Erro - Cooperativa "rejeitar_documento": {e}')
             self.connection_db.rollback()
+            return False
+        
+        finally:
+            cursor.close()
+
+    def delete(self, id_cooperativa: int) -> bool:
+        """
+        Deleta uma cooperativa do banco de dados.
+        """
+        if not isinstance(id_cooperativa, int):
+            raise TypeError('Cooperativa "delete" - id_cooperativa deve ser int')
+
+        cursor = self.connection_db.cursor()
+        try:
+            # Primeiro, deletar registros dependentes na tabela `documentos_cooperativas`
+            cursor.execute("DELETE FROM documentos_cooperativas WHERE id_cooperativa = %s;", (id_cooperativa,))
+            
+            # Depois, deletar a cooperativa
+            cursor.execute("DELETE FROM cooperativas WHERE id_cooperativa = %s;", (id_cooperativa,))
+            
+            return cursor.rowcount > 0
+        
+        except Exception as e:
+            print(f'Erro - Cooperativa "delete": {e}')
             return False
         
         finally:

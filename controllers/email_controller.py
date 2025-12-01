@@ -249,8 +249,7 @@ class Email:
             print(f'Erro em enviar: Credenciais não configuradas (USUARIO_EMAIL e SENHA_EMAIL no .env)')
             return False
 
-        servidor = smtplib.SMTP('smtp.gmail.com', 587)
-        servidor.starttls()
+        servidor = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=20)
 
         try:
 

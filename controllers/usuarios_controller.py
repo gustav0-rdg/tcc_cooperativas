@@ -32,7 +32,7 @@ class Usuarios:
 
 		#endregion
 
-		cursor = self.connection_db.cursor(dictionary=True)
+		cursor = self.connection_db.cursor(dictionary=True, buffered=True)
 
 		try:
 

@@ -592,9 +592,7 @@ def rejeitar_cooperativa():
 
         db.start_transaction()
         coop_ctrl = Cooperativa(db)
-        sucesso_doc = coop_ctrl.rejeitar_documento(int(id_cooperativa), int(id_usuario_gestor), motivo, justificativa)
-
-
+        
         cooperativa_data = coop_ctrl.get_by_id(int(id_cooperativa))
         if not cooperativa_data:
             db.rollback()
@@ -602,13 +600,15 @@ def rejeitar_cooperativa():
             return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
 
         id_usuario_cooperativa = cooperativa_data['id_usuario']
-        sucesso_user = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'bloqueado')
+        
+        # Deleta o usuário e a cooperativa
+        sucesso_coop = coop_ctrl.delete(int(id_cooperativa))
+        sucesso_user = Usuarios(db).delete(int(id_usuario_cooperativa))
 
-
-        if not (sucesso_doc and sucesso_user):
+        if not (sucesso_coop and sucesso_user):
             db.rollback()
             conn.close()
-            return jsonify({'error': 'Erro ao atualizar o status no banco de dados.'}), 500
+            return jsonify({'error': 'Erro ao deletar a cooperativa do banco de dados.'}), 500
 
         # Commit primeiro para garantir que a alteração seja salva
         db.commit()
