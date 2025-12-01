@@ -103,7 +103,8 @@ function configurarSPATabs() {
     tabs.forEach(tab => {
         const target = tab.getAttribute('data-bs-target');
         if (user_data.tipo === 'cooperado' && 
-            (target === '#cooperados' || target === '#vendas')) {
+            target === '#cooperados') {
+
 
             tab.classList.add('disabled');
             tab.style.pointerEvents = 'none';
@@ -114,12 +115,11 @@ function configurarSPATabs() {
             const target = event.target.getAttribute('data-bs-target');
             if (user_data.tipo === 'cooperado') {
                 // Impede o carregamento de cooperados e histórico se for 'cooperado'
-                if (target === '#cooperados' || target === '#vendas') {
+                if (target === '#cooperados') {
                     event.preventDefault(); // Impede o evento
                     alert('Acesso restrito para cooperados.');
                     return;
                 }
-                return
             }
             if (target === '#cooperados') {
                 carregarCooperados();
