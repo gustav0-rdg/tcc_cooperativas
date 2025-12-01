@@ -5,7 +5,7 @@ from controllers.feedback_controller import Feedbacks
 from controllers.usuarios_controller import Usuarios
 from controllers.tokens_controller import Tokens
 from controllers.cooperativa_controller import Cooperativa
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 from controllers.comentarios_controller import Comentarios
 from controllers.vendas_controller import Vendas
 from controllers.avaliacoes_controller import Avaliacoes
@@ -21,42 +21,49 @@ def get_all_compradores():
 
 @api_get.route("/compradores", methods=["GET"])
 def get_compradores():
-    """
-    Rota para buscar compradores com filtros opcionais.
-    Query params:
-        - material: ID do material base (opcional)
-        - estado: Sigla do estado (opcional)
-        - raio: Raio em km (opcional)
-    """
     token = request.headers.get('Authorization')
 
     if not token:
-        return jsonify({ 'texto': '"token" é parâmetro obrigatório' }), 400
+        return jsonify({'texto': '"token" é parâmetro obrigatório'}), 400
 
     conn = None
     try:
-
         conn = Connection()
+        db = conn.connection_db
 
-        data_token = Tokens(conn.connection_db).validar(token)
+        data_token = Tokens(db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
-            return jsonify({ 'error': '"Token" inexistente ou inválido'}), 401
+            return jsonify({'error': 'Token inexistente ou inválido'}), 401
 
         id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
 
-        coop_info = Cooperativa(conn.connection_db).get_by_user_id(id_usuario)
+        if not usuario_info:
+            return jsonify({'error': 'Usuário não encontrado'}), 404
+
+        user_type = usuario_info.get('tipo')
+        coop_info = None
+
+        if user_type == 'cooperativa':
+            coop_info = Cooperativa(db).get_by_user_id(id_usuario)
+        elif user_type == 'cooperado':
+            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+            if cooperado_info and 'id_cooperativa' in cooperado_info:
+                id_cooperativa = cooperado_info['id_cooperativa']
+                coop_info = Cooperativa(db).get_by_id(id_cooperativa)
+            else:
+                return jsonify({'error': 'Cooperado não está vinculado a uma cooperativa'}), 404
+        else:
+            return jsonify({'error': 'Acesso não autorizado para este tipo de usuário'}), 403
+
         if not coop_info:
-            return jsonify({ 'error': 'Cooperativa não encontrada' }), 404
+            return jsonify({'error': 'Informações da cooperativa não encontradas'}), 404
 
-        # Obter parâmetros de filtro da query string
         material_id = request.args.get('material', type=int)
         estado = request.args.get('estado', type=str)
         raio_km = request.args.get('raio', type=float)
 
-        print(f"Filtros aplicados - Material: {material_id}, Estado: {estado}, Raio: {raio_km} km")
-
-        # Buscar compradores com filtros
-        compradores = Compradores(conn.connection_db).get_all(
+        compradores = Compradores(db).get_all(
             user_lat=coop_info['latitude'],
             user_lon=coop_info['longitude'],
             material_id=material_id,
@@ -67,20 +74,14 @@ def get_compradores():
         print(f"Total de compradores retornados: {len(compradores) if isinstance(compradores, list) else 0}")
 
         match compradores:
-            # 404 - Compradores não encontrados
             case _ if isinstance(compradores, list) and len(compradores) <= 0:
-                return jsonify({ 'error': 'Nenhum comprador encontrado com os filtros aplicados' }), 404
-
-            # 200 - Compradores consultados
+                return jsonify([]), 200
             case _ if isinstance(compradores, list) and len(compradores) > 0:
                 return jsonify(compradores), 200
-
-            # 500 - Erro ao consultar compradores
             case False | _:
-                return jsonify({ 'error': 'Ocorreu um erro, tente novamente' }), 500
+                return jsonify({'error': 'Ocorreu um erro ao consultar compradores'}), 500
 
     except Exception as e:
-
         print(f"Erro ao buscar compradores: {e}")
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
 
@@ -103,10 +104,6 @@ def get_feedbacks():
     
 @api_get.route("/materiais", methods=["GET"])
 def get_materiais():
-    """
-    Rota para obter a lista de materiais.
-    Se um token de autenticação for fornecido, a lista pode incluir sinônimos.
-    """
     conn = None
     try:
         conn = Connection('local')
@@ -129,12 +126,11 @@ def get_materiais():
                             if coop_info:
                                 id_cooperativa = coop_info.get('id_cooperativa')
                         elif usuario_info['tipo'] == 'cooperado':
-                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
-                            if catador_info:
-                                id_cooperativa = catador_info.get('id_cooperativa')
+                            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+                            if cooperado_info:
+                                id_cooperativa = cooperado_info.get('id_cooperativa')
             except Exception as e:
                 print(f"Erro ao processar token em /materiais: {e}")
-                # Continua sem id_cooperativa, não retorna erro
 
         materiais = Materiais(db).get_all(id_cooperativa=id_cooperativa)
         return jsonify(materiais), 200
@@ -148,10 +144,6 @@ def get_materiais():
 
 @api_get.route("/subtipos/<int:material_id>", methods=["GET"])
 def get_subtipos_materiais(material_id):
-    """
-    Rota para obter a lista de subtipos de um material.
-    Se um token for fornecido, pode retornar nomes de sinônimos.
-    """
     conn = None
     try:
         conn = Connection('local')
@@ -174,9 +166,9 @@ def get_subtipos_materiais(material_id):
                             if coop_info:
                                 id_cooperativa = coop_info.get('id_cooperativa')
                         elif usuario_info['tipo'] == 'cooperado':
-                            catador_info = Catadores(db).get_by_id_usuario(id_usuario)
-                            if catador_info:
-                                id_cooperativa = catador_info.get('id_cooperativa')
+                            cooperado_info = Cooperados(db).get_by_id_usuario(id_usuario)
+                            if cooperado_info:
+                                id_cooperativa = cooperado_info.get('id_cooperativa')
             except Exception as e:
                 print(f"Erro ao processar token em /subtipos: {e}")
 
@@ -243,7 +235,7 @@ def get_comentarios(cnpj):
 
 @api_get.route('/cooperativas-pendentes', methods=['GET'])
 def get_cooperativas_pendentes():
-    
+
     token_header = request.headers.get('Authorization')
     if not token_header:
         return jsonify({'error': 'Token não fornecido'}), 401
@@ -251,25 +243,22 @@ def get_cooperativas_pendentes():
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão (reaproveitando a lógica de segurança)
         db = conn.connection_db
-        # Remove o prefixo "Bearer " se ele existir
         token = token_header.split(" ")[1] if " " in token_header else token_header
         data_token = Tokens(db).validar(token)
         if data_token is None:
             conn.close()
             return jsonify({'error': 'Token inválido ou expirado'}), 401
-        
+
         id_usuario = data_token['id_usuario']
         usuario_info = Usuarios(db).get(id_usuario)
-        
+
         if not usuario_info or usuario_info['tipo'] not in ['gestor', 'root']:
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar os dados (usando o método novo)
         cooperativas_pendentes = Cooperativa(db).get_pendentes_com_documentos()
-        
+
         if cooperativas_pendentes is False:
             conn.close()
             return jsonify({'error': 'Erro ao buscar solicitações.'}), 500
@@ -284,9 +273,6 @@ def get_cooperativas_pendentes():
 
 @api_get.route('/avaliacoes-pendentes/<id_cooperativa>', methods=['GET'])
 def get_avaliacoes_pendentes(id_cooperativa):
-    """
-    Rota para obter as avaliações pendentes de uma cooperativa específica.
-    """
     token_header = request.headers.get('Authorization')
     if not token_header:
         return jsonify({'error': 'Token não fornecido'}), 401
@@ -295,7 +281,6 @@ def get_avaliacoes_pendentes(id_cooperativa):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
         db = conn.connection_db
         data_token = Tokens(db).validar(token_header)
         if data_token is None:
@@ -309,7 +294,6 @@ def get_avaliacoes_pendentes(id_cooperativa):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar as avaliações pendentes
         avaliacoes_pendentes = Avaliacoes(db).get_avaliacoes_pendentes(int(id_cooperativa))
 
         conn.close()
@@ -322,9 +306,6 @@ def get_avaliacoes_pendentes(id_cooperativa):
 
 @api_get.route('/avaliacao-pendente/<id_avaliacao_pendente>', methods=['GET'])
 def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
-    """
-    Rota para obter uma avaliação pendente específica por ID.
-    """
     token_header = request.headers.get('Authorization')
     if not token_header:
         return jsonify({'error': 'Token não fornecido'}), 401
@@ -332,7 +313,6 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
         db = conn.connection_db
         data_token = Tokens(db).validar(token_header)
         if not data_token:
@@ -346,7 +326,6 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar a avaliação pendente
         avaliacao = Avaliacoes(db).get_avaliacao_pendente_por_id(int(id_avaliacao_pendente))
 
         if not avaliacao:
@@ -363,9 +342,6 @@ def get_avaliacao_pendente_por_id(id_avaliacao_pendente):
 
 @api_get.route('/comprador-detalhes/<int:id_comprador>', methods=['GET'])
 def get_comprador_detalhes(id_comprador):
-    """
-    Rota para obter os detalhes de um comprador específico.
-    """
     token_header = request.headers.get('Authorization')
     if not token_header:
         return jsonify({'error': 'Token não fornecido'}), 401
@@ -373,7 +349,6 @@ def get_comprador_detalhes(id_comprador):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
         db = conn.connection_db
         token = token_header.split(" ")[1] if " " in token_header else token_header
         data_token = Tokens(db).validar(token)
@@ -388,7 +363,6 @@ def get_comprador_detalhes(id_comprador):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Buscar os detalhes do comprador
         detalhes = Compradores(db).get_detalhes_comprador(id_comprador)
 
         if not detalhes:
@@ -405,9 +379,6 @@ def get_comprador_detalhes(id_comprador):
 
 @api_get.route('/cooperativa-info', methods=['GET'])
 def get_cooperativa_info():
-    """
-    Retorna as informações detalhadas da cooperativa logada.
-    """
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({'error': 'Token é obrigatório'}), 401
@@ -417,19 +388,16 @@ def get_cooperativa_info():
         conn = Connection('local')
         db = conn.connection_db
 
-        # Validar token
         data_token = Tokens(db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
         id_usuario = data_token['id_usuario']
-        
-        # Verificar se o usuário é uma cooperativa
+
         usuario_info = Usuarios(db).get(id_usuario)
         if not usuario_info or usuario_info['tipo'] != 'cooperativa':
             return jsonify({'error': 'Usuário não é uma cooperativa'}), 403
 
-        # Buscar dados da cooperativa usando o método já corrigido
         dados_cooperativa = Cooperativa(db).get_by_user_id(id_usuario)
         if not dados_cooperativa:
             return jsonify({'error': 'Dados da cooperativa não encontrados'}), 404

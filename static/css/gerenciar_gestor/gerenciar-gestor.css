@@ -1,160 +1,298 @@
-/* /static/css/gerenciar_gestor/gerenciar-gestor.css */
-
-/* Importa as variáveis de cor (ajuste o caminho se necessário) */
 @import url('../root-de-cores.css');
 
-main h1 {
-    color: var(--verde-claro);
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
-/* --- Seção de Pesquisa e Botão --- */
-
-.search-add-section {
-    background-color: rgba(0, 0, 0, 0.2); /* Fundo escuro semitransparente */
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid rgba(106, 182, 51, 0.2); /* Borda com a cor principal */
+body {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
-    gap: 1rem;
-    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.search-add-section .input-group {
-    flex: 1; /* Ocupa o espaço disponível */
-    min-width: 300px; /* Largura mínima */
+main {
+    flex-grow: 1;
 }
 
-.search-add-section .input-group-text {
-    background-color: var(--verde-claro);
-    border: 1px solid var(--verde-claro-medio);
-    border-right: none;
-    color: var(--verde-escuro-medio);
+.gerenciar-gestores-main {
+    background: var(--verde-principal);
+    min-height: calc(100vh - 120px);
+    padding: 3rem 1rem;
+    overflow-y: hidden;
 }
 
-#searchInput {
-    background-color: var(--verde-claro);
-    border: 1px solid var(--verde-claro-medio);
-    border-left: none;
+@media (max-width: 768px) {
+    .gerenciar-gestores-main {
+        padding: 2rem 0.75rem;
+    }
+}
+
+.page-header {
+    background: var(--branco);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 2px solid var(--verde-claro-medio);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem !important;
+}
+
+.page-header .btn-voltar {
+    background: var(--verde-claro-medio);
+    border: 3px solid var(--verde-claro-medio);
     color: var(--verde-escuro);
-    font-weight: 500;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
-#searchInput:focus {
-    background-color: var(--branco);
+
+.page-header .btn-voltar:hover {
+    transform: translateY(-3px);
     border-color: var(--verde-principal);
-    box-shadow: 0 0 0 0.25rem rgba(106, 182, 51, 0.25);
-}
-#searchInput::placeholder {
+    background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
     color: var(--verde-escuro-medio);
-    opacity: 0.7;
+}
+
+.page-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--verde-escuro);
+    margin-bottom: 0;
+}
+
+.page-subtitle {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: var(--verde-escuro-medio);
+    font-weight: 400;
+    margin-left: 57px;
+}
+
+.results-counter {
+    color: var(--verde-escuro-medio);
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* --- Seção de Pesquisa e Filtros --- */
+
+.search-box {
+    position: relative;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--verde-principal);
+    font-size: 1.1rem;
+}
+
+.search-input {
+    border-radius: 12px;
+    border: 2px solid var(--branco);
+    background: var(--branco);
+    padding-left: 45px;
+    height: 50px;
+    font-size: 1.1rem;
+    color: var(--verde-escuro-medio);
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    box-shadow: 0 8px 25px rgba(106, 182, 51, 0.2);
+    border-color: var(--verde-principal);
+    background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
+}
+
+.filters-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-filter {
+    background: var(--verde-claro-medio);
+    border: 3px solid var(--verde-claro-medio);
+    color: var(--verde-escuro);
+    font-weight: 600;
+    border-radius: 12px;
+    height: 50px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover, .btn-filter:active {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(106, 182, 51, 0.2);
+    border-color: var(--verde-principal);
+    background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
+    color: var(--verde-escuro);
+}
+
+.filter-dropdown {
+    border-radius: 12px;
+    border: 1px solid var(--verde-claro-medio);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.filter-item {
+    font-weight: 500;
+    color: var(--verde-escuro-medio);
+}
+.filter-item i {
+    width: 25px;
+    text-align: center;
+    margin-right: 5px;
+}
+.filter-item:hover {
+    background: var(--verde-claro);
+    color: var(--verde-escuro);
 }
 
 .btn-add-gestor {
-    background-color: var(--verde-principal);
-    border: none;
-    color: var(--branco);
+    background: var(--verde-claro-medio);
+    border: 3px solid var(--verde-claro-medio);
+    color: var(--verde-escuro);
     font-weight: 600;
+    border-radius: 12px;
+    height: 50px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: background-color 0.2s ease;
-    padding: 0.5rem 1rem;
+    padding: 0 1rem;
 }
-.btn-add-gestor:hover {
-    background-color: var(--verde-claro-medio);
+
+.btn-add-gestor:hover, .btn-add-gestor:active {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(106, 182, 51, 0.2);
+    border-color: var(--verde-principal);
+    background: linear-gradient(135deg, var(--branco) 0%, var(--verde-claro) 100%);
     color: var(--verde-escuro);
 }
 
 /* --- Container dos Cards --- */
 
-#gestoresCards {
-    display: grid;
-    /* Grid responsivo: preenche com quantos cards de 350px couberem */
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+.gestores-list {
+    /* Cards são brancos, então o CSS interno está OK */
 }
 
 /* --- Estilização dos Cards --- */
 
 .gestor-card {
-    background-color: var(--verde-claro);
-    border: 1px solid var(--verde-claro-medio);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    color: var(--verde-escuro);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--branco);
+    border: 2px solid var(--verde-claro-medio);
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
+
 .gestor-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--verde-principal);
 }
 
-.gestor-card .card-title {
-    color: var(--verde-escuro);
+.gestor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--verde-claro);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gestor-name {
+    font-size: 1.2rem;
     font-weight: 700;
-    border-bottom: 2px solid var(--verde-claro-medio);
-    padding-bottom: 0.5rem;
+    color: var(--verde-escuro);
+    margin-bottom: 0.25rem;
+    word-break: break-all;
+}
+
+.status-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-ativo {
+    background: var(--verde-claro);
+    color: var(--verde-escuro-medio);
+}
+
+.status-inativo {
+    background: #ffebee;
+    color: var(--vermelho);
+}
+
+.gestor-card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.gestor-info-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-.gestor-card .card-title .material-icons-outlined {
-    color: var(--verde-escuro-medio);
-}
-
-.gestor-card .card-text {
+    gap: 0.75rem;
     color: var(--verde-escuro-medio);
     font-size: 0.95rem;
-    margin-bottom: 0.5rem;
 }
-.gestor-card .card-text strong {
-    color: var(--verde-escuro);
-    font-weight: 600;
+.gestor-info-item i {
+    color: var(--verde-principal);
+    width: 20px;
+    text-align: center;
 }
 
 /* --- Botões de Ação do Card --- */
 
-.card-actions {
+.gestor-card-footer {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar linha se não couber */
-    gap: 0.5rem;
-    margin-top: 1rem;
-    border-top: 1px solid var(--verde-claro-medio);
-    padding-top: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
-.card-actions .btn {
+.btn-action {
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-.card-actions .btn .material-icons-outlined {
-    font-size: 1.1rem;
-}
-
-.btn-excluir {
-    background-color: #fce1e1; /* Fundo vermelho claro */
-    color: var(--vermelho);
-}
-.btn-excluir:hover {
-    background-color: var(--vermelho);
-    color: var(--branco);
+    gap: 0.5rem;
 }
 
 .btn-editar {
-    background-color: #e0e8da; /* Fundo verde-escuro-medio bem claro */
-    color: var(--verde-escuro-medio);
+    background: var(--verde-principal);
+    color: var(--branco);
 }
 .btn-editar:hover {
-    background-color: var(--verde-escuro-medio);
+    background: var(--verde-escuro-medio);
+}
+
+.btn-excluir {
+    background: var(--vermelho);
     color: var(--branco);
+}
+.btn-excluir:hover {
+    background: #c62828;
 }
 
 /* --- 🎨 ESTILIZAÇÃO CUSTOMIZADA DO SWEETALERT 🎨 ---

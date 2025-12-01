@@ -13,7 +13,6 @@ const compradorSection = document.querySelector('.registros__comprador');
 
 // Função para mostrar a etapa de vendedores
 export async function exibirVendedores() {
-    // --- Essa parte inicial continua a mesma ---
     etapaSection.innerHTML = `
     <div class="etapa__progresso">
         <h1>Venda de ${vendaAtual.material.subtipo}</h1>
@@ -100,18 +99,14 @@ export async function exibirVendedores() {
     });
     
     compradorSection.appendChild(novoComprador);
-    // Agora, para exibir a lista pela primeira vez, basta chamar sua nova função.
     await renderizarListaDeVendedores();
 }
 
 async function renderizarListaDeVendedores() {
-    // 1. Limpa a seção de opções para não duplicar a lista
     opcoesSection.innerHTML = '';
 
-    // 2. Busca a lista ATUALIZADA de compradores no seu backend
     const vendedores = await getAllCompradores();
-    console.log(vendedores);
-    // 3. Cria e adiciona o botão de cada vendedor na tela
+    // Cria e adiciona o botão de cada vendedor na tela
     vendedores.forEach(vendedor => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
@@ -125,7 +120,6 @@ async function renderizarListaDeVendedores() {
         // Adicionando o evento de clique para o vendedor
         div.addEventListener('click', () => {
             vendaAtual.vendedor = vendedor;
-            console.log(vendaAtual);
             exibirValoresDeVenda();
         });
     });

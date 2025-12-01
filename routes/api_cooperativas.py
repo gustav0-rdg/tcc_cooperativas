@@ -5,7 +5,6 @@ from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
 from controllers.cnpj_controller import CNPJ
 from controllers.email_controller import Email
-# imports para garantir a funcionalidade de uploads de documentos
 import os
 from werkzeug.utils import secure_filename
 
@@ -47,8 +46,6 @@ def cadastrar ():
         if len(data_cadastro['senha']) < 8:
             return jsonify({ 'texto': 'A senha deve ter no minímo 8 caractéres' }), 400
         
-        #region Validação Arquivo ATA
-
         if 'documento' not in request.files:
              return jsonify({'error': 'O arquivo do documento ATA é obrigatório.'}), 400
 
@@ -60,11 +57,7 @@ def cadastrar ():
         if not arquivo.filename.lower().endswith('.pdf'):
             return jsonify({'error': 'Tipo de arquivo não permitido.'}), 400
 
-        #endregion
-
-        # 400 - CNPJ Inválido
-
-        if CNPJ.validar(data_cadastro['cnpj']):
+        if not CNPJ.validar(data_cadastro['cnpj']):
             return jsonify({ 'error': 'CNPJ inválido. Revise e tente novamente' }), 400
 
         dados_cnpj = CNPJ.consultar(data_cadastro['cnpj'])
@@ -82,10 +75,6 @@ def cadastrar ():
 
         if not natureza_cooperativa in NATUREZAS_JURIDICAS_PERMITIDAS:
             return jsonify({'error': 'O CNPJ informado não pertence a uma Cooperativa ou Associação.'}), 400
-        
-        #endregion
-
-        #region Verificação de CNAE
 
         cnae_principal_id = dados_cnpj.get('mainActivity', {}).get('id')
         cnaes_secundarios_ids = [act.get('id') for act in dados_cnpj.get('sideActivities', [])]
@@ -103,12 +92,8 @@ def cadastrar ():
                     cnae_valido = True
                     break
 
-        # 400 - CNAE Inválido
-
         if not cnae_valido:
             return jsonify({'error': 'O CNPJ informado não possui CNAE compatível com cooperativas de reciclagem.'}), 400
-
-        #endregion
 
         id_status_atividade_cooperativa = dados_cnpj.get('status', {}).get('id')
 
@@ -154,22 +139,18 @@ def cadastrar ():
                 company = dados_cnpj.get('company', {})
                 phones = dados_cnpj.get('phones', [{}]) # Telefones (pode haver mais de 1 no JSON)
 
-                #region Upload Documento ATA
-
                 filename_base = secure_filename(f"doc_coop_{id_usuario_criado}")
                 extension = arquivo.filename.rsplit('.', 1)[1].lower()
                 filename = f"{filename_base}.{extension}"
-                
+
                 # Cria a pasta de uploads se ela não existir
                 os.makedirs(PASTA_UPLOAD, exist_ok=True)
-                
+
                 filepath = os.path.join(PASTA_UPLOAD, filename)
                 arquivo.save(filepath)
-                
+
                 # Salva o caminho no banco de dados
                 arquivo_url = f"uploads/documentos/{filename}"
-
-                #endregion
 
                 dados_criar_coop = {
                     "id_usuario": id_usuario_criado,
@@ -384,7 +365,7 @@ def alterar_aprovacao():
         id_usuario_cooperativa = cooperativa['id_usuario']
 
 
-        # Garante que não há transação pendente na conexão antes de iniciar
+        # Garante que não há transação pendente
         try:
             if db.in_transaction:
                 db.rollback()
@@ -399,7 +380,7 @@ def alterar_aprovacao():
             # Commit primeiro para garantir que a alteração seja salva
             db.commit()
             
-            # Envia email de aprovação ou reprovação (não bloqueia se falhar)
+            # Envia email de aprovação ou reprovação
             try:
                 usuario_coop = Usuarios(db).get(int(id_usuario_cooperativa))
                 if usuario_coop and usuario_coop.get('email'):
@@ -419,7 +400,7 @@ def alterar_aprovacao():
                         )
                         Email.enviar(usuario_coop['email'], assunto, corpo_html)
             except Exception as email_error:
-                # Log do erro mas não bloqueia a resposta de sucesso
+                # Log do erro mas não bloqueia a resposta
                 print(f"Erro ao enviar email (não crítico): {email_error}")
             
             return jsonify({'texto': 'Status da cooperativa alterado com sucesso!'}), 200
@@ -535,7 +516,7 @@ def enviar_documento():
             
         conn = Connection('local')
         
-        # Criação de um nome de arquivo seguro e único | EX: doc_coop_5.pdf
+        # Criação de um nome de arquivo seguro e único
         filename_base = secure_filename(f"doc_coop_{id_cooperativa}")
         extension = arquivo.filename.rsplit('.', 1)[1].lower()
         filename = f"{filename_base}.{extension}"
@@ -633,7 +614,7 @@ def rejeitar_cooperativa():
         # Commit primeiro para garantir que a alteração seja salva
         db.commit()
 
-        # Envia email de rejeição com template HTML bonito (não bloqueia se falhar)
+        # Envia email de rejeição
         try:
             assunto = "Cadastro no Recoopera Rejeitado"
             razao_social = cooperativa_data.get('razao_social', 'Cooperativa')

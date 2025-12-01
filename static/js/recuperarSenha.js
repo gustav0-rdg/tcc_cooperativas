@@ -1,12 +1,10 @@
 function mostrarErro (mensagem, form) 
 {
-    // Remove erro antigo, se houver
-
+    // Remove erro antigo
     const oldError = document.getElementById('recover-error-msg');
     if (oldError) oldError.remove();
 
-    // Cria o novo elemento de erro
-
+    // Cria novo erro
     const errorEl = document.createElement('div');
     errorEl.id = 'recover-error-msg';
     errorEl.className = 'alert alert-danger mt-3';
@@ -53,8 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             const response = await fetch(`/api/usuarios/recuperacao-senha/${email}`);
             const data = await response.json();
-
-            console.log(response);
 
             if (!response.ok) 
             {

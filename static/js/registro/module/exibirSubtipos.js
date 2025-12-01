@@ -7,11 +7,8 @@ const etapaSection = document.querySelector('.registros__etapa');
 const opcoesSection = document.querySelector('.registros__opcoes');
 const compradorSection = document.querySelector('.registros__comprador');
 
-// --- CORREÇÃO 1: INJETAR O ESTILO DO BOTÃO NO HEAD ---
-// Esta função garante que o estilo do botão de sucesso exista na página
 function injectSwalButtonStyles() {
     const styleId = 'swal-custom-button-style';
-    // Só injeta o estilo se ele ainda não existir
     if (document.getElementById(styleId)) {
         return;
     }
@@ -20,16 +17,14 @@ function injectSwalButtonStyles() {
     style.id = styleId;
     style.innerHTML = `
       .swal2-confirm.swal-confirm-custom-style {
-        background-color: var(--verde-escuro-medio) !important; 
-        color: var(--verde-claro) !important;               
+        background-color: var(--verde-escuro-medio) !important;
+        color: var(--verde-claro) !important;
       }
     `;
     document.head.appendChild(style);
 }
 
-// Chama a função IMEDIATAMENTE para garantir que o estilo esteja pronto
 injectSwalButtonStyles();
-// --- FIM DA CORREÇÃO 1 ---
 
 
 let valoresCadastro = {
@@ -122,15 +117,10 @@ const swalStyles = `
   }
 `;
 
-// REMOVI a constante successButtonStyle daqui, pois ela foi substituída pela função injectSwalButtonStyles()
-
-
 export async function exibirSubtipos() {
     compradorSection.innerHTML = '';
     const subtipos = await getSubtipos(vendaAtual.material.id_categoria)
 
-    // Debugging (mantido)
-    console.log(subtipos, material.id_material_catalogo, material, vendaAtual.material.id_categoria)
 
     etapaSection.innerHTML = `
         <div class="etapa__progresso">
@@ -145,7 +135,6 @@ export async function exibirSubtipos() {
 
     opcoesSection.innerHTML = '';
 
-    // --- Lógica do botão de registrar novo subtipo ---
     const novoSubtipo = document.createElement('button');
     novoSubtipo.className = "registros__opcoes-btn";
     novoSubtipo.classList.add("opcoes-btn__novo-comprador");
@@ -155,7 +144,6 @@ export async function exibirSubtipos() {
         item => item.id_material_base === vendaAtual.material.id_categoria
     );
 
-// Gerando os radios de opção
     const botoesSwalHtml = materiaisCategoriaAtual.map(mat => `
         <div class="swal-radio-option">
             <input type="radio" 
@@ -172,8 +160,7 @@ export async function exibirSubtipos() {
         
         Swal.fire({
             title: 'Vincular ou Criar Material',
-            // --- O ÍCONE FOI MANTIDO CONFORME SOLICITADO ---
-            icon: 'question', 
+            icon: 'question',
             width: '550px',
             html: `
               <style>${swalStyles}</style> <div class="swal-content-container">
@@ -249,10 +236,8 @@ export async function exibirSubtipos() {
         });
     });
     
-    // Adiciona o botão "Outros materiais" na tela
     compradorSection.appendChild(novoSubtipo)
 
-    // Adiciona os botões de materiais existentes
     materiaisCategoriaAtual.forEach(item => {
         const div = document.createElement('button');
         div.className = "registros__opcoes-btn";
@@ -263,13 +248,10 @@ export async function exibirSubtipos() {
             `;
         opcoesSection.appendChild(div);
 
-        // Adicionando o evento de clique para o material
         div.addEventListener('click', () => {
-            vendaAtual.material.subtipo = item.nome_especifico; // Atualiza o material no objeto vendaAtual
-            vendaAtual.material.id_material_catalogo = item.id_material_catalogo; // Guarda o ID também
-
+            vendaAtual.material.subtipo = item.nome_especifico;
+            vendaAtual.material.id_material_catalogo = item.id_material_catalogo;
             exibirVendedores();
-            console.log(vendaAtual); // Apenas para visualização
         });
     });
 }
@@ -331,16 +313,14 @@ async function cadastrarNovoMaterial(nomeMaterial, id_material_base) {
 
         if (resposta.ok) {
             await Swal.fire({
-              title:'🎉 Material cadastrado!', 
-              text: data.message, 
+              title:'🎉 Material cadastrado!',
+              text: data.message,
               icon:'success',
               background: "var(--verde-claro)",
               color: "var(--verde-escuro)",
               confirmButtonText: 'Fechar',
-              // --- CORREÇÃO 2: REMOVIDO 'html: successButtonStyle' ---
-              // html: successButtonStyle, // <--- REMOVIDO
               customClass: {
-                confirmButton: 'swal-confirm-custom-style' // A classe agora existe globalmente
+                confirmButton: 'swal-confirm-custom-style'
               }
             });
         } else {

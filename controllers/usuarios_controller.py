@@ -466,28 +466,20 @@ class Usuarios:
 			False: para outros erros de banco de dados.
 		"""
 
-		#region Exceções
-
 		if not isinstance(id_usuario, int):
-			raise TypeError('Usuarios "update" - id_usuario deve ser int')
-		
+			raise TypeError('id_usuario deve ser int')
+
 		if not isinstance(nome, str) or not nome:
-			raise TypeError('Usuarios "update" - nome deve ser uma string não vazia')
-		
+			raise TypeError('nome deve ser string não vazia')
+
 		if not isinstance(email, str) or not email:
-			raise TypeError('Usuarios "update" - email deve ser uma string não vazia')
-		
-		# Valida a senha apenas se ela for fornecida
+			raise TypeError('email deve ser string não vazia')
 
 		if senha is not None:
-
 			if not isinstance(senha, str):
-				raise TypeError('Usuarios "update" - senha deve ser string ou None')
-			
+				raise TypeError('senha deve ser string ou None')
 			if len(senha) < 8:
-				raise ValueError('Usuarios "update" - senha deve ter >= 8 caracteres')
-			
-		#endregion
+				raise ValueError('senha deve ter >= 8 caracteres')
 
 		cursor = self.connection_db.cursor()
 		

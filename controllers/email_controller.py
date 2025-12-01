@@ -238,18 +238,17 @@ class Email:
     def enviar (destinatario:str, assunto:str, formatacao_html:str) -> bool:
 
         """
-        Enviar email
+        Envia email via SMTP.
         """
 
         remetente = getenv('USUARIO_EMAIL')
         senha = getenv('SENHA_EMAIL')
 
-        # Verifica se as credenciais estão configuradas
+        # Verifica credenciais
         if not remetente or not senha:
-            print(f'Erro - Email "enviar": Credenciais de email não configuradas (USUARIO_EMAIL e SENHA_EMAIL no arquivo .env)')
+            print(f'Erro em enviar: Credenciais não configuradas (USUARIO_EMAIL e SENHA_EMAIL no .env)')
             return False
 
-        # Cria conexão com o servidor de email
         servidor = smtplib.SMTP('smtp.gmail.com', 587)
         servidor.starttls()
 

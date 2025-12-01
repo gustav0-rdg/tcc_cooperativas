@@ -3,7 +3,7 @@ from data.connection_controller import Connection
 from controllers.tokens_controller import Tokens
 from controllers.usuarios_controller import Usuarios
 from controllers.cooperativa_controller import Cooperativa
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 api_cooperados = Blueprint(
     
     'api_cooperados', 
@@ -30,10 +30,9 @@ def get_cooperados(identificador: int):
             dados_cooperativa_logada = Cooperativa(conn.connection_db).get_by_user_id(user['id_usuario'])
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada'}), 404
-            # Verificar se o identificador corresponde à cooperativa logada
             if str(identificador) != str(dados_cooperativa_logada['id_cooperativa']):
                 return jsonify({'error':'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}),403
-        cooperados = Catadores(conn.connection_db).get_by_cooperativa(dados_cooperativa_logada['id_cooperativa'])
+        cooperados = Cooperados(conn.connection_db).get_by_cooperativa(dados_cooperativa_logada['id_cooperativa'])
         return cooperados
     
     except Exception as e:
@@ -41,9 +40,9 @@ def get_cooperados(identificador: int):
     
     finally:
         conn.close()
-@api_cooperados.route('/delete/<int:id_catador>', methods=["DELETE"])
-def delete_cooperado(id_catador):
-    token = request.headers.get('Authorization')  # case-insensitive, só por padrão
+@api_cooperados.route('/delete/<int:id_cooperado>', methods=["DELETE"])
+def delete_cooperado(id_cooperado):
+    token = request.headers.get('Authorization')
     if not token:
         return jsonify({'erro': '"Token" é um parametro obrigatório'}), 400
 
@@ -59,19 +58,19 @@ def delete_cooperado(id_catador):
         if user['tipo'] not in ['cooperativa', 'gestor', 'root']:
             return jsonify({'error': 'Você não tem permissão pra realizar tal ação'}), 403
 
-        catadores_ctrl = Catadores(conn.connection_db)
-        catador = catadores_ctrl.get_by_id_catador(id_catador)
-        if not catador:
-            return jsonify({'error': f'Cooperado com id {id_catador} não encontrado'}), 404
+        cooperados_ctrl = Cooperados(conn.connection_db)
+        cooperado = cooperados_ctrl.get_by_id_cooperado(id_cooperado)
+        if not cooperado:
+            return jsonify({'error': f'Cooperado com id {id_cooperado} não encontrado'}), 404
 
-        if user["tipo"] == "cooperativa" and catador["id_cooperativa"] != cooperativa["id_cooperativa"]:
+        if user["tipo"] == "cooperativa" and cooperado["id_cooperativa"] != cooperativa["id_cooperativa"]:
 
             return jsonify({'error': 'Você não pode remover cooperados de outra cooperativa'}), 403
 
-        delete_ok = catadores_ctrl.delete_cooperado(catador["id_usuario"], id_catador)
+        delete_ok = cooperados_ctrl.delete_cooperado(cooperado["id_usuario"], id_cooperado)
         
         if delete_ok:
-            return jsonify({"sucesso": f"Cooperado correspondente ao id {id_catador} excluído"}), 200
+            return jsonify({"sucesso": f"Cooperado correspondente ao id {id_cooperado} excluído"}), 200
         else:
             return jsonify({'erro': 'Erro desconhecido ao excluir cooperado.'}), 500
 
@@ -99,11 +98,8 @@ def search_cooperado(identificador, nome):
             dados_cooperativa_logada = Cooperativa(conn.connection_db).get_by_user_id(user['id_usuario'])
             if not dados_cooperativa_logada:
                 return jsonify({'error': 'Cooperativa associada a este usuário não encontrada'}), 404
-            #  CORRIGIR DEPOIS BRUHHHH
-            
-            # if (identificador != dados_cooperativa_logada['id_cooperativa']):
-            #     return jsonify({'error':'Acesso negado. Você só pode consultar os dados da sua própria cooperativa.'}),403
-        cooperados = Catadores(conn.connection_db).search_cooperado(dados_cooperativa_logada['id_cooperativa'], nome)
+
+        cooperados = Cooperados(conn.connection_db).search_cooperado(dados_cooperativa_logada['id_cooperativa'], nome)
         return cooperados
     
     except Exception as e:

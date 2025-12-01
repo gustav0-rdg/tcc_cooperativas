@@ -51,19 +51,22 @@ class Cooperativa:
         if not isinstance(id_cooperativa, int):
             raise TypeError('Cooperativa - "id_cooperativa" (get_by_id) deve ser um int')
 
-
         cursor = self.connection_db.cursor(dictionary=True)
         try:
+            # Query expandida para buscar também latitude e longitude
             cursor.execute(
                 """
                 SELECT
-                    id_cooperativa,
-                    id_usuario,
-                    cnpj,
-                    razao_social,
-                    email
-                FROM v_cooperativas_list
-                WHERE id_cooperativa = %s;
+                    c.id_cooperativa,
+                    c.id_usuario,
+                    c.cnpj,
+                    c.razao_social,
+                    u.email,
+                    c.latitude,
+                    c.longitude
+                FROM cooperativas c
+                JOIN usuarios u ON c.id_usuario = u.id_usuario
+                WHERE c.id_cooperativa = %s;
                 """,
                 (id_cooperativa,)
             )

@@ -23,7 +23,6 @@ export async function getMateriais() {
         }
 
         const data = await response.json();
-        console.log('alo', data)
         return data;
 
     } catch (error) {

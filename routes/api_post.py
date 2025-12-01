@@ -3,7 +3,7 @@ from controllers.comprador_controller import Compradores
 from controllers.vendas_controller import Vendas
 from data.connection_controller import Connection
 from controllers.materiais_controller import Materiais
-from controllers.cooperados_controller import Catadores
+from controllers.cooperados_controller import Cooperados
 from controllers.tokens_controller import Tokens
 from controllers.avaliacoes_controller import Avaliacoes
 from controllers.cooperativa_controller import Cooperativa
@@ -18,18 +18,21 @@ def postar_dados_de_venda():
         dados_recebidos = request.get_json()
         conn = Connection('local')
         
-        sucesso = Vendas(conn.connection_db).registrar_nova_venda(
+        resultado_venda = Vendas(conn.connection_db).registrar_nova_venda(
             dados_recebidos["id_cooperativa"], 
             dados_recebidos
         )
         
-        if sucesso:
-            return jsonify({"status": "sucesso", "mensagem": "Dados da venda recebidos e processados!"}), 200
+        if resultado_venda["sucesso"]:
+            return jsonify({
+                "status": "sucesso", 
+                "mensagem": "Dados da venda recebidos e processados!",
+                "id_avaliacao_pendente": resultado_venda["id_avaliacao_pendente"]
+            }), 200
         else:
             return jsonify({"erro": "Falha ao registrar a venda"}), 500
             
     except Exception as e:
-        # Adiciona log do erro para facilitar a depuração
         print(f"Erro na rota /dados-venda: {e}")
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
@@ -47,8 +50,6 @@ def postar_dados_comprador():
         return jsonify({"erro": "Ocorreu um erro interno no servidor"}), 500
     finally:
         conn.close()
-
-# Corrigido: Agora obtém id_cooperativa corretamente do token
 
 @api_post.route("/cadastrar-sinonimo", methods=["POST"])
 def registrar_sinonimo():
@@ -75,7 +76,6 @@ def registrar_sinonimo():
 
         id_usuario = data_token['id_usuario']
         
-        # Corrigido: Buscar id_cooperativa a partir do id_usuario
         coop_info = Cooperativa(db).get_by_user_id(id_usuario)
         if not coop_info or 'id_cooperativa' not in coop_info:
             return jsonify({'error': 'Cooperativa não encontrada para este usuário'}), 404
@@ -88,7 +88,6 @@ def registrar_sinonimo():
         resposta = Materiais(db).post_cadastrar_sinonimo(nome_padrao, sinonimo, id_cooperativa)
         return resposta
     except Exception as e:
-        # Log do erro para depuração
         print(f"Erro em /post/cadastrar-sinonimo: {e}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
     finally:
@@ -100,12 +99,11 @@ def cadastrar_material_base():
     try:
         data = request.get_json()
         nome_material = data.get('nome_material')
-        id_cooperativa = 1  # TODO: Obter do token
+        id_cooperativa = 1
 
         if not nome_material:
             return jsonify({'message': 'Nome do material é obrigatório.'}), 400
 
-        # Obter id_cooperativa do token
         token_header = request.headers.get('Authorization')
         if not token_header:
             return jsonify({'error': 'Token não fornecido'}), 401
@@ -120,7 +118,6 @@ def cadastrar_material_base():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
-        # Obter id_cooperativa do usuário logado
         from controllers.cooperativa_controller import Cooperativa
         coop_info = Cooperativa(conn.connection_db).get_by_user_id(data_token['id_usuario'])
         if not coop_info:
@@ -157,7 +154,6 @@ def cadastrar_sinonimo_base():
         if not all([id_material_base, sinonimo]):
             return jsonify({'message': 'Dados incompletos.'}), 400
 
-        # Obter id_cooperativa do token
         token_header = request.headers.get('Authorization')
         if not token_header:
             return jsonify({'error': 'Token não fornecido'}), 401
@@ -172,7 +168,6 @@ def cadastrar_sinonimo_base():
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
-        # Obter id_cooperativa do usuário logado
         from controllers.cooperativa_controller import Cooperativa
         coop_info = Cooperativa(conn.connection_db).get_by_user_id(data_token['id_usuario'])
         if not coop_info:
@@ -199,7 +194,6 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
     conn = Connection('local')
 
     try:
-        # 1. Validar o Token e Permissão
         db = conn.connection_db
         from controllers.tokens_controller import Tokens
         from controllers.usuarios_controller import Usuarios
@@ -215,12 +209,10 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
             conn.close()
             return jsonify({'error': 'Acesso não autorizado'}), 403
 
-        # 2. Receber dados da avaliação
         dados_avaliacao = request.get_json()
         if not dados_avaliacao:
             return jsonify({'error': 'Dados da avaliação não fornecidos'}), 400
 
-        # 3. Finalizar avaliação pendente
         avaliacoes_controller = Avaliacoes(db)
         sucesso = avaliacoes_controller.finalizar_avaliacao_pendente(id_avaliacao_pendente, dados_avaliacao)
 
@@ -237,9 +229,6 @@ def finalizar_avaliacao_pendente(id_avaliacao_pendente):
 
 @api_post.route('/salvar-informacoes', methods=['POST'])
 def salvar_informacoes():
-    """
-    Rota para salvar as informações atualizadas da cooperativa.
-    """
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({'error': 'Token é obrigatório'}), 401
@@ -253,21 +242,18 @@ def salvar_informacoes():
         conn = Connection('local')
         db = conn.connection_db
 
-        # Validar token
         data_token = Tokens(db).validar(token)
         if not data_token or data_token['tipo'] != 'sessao':
             return jsonify({'error': 'Token inválido ou expirado'}), 401
 
         id_usuario = data_token['id_usuario']
         
-        # Obter o id_cooperativa a partir do id_usuario
         coop_info = Cooperativa(db).get_by_user_id(id_usuario)
         if not coop_info or 'id_cooperativa' not in coop_info:
             return jsonify({'error': 'Cooperativa não encontrada'}), 404
         
         id_cooperativa = coop_info['id_cooperativa']
 
-        # Chamar o controller para atualizar os dados
         sucesso = Cooperativa(db).update_info(id_cooperativa, dados)
 
         if sucesso:
@@ -281,3 +267,42 @@ def salvar_informacoes():
     finally:
         if conn:
             conn.close()
+
+@api_post.route("/pular-avaliacao/<int:id_avaliacao_pendente>", methods=["POST"])
+def pular_avaliacao(id_avaliacao_pendente):
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    conn = Connection('local')
+
+    try:
+        db = conn.connection_db
+        from controllers.tokens_controller import Tokens
+        from controllers.usuarios_controller import Usuarios
+        data_token = Tokens(db).validar(token)
+        if not data_token:
+            conn.close()
+            return jsonify({'error': 'Token inválido ou expirado'}), 401
+
+        id_usuario = data_token['id_usuario']
+        usuario_info = Usuarios(db).get(id_usuario)
+
+        if not usuario_info or usuario_info['tipo'] not in ['cooperativa', 'cooperado']:
+            conn.close()
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+
+        avaliacoes_controller = Avaliacoes(db)
+        sucesso = avaliacoes_controller.remover_avaliacao_pendente(id_avaliacao_pendente)
+
+        if sucesso:
+            conn.close()
+            return jsonify({'status': 'sucesso', 'mensagem': 'Avaliação pendente pulada com sucesso!'}), 200
+        else:
+            conn.close()
+            return jsonify({'error': 'Erro ao pular avaliação pendente'}), 500
+
+    except Exception as e:
+        if conn: conn.close()
+        print(f"Erro em /post/pular-avaliacao: {e}")
+        return jsonify({'error': 'Erro interno no servidor'}), 500

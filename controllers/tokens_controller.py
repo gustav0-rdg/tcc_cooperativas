@@ -16,7 +16,7 @@ class Tokens:
         self.connection_db = connection_db
 
     def create (
-            
+
         self,
 
         id_usuario:int,
@@ -24,37 +24,27 @@ class Tokens:
         data_expiracao:datetime
 
     ) -> bool:
-        
-        #region Exceções
 
         if not isinstance(id_usuario, int):
+            raise TypeError ('id_usuario deve ser int')
 
-            raise TypeError ('Tokens - "id_usuario" deve ser do tipo Int')
-        
         if not isinstance(tipo, str):
-
-            raise TypeError ('Tokens - "tipo" deve ser do tipo String')
+            raise TypeError ('tipo deve ser string')
 
         tipos_validos = ['validacao_email', 'recuperacao_senha', 'sessao']
 
         if not tipo in tipos_validos:
+            raise ValueError (f'tipo deve ser um de: {tipos_validos}, recebeu: "{tipo}"')
 
-            raise ValueError (f'Tokens - O parâmetro "tipo" deve receber um desses valores: {tipos_validos} mas recebeu: "{tipo}"')
-
-        #endregion
-        
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
-            # Apaga os tokens anteriores pois esta
-            # credencial deve ser única
-
+            # Remove tokens antigos para manter único
             cursor.execute (
 
                 """
                 DELETE FROM tokens_validacao
-                WHERE 
+                WHERE
                     tokens_validacao.id_usuario = %s
                 AND
                     tokens_validacao.tipo = %s;
@@ -79,43 +69,28 @@ class Tokens:
 
             self.connection_db.commit()
             if cursor.rowcount > 0 and token:
-
                 return token
-
             else:
-
                 return False
 
         except Exception as e:
-
-            print(f'Erro - Tokens "create": {e}')
-
+            print(f'Erro em create: {e}')
             return False
 
         finally:
-
-            cursor.close() 
+            cursor.close()
 
     def validar (self, token:str) -> dict | None:
 
-        #region Exceções
-
         if not isinstance(token, str):
-
             return None
-
-
 
         if len(token) != 64:
-
             return None
-
-        #endregion
 
         cursor = self.connection_db.cursor(dictionary=True)
 
         try:
-
             cursor.execute (
 
                 """
@@ -138,13 +113,10 @@ class Tokens:
             return cursor.fetchone()
 
         except Exception as e:
-
-            print(f'Erro - Tokens "validar": {e}')
-
+            print(f'Erro em validar: {e}')
             return None
 
         finally:
-
             cursor.close()
     
     def set_state (self, id_token:int) -> bool:
@@ -189,30 +161,29 @@ class Tokens:
     def get_ultimo_token_por_usuario (self, id_usuario:int, tipo:str) -> str | None:
 
         """
-        Busca o token (string) mais recente, válido e não usado 
-        de um usuário específico.
+        Busca token mais recente, válido e não usado do usuário.
         """
 
         cursor = self.connection_db.cursor(dictionary=True)
         try:
             cursor.execute(
                 """
-                SELECT token FROM tokens_validacao 
-                WHERE id_usuario = %s 
-                  AND tipo = %s 
+                SELECT token FROM tokens_validacao
+                WHERE id_usuario = %s
+                  AND tipo = %s
                   AND usado = FALSE
                   AND data_expiracao > NOW()
-                ORDER BY data_criacao DESC 
+                ORDER BY data_criacao DESC
                 LIMIT 1
                 """,
                 (id_usuario, tipo)
             )
             data = cursor.fetchone()
             return data['token'] if data else None
-        
+
         except Exception as e:
-            print(f'Erro - Tokens "get_ultimo_token_por_usuario": {e}')
+            print(f'Erro em get_ultimo_token_por_usuario: {e}')
             return None
-        
+
         finally:
             cursor.close()

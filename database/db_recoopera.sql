@@ -101,9 +101,6 @@ CREATE TABLE cooperados (
   id_usuario BIGINT UNSIGNED NOT NULL UNIQUE,
   id_cooperativa BIGINT UNSIGNED NOT NULL,
   cpf CHAR(11) NOT NULL UNIQUE,
-  endereco VARCHAR(255),
-  cidade VARCHAR(100),
-  estado CHAR(2),
   data_vinculo DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_cooperativa (id_cooperativa),
   INDEX idx_cpf (cpf),
@@ -734,9 +731,6 @@ SELECT
     c.id_cooperado,
     c.id_usuario,
     c.cpf,
-    coop.logradouro AS endereco,
-    coop.cidade AS cidade,
-    coop.estado AS estado,
     c.data_vinculo,
     c.id_cooperativa,
     coop.nome_fantasia AS cooperativa_nome,
@@ -801,39 +795,6 @@ LEFT JOIN vendas v ON c.id_comprador = v.id_comprador
 LEFT JOIN avaliacoes_compradores ac ON v.id_venda = ac.id_venda
 WHERE c.deletado_em IS NULL
 GROUP BY c.id_comprador;
-
-
-CREATE VIEW v_cooperados_detalhados AS
-SELECT 
-    u.id_usuario,
-    coop.id_cooperado,
-    coop.cpf,
-    coop.data_vinculo,
-    u.nome AS usuario_nome,
-    u.email AS usuario_email,
-    u.tipo AS cooperado_tipo,
-    u.status AS cooperado_status,
-    
-    c.cnpj,
-	c.razao_social,
-	c.nome_fantasia,
-	c.email_contato AS email,
-	c.telefone AS telefone_fixo,
-	c.whatsapp,
-    c.cidade,
-	c.site,
-    CONCAT_WS(', ', c.logradouro, c.numero, c.bairro) AS endereco
-FROM 
-    usuarios u
-JOIN 
-    cooperados coop ON u.id_usuario = coop.id_usuario
-JOIN 
-    cooperativas c ON coop.id_cooperativa = c.id_cooperativa
-WHERE 
-    u.tipo = 'cooperado';
-    
-SELECT * FROM v_cooperados_detalhados WHERE id_usuario = 4;   
-
 
 -- ====================================================
 -- Lista de cooperativas otimizada para frontend

@@ -220,87 +220,38 @@ main {
     padding-right: 10px; /* Espaço para a barra de rolagem */
 }
 
-/* Estilos para as avaliações agrupadas */
-.avaliacao-list {
-    list-style: none;
-    padding-left: 0;
-}
-
-.avaliacao-item {
-    border-bottom: 1px solid var(--verde-claro-medio);
-    padding: 15px 0;
-    margin-bottom: 15px;
-}
-
-.avaliacao-item:last-child {
-    border-bottom: none;
-}
-
-.avaliacao-header {
+.swal-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 1.5rem;
 }
 
-.avaliacao-data {
-    font-weight: 600;
-    color: var(--verde-escuro);
-}
-
-.avaliacao-count {
-    font-size: 0.9rem;
-    color: var(--verde-escuro-medio);
-}
-
-.avaliacao-scores {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 10px;
-}
-
-.score-item {
-    display: flex;
-    justify-content: space-between;
+.whatsapp-button {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-.score-label {
-    font-weight: 500;
-    color: var(--verde-escuro-medio);
-}
-
-.avaliacao-comentarios {
-    margin-top: 10px;
-}
-
-.avaliacao-comentario {
-    font-size: 0.95rem;
-    color: var(--verde-escuro);
-    font-style: italic;
-    margin-bottom: 5px;
-    padding-left: 10px;
-    border-left: 3px solid var(--verde-claro-medio);
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    transform: scale(1.1);
+    color: white;
 }
 
 .swal-modal-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--verde-escuro);
-    margin-bottom: 5px;
-}
-
-.swal-modal-location {
-    font-size: 1rem;
-    color: var(--verde-escuro-medio);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-.swal-modal-location .material-icons {
-    font-size: 1.1rem;
+    margin: 0;
 }
 
 .swal-modal-section {
@@ -757,87 +708,38 @@ main {
     padding-right: 10px; /* Espaço para a barra de rolagem */
 }
 
-/* Estilos para as avaliações agrupadas */
-.avaliacao-list {
-    list-style: none;
-    padding-left: 0;
-}
-
-.avaliacao-item {
-    border-bottom: 1px solid var(--verde-claro-medio);
-    padding: 15px 0;
-    margin-bottom: 15px;
-}
-
-.avaliacao-item:last-child {
-    border-bottom: none;
-}
-
-.avaliacao-header {
+.swal-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 1.5rem;
 }
 
-.avaliacao-data {
-    font-weight: 600;
-    color: var(--verde-escuro);
-}
-
-.avaliacao-count {
-    font-size: 0.9rem;
-    color: var(--verde-escuro-medio);
-}
-
-.avaliacao-scores {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 10px;
-}
-
-.score-item {
-    display: flex;
-    justify-content: space-between;
+.whatsapp-button {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-.score-label {
-    font-weight: 500;
-    color: var(--verde-escuro-medio);
-}
-
-.avaliacao-comentarios {
-    margin-top: 10px;
-}
-
-.avaliacao-comentario {
-    font-size: 0.95rem;
-    color: var(--verde-escuro);
-    font-style: italic;
-    margin-bottom: 5px;
-    padding-left: 10px;
-    border-left: 3px solid var(--verde-claro-medio);
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    transform: scale(1.1);
+    color: white;
 }
 
 .swal-modal-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--verde-escuro);
-    margin-bottom: 5px;
-}
-
-.swal-modal-location {
-    font-size: 1rem;
-    color: var(--verde-escuro-medio);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-.swal-modal-location .material-icons {
-    font-size: 1.1rem;
+    margin: 0;
 }
 
 .swal-modal-section {
@@ -1132,4 +1034,89 @@ main {
 {
     font-size: 1.1em;
     color: royalblue;
+}
+
+/* === NOVOS ESTILOS PARA AVALIAÇÕES NO MODAL === */
+
+/* Remove estilos antigos e conflitantes */
+.avaliacao-scores, .avaliacao-count, .score-item, .score-label {
+    display: none;
+}
+
+.avaliacao-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Espaçamento entre os itens de avaliação */
+}
+
+.avaliacao-item {
+    background-color: var(--verde-claro);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--verde-claro-medio);
+    margin-bottom: 0;
+}
+
+.avaliacao-item:last-child {
+    border-bottom: 1px solid var(--verde-claro-medio); /* Garante consistência */
+}
+
+.avaliacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem; /* Espaço entre header e comentário */
+    flex-wrap: wrap; /* Permite quebrar a linha em telas pequenas */
+    gap: 0.5rem;
+}
+
+.avaliacao-estrelas {
+    font-size: 1rem; /* Tamanho das estrelas */
+}
+
+.avaliacao-estrelas .fa-star,
+.avaliacao-estrelas .fa-star-half-alt {
+    color: #FFC107;
+}
+
+.avaliacao-estrelas .nota-comprador {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--verde-escuro);
+    margin-right: 0.25rem;
+}
+
+.avaliacao-data {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--verde-escuro-medio);
+    background-color: var(--branco);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--verde-claro-medio);
+}
+
+.avaliacao-comentario {
+    font-size: 0.95rem;
+    color: var(--verde-escuro);
+    font-style: italic;
+    margin: 0;
+    padding: 0.75rem;
+    border-left: none;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+}
+
+.avaliacao-comentario:before {
+    content: '“';
+    margin-right: 0.25em;
+    font-weight: bold;
+}
+
+.avaliacao-comentario:after {
+    content: '”';
+    margin-left: 0.25em;
+    font-weight: bold;
 }

@@ -29,20 +29,72 @@
 <body>
     {% include 'includes/header.html' %}
 
-    <main class="container mt-5">
-        <header>
-            <h1 class="text-center"><strong>Gestão de Gestores</strong></h1>
-        </header>
+    <main class="container-fluid gerenciar-gestores-main">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-11 col-xl-10">
 
-        <section class="d-flex justify-content-center gap-5 align-items-center mb-4">
-            <input type="text" id="searchInput" class="form-control w-50" placeholder="Pesquisar gestores">
-            <button class="btn btn-success d-flex align-items-center gap-2" id="addGestorBtn" style="background-color: var(--verde-escuro-medio); border-color: var(--verde-escuro-medio);">
-                <span class="material-icons-outlined">person_add</span> Adicionar Gestor
-            </button>
-        </section>
+                <section class="page-header mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <a href="/pagina-inicial/gestor" class="btn-voltar" title="Voltar">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h1 class="page-title mb-0">Gerenciamento de Gestores</h1>
+                    </div>
+                    <p class="page-subtitle">Gerencie e visualize todos os gestores do sistema.</p>
+                </section>
 
-        <section id="gestoresCards">
-        </section>
+                <div class="results-counter mb-3">
+                    <span id="resultsCount"></span>
+                </div>
+
+                <section class="search-section mb-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6 col-lg-5">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="form-control search-input" id="searchInput" placeholder="Buscar por nome ou email...">
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-7">
+                            <div class="filters-box">
+                                <button class="btn btn-filter dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter"></i> Filtros
+                                </button>
+                                <ul class="dropdown-menu filter-dropdown">
+                                    <li>
+                                        <h6 class="dropdown-header">Status</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="todos">
+                                            <i class="fas fa-circle-nodes"></i> Todos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="ativo">
+                                            <i class="fas fa-check-circle text-success"></i> Ativos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item filter-item" href="#" data-filter="status" data-value="inativo">
+                                            <i class="fas fa-times-circle text-danger"></i> Inativos
+                                        </a>
+                                    </li>
+                                </ul>
+                                <button class="btn btn-add-gestor" id="addGestorBtn">
+                                    <span class="material-icons-outlined">person_add</span> Adicionar Gestor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="gestores-list mb-4">
+                    <div class="row g-3 g-md-4" id="gestoresContainer">
+                    </div>
+                </section>
+
+            </div>
+        </div>
     </main>
 
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

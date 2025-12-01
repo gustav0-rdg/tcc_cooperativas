@@ -1,12 +1,8 @@
-// Aguarda o DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Carrega materiais para o filtro
     carregarMateriaisFiltro();
 
-    // 2. Inicia o carregamento dos compradores
     carregarCompradores();
 
-    // 3. Configura eventos dos filtros
     configurarFiltros();
 });
 
@@ -27,40 +23,34 @@ async function carregarCompradores(filtros = {}) {
     }
 
     try {
-        // Mostrar loading
         loadingSpinner.classList.remove('d-none');
         errorMessage.classList.add('d-none');
         cardsContainer.innerHTML = '';
 
-        // Construir URL com parâmetros de filtro
         const params = new URLSearchParams();
         if (filtros.material) params.append('material', filtros.material);
         if (filtros.estado) params.append('estado', filtros.estado);
         if (filtros.raio) params.append('raio', filtros.raio);
 
         const url = '/get/compradores' + (params.toString() ? '?' + params.toString() : '');
-        
+
         const response = await fetch(url, {
-            headers: { 
-                'Authorization': token 
+            headers: {
+                'Authorization': token
             }
         });
 
         const data = await response.json();
 
-        console.log(data)
-
         if (!response.ok) {
             throw new Error(data.error || 'Erro ao buscar dados.');
         }
 
-        // Esconde o loading
         loadingSpinner.classList.add('d-none');
 
-        // Renderiza os cards
         if (data.length === 0) {
             cardsContainer.innerHTML = '<div class="col-12"><p class="text-center fs-5 text-muted">Nenhum comprador encontrado com os filtros aplicados.</p></div>';
-            mostrarErro('oi', 'oi', 'warning')
+            errorMessage.classList.add('d-none');
             return;
         }
 
@@ -74,23 +64,21 @@ async function carregarCompradores(filtros = {}) {
         mostrarErro('Não foi possível carregar os compradores.', err.message, );
     }
 
-    // Função interna de ajuda para mostrar erros
     function mostrarErro(mensagem, detalhe, type='alert') {
         loadingSpinner.classList.add('d-none');
-        errorMessage.classList.remove('d-none');
+        errorMessage.classList.remove('d-none'); 
         errorTitle.textContent = detalhe;
         errorDetail.textContent = mensagem; 
+
+        errorMessage.classList.remove('alert-danger', 'alert-warning');
 
         switch (type)
         {
             case 'alert':
-
-                errorMessage.className = 'alert alert-danger d-none text-center pt-5 pb-5';
+                errorMessage.classList.add('alert-danger');
                 break;
-
             case 'warning':
-
-                errorMessage.className = 'alert alert-warning d-none text-center pt-5 pb-5';
+                errorMessage.classList.add('alert-warning');
                 break;
         }
     }
@@ -235,7 +223,7 @@ async function abrirModalDetalhes(comprador) {
     // Feedback imediato de carregamento
     Swal.fire({
         title: `Carregando ${comprador.razao_social}...`,
-        html: 'Buscando detalhes, materiais e avaliações.',
+        html: 'Buscando todos os detalhes do comprador.',
         allowOutsideClick: false,
         didOpen: () => {
             Swal.showLoading();
@@ -243,38 +231,24 @@ async function abrirModalDetalhes(comprador) {
     });
 
     try {
-        // 1. Busca os dados em paralelo (muito mais rápido)
-        const [detalhesRes, tagsRes, comentariosRes] = await Promise.all([
-            fetch(`/get/comprador-detalhes/${comprador.id_comprador}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }),
-            fetch(`/get/feedback-tags/${comprador.cnpj}`, {
-                headers: { 'Authorization': token }
-            }),
-            fetch(`/get/comentarios-livres/${comprador.cnpj}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-        ]);
+        const response = await fetch(`/get/comprador-detalhes/${comprador.id_comprador}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-        // 2. Processa os JSON
-        const detalhes = await detalhesRes.json();
-        const tags = await tagsRes.json();
-        const comentarios = await comentariosRes.json();
+        const detalhes = await response.json();
 
-        // 3. Valida se alguma API falhou
-        if (!detalhesRes.ok) throw new Error(detalhes.erro || 'Falha ao buscar detalhes');
-        if (!tagsRes.ok) throw new Error(tags.erro || 'Falha ao buscar tags');
-        if (!comentariosRes.ok) throw new Error(comentarios.erro || 'Falha ao buscar comentários');
+        // Valida se a API falhou
+        if (!response.ok) {
+            throw new Error(detalhes.error || 'Falha ao buscar detalhes do comprador');
+        }
 
-        // 4. Constrói o HTML do modal
-        const modalHtml = construirHtmlModal(comprador, detalhes, tags, comentarios);
+        const modalHtml = construirHtmlModal(detalhes);
 
-        // 5. Exibe o SweetAlert completo
         Swal.fire({
             html: modalHtml,
-            width: '800px', // Modal mais largo
-            confirmButtonText: 'Fechar',
-        confirmButtonColor: 'var(--verde-claro-medio)'
+            width: '800px',
+            showCloseButton: true,
+            showConfirmButton: false
         });
 
     } catch (err) {
@@ -286,137 +260,104 @@ async function abrirModalDetalhes(comprador) {
 /**
  * Constrói o HTML final para o pop-up SweetAlert
  */
-function construirHtmlModal(comprador, detalhes, tags, comentarios) {
+function construirHtmlModal(detalhes) {
+    const { logradouro, numero, complemento, bairro, cidade, estado, email } = detalhes;
+    const { phones } = detalhes.api_externa || {};
 
-    // --- Contatos ---
+    const enderecoFormatado = [logradouro, numero, complemento, bairro]
+        .filter(Boolean)
+        .join(', ') + ` - ${cidade}, ${estado}`;
+
+    let phoneList = [];
+    if (phones && phones.length > 0) {
+        const uniquePhones = new Set();
+        phones.forEach(phone => {
+            const numeroCompleto = `(${phone.area}) ${phone.number}`;
+            if (!uniquePhones.has(numeroCompleto)) {
+                uniquePhones.add(numeroCompleto);
+                phoneList.push({ numero: numeroCompleto, type: phone.type });
+            }
+        });
+    } else {
+        const uniquePhones = new Set();
+        if (detalhes.telefone) {
+            uniquePhones.add(detalhes.telefone);
+            phoneList.push({ numero: detalhes.telefone, type: 'LANDLINE' });
+        }
+        if (detalhes.whatsapp && !uniquePhones.has(detalhes.whatsapp)) {
+            uniquePhones.add(detalhes.whatsapp);
+            phoneList.push({ numero: detalhes.whatsapp, type: 'MOBILE' });
+        }
+    }
+
+    if (phoneList.length > 2) {
+        phoneList = phoneList.slice(0, 2);
+    }
+
     let contatosHtml = '';
-    if (comprador.email) contatosHtml += `<li><span class="material-icons">email</span> ${comprador.email}</li>`;
-    if (comprador.telefone) contatosHtml += `<li><span class="material-icons">phone</span> ${comprador.telefone}</li>`;
-    if (comprador.whatsapp) contatosHtml += `<li><span class="material-icons">whatsapp</span> ${comprador.whatsapp}</li>`;
-    if (!contatosHtml) contatosHtml = '<p>Nenhum contato direto informado.</p>';
+    if (email) {
+        contatosHtml += `<li><span class="material-icons">email</span> ${email}</li>`;
+    }
 
-    // --- Materiais e Preços ---
+    phoneList.forEach(phone => {
+        const icon = phone.type === 'MOBILE' ? 'smartphone' : 'phone';
+        contatosHtml += `<li><span class="material-icons">${icon}</span> ${phone.numero}</li>`;
+    });
+
+    contatosHtml += `<li><span class="material-icons">place</span> ${enderecoFormatado}</li>`;
+
     let materiaisHtml = '';
     if (detalhes.materiais_comprados && detalhes.materiais_comprados.length > 0) {
         materiaisHtml = detalhes.materiais_comprados.map(mat => {
-
             const precoMin = parseFloat(mat.preco_max_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const precoMax = parseFloat(mat.preco_min_kg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            let faixaPreco = `${precoMin} /Kg`;
-            // Só mostra faixa (Ex: R$1,50 a R$2,00) se os preços forem diferentes
-            if (precoMin !== precoMax) {
-                faixaPreco = `${precoMin} a ${precoMax} /Kg`;
-            }
+            const faixaPreco = precoMin !== precoMax ? `${precoMin} a ${precoMax} /Kg` : `${precoMin} /Kg`;
 
             return `
                 <li class="material-price-item">
                     <span class="material-name">${mat.material_nome} (x${mat.total_vendas} vendas)</span>
                     <span class="material-price-range">${faixaPreco}</span>
-                </li>
-            `;
-
+                </li>`;
         }).join('');
     } else {
         materiaisHtml = '<p>Este comprador ainda não registrou compras de materiais específicos.</p>';
     }
 
-    // --- Tags de Feedback (Positivas e Negativas) ---
-    let tagsHtml = '';
-    if (tags && tags.length > 0) {
-        tagsHtml = tags.map(tag => {
-            // O seu comentarios_controller já retorna o 'tipo'
-            const tagClass = tag.tipo === 'positivo' ? 'positivo' : 'negativo';
-            return `
-                <div class="feedback-tag ${tagClass}">
-                    ${tag.texto}
-                    <span class="tag-count">${tag.quantidade}x</span>
+    const tags = detalhes.feedback_tags || [];
+    const tagsHtml = tags.length > 0 ? tags.map(tag => `
+        <div class="feedback-tag ${tag.tipo === 'positivo' ? 'positivo' : 'negativo'}">
+            ${tag.texto}
+            <span class="tag-count">${tag.quantidade}x</span>
+        </div>`
+    ).join('') : '<p>Ainda não há avaliações rápidas para este comprador.</p>';
+
+    const avaliacoesLimitadas = (detalhes.avaliacoes_recentes || []).slice(0, 5);
+    const avaliacoesHtml = avaliacoesLimitadas.length > 0 ? avaliacoesLimitadas.map(aval => {
+        const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
+        const estrelasHtml = gerarEstrelas(aval.score);
+        const comentarioHtml = aval.comentario_livre ? `<p class="avaliacao-comentario">“${aval.comentario_livre}”</p>` : '';
+
+        return `
+            <li class="avaliacao-item">
+                <div class="avaliacao-header">
+                    <div class="avaliacao-estrelas">${estrelasHtml}</div>
+                    <span class="avaliacao-data">${dataFormatada}</span>
                 </div>
-            `;
-        }).join('');
-    } else {
-        tagsHtml = '<p>Ainda não há avaliações rápidas para este comprador.</p>';
-    }
+                ${comentarioHtml}
+            </li>`;
+    }).join('') : '<p>Nenhuma avaliação recente registrada.</p>';
+    
+    const whatsAppNumber = phoneList.find(p => p.type === 'MOBILE');
+    const whatsAppButton = whatsAppNumber ? `
+        <a href="https://wa.me/55${whatsAppNumber.numero.replace(/\D/g, '')}" target="_blank" class="btn btn-success ms-2">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>` : '';
 
-    // --- Avaliações Recentes ---
-    let avaliacoesHtml = '';
-    if (detalhes.avaliacoes_recentes && detalhes.avaliacoes_recentes.length > 0) {
-        // Agrupar avaliações por data (mais recentes primeiro)
-        const avaliacoesAgrupadas = {};
-        detalhes.avaliacoes_recentes.forEach(aval => {
-            const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
-            if (!avaliacoesAgrupadas[dataFormatada]) {
-                avaliacoesAgrupadas[dataFormatada] = [];
-            }
-            avaliacoesAgrupadas[dataFormatada].push(aval);
-        });
-
-        // Mostrar apenas as 3 datas mais recentes
-        const datasRecentes = Object.keys(avaliacoesAgrupadas).sort((a, b) => new Date(b) - new Date(a)).slice(0, 3);
-
-        avaliacoesHtml = datasRecentes.map(data => {
-            const avaliacoesDia = avaliacoesAgrupadas[data];
-            const mediaPontualidade = avaliacoesDia.reduce((sum, aval) => sum + aval.pontualidade_pagamento, 0) / avaliacoesDia.length;
-            const mediaLogistica = avaliacoesDia.reduce((sum, aval) => sum + aval.logistica_entrega, 0) / avaliacoesDia.length;
-            const mediaNegociacao = avaliacoesDia.reduce((sum, aval) => sum + aval.qualidade_negociacao, 0) / avaliacoesDia.length;
-
-            const estrelasPontualidade = gerarEstrelas(mediaPontualidade);
-            const estrelasLogistica = gerarEstrelas(mediaLogistica);
-            const estrelasNegociacao = gerarEstrelas(mediaNegociacao);
-
-            const comentariosDia = avaliacoesDia.filter(aval => aval.comentario_livre).map(aval => aval.comentario_livre);
-
-            return `
-                <li class="avaliacao-item">
-                    <div class="avaliacao-header">
-                        <span class="avaliacao-data">${data}</span>
-                        <span class="avaliacao-count">(${avaliacoesDia.length} avaliação${avaliacoesDia.length > 1 ? 'ões' : ''})</span>
-                    </div>
-                    <div class="avaliacao-scores">
-                        <div class="score-item">
-                            <span class="score-label">Pontualidade:</span>
-                            ${estrelasPontualidade}
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Logística:</span>
-                            ${estrelasLogistica}
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Negociação:</span>
-                            ${estrelasNegociacao}
-                        </div>
-                    </div>
-                    ${comentariosDia.length > 0 ? `<div class="avaliacao-comentarios">${comentariosDia.map(com => `<p class="avaliacao-comentario">"${com}"</p>`).join('')}</div>` : ''}
-                </li>
-            `;
-        }).join('');
-    } else {
-        avaliacoesHtml = '<p>Nenhuma avaliação recente registrada.</p>';
-    }
-
-    // --- Comentários Livres (ANÔNIMOS) ---
-    let comentariosHtml = '';
-    if (comentarios && comentarios.length > 0) {
-        comentariosHtml = comentarios.map(com => {
-            return `
-                <li class="comment-item">
-                    <p class="comment-text">"${com.comentario_livre}"</p>
-                    <p class="comment-anon">- Avaliação feita por uma Cooperativa</p>
-                </li>
-            `;
-        }).join('');
-    } else {
-        comentariosHtml = '<p>Nenhum comentário adicional registrado.</p>';
-    }
-
-    // --- Montagem Final ---
     return `
         <div class="swal-modal-container">
-            <h2 class="swal-modal-title">${comprador.razao_social}</h2>
-            <p class="swal-modal-location">
-                <span class="material-icons">place</span>
-                ${comprador.endereco || 'Endereço não informado'} - ${comprador.cidade}, ${comprador.estado}
-            </p>
+            <div class="swal-modal-header">
+                <h2 class="swal-modal-title">${detalhes.razao_social}</h2>
+            </div>
 
             <section class="swal-modal-section">
                 <h3 class="swal-modal-subtitle"><span class="material-icons">contacts</span> Contato</h3>
@@ -438,49 +379,51 @@ function construirHtmlModal(comprador, detalhes, tags, comentarios) {
                 <div class="feedback-tags-container">${tagsHtml}</div>
             </section>
 
-            <section class="swal-modal-section">
-                <h3 class="swal-modal-subtitle"><span class="material-icons">chat</span> Comentários (Anônimos)</h3>
-                <ul class="comment-list">${comentariosHtml}</ul>
+            <section class="swal-modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary" onclick="Swal.close()">Fechar</button>
+                ${whatsAppButton}
             </section>
         </div>
     `;
 }
 
 function configurarFiltros() {
-
     const btnAplicarFiltros = document.getElementById('apply-filters');
-
-    // Botões de Ação
-    btnAplicarFiltros.addEventListener('click', async function () {
-
-        await aplicarFiltros();
-        buscarNomeCNPJ();
-
-    });
-
-    document.getElementById('clear-filters').addEventListener('click', limparFiltros);
-
     const searchInput = document.getElementById('search-input');
 
-    function buscarNomeCNPJ ()
-    {
-        if (searchInput.value.trim() == '')
-        {
-            limparFiltros();
-            return
+    // Botão de Ação para Aplicar Filtros do Servidor
+    btnAplicarFiltros.addEventListener('click', async function () {
+        await aplicarFiltros();
+
+        const query = searchInput.value.trim();
+        if (query) {
+            filtrarCompradoresLocal(query);
         }
-
-        filtrarCompradoresLocal(searchInput.value);
-    }
-
-    // Input de Busca por Nome (Enter)
-    searchInput.addEventListener('keypress', function (e) {
-
-        if (e.key == 'Enter') buscarNomeCNPJ();
-
     });
 
-    // --- Lógica do Slider de Raio (Mantida da sua versão anterior) ---
+    // Botão para Limpar Filtros
+    document.getElementById('clear-filters').addEventListener('click', limparFiltros);
+
+    // Função interna para a busca por Nome/CNPJ
+    function buscarNomeCNPJ() {
+        const query = searchInput.value.trim();
+
+        if (query === '') {
+            aplicarFiltros(); 
+        } else {
+            aplicarFiltros().then(() => {
+                filtrarCompradoresLocal(query);
+            });
+        }
+    }
+
+    searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            buscarNomeCNPJ();
+        }
+    });
+
+    // Lógica do Slider de Raio
     const enableRadius = document.getElementById('enable-radius-filter');
     const radiusControls = document.getElementById('radius-controls');
     const radiusInput = document.getElementById('radius-filter');
@@ -495,9 +438,7 @@ function configurarFiltros() {
         radiusValue.textContent = `${e.target.value} km`;
     });
 
-    // --- NOVA LÓGICA: Cascata de Material -> Subtipo ---
     const materialSelect = document.getElementById('material-filter');
-    
     materialSelect.addEventListener('change', (e) => {
         const idMaterialPai = e.target.value;
         carregarSubtipos(idMaterialPai);
@@ -554,7 +495,6 @@ async function carregarSubtipos(idMaterialPai) {
         const subtipos = await response.json();
 
         subtipos.forEach(sub => {
-            console.log(sub)
             const option = document.createElement('option');
             option.value = sub.id_material_catalogo; 
             option.textContent = sub.nome_especifico;
@@ -582,14 +522,12 @@ async function aplicarFiltros() {
     const raio = enableRadius.checked ? document.getElementById('radius-filter').value : null;
 
     const filtros = {};
-    
-    // Se tiver subtipo, ele é mais específico, então ele que deve prevalecer ou ser enviado junto
+
     if (material) filtros.material = material;
-    if (subtipo) filtros.subtipo = subtipo; // Envia o subtipo para a API
+    if (subtipo) filtros.subtipo = subtipo; 
     if (estado) filtros.estado = estado;
     if (raio) filtros.raio = parseFloat(raio);
 
-    console.log("Filtros aplicados:", filtros); // Para debug
     await carregarCompradores(filtros);
 }
 

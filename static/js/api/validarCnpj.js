@@ -33,5 +33,4 @@ const validarCnpj = async (cnpj) =>{
 btn.addEventListener('click', async () =>{
     const valueDecoded = values.value.replace(/[-_/.]/g, '');
     const dados = await validarCnpj(valueDecoded);
-    console.log("Dados encontrados: ", dados);
 })

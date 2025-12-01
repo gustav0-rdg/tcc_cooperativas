@@ -1,15 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Verifica se o gestor está logado (procurando o token)
     const token = localStorage.getItem('session_token');
-    
+
     if (!token) {
-        // Se não houver token, expulsa o utilizador
         Swal.fire('Erro', 'Acesso negado. Faça o login como gestor.', 'error')
             .then(() => window.location.href = '/login-admin');
         return;
     }
-    
-    // 2. Se estiver logado, carrega as solicitações pendentes
     carregarSolicitacoes(token);
 });
 
@@ -21,10 +17,9 @@ async function carregarSolicitacoes(token) {
     const container = document.getElementById('solicitacoesContainer');
     const loadingSpinner = document.getElementById('loading-spinner');
     const noSolicitacoesAlert = document.getElementById('no-solicitacoes-alert');
-    const resultsCount = document.getElementById('resultsCount'); // Assumindo que tens um span com este ID
+    const resultsCount = document.getElementById('resultsCount'); 
 
     try {
-        // Chama a rota da API que vamos criar no Passo 3
         const response = await fetch('/get/cooperativas-pendentes', {
             method: 'GET',
             headers: {
@@ -32,11 +27,9 @@ async function carregarSolicitacoes(token) {
             }
         });
 
-        // Esconde o spinner de qualquer forma
         loadingSpinner.style.display = 'none';
 
         if (response.status === 401) {
-            // Token inválido ou expirado, redireciona para login
             localStorage.removeItem('session_token');
             window.location.href = '/login-admin';
             return;
@@ -45,16 +38,13 @@ async function carregarSolicitacoes(token) {
         const data = await response.json();
 
         if (!response.ok) {
-            // O erro 404 vai cair aqui
             throw new Error(data.error || 'Erro ao buscar solicitações');
         }
 
         if (data.length === 0) {
-            // Se não houver dados, mostra o alerta de "nada pendente"
             noSolicitacoesAlert.style.display = 'block';
             if(resultsCount) resultsCount.textContent = 'Nenhuma solicitação pendente.';
         } else {
-            // Se houver dados, cria os cards
             if(resultsCount) resultsCount.textContent = `Exibindo ${data.length} solicitação(ões) pendente(s).`;
             data.forEach(solicitacao => {
                 const card = criarCardSolicitacao(solicitacao, token);
@@ -70,16 +60,12 @@ async function carregarSolicitacoes(token) {
     }
 }
 
-/**
- * Cria o elemento HTML (o card) para uma única solicitação
- */
 function criarCardSolicitacao(solicitacao, token) {
     const col = document.createElement('div');
     col.className = 'col-lg-4 col-md-6 mb-4';
     
     const dataCadastro = new Date(solicitacao.data_cadastro).toLocaleDateString('pt-BR');
-    
-    // Verifica se há um documento para baixar
+
     const temDocumento = solicitacao.arquivo_url;
     const downloadButton = `
         <a href="/static/${solicitacao.arquivo_url}" 
@@ -115,7 +101,6 @@ function criarCardSolicitacao(solicitacao, token) {
         </div>
     `;
 
-    // Adiciona os "event listeners" (as ações) aos botões
     col.querySelector('.btn-approve').addEventListener('click', () => {
         handleAprovar(solicitacao.id_cooperativa, token, col);
     });
@@ -145,7 +130,6 @@ function handleAprovar(id, token, cardElement) {
             Swal.fire({ title: 'Aprovando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                // Chama a rota da API que JÁ EXISTE no teu ficheiro
                 const response = await fetch('/api/cooperativas/alterar-aprovacao', {
                     method: 'POST',
                     headers: {
@@ -154,7 +138,7 @@ function handleAprovar(id, token, cardElement) {
                     },
                     body: JSON.stringify({ 
                         id_cooperativa: id,
-                        aprovacao: true // Define a aprovação como TRUE
+                        aprovacao: true 
                     })
                 });
 
@@ -162,7 +146,7 @@ function handleAprovar(id, token, cardElement) {
                 if (!response.ok) throw new Error(data.error || 'Erro desconhecido');
 
                 Swal.fire('Aprovado!', data.texto || 'Cooperativa aprovada com sucesso!', 'success');
-                cardElement.remove(); // Remove o card da tela
+                cardElement.remove(); 
 
             } catch (error) {
                 Swal.fire('Erro', error.message, 'error');
@@ -211,7 +195,6 @@ async function handleRejeitar(id, email, token, cardElement) {
         Swal.fire({ title: 'Rejeitando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         
         try {
-            // Chama a rota da API que JÁ EXISTE no teu ficheiro
             const response = await fetch('/api/cooperativas/rejeitar', {
                 method: 'POST',
                 headers: {
@@ -230,7 +213,7 @@ async function handleRejeitar(id, email, token, cardElement) {
             if (!response.ok) throw new Error(data.error || 'Erro desconhecido');
 
             Swal.fire('Rejeitado!', data.message, 'success');
-            cardElement.remove(); // Remove o card da tela
+            cardElement.remove(); 
 
         } catch (error) {
             Swal.fire('Erro', error.message, 'error');
