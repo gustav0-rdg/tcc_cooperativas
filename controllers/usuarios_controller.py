@@ -415,7 +415,7 @@ class Usuarios:
 		if not isinstance(id_usuario, int):
 			raise TypeError('Usuarios "alterar_status" - id_usuario deve ser int')
 
-		status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente']
+		status_validos = ['ativo', 'inativo', 'bloqueado', 'pendente', 'reprovado']
 		if novo_status not in status_validos:
 			raise ValueError(f'Usuarios "alterar_status" - novo_status inválido: {novo_status}')
 
@@ -445,12 +445,14 @@ class Usuarios:
 
 		try:
 			cursor.execute("DELETE FROM usuarios WHERE id_usuario = %s;", (id_usuario,))
+			self.connection_db.commit()
 			return cursor.rowcount > 0
-		
+
 		except Exception as e:
 			print(f'Erro - Usuarios "delete": {e}')
+			self.connection_db.rollback()
 			return False
-		
+
 		finally:
 			cursor.close()
 
