@@ -54,6 +54,9 @@ async function carregarCompradores(filtros = {}) {
             return;
         }
 
+        // Ordena os compradores por score de confiança (maior primeiro)
+        data.sort((a, b) => (b.score_confianca || 0) - (a.score_confianca || 0));
+
         data.forEach(comprador => {
             const card = criarCardComprador(comprador);
             cardsContainer.appendChild(card);

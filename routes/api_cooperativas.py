@@ -592,7 +592,7 @@ def rejeitar_cooperativa():
 
         db.start_transaction()
         coop_ctrl = Cooperativa(db)
-        
+
         cooperativa_data = coop_ctrl.get_by_id(int(id_cooperativa))
         if not cooperativa_data:
             db.rollback()
@@ -600,17 +600,31 @@ def rejeitar_cooperativa():
             return jsonify({'error': 'Cooperativa não encontrada para rejeitar'}), 404
 
         id_usuario_cooperativa = cooperativa_data['id_usuario']
-        
-        # Deleta o usuário e a cooperativa
-        sucesso_coop = coop_ctrl.delete(int(id_cooperativa))
-        sucesso_user = Usuarios(db).delete(int(id_usuario_cooperativa))
 
-        if not (sucesso_coop and sucesso_user):
-            db.rollback()
-            conn.close()
-            return jsonify({'error': 'Erro ao deletar a cooperativa do banco de dados.'}), 500
+        # Verifica se a cooperativa tem vendas registradas
+        cursor = db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM vendas WHERE id_cooperativa = %s", (int(id_cooperativa),))
+        vendas_count = cursor.fetchone()[0]
+        cursor.close()
 
-        # Commit primeiro para garantir que a alteração seja salva
+        if vendas_count > 0:
+            # Se tem vendas, apenas marca como reprovado (não pode deletar devido às constraints)
+            sucesso_status = Usuarios(db).alterar_status(int(id_usuario_cooperativa), 'reprovado')
+            if not sucesso_status:
+                db.rollback()
+                conn.close()
+                return jsonify({'error': 'Erro ao alterar status da cooperativa.'}), 500
+        else:
+            # Se não tem vendas, pode deletar completamente
+            sucesso_coop = coop_ctrl.delete(int(id_cooperativa))
+            sucesso_user = Usuarios(db).delete(int(id_usuario_cooperativa))
+
+            if not (sucesso_coop and sucesso_user):
+                db.rollback()
+                conn.close()
+                return jsonify({'error': 'Erro ao deletar a cooperativa do banco de dados.'}), 500
+
+        # Commit para garantir que a alteração seja salva
         db.commit()
 
         # Envia email de rejeição
