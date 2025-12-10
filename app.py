@@ -95,7 +95,7 @@ def verificar_autenticacao():
                 return redirect('/login-admin')
             return
 
-        # Para outras rotas protegidas (não-gestor)
+        # Para outras rotas protegidas
         conn.close()
         return 
 
