@@ -67,10 +67,13 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A74A6112ED84431EA1D376C0E8441AF8 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B4B82A50EB3F4D61B459439A566B79AF }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
-          app-name: 'recoopera'
-          slot-name: 'Production'
+          app-name: recoopera
+          slot-name: production
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISH_PROFILE }}
+          package: .
+          clean: true
+
           
